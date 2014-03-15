@@ -1,0 +1,56 @@
+#!/usr/bin/python
+
+import sys
+sys.path.append("../svgwrite-1.1.3")
+sys.path.append("../filter")
+
+import premap_pb2 as pb
+import svgwrite
+
+scale = 1000000
+shiftlat = scale*49.96
+shiftlon = scale*14.26
+
+def drawWays(pbMap,d, node_ids):
+	for way in pbMap.ways:
+		coord=[]
+		for ref in way.refs:
+			try:
+				node = (pbMap.nodes[node_ids[ref]])
+				coord.append((node.lon-shiftlon,-(node.lat-shiftlat)))
+			except KeyError:
+				pass
+		style={"stroke" : "black", "stroke-width" : "3", "fill" : "none"}
+		if way.type==way.WAY:
+			pass
+		elif way.type==way.RAILWAY:
+			style["stroke"] = "purple"
+		elif way.type==way.WATER:
+			style["stroke"] = "blue"
+		elif way.type==way.BARRIER:
+			style["stroke"] = "red"
+		elif way.type==way.PARK:
+			style["stroke"] = "green"
+		elif way.type==way.FOREST:
+			style["stroke"] = "forestgreen"
+		elif way.type==way.IGNORE:
+			style["stroke"] = "cyan"
+		
+		if way.area:
+			style["fill"]=style["stroke"]
+			style["fill-opacity"] = "0.5"
+
+		stylestr = ";".join([key+":"+value for key,value in style.iteritems()])
+		d.add(svgwrite.shapes.Polyline(coord,style=stylestr))
+
+pbMap = pb.Map()
+with open("../filter/praha-pre.pbf","rb") as infile:
+	pbMap.ParseFromString(infile.read())
+
+node_ids = {}
+for i in range(len(pbMap.nodes)):
+	node_ids[pbMap.nodes[i].id]=i
+
+d = svgwrite.Drawing()
+drawWays(pbMap,d,node_ids)
+d.save()
