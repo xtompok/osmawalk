@@ -23,134 +23,19 @@ class Map:
 		pbMap.ways.extend(self.ways)
 		pbMap.relations.extend(self.relations)
 		return pbMap
-
-class counter():
-	ways = 0
-	nodes = 0
-	relations = 0
-	areas=0
-
-	def __init__(self,waysConf):
-		self.Map = Map()
-		self.waysConf = waysConf
-
-	def ways_cb(self,ways):
-		for osmid,tags,refs in ways:
-			self.ways+=1
-			pbway = pb.Way()
-			pbway.id = int(osmid)
-			pbway.refs.extend(map(int,refs))
-			for key in tags.keys():
-				if key[:5]=="addr:" or key[:4]=="name" or key=="source" or key=="is_in" or key[:4]=="ref:" or key=="created_by":
-					del tags[key]
-
-				if key in waysConf.keys():
-					if waysConf[key].keys()==["*"]:
-						pbway.type = waysConf[key]["*"]
-					val = tags[key]
-					if val in waysConf[key].keys():
-						pbway.type = waysConf[key][val]
-
-				if key in areasConf.keys():
-					if areasConf[key].keys()==["*"]:
-						pbway.area = areasConf[key]["*"]
-					val = tags[key]
-					if val in areasConf[key].keys():
-						pbway.area = areasConf[key][val]
-			pbway.str_keys.extend(tags.keys())
-			pbway.str_vals.extend(tags.values())
-			if pbway.type == pbway.IGNORE:
-				pbway.render = False
-			else:
-				pbway.render = True
-			self.Map.ways.append(pbway)
-
-			if "area" in tags.keys() and tags["area"]=="yes":
-				self.areas+=1
-			if "building" in tags.keys():
-				self.areas+=1
-			if "landuse" in tags.keys():
-				self.areas+=1
-			if "leisure" in tags.keys():
-				self.areas+=1
-			if "natural" in tags.keys():
-				self.areas+=1
-
-
-	def nodes_cb(self,nodes):
-		for osmid,tags,coords in nodes:
-			self.nodes+=1
-			pbnode = pb.Node()
-			pbnode.id = int(osmid)
-			pbnode.lat = int(coords[1]*scale)
-			pbnode.lon = int(coords[0]*scale)
-			for key in tags.keys():
-				if key[:5]=="addr:" or key=="name" or key=="source" or key=="is_in" or key[:4]=="ref:" or key=="created_by":
-					del tags[key]
-			pbnode.str_keys.extend(tags.keys())
-			pbnode.str_vals.extend(tags.values())
-			pbnode.render = True
-			self.Map.nodes.append(pbnode)
 	
-	def coords_cb(self,coords):
-		for (osmid,lon,lat) in coords:
-			self.nodes+=1
-			pbnode = pb.Node()
-			pbnode.id = int(osmid)
-			pbnode.lat = int(lat*scale)
-			pbnode.lon = int(lon*scale)
-			pbnode.render = True
-			self.Map.nodes.append(pbnode)
+	def loadFromPB(self,filename):
+		f = open(filename,"r")
+		pbMap = pb.Map()
+		pbMap.ParseFromString(f.read())
+		f.close()
+		self.nodes = list(pbMap.nodes)
+		self.ways = list(pbMap.ways)
+		self.relations = list(pbMap.relations)
+		for i in range(len(self.nodes)):
+			self.nodesidx[self.nodes[i].id]=i
+		
 
-	def relations_cb(self,relations):
-		for osmid,tags,refs in relations:
-			self.relations+=1
-			for key in tags.keys():
-				if key[:5]=="addr:" or key=="name" or key=="source" or key=="is_in" or key[:4]=="ref:" or key=="created_by":
-					del tags[key]
-			if "type" in tags.keys() and tags["type"]=="multipolygon":
-				self.areas+=1
-				pbpol = pb.Multipolygon()
-				pbpol.id = int(osmid)
-				pbpol.str_keys.extend(tags.keys())
-				pbpol.str_vals.extend(tags.values())
-				pbpol.refs.extend([int(item[0]) for item in refs])
-				pbpol.roles.extend([pbpol.OUTER if item[2]=="outer" else pbpol.INNER for item in refs])
-
-
-def loadWaysConf(filename):
-	config = {}
-	with open(filename) as conffile:
-		config = yaml.load(conffile.read())
-	ways={}
-	pbW = pb.Way()
-	str2pb = {"ignore": pbW.IGNORE, "barrier":pbW.BARRIER, "railway":pbW.RAILWAY, "water": pbW.WATER, "park": pbW.PARK, "green":pbW.GREEN, "forest":pbW.FOREST }
-	for cat in config["Way"].keys():
-		catenum = str2pb[cat]
-		for key in config["Way"][cat]:
-			if key not in ways.keys():
-				ways[key] = {}
-			for value in config["Way"][cat][key]:
-				ways[key][value]=catenum
-	return ways
-
-
-def loadAreasConf(filename):
-	config = {}
-	with open(filename) as conffile:
-		config = yaml.load(conffile.read())
-	areas = {}
-	for key in config[True]:
-		if key not in areas.keys():
-			areas[key] = {}
-		for value in config[True][key]:
-			areas[key][value]=True
-	for key in config[False]:
-		if key not in areas.keys():
-			areas[key] = {}
-		for value in config[False][key]:
-			areas[key][value]=False
-	return areas
 
 def nodeWays(amap):
 	missingcnt=0
@@ -160,7 +45,7 @@ def nodeWays(amap):
 		for node in way.refs:
 			try:
 				nodeways[amap.nodesidx[node]].append(way.id)
-			except KeyError:
+			except IndexError:
 				missingcnt+=1
 				missing.append(node)
 		for node in missing:
@@ -169,32 +54,11 @@ def nodeWays(amap):
 
 	return nodeways	
 
-def deleteAloneNodes(amap,nodeways):
-	toidx = 0
-	for fromidx in range(len(amap.nodes)):
-		if len(nodeways[fromidx])==0:
-			continue
-		amap.nodes[toidx]=amap.nodes[fromidx]
-		toidx+=1
-	for i in range(len(amap.nodes)-1,toidx,-1):
-		del amap.nodes[i]
-	for i in range(len(amap.nodes)):
-		amap.nodesidx[amap.nodes[i].id]=i
-	return amap
-
-def parseOSMfile(filename):	
-	cnt = counter(waysConf)
-	p = OSMParser(concurrency=4, ways_callback=cnt.ways_cb, nodes_callback=cnt.nodes_cb, relations_callback=cnt.relations_cb, coords_callback=cnt.coords_cb)
-	p.parse(filename)
-	cnt.Map.nodes.sort(key=lambda node: node.id)
-	cnt.Map.ways.sort(key=lambda way: way.id)
-	for i in range(len(cnt.Map.nodes)):
-		cnt.Map.nodesidx[cnt.Map.nodes[i].id]=i
-	return cnt.Map
 
 def binary_search(alist,func,item):
     lo = 0
     hi = len(alist)
+    mid = 1
     while lo < hi:
         mid = (lo+hi)//2
         midval = alist[mid]
@@ -258,6 +122,7 @@ class Interval:
 	upper = 0
 	way_idx = 0
 
+
 def isInside(node,intervals):
 	if len(intervals) == 0:
 		return -1
@@ -279,6 +144,7 @@ def updateIntervals(nodes,intervals,lon):
 		dlon = nodes[aint.uto].lon - nodes[aint.ufrom].lon
 		scale = (lon - nodes[aint.ufrom].lon)/dlon
 		intervals[i].upper = dlat*scale + nodes[aint.ufrom].lat
+	return intervals
 
 
 def zametani(amap,vectors):
@@ -287,75 +153,95 @@ def zametani(amap,vectors):
 	intervals = []
 	graph = []
 	ends = {}
-	i=0
-	while i<len(nodes):
-		actual=[nodes[i]]
-		while (nodes[i].lon == nodes[i+1].lon)and(i<len(nodes)-1):
-			actual.append(nodes[i+1])
-			i+=1
-		if i<len(nodes)-1:
-			nextlon = nodes[i+1].lon
+	nodeidx=0
+	while nodeidx<len(nodes):
+		actual=[nodes[nodeidx]]
+		while (nodes[nodeidx].lon == nodes[nodeidx+1].lon)and(nodeidx<len(nodes)-1):
+			actual.append(nodes[nodeidx+1])
+			nodeidx+=1
+		nodeidx+=1
+		if nodeidx<len(nodes)-1:
+			nextlon = nodes[nodeidx].lon
 		else:
 			 return graph
 		 
+		print nextlon
+		print nodeidx
 		actual.sort(key=lambda node: node.lat)
 		for node in actual:
 			neighs = vectors[amap.nodesidx[node.id]]
 			inside = isInside(node,intervals)
+			buildings = []
+			isbroken = False
+			for n in neighs:
+				if amap.ways[n[1]].area == False:
+					isbroken = True
+					continue
+				if amap.ways[n[1]].type != pb.Way.BARRIER:
+					isbroken = True
+					continue
+				buildings.append(n)
 			if inside == -1:
-				buildings = []
-				broken = False
-				for n in neighs:
-					if amap.ways[n[1]].area == False:
-						broken = True
-						continue
-					if amap.ways[n[1]].waytype != pb.Way.BARRIER:
-						broken = True
-						continue
-					buildings.append(n)
 				buildings.sort(key=lambda b: amap.nodes[b[0]].lat)
 				i = 0
 				while buildings != []:
 					if buildings[i][1]!=buildings[i+1][1]:
 						print "Error in buildings!"
 					aint = Interval()
-					interval.lfrom = amap.nodesidx[node.id]
-					interval.lto = buildings[i][0]
-					interval.ufrom = interval.lfrom
-					interval.uto = buildings[i+1][0]
-					interval.way_idx = buildings[i][1]
+					aint.lfrom = amap.nodesidx[node.id]
+					aint.lto = buildings[i][0]
+					aint.ufrom = aint.lfrom
+					aint.uto = buildings[i+1][0]
+					aint.way_idx = buildings[i][1]
 					idx = binary_search(intervals,lambda aint: aint.upper,node.lat)
-					intervals.insert(idx+1,interval)
+					intervals.insert(idx+1,aint)
 
-					try: 
-						ends[
+					broken[aint.way_idx] = isbroken
+
 					i+=2
-
-
-					
-
-
 			else:
-				pass 
+				buildings.sort(key=lambda b: b[1])
+				remove = []
+				iidx = 0
+				for inter in intervals:
+					if inter.uto == node.id and inter.lto == node.id:
+						remove.append(i)
+					
+					bidx = binary_search(buildings,lambda b:b[1],inter.way_idx)
+					if inter.uto == node.id and bidx > 0:
+						inter.ufrom = amap.nodesidx[node.id]
+						inter.uto = buildings[bidx][0]
+
+					if inter.lto == node.id and bidx > 0:
+						inter.lfrom = amap.nodesidx[node.id]
+						i.lto = buildings[bidx][0]
+					
+					if iidx+1 < len(intervals) and inter.uto == intervals[iidx+1].lto and inter.uto == node.id:
+						intervals[iidx+1].lfrom = inter.lfrom
+						intervals[iidx+1].lto = inter.lto
+						remove.append(i)
+
+					iidx +=1 
+				for inter in remove:
+					intervals.remove(inter)
+
+				 
+				 
 				
 		intervals = updateIntervals(amap.nodes,intervals,nextlon)
 
 		
 
 
-waysConf=loadWaysConf("types.yaml")
-areasConf=loadAreasConf("area.yaml")
-
 start = time.time()
 
-amap = parseOSMfile("../../osm/praha.osm")
+amap = Map()
+amap.loadFromPB("praha-pre.pbf")
 
 end = time.time()
-print "Parsing took "+str(end-start)
+print "Loading took "+str(end-start)
 start = time.time()
 
-nodeways=nodeWays(amap)
-amap = deleteAloneNodes(amap,nodeways)
 nodeways=nodeWays(amap)
 
 end = time.time()
@@ -373,7 +259,7 @@ zametani(amap,vectors)
 del vectors
 del nodeways
 
-outfile = open("praha-pre.pbf","w")
+outfile = open("praha-union.pbf","w")
 outfile.write(amap.toPB().SerializeToString())
 outfile.close()
 
