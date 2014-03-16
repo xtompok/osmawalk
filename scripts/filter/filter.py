@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf8 -*-
 
 import sys
 sys.path.append("../imposm-parser")
@@ -147,6 +148,101 @@ def updateIntervals(nodes,intervals,lon):
 	return intervals
 
 
+"""
+Postup:
+ - najdi všechny body na poledníku
+ - seřaď je od jihu k severu
+ - jdi od jihu
+   - vezmi bod
+   - seřaď jeho sousedy podle úhlu od jihu k severu
+   - smaž všechny intervaly, které v něm končí
+   - je bod uvnitř intervalu budovy b?
+     - je nejnižší hrana hranou b?
+       - ne - budova je broken
+       - ano
+        - je nejvyšší hrana hranou b?
+	  - ne - budova je broken
+	  - ano 
+	    - rozdělit interval
+	    - vyřešit vnitřek
+   - je bod na kraji intervalu budovy b?
+     - horní
+       - je nejnižší hrana hranou b?
+         - ne - budova je broken
+	 - ano
+	   - uprav interval
+     - dolní
+       - je nejvyšší hrana hranou b?
+         - ne - budova je broken
+	 - ano
+	   - uprav interval
+   - vyřešit vnitřek
+
+Vyřešit vnitřek:
+ - jdi po kružnici od jihu
+ - je cesta budova?
+  - ne - vezmi další
+  - ano - budova b
+    - je další cesta budova b?
+      - ano - uprav interval
+      - ne
+        - b je broken
+	- ber cesty, dokud nenarazíš na b
+	- uprav interval
+
+"""
+
+def sortedNeighs(amap,vectors,nodeidx):
+	lat = amap.nodes[nodeidx].lat
+	lon = amap.nodes[nodeidx].lon
+	try:
+		neighs = vectors[nodeidx]
+	except KeyError:
+		#print "Key Error: "+str(amap.nodes[nodeidx].id)
+		return []
+	angles = []
+	top = []
+	bot = []
+	for n in neighs:
+		nlat = amap.nodes[n[0]].lat
+		nlon = amap.nodes[n[0]].lon
+		if nlon == lon:
+			if nlat>lat:
+				top.append(n)
+			elif nlat<lat:
+				bot.append(n)
+			continue
+		angle = (1.0*nlat-lat)/(1.0*nlon-lon)
+		angles.append((angle,n))
+	angles.sort(key=lambda a: a[0])
+	sneighs = bot+[a[1] for a in angles]+top
+	out = []
+	lastidx = 0
+	for n in sneighs:
+		if n[0] == lastidx:
+			if lastidx == 0:
+				print "Error in "+str(amap.nodes[n[0]].id)
+				continue
+			out[-1].append(n)
+		else:
+			out.append([n])
+			lastidx = n[0] 
+	return out
+
+class Edge:
+	fromlat = 0
+	fromlon = 0
+	tolat = 0
+	tolon = 0
+	vectoridx = 0
+
+	def __init__(self,vectors,amap,fromidx,toidx):
+		self.fromlat = amap.nodes[fromidx].lat
+		self.fromlon = amap.nodes[fromidx].lon
+		self.tolat = amap.nodes[vectors[toidx][0]].lat
+		self.tolon = amap.nodes[vectors[toidx][0]].lon
+		self.vectoridx = toidx
+
 def zametani(amap,vectors):
 	nodes = sorted(amap.nodes,key=lambda node: node.lon)
 	broken = {}
@@ -156,7 +252,7 @@ def zametani(amap,vectors):
 	nodeidx=0
 	while nodeidx<len(nodes):
 		actual=[nodes[nodeidx]]
-		while (nodes[nodeidx].lon == nodes[nodeidx+1].lon)and(nodeidx<len(nodes)-1):
+		while (nodeidx<len(nodes)-1) and (nodes[nodeidx].lon == nodes[nodeidx+1].lon):
 			actual.append(nodes[nodeidx+1])
 			nodeidx+=1
 		nodeidx+=1
@@ -165,11 +261,13 @@ def zametani(amap,vectors):
 		else:
 			 return graph
 		 
-		print nextlon
-		print nodeidx
+		#print nextlon
+		#print nodeidx
+
 		actual.sort(key=lambda node: node.lat)
 		for node in actual:
-			neighs = vectors[amap.nodesidx[node.id]]
+			neighs = sortedNeighs(amap,vectors,amap.nodesidx[node.id])
+"""
 			inside = isInside(node,intervals)
 			buildings = []
 			isbroken = False
@@ -184,7 +282,7 @@ def zametani(amap,vectors):
 			if inside == -1:
 				buildings.sort(key=lambda b: amap.nodes[b[0]].lat)
 				i = 0
-				while buildings != []:
+				while i+1 < len(buildings):
 					if buildings[i][1]!=buildings[i+1][1]:
 						print "Error in buildings!"
 					aint = Interval()
@@ -211,15 +309,35 @@ def zametani(amap,vectors):
 					if inter.uto == node.id and bidx > 0:
 						inter.ufrom = amap.nodesidx[node.id]
 						inter.uto = buildings[bidx][0]
+						buildings.remove(buildings[bidx])
 
 					if inter.lto == node.id and bidx > 0:
 						inter.lfrom = amap.nodesidx[node.id]
 						i.lto = buildings[bidx][0]
+						buildings.remove(buildings[bidx])
 					
 					if iidx+1 < len(intervals) and inter.uto == intervals[iidx+1].lto and inter.uto == node.id:
 						intervals[iidx+1].lfrom = inter.lfrom
 						intervals[iidx+1].lto = inter.lto
 						remove.append(i)
+
+				buildings.sort(key=lambda b: amap.nodes[b[0]].lat)
+				i = 0
+				while i+1 < len(buildings):
+					if buildings[i][1]!=buildings[i+1][1]:
+						print "Error in buildings!"
+					aint = Interval()
+					aint.lfrom = amap.nodesidx[node.id]
+					aint.lto = buildings[i][0]
+					aint.ufrom = aint.lfrom
+					aint.uto = buildings[i+1][0]
+					aint.way_idx = buildings[i][1]
+					idx = binary_search(intervals,lambda aint: aint.upper,node.lat)
+					intervals.insert(idx+1,aint)
+
+					broken[aint.way_idx] = isbroken
+
+					i+=2
 
 					iidx +=1 
 				for inter in remove:
@@ -230,7 +348,7 @@ def zametani(amap,vectors):
 				
 		intervals = updateIntervals(amap.nodes,intervals,nextlon)
 
-		
+		"""
 
 
 start = time.time()
@@ -256,6 +374,11 @@ print "Vectors took "+str(end-start)
 start = time.time()
 
 zametani(amap,vectors)
+
+end = time.time()
+print "Zametani took "+str(end-start)
+start = time.time()
+
 del vectors
 del nodeways
 
@@ -266,9 +389,9 @@ outfile.close()
 end = time.time()
 print "Saving took "+str(end-start)
 
-print "Ways:",cnt.ways
-print "Nodes:",cnt.nodes
-print "Relations:",cnt.relations
-print "Areas:",cnt.areas
-print "Nodes on ways",len(nodeways.keys())
+#print "Ways:",cnt.ways
+#print "Nodes:",cnt.nodes
+#print "Relations:",cnt.relations
+#print "Areas:",cnt.areas
+#print "Nodes on ways",len(nodeways.keys())
 
