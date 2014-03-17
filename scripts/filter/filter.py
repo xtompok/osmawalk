@@ -428,73 +428,106 @@ def onBorder(amap,neighs,nodeid,lastnodeid):
 	vy = lastnode.lat-node.lat
 	
 	neighangles = []
-	for nid in neighs:
+	#print "Last node:",lastnodeid,"Node ",node.id,"neighs:",neighs[node.id]
+	for nid in neighs[node.id]:
+		if nid==lastnodeid:
+			continue
+		#print "with ",nid
 		n = amap.nodes[amap.nodesidx[nid]]
 		ux = n.lon-node.lon
 		uy = n.lat-node.lat
 		ang = angle(ux,uy,vx,vy)
 		neighangles.append((ang,nid))
 	neighangles.sort(key=lambda n: n[0])
-	if neighangles[0][1]==lastnodeid:
-		return neighangles[1][1]
-	else:
-		return neighangles[0][1]
+	return neighangles[-1][1]
+
+def firstBorder(amap,neighs,node):
+	memangle = 360
+	memid = -1
+	
+	vx = 0
+	vy = -1000
+	
+	neighangles = []
+	#print "Node ",node.id,"neighs:",neighs[node.id]
+	for nid in neighs[node.id]:
+		n = amap.nodes[amap.nodesidx[nid]]
+		ux = n.lon-node.lon
+		uy = n.lat-node.lat
+		ang = angle(ux,uy,vx,vy)
+		neighangles.append((ang,nid))
+	neighangles.sort(key=lambda n: n[0])
+	return neighangles[-1][1]
 
 
 def angle(ux,uy,vx,vy):
-	cos = (ux*vx + uy*vy)/(math.sqrt(ux*ux+uy*uy)*math.sqrt(vx*vx+vy*vy))
-	angle = math.acos(cos)
+	try:
+		cos = (ux*vx + uy*vy)/(math.sqrt(ux*ux+uy*uy)*math.sqrt(vx*vx+vy*vy))
+	except ZeroDivisionError:
+		return 0
+	try:
+		angle = math.acos(cos)
+	except ValueError:
+		if cos>0.99:
+			angle=0
+		if cos<0.01:
+			angle=math.pi
 	d = ux*vy-uy*vx
-	if d<=0:
-		angle+=math.pi
+	if d>=0:
+		angle=2*math.pi-angle
 	return angle
 	
 
 
 
 
-def mergeWays(amap,vectors,way1id,way2id):
-	print "merging",way1id," and ",way2id
+def mergeWays(amap,wayids):
+	#print "merging",wayids
 	newway = pb.Way()
-	way1 = amap.ways[amap.waysidx[way1id]]
-	way2 = amap.ways[amap.waysidx[way2id]]
-	nodes1 = [amap.nodes[amap.nodesidx[ref]] for ref in way1.refs]
-	nodes2 = [amap.nodes[amap.nodesidx[ref]] for ref in way2.refs]
-	bylon = sorted(nodes1+nodes2,key=lambda n:n.lon)
+	way1 = amap.ways[amap.waysidx[wayids[0]]]
+	neighs = {}
+	nodes = []
+	for wayid in wayids:
+		way = amap.ways[amap.waysidx[wayid]]
+		waynodes = [amap.nodes[amap.nodesidx[ref]] for ref in way.refs]
+		if len(waynodes)<3:
+			continue
+		if len(waynodes)==3 and waynodes[-1]==waynodes[0]:
+			continue
+		if waynodes[-1] != waynodes[0]:
+			waynodes.append(waynodes[0])
+		for i in range(len(waynodes)):
+			wniid = waynodes[i].id
+			if wniid not in neighs.keys():
+				neighs[wniid] = []
+				nodes.append(waynodes[i])	
+			if i!=0:
+				if waynodes[i-1].id not in neighs[wniid]:
+					neighs[wniid].append(waynodes[i-1].id)
+			if i!=len(waynodes)-1:
+				if waynodes[i+1].id not in neighs[wniid]:
+					neighs[wniid].append(waynodes[i+1].id)
+
+	bylon = sorted(nodes,key=lambda n:n.lon)
 	bylatlon = sorted(bylon,key=lambda n:n.lat)
-	neighs = { n.id:[] for n in nodes1+nodes2 }
-	for i in range(len(nodes1)):
-		if i!=0:
-			neighs[nodes1[i].id].append(nodes1[i-1].id)
-		if i!=len(nodes1)-1:
-			neighs[nodes1[i].id].append(nodes1[i-1].id)
-	for i in range(len(nodes2)):
-		if i!=0:
-			neighs[nodes2[i].id].append(nodes2[i-1].id)
-		if i!=len(nodes2)-1:
-			neighs[nodes2[i].id].append(nodes2[i-1].id)
 
 	first = bylatlon[0]
-	i = 1
-	while bylatlon[i].id not in neighs:
-			i+=1
-	second = bylatlon[i]
-	print "edge:",first.id," ",second.id
-	#fneighs = [ n[0] for n in sortedNeighs(amap,vectors,amap.nodesidx[first.id]) if n[1]==way1.id or n[1]==way2.id ]
-	#if len(fneighs)==0:
-	#	return None
-	#second = fneighs[0]
+	#print neighs[first.id]
+	second = amap.nodes[amap.nodesidx[firstBorder(amap,neighs,first)]]
+	#print "edge:",first.id," ",second.id
 	newway.refs.append(first.id)
 	newway.refs.append(second.id)
 	nextid = onBorder(amap,neighs,second.id,first.id)
-	while(nextid != first):
-		newway.refs.append(onBorder(amap,neighs,newway.refs[-1],newway.refs[-2]))
-		nextid = newway.refs[-1]
-	newway.refs.append(first)
+	while(nextid != first.id):
+		nextid = onBorder(amap,neighs,newway.refs[-1],newway.refs[-2])
+		newway.refs.append(nextid)
+	#	print "F",first.id,"n",nextid
+	#	print newway.refs
+	newway.refs.append(first.id)
 	newway.type = way1.type
 	newway.id = way1.id #FIXME
 	newway.area = way1.area
-	newway.render = false
+	newway.render = False
 	return newway
 
 
@@ -526,13 +559,11 @@ def makeNeighGraph(amap,nodeways):
 	print bcnt
 	return (G,broken)
 
-def mergeComponents(amap,G,vectors):
-	print type(nx.minimum_spanning_tree(G))
+def mergeComponents(amap,G):
 	for c in nx.connected_components(G):
 		if len(c) == 1:
 			continue
-		for i in range(1,len(c)):
-			way = mergeWays(amap,vectors,c[i-1],c[i])
+		way = mergeWays(amap,c)
 		amap.ways.append(way)
 
 
@@ -560,24 +591,22 @@ print "Components",len(nx.connected_components(G))
 
 end = time.time()
 print "Neighs took "+str(end-start)
-start = time.time()
+#start = time.time()
 
-vectors = nodeVectors(amap,nodeways)
-print len(vectors)
+#ectors = nodeVectors(amap,nodeways)
+#print len(vectors)
 
-end = time.time()
-print "Vectors took "+str(end-start)
+#end = time.time()
+#print "Vectors took "+str(end-start)
 start = time.time()
 
 #zametani(amap,vectors)
-mergeComponents(amap,G,vectors)
+mergeComponents(amap,G)
 
 end = time.time()
 print "Zametani took "+str(end-start)
 start = time.time()
 
-del vectors
-del nodeways
 
 outfile = open("praha-union.pbf","w")
 outfile.write(amap.toPB().SerializeToString())
