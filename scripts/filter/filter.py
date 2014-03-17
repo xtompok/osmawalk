@@ -114,38 +114,6 @@ def nodeVectors(amap,nodeways):
 
 
 	
-class Interval:
-	lfrom = 0
-	lto = 0
-	lower=0
-	ufrom = 0
-	uto = 0
-	upper = 0
-	way_idx = 0
-
-
-def isInside(node,intervals):
-	if len(intervals) == 0:
-		return -1
-	idx = binary_search(intervals, lambda interval: interval.lower, node.lat)
-	if idx >= 0:
-		return idx
-	elif intervals[-idx].upper > node.lat:
-		return -idx
-	else:
-		return -1
-def updateIntervals(nodes,intervals,lon):
-	for i in range(len(intervals)):
-		aint = intervals[i]
-		dlat = nodes[aint.lto].lat - nodes[aint.lfrom].lat
-		dlon = nodes[aint.lto].lon - nodes[aint.lfrom].lon
-		scale = (lon - nodes[aint.lfrom].lon)/dlon
-		intervals[i].lower = dlat*scale + nodes[aint.lfrom].lat
-		dlat = nodes[aint.uto].lat - nodes[aint.ufrom].lat
-		dlon = nodes[aint.uto].lon - nodes[aint.ufrom].lon
-		scale = (lon - nodes[aint.ufrom].lon)/dlon
-		intervals[i].upper = dlat*scale + nodes[aint.ufrom].lat
-	return intervals
 
 
 """
@@ -229,28 +197,114 @@ def sortedNeighs(amap,vectors,nodeidx):
 			lastidx = n[0] 
 	return out
 
-class Edge:
-	fromlat = 0
-	fromlon = 0
-	tolat = 0
-	tolon = 0
-	vectoridx = 0
+class Interval:
+	lfrom = 0
+	lto = 0
+	ufrom = 0
+	uto = 0
+	way_idx = 0
 
-	def __init__(self,vectors,amap,fromidx,toidx):
-		self.fromlat = amap.nodes[fromidx].lat
-		self.fromlon = amap.nodes[fromidx].lon
-		self.tolat = amap.nodes[vectors[toidx][0]].lat
-		self.tolon = amap.nodes[vectors[toidx][0]].lon
-		self.vectoridx = toidx
+
+def isInside(node,intervals):
+	if len(intervals) == 0:
+		return -1
+	idx = binary_search(intervals, lambda interval: interval.lower, node.lat)
+	if idx >= 0:
+		return idx
+	elif intervals[-idx].upper > node.lat:
+		return -idx
+	else:
+		return -1
+def updateIntervals(nodes,intervals,lon):
+	for i in range(len(intervals)):
+		aint = intervals[i]
+		dlat = nodes[aint.lto].lat - nodes[aint.lfrom].lat
+		dlon = nodes[aint.lto].lon - nodes[aint.lfrom].lon
+		scale = (lon - nodes[aint.lfrom].lon)/dlon
+		intervals[i].lower = dlat*scale + nodes[aint.lfrom].lat
+		dlat = nodes[aint.uto].lat - nodes[aint.ufrom].lat
+		dlon = nodes[aint.uto].lon - nodes[aint.ufrom].lon
+		scale = (lon - nodes[aint.ufrom].lon)/dlon
+		intervals[i].upper = dlat*scale + nodes[aint.ufrom].lat
+	return intervals
+
+
+class Intervals:
+	nodes = None
+	points = []
+	intervals = []
+	
+
+	def calcLon(idx1, idx2, lon):
+		dlat = nodes[idx2].lat - nodes[idx1].lat
+		dlon = nodes[idx2].lon - nodes[idx1].lon
+		scale = (lon - nodes[idx1].lon)/dlon
+		return dlat*scale + nodes[aint.lfrom].lat
+		
+
+	def __init__(self,nodes):
+		self.nodes = nodes
+
+	def deleteEnding(self,lon):
+		remove = []
+		for i in range(len(self.intervals)):
+			if self.intervals[i] == None:
+				continue
+			if self.intervals[i].lto == self.intervals[i].uto and nodes[self.intervals[i].lto].lon == lon:
+				remove.append(i)
+		i=0
+		toidx = 0
+		for i in range(len(self.intervals)):
+			if i in remove:
+				continue
+			self.intervals[toidx] = self.intervals[i]
+			self.points[toidx] = self.points[i]
+			self.points[toidx+1] = self.points[i+1]
+			toidx+=1
+		for i in range(len(self.intervals)-1,toidx,-1):
+			del self.intervals[i]
+			del self.points[i]
+						
+	def isInside(self,nodeidx):
+		return binary_search(self.points,int,nodes[nodeidx].lon)
+	def update(self,lon):
+		if len(self.points)==0:
+			return
+		self.points[0] = self.calcLon(self.intervals[0].lfrom,self.intervals[0].lto,lon)	
+		for i in range(len(self.intervals)):
+			self.points[i+1] = self.calcLon(self.intervals[i].ufrom,self.intervals[i].uto,lon)
+
+	def add(self,interval):
+		llat = nodes[interval.lfrom].lat
+		pos = binary_search(self.points,int,llat)
+		if pos>0:
+			while i+1<len(self.intervals) and self.points[i+1]==llat:
+				pos+=1
+			self.intervals.insert(pos,interval)
+			self.points.instert(pos,llat)
+		if pos<0:
+			pos = -pos-1
+			if pos!=len(self.intervals):
+				self.intervals.insert(pos,None)
+				self.points.insert(pos,llat)
+
+				self.intervals.insert(pos,interval)
+				self.points.insert(pos,llat)
+			if pos!=0:
+				self.intervals.insert(pos,None)
+				self.points.insert(pos,llat)
+
 
 def zametani(amap,vectors):
 	nodes = sorted(amap.nodes,key=lambda node: node.lon)
 	broken = {}
-	intervals = []
+	intervals = Intervals(amap.nodes)
 	graph = []
 	ends = {}
 	nodeidx=0
+	nextlon=0
 	while nodeidx<len(nodes):
+		intervals.deleteEnding(nextlon)
 		actual=[nodes[nodeidx]]
 		while (nodeidx<len(nodes)-1) and (nodes[nodeidx].lon == nodes[nodeidx+1].lon):
 			actual.append(nodes[nodeidx+1])
@@ -267,6 +321,15 @@ def zametani(amap,vectors):
 		actual.sort(key=lambda node: node.lat)
 		for node in actual:
 			neighs = sortedNeighs(amap,vectors,amap.nodesidx[node.id])
+			for ns in neighs:
+				for n in ns:
+					way = amap.ways[binary_search(amap.ways,lambda way: way.id,n[1])]
+					if way.type == pb.Way.BARRIER and way.area == true:
+						pass
+
+
+
+		intervals.update(nextlon)
 """
 			inside = isInside(node,intervals)
 			buildings = []
@@ -349,6 +412,40 @@ def zametani(amap,vectors):
 		intervals = updateIntervals(amap.nodes,intervals,nextlon)
 
 		"""
+def onBorder(amap,neighs,nodeid,lastnodeid):
+	memangle = 360
+	memid = -1
+	
+			
+
+	
+
+def mergeWays(amap,vectors,way1,way2):
+	newway = pb.Way()
+	nodes1 = [amap.nodes[amap.nodesidx(ref)] for ref in way1.refs]
+	nodes2 = [amap.nodes[amap.nodesidx(ref)] for ref in way2.refs]
+	bylon = sorted(nodes1+nodes2,key=lambda n:n.lon)
+	bylatlon = sorted(bylon,key=lambda n:n.lat)
+	neighs = { n.id:[] for n in nodes1+nodes2 }
+	for i in range(len(nodes1)):
+		if i!=0:
+			neighs[nodes1[i].id].append(nodes1[i-1].id)
+		if i!=len(nodes1)-1:
+			neighs[nodes1[i].id].append(nodes1[i-1].id)
+	for i in range(len(nodes2)):
+		if i!=0:
+			neighs[nodes2[i].id].append(nodes2[i-1].id)
+		if i!=len(nodes2)-1:
+			neighs[nodes2[i].id].append(nodes2[i-1].id)
+
+	first = bylatlon[0]
+	neighs = [ n[0] for n in sortedNeighs(amap,vectors,amap.nodesidx[first.id]) if n[1]==way1.id or n[1]==way2.id ]
+	second = neighs[0]
+
+
+	
+
+
 
 
 start = time.time()
