@@ -1,0 +1,13 @@
+yes:
+    area: 
+        - "yes"
+    landuse: "*"
+    building: "*"
+    leisure:
+        - park
+        - playground
+        - garden
+        - pitch
+no:
+    area: 
+        - "no"

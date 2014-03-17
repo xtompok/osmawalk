@@ -1,0 +1,62 @@
+package premap;
+
+message Node {
+	required sint64 id = 1;
+	required sint64 lat = 2;
+	required sint64 lon = 3;
+	optional int32 usable = 4 [default=0];
+	repeated string str_keys = 8;
+	repeated string str_vals = 9;
+	optional bool render = 15;
+}
+
+message Way {
+	enum waytype {
+			BARRIER = 0;
+			WAY = 1;
+			RAILWAY = 2;
+			WATER = 3;
+			PARK = 4;
+			GREEN = 5;
+			FOREST = 6;
+			MULTIPOLYGON = 250;
+			IGNORE = 256;
+	}
+
+	required int64 id=1;
+	repeated string str_keys = 8;
+	repeated string str_vals = 9;
+	repeated sint64 refs = 10;
+	optional bool area = 11;
+	optional waytype type = 12 [default=WAY];
+	optional bool render = 15;
+}
+
+message Relation {
+	required int64 id = 1;
+	optional int32 usable = 4 [default=0];
+    optional bool multipolygon = 7;
+	repeated string str_keys = 8;
+	repeated string str_vals = 9;
+	repeated sint64 refs = 10;
+	optional bool render = 15;
+}
+message Multipolygon {
+	enum Role {
+		INNER = 2;
+		OUTER = 1;	
+	}
+	required int64 id = 1;
+	repeated string str_keys = 8;
+	repeated string str_vals = 9;
+	repeated sint64 refs = 10;
+	repeated Role roles = 11;
+}
+
+
+message Map {
+	repeated Node nodes = 1;
+	repeated Way ways = 2;
+	repeated Relation relations = 3;
+	repeated Multipolygon multipols = 4;
+}

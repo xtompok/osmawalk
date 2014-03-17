@@ -1,0 +1,62 @@
+Way:
+    ignore: 
+        boundary : "*"
+  
+    barrier: 
+        barrier : "*"
+        waterway:
+            - river
+            - canal
+            - weir
+        building: "*"
+        landuse:
+            - allotments
+            - basin
+            - garages
+            - greenhoue_horticulture
+            - landfill
+            - military 
+            - reservoir
+            - vineyard
+ 
+        leisure:
+            - garden
+            - pitch
+        highway:
+            - motorway
+            - trunk
+            - motorway-link
+            - trunk-link
+    
+    railway:
+        railway:
+            - funicular
+            - light_rail
+            - rail
+        landuse:
+            - railway
+    water:
+        waterway:
+            - stream
+    park:
+        leisure:
+            - park
+            - playground
+        landuse:
+            - grass
+            - recreation_ground
+            - village_green
+
+    green:
+        landuse:
+            - farm
+            - farmland
+            - meadow
+            - orchad
+            - pasture
+    forest:
+        landuse:
+            - forest
+
+
+
