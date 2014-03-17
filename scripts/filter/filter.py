@@ -5,9 +5,11 @@ import sys
 sys.path.append("../imposm-parser")
 
 import time
+import math
 import yaml
 import pprint
 import premap_pb2 as pb
+import networkx as nx
 from imposm.parser import OSMParser
 
 scale = 1000000
@@ -17,6 +19,7 @@ class Map:
 	ways = []
 	relations = []
 	nodesidx = {}
+	waysidx = {}
 	
 	def toPB(self):
 		pbMap = pb.Map()
@@ -35,6 +38,8 @@ class Map:
 		self.relations = list(pbMap.relations)
 		for i in range(len(self.nodes)):
 			self.nodesidx[self.nodes[i].id]=i
+		for i in range(len(self.ways)):
+			self.waysidx[self.ways[i].id]=i
 		
 
 
@@ -416,14 +421,45 @@ def onBorder(amap,neighs,nodeid,lastnodeid):
 	memangle = 360
 	memid = -1
 	
-			
+	lastnode = amap.nodes[amap.nodesidx[lastnodeid]]
+	node = amap.nodes[amap.nodesidx[nodeid]]
 
+	vx = lastnode.lon-node.lon
+	vy = lastnode.lat-node.lat
+	
+	neighangles = []
+	for nid in neighs:
+		n = amap.nodes[amap.nodesidx[nid]]
+		ux = n.lon-node.lon
+		uy = n.lat-node.lat
+		ang = angle(ux,uy,vx,vy)
+		neighangles.append((ang,nid))
+	neighangles.sort(key=lambda n: n[0])
+	if neighangles[0][1]==lastnodeid:
+		return neighangles[1][1]
+	else:
+		return neighangles[0][1]
+
+
+def angle(ux,uy,vx,vy):
+	cos = (ux*vx + uy*vy)/(math.sqrt(ux*ux+uy*uy)*math.sqrt(vx*vx+vy*vy))
+	angle = math.acos(cos)
+	d = ux*vy-uy*vx
+	if d<=0:
+		angle+=math.pi
+	return angle
 	
 
-def mergeWays(amap,vectors,way1,way2):
+
+
+
+def mergeWays(amap,vectors,way1id,way2id):
+	print "merging",way1id," and ",way2id
 	newway = pb.Way()
-	nodes1 = [amap.nodes[amap.nodesidx(ref)] for ref in way1.refs]
-	nodes2 = [amap.nodes[amap.nodesidx(ref)] for ref in way2.refs]
+	way1 = amap.ways[amap.waysidx[way1id]]
+	way2 = amap.ways[amap.waysidx[way2id]]
+	nodes1 = [amap.nodes[amap.nodesidx[ref]] for ref in way1.refs]
+	nodes2 = [amap.nodes[amap.nodesidx[ref]] for ref in way2.refs]
 	bylon = sorted(nodes1+nodes2,key=lambda n:n.lon)
 	bylatlon = sorted(bylon,key=lambda n:n.lat)
 	neighs = { n.id:[] for n in nodes1+nodes2 }
@@ -439,11 +475,67 @@ def mergeWays(amap,vectors,way1,way2):
 			neighs[nodes2[i].id].append(nodes2[i-1].id)
 
 	first = bylatlon[0]
-	neighs = [ n[0] for n in sortedNeighs(amap,vectors,amap.nodesidx[first.id]) if n[1]==way1.id or n[1]==way2.id ]
-	second = neighs[0]
+	i = 1
+	while bylatlon[i].id not in neighs:
+			i+=1
+	second = bylatlon[i]
+	print "edge:",first.id," ",second.id
+	#fneighs = [ n[0] for n in sortedNeighs(amap,vectors,amap.nodesidx[first.id]) if n[1]==way1.id or n[1]==way2.id ]
+	#if len(fneighs)==0:
+	#	return None
+	#second = fneighs[0]
+	newway.refs.append(first.id)
+	newway.refs.append(second.id)
+	nextid = onBorder(amap,neighs,second.id,first.id)
+	while(nextid != first):
+		newway.refs.append(onBorder(amap,neighs,newway.refs[-1],newway.refs[-2]))
+		nextid = newway.refs[-1]
+	newway.refs.append(first)
+	newway.type = way1.type
+	newway.id = way1.id #FIXME
+	newway.area = way1.area
+	newway.render = false
+	return newway
 
 
-	
+def makeNeighGraph(amap,nodeways):
+	G = nx.Graph()
+	G.add_nodes_from([way.id for way in amap.ways])
+	broken = {way.id : False for way in amap.ways }
+	bcnt = 0
+	for n in amap.nodes:
+		nidx = amap.nodesidx[n.id]
+		ways = nodeways[nidx]
+		isbroken = False
+		buildings = []
+		for wayid in ways:
+			wayidx = amap.waysidx[wayid]
+			way = amap.ways[wayidx]
+			if way.type != pb.Way.BARRIER or way.area!=True:
+				isbroken = True
+			else:
+				bcnt+=1
+				buildings.append(wayidx)
+		if isbroken:
+			for wayidx in buildings:
+				broken[amap.ways[wayidx].id]=True
+		else:
+			firstwayid = amap.ways[buildings[0]].id
+			for wayidx in buildings[1:]:
+				G.add_edge(firstwayid,amap.ways[wayidx].id)
+	print bcnt
+	return (G,broken)
+
+def mergeComponents(amap,G,vectors):
+	print type(nx.minimum_spanning_tree(G))
+	for c in nx.connected_components(G):
+		if len(c) == 1:
+			continue
+		for i in range(1,len(c)):
+			way = mergeWays(amap,vectors,c[i-1],c[i])
+		amap.ways.append(way)
+
+
 
 
 
@@ -463,6 +555,13 @@ end = time.time()
 print "Nodeways took "+str(end-start)
 start = time.time()
 
+(G,broken) = makeNeighGraph(amap,nodeways)
+print "Components",len(nx.connected_components(G))
+
+end = time.time()
+print "Neighs took "+str(end-start)
+start = time.time()
+
 vectors = nodeVectors(amap,nodeways)
 print len(vectors)
 
@@ -470,7 +569,8 @@ end = time.time()
 print "Vectors took "+str(end-start)
 start = time.time()
 
-zametani(amap,vectors)
+#zametani(amap,vectors)
+mergeComponents(amap,G,vectors)
 
 end = time.time()
 print "Zametani took "+str(end-start)
