@@ -7,22 +7,10 @@ import time
 import yaml
 import pprint
 import premap_pb2 as pb
+from Map import Map
 from imposm.parser import OSMParser
 
 scale = 1000000
-
-class Map:
-	nodes = []
-	ways = []
-	relations = []
-	nodesidx = {}
-	
-	def toPB(self):
-		pbMap = pb.Map()
-		pbMap.nodes.extend(self.nodes)
-		pbMap.ways.extend(self.ways)
-		pbMap.relations.extend(self.relations)
-		return pbMap
 
 class counter():
 	ways = 0
@@ -210,7 +198,7 @@ nodeways=nodeWays(amap)
 amap = deleteAloneNodes(amap,nodeways)
 
 end = time.time()
-print "Nodeways took "+str(end-start)
+print "Deleting alone nodes took "+str(end-start)
 start = time.time()
 
 outfile = open("praha-pre.pbf","w")
