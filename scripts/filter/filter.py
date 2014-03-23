@@ -9,6 +9,7 @@ import math
 import yaml
 import pprint
 import premap_pb2 as pb
+import types_pb2 as pbtypes
 import networkx as nx
 from utils import angle
 from Map import Map
@@ -143,7 +144,7 @@ def makeNeighGraph(amap,nodeways):
 		for wayid in ways:
 			wayidx = amap.waysidx[wayid]
 			way = amap.ways[wayidx]
-			if way.type != pb.Way.BARRIER or way.area!=True:
+			if way.type != pbtypes.BARRIER or way.area!=True:
 				isbroken = True
 			else:
 				bcnt+=1
@@ -271,7 +272,7 @@ def isIn(amap,node,way):
 
 def markInside(amap,raster):
 	for way in amap.ways:
-		if not (way.area and way.type==pb.Way.BARRIER) :
+		if not (way.area and way.type==pbtypes.BARRIER) :
 			continue
 		bbox = getbbox(amap,way.id)
 		minbox = raster.getBox(bbox[0],bbox[1])
@@ -369,7 +370,7 @@ def mergeMultipolygons(amap):
 				print "Merging Error"
 				break
 			print "Remains",len(outer),"ways"
-			if multi.type != pb.Multipolygon.WAY:
+			if multi.type != pbtypes.WAY:
 				way.type = multi.type
 			way.area = True
 			print "Way created"
