@@ -1,0 +1,34 @@
+package map;
+import "types.proto"
+
+message Node {
+	required sint64 id = 1;
+	required sint64 lat = 2;
+	required sint64 lon = 3;
+	optional crosstype crosstype = 4;
+	optional bool inside = 5; [default=false]
+	optional int64 nodeidx = 200;
+}
+
+message Way {
+
+	required int64 id=1;
+	repeated sint64 refs = 10;
+	optional bool area = 11;
+	optional waytype type = 12 [default=WAY];
+	optional waytype bordertype = 13;
+	optional crosstype crossing = 14;
+	optional int64 wayidx = 200;
+}
+
+message Area {
+
+
+}
+
+
+message Map {
+	repeated Node nodes = 1;
+	repeated Way ways = 2;
+	repeated Area areas = 3;
+}

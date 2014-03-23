@@ -1,0 +1,36 @@
+enum waytype {
+	BARRIER = 0;
+	WAY = 1;
+	RAILWAY = 2;
+	WATER = 3;
+	PARK = 4;
+	GREEN = 5;
+	FOREST = 6;
+	PAVED = 7;
+	UNPAVED = 8;
+	STEPS = 9;
+	HIGHWAY = 10;
+	
+	DIRECT = 20;
+
+	MULTIPOLYGON = 250;
+	INSIDE = 251;
+	IGNORE = 256;
+}
+
+enum barriertype {
+	NONE = 0;
+	RAILWAY = 1;
+	ROPE = 2;
+	WATER = 3;
+	HIGHWAY = 4;
+
+	SOLID = 10;
+	
+}
+
+enum crosstype {
+	NONE = 0;
+	ENTRANCE = 1;
+
+}
