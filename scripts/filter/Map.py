@@ -8,6 +8,11 @@ class Map:
 	multipols = []
 	nodesidx = {}
 	waysidx = {}
+	lastnodeid = -1
+
+	def newNodeid(self):
+		self.lastnodeid-=1
+		return self.lastnodeid
 	
 	def toPB(self):
 		pbMap = pb.Map()

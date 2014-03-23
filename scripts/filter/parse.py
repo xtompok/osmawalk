@@ -7,6 +7,7 @@ import time
 import yaml
 import pprint
 import premap_pb2 as pb
+import types_pb2 as pbtypes
 from Map import Map
 from imposm.parser import OSMParser
 
@@ -45,7 +46,7 @@ class counter():
 					val = tags[key]
 					if val in areasConf[key].keys():
 						pbway.area = areasConf[key][val]
-			if "boundary" in tags.keys() and pbway.type==pb.Way.IGNORE and pbway.area==False:
+			if "boundary" in tags.keys() and pbway.type==pbtypes.IGNORE and pbway.area==False:
 				continue
 			if pbway.type == pbway.IGNORE:
 				pbway.render = False
@@ -121,18 +122,17 @@ def loadWaysConf(filename):
 	with open(filename) as conffile:
 		config = yaml.load(conffile.read())
 	ways={}
-	pbW = pb.Way()
-	str2pb = {"ignore": pbW.IGNORE, 
-			"barrier":pbW.BARRIER, 
-			"railway":pbW.RAILWAY, 
-			"water": pbW.WATER, 
-			"park": pbW.PARK, 
-			"green":pbW.GREEN, 
-			"forest":pbW.FOREST,
-			"paved":pbW.PAVED,
-			"unpaved":pbW.UNPAVED,
-			"steps":pbW.STEPS,
-			"highway":pbW.HIGHWAY
+	str2pb = {"ignore": pbtypes.IGNORE, 
+			"barrier":pbtypes.BARRIER, 
+			"railway":pbtypes.RAILWAY, 
+			"water": pbtypes.WATER, 
+			"park": pbtypes.PARK, 
+			"green":pbtypes.GREEN, 
+			"forest":pbtypes.FOREST,
+			"paved":pbtypes.PAVED,
+			"unpaved":pbtypes.UNPAVED,
+			"steps":pbtypes.STEPS,
+			"highway":pbtypes.HIGHWAY
 			}
 	for cat in config["Way"].keys():
 		catenum = str2pb[cat]

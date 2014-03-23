@@ -8,6 +8,7 @@ import time
 import math
 import yaml
 import pprint
+import pyproj
 import premap_pb2 as pb
 import types_pb2 as pbtypes
 import networkx as nx
@@ -379,6 +380,59 @@ def mergeMultipolygons(amap):
 	print "With Inner: ",winner
 	print "Without Inner: ",woinner
 
+def divideLongEdges(amap):
+	longcnt = 0
+	edgecnt = 0
+	geod = pyproj.Geod(ellps="WGS84")
+	for wayidx in range(len(amap.ways)):
+		way = amap.ways[wayidx]		
+		newway = pb.Way()
+		replace = False
+		for i in range(len(way.refs)-1):
+			ref1 = amap.nodes[amap.nodesidx[way.refs[i]]]
+			ref2 = amap.nodes[amap.nodesidx[way.refs[i+1]]]
+			newway.refs.append(ref1.id)
+			try:
+				r1lon = 1.0*ref1.lon/scale
+				r1lat = 1.0*ref1.lat/scale
+				r2lon = 1.0*ref2.lon/scale
+				r2lat = 1.0*ref2.lat/scale
+				(azim,_,dist)=geod.inv(r1lon,r1lat,r2lon,r2lat)
+			except ValueError:
+				continue
+			if dist<30:
+				continue
+			replace=True
+			lonlats = geod.npts(r1lon,r1lat,r2lon,r2lat,dist/20)
+			for lon,lat in lonlats:
+				newnode = pb.Node()
+				newnode.id = amap.newNodeid()
+				newnode.lon = int(lon*scale)
+				newnode.lat = int(lat*scale)
+				newway.refs.append(newnode.id)
+				amap.nodes.append(newnode)
+		if not replace:
+			continue
+		newway.type = way.type
+		newway.id = way.id
+		newway.area = way.area
+		newway.barrier = way.barrier
+		newway.bordertype = way.bordertype
+		newway.refs.append(way.refs[-1])
+		amap.ways[wayidx] = newway
+def chcekRequiredFields(amap):
+	for node in amap.nodes:
+		if n.id == 0:
+			print "Wrong node"
+
+
+def distance(geod,node1,node2):
+	#print (1.0*node1.lon/scale,1.0*node1.lat/scale,1.0*node2.lon/scale,1.0*node2.lat/scale)
+	try:
+		return geod.inv(1.0*node1.lon/scale,1.0*node1.lat/scale,1.0*node2.lon/scale,1.0*node2.lat/scale)[2]
+	except ValueError:
+		return 0
+
 			
 
 
@@ -430,6 +484,12 @@ removeMerged(amap,remove)
 
 end = time.time()
 print "Removing took "+str(end-start)
+start = time.time()
+
+divideLongEdges(amap)
+
+end = time.time()
+print "Long edges took "+str(end-start)
 start = time.time()
 
 

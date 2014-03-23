@@ -5,6 +5,7 @@ sys.path.append("../svgwrite-1.1.3")
 sys.path.append("../filter")
 
 import premap_pb2 as pb
+import types_pb2 as pbtypes
 import svgwrite
 
 scale = 1000000
@@ -21,32 +22,32 @@ def drawWays(pbMap,d, node_ids):
 			except KeyError:
 				pass
 		style={"stroke" : "black", "stroke-width" : "5", "fill" : "none"}
-		if way.type==way.WAY:
+		if way.type==pbtypes.WAY:
 			pass
-		elif way.type==way.RAILWAY:
+		elif way.type==pbtypes.RAILWAY:
 			style["stroke"] = "purple"
-		elif way.type==way.WATER:
+		elif way.type==pbtypes.WATER:
 			style["stroke"] = "blue"
-		elif way.type==way.BARRIER:
+		elif way.type==pbtypes.BARRIER:
 			style["stroke"] = "red"
-		elif way.type==way.PARK:
+		elif way.type==pbtypes.PARK:
 			style["stroke"] = "green"
-		elif way.type==way.GREEN:
+		elif way.type==pbtypes.GREEN:
 			style["stroke"] = "greenyellow"
-		elif way.type==way.FOREST:
+		elif way.type==pbtypes.FOREST:
 			style["stroke"] = "forestgreen"
-		elif way.type==way.PAVED:
+		elif way.type==pbtypes.PAVED:
 			style["stroke"] = "gray"
-		elif way.type==way.IGNORE:
+		elif way.type==pbtypes.IGNORE:
 			style["stroke"] = "cyan"
-		elif way.type==way.UNPAVED:
+		elif way.type==pbtypes.UNPAVED:
 			style["stroke"] = "brown"
-		elif way.type==way.STEPS:
+		elif way.type==pbtypes.STEPS:
 			style["stroke"] = "steelblue"
-		elif way.type==way.HIGHWAY:
+		elif way.type==pbtypes.HIGHWAY:
 			style["stroke"] = "darkslategray"
 
-		elif way.type==way.MULTIPOLYGON:
+		elif way.type==pbtypes.MULTIPOLYGON:
 			style["stroke"] = "orange"
 			print "Multipoly found"
 
@@ -54,7 +55,7 @@ def drawWays(pbMap,d, node_ids):
 		if way.area:
 			style["fill"]=style["stroke"]
 			style["fill-opacity"] = "0.5"
-		if not way.render and way.type==way.BARRIER:
+		if not way.render and way.type==pbtypes.BARRIER:
 			style["fill"]="aqua"
 
 		stylestr = ";".join([key+":"+value for key,value in style.iteritems()])
