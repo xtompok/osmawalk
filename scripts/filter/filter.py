@@ -12,7 +12,7 @@ import pyproj
 import premap_pb2 as pb
 import types_pb2 as pbtypes
 import networkx as nx
-from utils import angle
+from utils import angle,int2deg,deg2int
 from Map import Map
 from Raster import Raster
 from imposm.parser import OSMParser
@@ -90,7 +90,7 @@ def mergeWays(amap,wayids):
 			waynodes.append(waynodes[0])
 		for i in range(len(waynodes)):
 			wniid = waynodes[i].id
-			if wniid not in neighs.keys():
+			if wniid not in neighs:
 				neighs[wniid] = []
 				nodes.append(waynodes[i])	
 			if i!=0:
@@ -126,7 +126,7 @@ def mergeWays(amap,wayids):
 	#	print newway.refs
 	newway.refs.append(first.id)
 	newway.type = way1.type
-	newway.id = -way1.id #FIXME
+	newway.id = amap.newWayid()
 	newway.area = way1.area
 	newway.render = True
 	return newway
@@ -272,6 +272,7 @@ def isIn(amap,node,way):
 	return True
 
 def markInside(amap,raster):
+	incnt = 0
 	for way in amap.ways:
 		if not (way.area and way.type==pbtypes.BARRIER) :
 			continue
@@ -283,8 +284,12 @@ def markInside(amap,raster):
 			for j in range(minbox[1],maxbox[1]+1):
 				nodes += raster.raster[i][j]
 		for node in nodes:
-			isIn(amap,amap.nodes[amap.nodesidx[node]],way)
+			if isIn(amap,amap.nodes[amap.nodesidx[node]],way):
+				amap.nodes[amap.nodesidx[node]].inside = True
+				incnt+=1
+			
 		print "Way ",way.id," should collide with ",len(nodes)," nodes."
+	print "Nodes:",len(amap.nodes),"inside",incnt
 
 def mergeMultipolygon(amap,wayids):
 	newway = pb.Way()
@@ -299,7 +304,7 @@ def mergeMultipolygon(amap,wayids):
 			if wniid not in nodeways:
 				nodeways[wniid] = []
 			nodeways[wniid].append(wayid)
-			if wniid not in neighs.keys():
+			if wniid not in neighs:
 				neighs[wniid] = []
 			if i!=0:
 				if waynodes[i-1].id not in neighs[wniid]:
@@ -341,7 +346,7 @@ def mergeMultipolygon(amap,wayids):
 				wayids.remove(wayid)
 	newway.refs.append(first.id)
 	newway.type = way1.type
-	newway.id = -way1.id #FIXME
+	newway.id = amap.newWayid()
 	newway.render = True
 	return (newway,wayids)
 
@@ -356,7 +361,7 @@ def mergeMultipolygons(amap):
 			if multi.roles[i] == pb.Multipolygon.INNER:
 				hasInner = True
 			else:
-				if multi.refs[i] in amap.waysidx.keys():
+				if multi.refs[i] in amap.waysidx:
 					outer.append(multi.refs[i])
 		if hasInner:
 			winner +=1
@@ -393,10 +398,10 @@ def divideLongEdges(amap):
 			ref2 = amap.nodes[amap.nodesidx[way.refs[i+1]]]
 			newway.refs.append(ref1.id)
 			try:
-				r1lon = 1.0*ref1.lon/scale
-				r1lat = 1.0*ref1.lat/scale
-				r2lon = 1.0*ref2.lon/scale
-				r2lat = 1.0*ref2.lat/scale
+				r1lon = int2deg(ref1.lon)
+				r1lat = int2deg(ref1.lat)
+				r2lon = int2deg(ref2.lon)
+				r2lat = int2deg(ref2.lat)
 				(azim,_,dist)=geod.inv(r1lon,r1lat,r2lon,r2lat)
 			except ValueError:
 				continue
@@ -407,8 +412,8 @@ def divideLongEdges(amap):
 			for lon,lat in lonlats:
 				newnode = pb.Node()
 				newnode.id = amap.newNodeid()
-				newnode.lon = int(lon*scale)
-				newnode.lat = int(lat*scale)
+				newnode.lon = deg2int(lon)
+				newnode.lat = deg2int(lat)
 				newway.refs.append(newnode.id)
 				amap.nodes.append(newnode)
 		if not replace:
@@ -420,20 +425,6 @@ def divideLongEdges(amap):
 		newway.bordertype = way.bordertype
 		newway.refs.append(way.refs[-1])
 		amap.ways[wayidx] = newway
-def chcekRequiredFields(amap):
-	for node in amap.nodes:
-		if n.id == 0:
-			print "Wrong node"
-
-
-def distance(geod,node1,node2):
-	#print (1.0*node1.lon/scale,1.0*node1.lat/scale,1.0*node2.lon/scale,1.0*node2.lat/scale)
-	try:
-		return geod.inv(1.0*node1.lon/scale,1.0*node1.lat/scale,1.0*node2.lon/scale,1.0*node2.lat/scale)[2]
-	except ValueError:
-		return 0
-
-			
 
 
 
@@ -454,13 +445,14 @@ print "Nodeways took "+str(end-start)
 start = time.time()
 
 mergeMultipolygons(amap)
+amap.updateWaysIdx()
 
 end = time.time()
 print "Multipolygons took "+str(end-start)
 start = time.time()
 
 raster = Raster(amap)
-#markInside(amap,raster)
+markInside(amap,raster)
 
 end = time.time()
 print "Making raster took "+str(end-start)
@@ -474,6 +466,7 @@ print "Neighs took "+str(end-start)
 start = time.time()
 
 remove = mergeComponents(amap,G,broken)
+amap.updateWaysIdx()
 
 end = time.time()
 print "Merge took "+str(end-start)
@@ -487,6 +480,7 @@ print "Removing took "+str(end-start)
 start = time.time()
 
 divideLongEdges(amap)
+amap.updateNodesIdx()
 
 end = time.time()
 print "Long edges took "+str(end-start)

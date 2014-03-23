@@ -1,5 +1,8 @@
 import math
 
+
+scale = 1000000
+
 def angle(ux,uy,vx,vy):
 	try:
 		cos = (ux*vx + uy*vy)/(math.sqrt(ux*ux+uy*uy)*math.sqrt(vx*vx+vy*vy))
@@ -31,3 +34,9 @@ def binary_search(alist,func,item):
         else:
             return mid
     return -(mid-1)
+
+def int2deg(intdeg):
+	return 1.0*intdeg/scale
+
+def deg2int(deg):
+	return int(deg*scale)

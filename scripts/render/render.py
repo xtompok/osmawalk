@@ -55,11 +55,16 @@ def drawWays(pbMap,d, node_ids):
 		if way.area:
 			style["fill"]=style["stroke"]
 			style["fill-opacity"] = "0.5"
-		if not way.render and way.type==pbtypes.BARRIER:
-			style["fill"]="aqua"
+		#if not way.render and way.type==pbtypes.BARRIER:
+		#	style["fill"]="aqua"
 
 		stylestr = ";".join([key+":"+value for key,value in style.iteritems()])
 		d.add(svgwrite.shapes.Polyline(coord,style=stylestr))
+	for node in pbMap.nodes:
+		if node.inside:
+			#style={"stroke" : "black", "stroke-width" : "5", "fill" : "black"}
+			#stylestr = ";".join([key+":"+value for key,value in style.iteritems()])
+			d.add(svgwrite.shapes.Circle((node.lon-shiftlon,-(node.lat-shiftlat)),10))
 
 print "Loading map..."
 pbMap = pb.Map()

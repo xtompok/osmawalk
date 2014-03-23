@@ -9,10 +9,15 @@ class Map:
 	nodesidx = {}
 	waysidx = {}
 	lastnodeid = -1
+	lastwayid = -1
 
 	def newNodeid(self):
 		self.lastnodeid-=1
 		return self.lastnodeid
+
+	def newWayid(self):
+		self.lastwayid-=1
+		return self.lastwayid
 	
 	def toPB(self):
 		pbMap = pb.Map()
@@ -31,7 +36,12 @@ class Map:
 		self.ways = list(pbMap.ways)
 		self.relations = list(pbMap.relations)
 		self.multipols = list(pbMap.multipols)
+		self.updateNodesIdx()
+		self.updateWaysIdx()
+
+	def updateNodesIdx(self):
 		for i in range(len(self.nodes)):
 			self.nodesidx[self.nodes[i].id]=i
+	def updateWaysIdx(self):
 		for i in range(len(self.ways)):
 			self.waysidx[self.ways[i].id]=i

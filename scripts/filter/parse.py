@@ -48,7 +48,7 @@ class counter():
 						pbway.area = areasConf[key][val]
 			if "boundary" in tags.keys() and pbway.type==pbtypes.IGNORE and pbway.area==False:
 				continue
-			if pbway.type == pbway.IGNORE:
+			if pbway.type == pbtypes.IGNORE:
 				pbway.render = False
 			else:
 				pbway.render = True
@@ -76,7 +76,6 @@ class counter():
 			for key in tags.keys():
 				if key[:5]=="addr:" or key=="name" or key=="source" or key=="is_in" or key[:4]=="ref:" or key=="created_by":
 					del tags[key]
-			pbnode.render = True
 			self.Map.nodes.append(pbnode)
 	
 	def coords_cb(self,coords):
@@ -86,7 +85,6 @@ class counter():
 			pbnode.id = int(osmid)
 			pbnode.lat = int(lat*scale)
 			pbnode.lon = int(lon*scale)
-			pbnode.render = True
 			self.Map.nodes.append(pbnode)
 
 	def relations_cb(self,relations):
