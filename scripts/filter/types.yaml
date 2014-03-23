@@ -1,7 +1,10 @@
 Way:
     ignore: 
         boundary : "*"
-  
+        natural:
+            - tree_row
+        railway:
+            - subway
     barrier: 
         barrier : "*"
         waterway:
@@ -12,6 +15,8 @@ Way:
         landuse:
             - allotments
             - basin
+            - construction
+            - cemetery
             - garages
             - greenhoue_horticulture
             - landfill
@@ -22,6 +27,7 @@ Way:
         leisure:
             - garden
             - pitch
+            - stadium
         highway:
             - motorway
             - trunk
@@ -37,6 +43,7 @@ Way:
             - railway
     water:
         waterway:
+            - riverbank
             - stream
     park:
         leisure:
@@ -46,17 +53,61 @@ Way:
             - grass
             - recreation_ground
             - village_green
+        natural:
+            - grassland
 
     green:
+        leisure:
+            - common
+            - nature_reserve
         landuse:
             - farm
             - farmland
             - meadow
             - orchad
             - pasture
+        natural:
+            - scrub
+            - heath
+            - sand
+
     forest:
         landuse:
             - forest
+    paved:
+        landuse:
+            - residential
+            - industrial
+        amenity:
+            - parking
+            - fuel
+        highway:
+            - residential
+            - service
+            - living_street
+            - pedestrian
+            - track
+            - footway
+            - cycleway
+        area:highway:
+            - pedestrian
+        cycleway:
+            - track
+    steps:
+        highway:
+            - steps
+    unpaved:
+        highway:
+            - track
+            - path
+            - bridleway
+    highway:
+        highway:
+            - primary
+            - secondary
+            - tertiary
+
+        
 
 
 

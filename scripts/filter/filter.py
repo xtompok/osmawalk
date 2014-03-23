@@ -12,6 +12,7 @@ import premap_pb2 as pb
 import networkx as nx
 from utils import angle
 from Map import Map
+from Raster import Raster
 from imposm.parser import OSMParser
 
 scale = 1000000
@@ -72,7 +73,6 @@ def firstBorder(amap,neighs,node):
 
 
 def mergeWays(amap,wayids):
-	print "merging",wayids
 	newway = pb.Way()
 	way1 = amap.ways[amap.waysidx[wayids[0]]]
 	neighs = {}
@@ -99,6 +99,7 @@ def mergeWays(amap,wayids):
 					neighs[wniid].append(waynodes[i+1].id)
 
 	if len(nodes)<3:
+		print "merging",wayids
 		print "Merge failed -- too few nodes"
 		return None
 	bylon = sorted(nodes,key=lambda n:n.lon)
@@ -114,6 +115,7 @@ def mergeWays(amap,wayids):
 	while(nextid != first.id):
 		nextid = onBorder(amap,neighs,newway.refs[-1],newway.refs[-2])
 		if nextid in newway.refs and nextid != first.id:
+			print "merging",wayids
 			print "Merge failed -- wrong cycle"
 			print newway.refs,", repeated:",nextid
 			return None
@@ -124,7 +126,7 @@ def mergeWays(amap,wayids):
 	newway.type = way1.type
 	newway.id = -way1.id #FIXME
 	newway.area = way1.area
-	newway.render = False
+	newway.render = True
 	return newway
 
 
@@ -182,6 +184,202 @@ def removeMerged(amap,remove):
 	for i in range(len(amap.ways)-1,toidx,-1):
 		del amap.ways[i]
 
+def getbbox(amap,wayid):
+	way = amap.ways[amap.waysidx[wayid]]
+	nodeids = way.refs
+	minlon = 10**10
+	minlat = 10**10
+	maxlon = 0
+	maxlat = 0
+	for nid in nodeids:
+		node = amap.nodes[amap.nodesidx[nid]]
+		maxlon = max(maxlon,node.lon)
+		maxlat = max(maxlat,node.lat)
+		minlon = min(minlon,node.lon)
+		minlat = min(minlat,node.lat)
+	return (minlon,minlat,maxlon,maxlat)
+
+
+		
+def isIn(amap,node,way):
+	if way.area == False:
+		if node.id in way.refs:
+			return True
+		else:
+			return False
+	bbox = getbbox(amap,way.id)
+	if node.lon < bbox[0] and node.lon > bbox[2] and node.lat < bbox[1] and node.lat > bbox[3]:
+		return False
+	intcnt = 0
+	up = False
+	lat = node.lat
+	lon = node.lon
+	memnode = amap.nodes[amap.nodesidx[way.refs[0]]]
+	if memnode.lat == lat and memnode.lon >= lon: #FIXME
+		return True
+	for nid in way.refs[1:]:
+		node = amap.nodes[amap.nodesidx[nid]]
+		if node.lat == lat and node.lon == lon:
+			return True
+		if (memnode.lon < lon) and node.lon < lon:
+			memnode = node
+			continue
+		if (memnode.lat < lat and node.lat < lat) or (memnode.lat > lat and node.lat > lat):
+			memnode = node
+			continue
+		if (memnode.lon >= lon) and node.lon >=lon:
+			if (memnode.lat < lat and node.lat > lat) or (memnode.lat>lat and node.lat<lat):
+				intcnt+=1
+				memnode = node
+				continue
+			if (node.lat==lat):
+				if memnode.lat > lat:
+					up = True
+				elif memnode.lat < lat:
+					up = False
+				memnode = node
+				continue
+			if memnode.lat==lat:
+				if node.lat > lat:
+					if not up:
+						intcnt+=1
+				if node.lat < lat:
+					if up:
+						intcnt+=1
+				memnode = node
+				continue
+		if (memnode.lat < lat and node.lat > lat) or (memnode.lat>lat and node.lat<lat):
+			dlon = node.lon - memnode.lon
+			dlat = node.lat - memnode.lat
+			ndlat = lat - memnode.lat
+			if (memnode.lon+dlon*(ndlat*1.0/dlat) >= lon):
+				intcnt +=1
+			memnode = node
+			continue
+		if memnode.lat == lat:
+			return True
+		if memnode.lat < lat:
+			up = False
+		elif memnode.lat > lat:
+			up = True
+		memnode = node 
+		continue
+	
+	if intcnt%2 == 0:
+		return False
+	return True
+
+def markInside(amap,raster):
+	for way in amap.ways:
+		if not (way.area and way.type==pb.Way.BARRIER) :
+			continue
+		bbox = getbbox(amap,way.id)
+		minbox = raster.getBox(bbox[0],bbox[1])
+		maxbox = raster.getBox(bbox[2],bbox[3])
+		nodes  = []
+		for i in range(minbox[0],maxbox[0]+1):
+			for j in range(minbox[1],maxbox[1]+1):
+				nodes += raster.raster[i][j]
+		for node in nodes:
+			isIn(amap,amap.nodes[amap.nodesidx[node]],way)
+		print "Way ",way.id," should collide with ",len(nodes)," nodes."
+
+def mergeMultipolygon(amap,wayids):
+	newway = pb.Way()
+	way1 = amap.ways[amap.waysidx[wayids[0]]]
+	neighs = {}
+	nodeways = {}
+	for wayid in wayids:
+		way = amap.ways[amap.waysidx[wayid]]
+		waynodes = [amap.nodes[amap.nodesidx[ref]] for ref in way.refs]
+		for i in range(len(waynodes)):
+			wniid = waynodes[i].id
+			if wniid not in nodeways:
+				nodeways[wniid] = []
+			nodeways[wniid].append(wayid)
+			if wniid not in neighs.keys():
+				neighs[wniid] = []
+			if i!=0:
+				if waynodes[i-1].id not in neighs[wniid]:
+					neighs[wniid].append(waynodes[i-1].id)
+			if i!=len(waynodes)-1:
+				if waynodes[i+1].id not in neighs[wniid]:
+					neighs[wniid].append(waynodes[i+1].id)
+
+
+	for k,v in neighs.iteritems():
+		if len(v)!=2:
+			print "Error in node",k
+			print neighs
+			return (None,None)
+
+	first = amap.nodes[amap.nodesidx[way1.refs[0]]]
+	second = amap.nodes[amap.nodesidx[neighs[first.id][0]]]
+	#print "edge:",first.id," ",second.id
+	newway.refs.append(first.id)
+	newway.refs.append(second.id)
+	nextid = neighs[newway.refs[-1]][0]
+	if nextid == newway.refs[-2]:
+		nextid = neighs[newway.refs[-1]][1]
+	while(nextid != first.id):
+		nextid = neighs[newway.refs[-1]][0]
+		if nextid == newway.refs[-2]:
+			nextid = neighs[newway.refs[-1]][1]
+		if nextid in newway.refs and nextid != first.id:
+			print "merging",wayids
+			print "Merge failed -- wrong cycle"
+			print newway.refs,", repeated:",nextid
+			return (None,None)
+		newway.refs.append(nextid)
+	#	print "F",first.id,"n",nextid
+	#	print newway.refs
+	for nodeid in newway.refs:
+		for wayid in nodeways[nodeid]:
+			if wayid in wayids:
+				wayids.remove(wayid)
+	newway.refs.append(first.id)
+	newway.type = way1.type
+	newway.id = -way1.id #FIXME
+	newway.render = True
+	return (newway,wayids)
+
+def mergeMultipolygons(amap):
+	print "Multipolygons: ",len(amap.multipols)
+	winner = 0
+	woinner = 0
+	for multi in amap.multipols:
+		outer = []
+		hasInner = False
+		for i in range(len(multi.roles)):
+			if multi.roles[i] == pb.Multipolygon.INNER:
+				hasInner = True
+			else:
+				if multi.refs[i] in amap.waysidx.keys():
+					outer.append(multi.refs[i])
+		if hasInner:
+			winner +=1
+		else:
+			woinner +=1
+		if len(outer)<=1:
+			continue
+		print "Merging",len(outer),"in multipolygon",multi.id
+		while (len(outer)>0):
+			(way,outer) = mergeMultipolygon(amap,outer)
+			if way == None:
+				print "Merging Error"
+				break
+			print "Remains",len(outer),"ways"
+			if multi.type != pb.Multipolygon.WAY:
+				way.type = multi.type
+			way.area = True
+			print "Way created"
+			amap.ways.append(way)
+
+	print "With Inner: ",winner
+	print "Without Inner: ",woinner
+
+			
+
 
 
 
@@ -198,6 +396,19 @@ nodeways=nodeWays(amap)
 
 end = time.time()
 print "Nodeways took "+str(end-start)
+start = time.time()
+
+mergeMultipolygons(amap)
+
+end = time.time()
+print "Multipolygons took "+str(end-start)
+start = time.time()
+
+raster = Raster(amap)
+#markInside(amap,raster)
+
+end = time.time()
+print "Making raster took "+str(end-start)
 start = time.time()
 
 (G,broken) = makeNeighGraph(amap,nodeways)

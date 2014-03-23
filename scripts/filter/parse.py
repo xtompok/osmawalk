@@ -45,8 +45,8 @@ class counter():
 					val = tags[key]
 					if val in areasConf[key].keys():
 						pbway.area = areasConf[key][val]
-			pbway.str_keys.extend(tags.keys())
-			pbway.str_vals.extend(tags.values())
+			if "boundary" in tags.keys() and pbway.type==pb.Way.IGNORE and pbway.area==False:
+				continue
 			if pbway.type == pbway.IGNORE:
 				pbway.render = False
 			else:
@@ -75,8 +75,6 @@ class counter():
 			for key in tags.keys():
 				if key[:5]=="addr:" or key=="name" or key=="source" or key=="is_in" or key[:4]=="ref:" or key=="created_by":
 					del tags[key]
-			pbnode.str_keys.extend(tags.keys())
-			pbnode.str_vals.extend(tags.values())
 			pbnode.render = True
 			self.Map.nodes.append(pbnode)
 	
@@ -93,17 +91,29 @@ class counter():
 	def relations_cb(self,relations):
 		for osmid,tags,refs in relations:
 			self.relations+=1
+			ignore = False
 			for key in tags.keys():
+				if key=="boundary":
+					ignore = True
+					break
 				if key[:5]=="addr:" or key=="name" or key=="source" or key=="is_in" or key[:4]=="ref:" or key=="created_by":
 					del tags[key]
+			if ignore == True:
+				continue
 			if "type" in tags.keys() and tags["type"]=="multipolygon":
 				self.areas+=1
 				pbpol = pb.Multipolygon()
+				for key in tags.keys():
+					if key in waysConf.keys():
+						if waysConf[key].keys()==["*"]:
+							pbpol.type = waysConf[key]["*"]
+						val = tags[key]
+						if val in waysConf[key].keys():
+							pbpol.type = waysConf[key][val]
 				pbpol.id = int(osmid)
-				pbpol.str_keys.extend(tags.keys())
-				pbpol.str_vals.extend(tags.values())
 				pbpol.refs.extend([int(item[0]) for item in refs])
 				pbpol.roles.extend([pbpol.OUTER if item[2]=="outer" else pbpol.INNER for item in refs])
+				self.Map.multipols.append(pbpol)
 
 
 def loadWaysConf(filename):
@@ -112,7 +122,18 @@ def loadWaysConf(filename):
 		config = yaml.load(conffile.read())
 	ways={}
 	pbW = pb.Way()
-	str2pb = {"ignore": pbW.IGNORE, "barrier":pbW.BARRIER, "railway":pbW.RAILWAY, "water": pbW.WATER, "park": pbW.PARK, "green":pbW.GREEN, "forest":pbW.FOREST }
+	str2pb = {"ignore": pbW.IGNORE, 
+			"barrier":pbW.BARRIER, 
+			"railway":pbW.RAILWAY, 
+			"water": pbW.WATER, 
+			"park": pbW.PARK, 
+			"green":pbW.GREEN, 
+			"forest":pbW.FOREST,
+			"paved":pbW.PAVED,
+			"unpaved":pbW.UNPAVED,
+			"steps":pbW.STEPS,
+			"highway":pbW.HIGHWAY
+			}
 	for cat in config["Way"].keys():
 		catenum = str2pb[cat]
 		for key in config["Way"][cat]:

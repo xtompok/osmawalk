@@ -2,12 +2,16 @@ yes:
     area: 
         - "yes"
     landuse: "*"
+    area:highway: "*"
     building: "*"
-    leisure:
-        - park
-        - playground
-        - garden
-        - pitch
+    leisure: "*"
+    aeroway: "*"
+    natural: "*"
+    waterway: 
+        - riverbank
+    amenity:
+        - parking
+        - fuel
 no:
     area: 
         - "no"

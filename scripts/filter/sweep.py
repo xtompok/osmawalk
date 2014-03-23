@@ -1,17 +1,3 @@
-def binary_search(alist,func,item):
-    lo = 0
-    hi = len(alist)
-    mid = 1
-    while lo < hi:
-        mid = (lo+hi)//2
-        midval = alist[mid]
-        if func(midval) < item:
-            lo = mid+1
-        elif func(midval) > item: 
-            hi = mid
-        else:
-            return mid
-    return -(mid-1)
 
 
 def nodeVectors(amap,nodeways):

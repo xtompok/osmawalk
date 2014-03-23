@@ -20,7 +20,7 @@ def drawWays(pbMap,d, node_ids):
 				coord.append((node.lon-shiftlon,-(node.lat-shiftlat)))
 			except KeyError:
 				pass
-		style={"stroke" : "black", "stroke-width" : "3", "fill" : "none"}
+		style={"stroke" : "black", "stroke-width" : "5", "fill" : "none"}
 		if way.type==way.WAY:
 			pass
 		elif way.type==way.RAILWAY:
@@ -31,10 +31,25 @@ def drawWays(pbMap,d, node_ids):
 			style["stroke"] = "red"
 		elif way.type==way.PARK:
 			style["stroke"] = "green"
+		elif way.type==way.GREEN:
+			style["stroke"] = "greenyellow"
 		elif way.type==way.FOREST:
 			style["stroke"] = "forestgreen"
+		elif way.type==way.PAVED:
+			style["stroke"] = "gray"
 		elif way.type==way.IGNORE:
 			style["stroke"] = "cyan"
+		elif way.type==way.UNPAVED:
+			style["stroke"] = "brown"
+		elif way.type==way.STEPS:
+			style["stroke"] = "steelblue"
+		elif way.type==way.HIGHWAY:
+			style["stroke"] = "darkslategray"
+
+		elif way.type==way.MULTIPOLYGON:
+			style["stroke"] = "orange"
+			print "Multipoly found"
+
 		
 		if way.area:
 			style["fill"]=style["stroke"]

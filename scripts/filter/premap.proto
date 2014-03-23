@@ -1,5 +1,7 @@
 package premap;
 
+import "types.proto"
+
 message Node {
 	required sint64 id = 1;
 	required sint64 lat = 2;
@@ -11,17 +13,6 @@ message Node {
 }
 
 message Way {
-	enum waytype {
-			BARRIER = 0;
-			WAY = 1;
-			RAILWAY = 2;
-			WATER = 3;
-			PARK = 4;
-			GREEN = 5;
-			FOREST = 6;
-			MULTIPOLYGON = 250;
-			IGNORE = 256;
-	}
 
 	required int64 id=1;
 	repeated string str_keys = 8;
@@ -51,6 +42,7 @@ message Multipolygon {
 	repeated string str_vals = 9;
 	repeated sint64 refs = 10;
 	repeated Role roles = 11;
+	optional waytype type = 12 [default=WAY];
 }
 
 
