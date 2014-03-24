@@ -46,6 +46,8 @@ def drawWays(pbMap,d, node_ids):
 			style["stroke"] = "steelblue"
 		elif way.type==pbtypes.HIGHWAY:
 			style["stroke"] = "darkslategray"
+		elif way.type==pbtypes.DIRECT:
+			style["stroke"] = "magenta"
 
 		elif way.type==pbtypes.MULTIPOLYGON:
 			style["stroke"] = "orange"
@@ -61,7 +63,7 @@ def drawWays(pbMap,d, node_ids):
 		stylestr = ";".join([key+":"+value for key,value in style.iteritems()])
 		d.add(svgwrite.shapes.Polyline(coord,style=stylestr))
 	for node in pbMap.nodes:
-		if node.inside:
+		if not node.inside:
 			#style={"stroke" : "black", "stroke-width" : "5", "fill" : "black"}
 			#stylestr = ";".join([key+":"+value for key,value in style.iteritems()])
 			d.add(svgwrite.shapes.Circle((node.lon-shiftlon,-(node.lat-shiftlat)),10))

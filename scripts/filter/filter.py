@@ -9,15 +9,18 @@ import math
 import yaml
 import pprint
 import pyproj
+import heapq
+import bst
 import premap_pb2 as pb
 import types_pb2 as pbtypes
 import networkx as nx
-from utils import angle,int2deg,deg2int
+from utils import angle,int2deg,deg2int,distance
 from Map import Map
 from Raster import Raster
 from imposm.parser import OSMParser
 
 scale = 1000000
+walkTypes = [pbtypes.PAVED,pbtypes.UNPAVED,pbtypes.STEPS,pbtypes.HIGHWAY]
 
 def nodeWays(amap):
 	missingcnt=0
@@ -35,6 +38,16 @@ def nodeWays(amap):
 	print "Missing "+str(missingcnt)+" nodes"
 
 	return nodeways	
+
+def deleteAloneNodes(amap,nodeways):
+	toidx = 0
+	for fromidx in range(len(amap.nodes)):
+		if len(nodeways[fromidx])==0:
+			continue
+		amap.nodes[toidx]=amap.nodes[fromidx]
+		toidx+=1
+	for i in range(len(amap.nodes)-1,toidx,-1):
+		del amap.nodes[i]
 
 	
 def onBorder(amap,neighs,nodeid,lastnodeid):
@@ -204,11 +217,10 @@ def getbbox(amap,wayid):
 
 		
 def isIn(amap,node,way):
-	if way.area == False:
-		if node.id in way.refs:
-			return True
-		else:
-			return False
+	if node.id in way.refs:
+		return True
+	elif way.area == False:
+		return False
 	bbox = getbbox(amap,way.id)
 	if node.lon < bbox[0] and node.lon > bbox[2] and node.lat < bbox[1] and node.lat > bbox[3]:
 		return False
@@ -290,6 +302,31 @@ def markInside(amap,raster):
 			
 		print "Way ",way.id," should collide with ",len(nodes)," nodes."
 	print "Nodes:",len(amap.nodes),"inside",incnt
+def unmarkBorderNodes(amap):
+	waycnt = 0
+	for way in amap.ways:
+		if way.area or way.type==pbtypes.BARRIER or way.type == pbtypes.IGNORE:
+			continue
+		memnode = amap.nodes[amap.nodesidx[way.refs[0]]]
+		border = False
+		for nodeid in way.refs[1:]:
+			node = amap.nodes[amap.nodesidx[nodeid]]
+			if memnode.inside==node.inside:
+				memnode = node
+				continue
+			if memnode.inside and not node.inside:
+				memnode.inside = False
+				memnode = node 
+				continue
+			if border:
+				memnode = node
+				border = False
+				continue
+			node.inside = False
+			border = True
+		waycnt+=1
+	print "Non-barrier ways:",waycnt
+
 
 def mergeMultipolygon(amap,wayids):
 	newway = pb.Way()
@@ -391,6 +428,8 @@ def divideLongEdges(amap):
 	geod = pyproj.Geod(ellps="WGS84")
 	for wayidx in range(len(amap.ways)):
 		way = amap.ways[wayidx]		
+		if not (way.type in walkTypes):
+			continue
 		newway = pb.Way()
 		replace = False
 		for i in range(len(way.refs)-1):
@@ -414,6 +453,7 @@ def divideLongEdges(amap):
 				newnode.id = amap.newNodeid()
 				newnode.lon = deg2int(lon)
 				newnode.lat = deg2int(lat)
+				newnode.inside = ref1.inside and ref2.inside
 				newway.refs.append(newnode.id)
 				amap.nodes.append(newnode)
 		if not replace:
@@ -425,8 +465,270 @@ def divideLongEdges(amap):
 		newway.bordertype = way.bordertype
 		newway.refs.append(way.refs[-1])
 		amap.ways[wayidx] = newway
+		
+def makeGraph(amap):
+	barGraph = []
+	wayGraph = {node.id:[] for node in amap.nodes}
+	for way in amap.ways:
+		if way.type in walkTypes:
+			for i in range(len(way.refs)-1):
+				wayGraph[way.refs[i]].append(way.refs[i+1])
+				wayGraph[way.refs[i+1]].append(way.refs[i])
+		elif way.type in [pbtypes.BARRIER]:
+			for i in range(len(way.refs)-1):
+				barGraph.append((way.refs[i],way.refs[i+1]))
+	return (wayGraph,barGraph)
+	
+def makeDirectCandidates(amap,raster,wayGraph,maxdist):
+	candidates = []
+	geod = pyproj.Geod(ellps="WGS84")
+	for lonidx in range(raster.lonparts-1):
+		for latidx in range(raster.latparts-1):
+			waynodes = [nid for nid in raster.raster[lonidx][latidx] if wayGraph[nid] != []]
+			candidates.extend([(u,v) for u in waynodes for v in waynodes if u<v])
+			waynodesNeigh = [nid for nid in raster.raster[lonidx+1][latidx] if wayGraph[nid] != []]
+			candidates.extend([(u,v) for u in waynodes 
+					for v in waynodesNeigh 
+					if distance(amap.nodes[amap.nodesidx[u]],amap.nodes[amap.nodesidx[v]]) <= 20])
+			waynodesNeigh = [nid for nid in raster.raster[lonidx+1][latidx+1] if wayGraph[nid] != []]
+			candidates.extend([(u,v) for u in waynodes 
+					for v in waynodesNeigh 
+					if distance(amap.nodes[amap.nodesidx[u]],amap.nodes[amap.nodesidx[v]]) <= 20])
+			waynodesNeigh = [nid for nid in raster.raster[lonidx][latidx+1] if wayGraph[nid] != []]
+			candidates.extend([(u,v) for u in waynodes 
+					for v in waynodesNeigh 
+					if distance(amap.nodes[amap.nodesidx[u]],amap.nodes[amap.nodesidx[v]]) <= 20])
+	remove = []
+	for i in range(len(candidates)):
+		(n1id,n2id) = candidates[i]
+		if n2id in wayGraph[n1id]:
+			remove.append(i)
+	
+	toidx = 0
+	remidx = 0
+	i = 0
+	while (i<len(candidates)):
+		if remidx < len(remove) and i == remove[remidx]:
+			remidx+=1
+			i+=1
+			continue
+		candidates[toidx] = candidates[i]
+		toidx+=1
+		i+=1
+	for i in range(len(candidates)-1,toidx-1,-1):
+		del candidates[i]
+		
+	print "Candidates:",len(candidates)
+	return candidates
+			
+class Line:
+	start = None
+	end = None
+	isBar = False
+	broken = False
+	angle = 0
+
+	def __eq__(self,other):
+		if isinstance(other,Line):
+			return self.__dict__ == other.__dict__
+		else:
+			return False
+
+	def __cmp__(self,other):
+		if not isinstance(other,Line):
+			return NotImplemented
+		return cmp((self.start.id,self.end.id,self.angle,self.isBar),(other.start.id,other.end.id,other.angle,other.isBar))
+	def __str__(self):
+		return "Start:"+str(self.start.id)+" End:"+str(self.end.id)+" Angle:"+str(self.angle)
+
+	def calcLatForLon(self,lon):
+		minlon = self.start.lon
+		maxlon = self.end.lon
+		minlat = min(self.start.lat,self.end.lat)
+		maxlat = max(self.start.lat,self.end.lat)
+		return ((lon-minlon)/(maxlon-minlon))*(maxlat-minlat)+minlat
+
+	def compare(self,lon):
+		return (self.calcLatForLon(lon),angle)
+	
+class Event:
+	START = 2
+	END = 0
+	INTERSECT = 1
+
+	lon = 0
+	lat = 0
+	angle = 0
+	
+	cat = 0
+	lines = []
+
+	def __cmp__(self,other):
+		if not isinstance(other,Event):
+			return NotImplemented
+		return cmp((self.lon,self.cat,self.lat,self.angle),(other.lon,other.cat,other.lat,other.angle))
 
 
+"""	def __cmp__(self,other):
+		if not isinstance(other,Event):
+			return NotImplemented
+		if self.lon != other.lon:
+			return cmp(self.lon,other.lon)
+		if self.lat != other.lat:
+			return cmp(self.lat,other.lat)
+		sangle = angle(0,-1,self.end.lon-self.start.lon,self.end.lat-self.start.lat)
+		oangle = angle(0,-1,other.end.lon-other.start.lon,other.end.lat-other.start.lat)
+		return cmp(sangle,oangle)
+"""			
+
+
+def findDirectWays(amap,candidates,barGraph):
+	lines = []
+	for (n1id,n2id) in candidates:
+		n1 = amap.nodes[amap.nodesidx[n1id]]
+		n2 = amap.nodes[amap.nodesidx[n2id]]
+		line = Line()
+		line.isBar = False
+		line.broken = False
+		if (n2.lon < n1.lon):
+			line.start = n2
+			line.end = n1
+		else:
+			line.start = n1
+			line.end = n2
+		line.angle = angle(0,-100,line.end.lon-line.start.lon,line.end.lat-line.start.lat)
+		lines.append(line)
+
+	for (n1id,n2id) in barGraph:
+		n1 = amap.nodes[amap.nodesidx[n1id]]
+		n2 = amap.nodes[amap.nodesidx[n2id]]
+		line = Line()
+		line.isBar = True
+		if (n2.lon < n1.lon):
+			line.start = n2
+			line.end = n1
+		else:
+			line.start = n1
+			line.end = n2
+		line.angle = angle(0,-100,line.end.lon-line.start.lon,line.end.lat-line.start.lat)
+		lines.append(line)
+	print "Lines:",len(lines)
+	lines.sort()
+	newlines = []
+	memline = lines[0]
+	newlines.append(memline)
+	for line in lines[1:]:
+		if memline!=line:
+			newlines.append(line)
+		memline = line
+
+	lines = newlines
+
+	print "Lines:",len(lines)
+
+	queue = []
+	for line in lines:
+		evt = Event()
+		evt.cat = evt.START
+		evt.lon = line.start.lon
+		evt.lat = line.start.lat
+		evt.angle = line.angle
+		evt.lines = [line]
+		heapq.heappush(queue,evt)
+		evt = Event()
+		evt.cat = evt.END
+		evt.lon = line.end.lon
+		evt.lat = line.end.lat
+		evt.angle = -line.angle
+		evt.lines = [line]
+		heapq.heappush(queue,evt)
+	
+	tree = bst.BinarySearchTree()
+	while len(queue) > 0:
+		evt = heapq.heappop(queue)
+		line = evt.lines[0]
+		if line.start.lon==line.end.lon:
+		#	print "Special case"
+			continue
+		if evt.cat==evt.START:
+			(left,right)=tree.put(line,evt.lon)
+			if left:
+				col = calcCollision(line,left)
+				if col:
+					evt = Event()
+					evt.cat = evt.INTERSECTION
+					evt.lon = cal[0]
+					evt.lat = cal[1]
+					evt.lines = [line1,line2]
+					heapq.heappush(queue,evt)
+					line1.broken=True
+					line2.broken=True
+			if right:
+				col = calcCollision(line,right)
+				if col:
+					evt = Event()
+					evt.cat = evt.INTERSECTION
+					evt.lon = cal[0]
+					evt.lat = cal[1]
+					evt.lines = [line1,line2]
+					heapq.heappush(queue,evt)
+					line1.broken=True
+					line2.broken=True
+
+			l =tree.get(line,evt.lon)
+			if evt.lines[0] == l:
+				pass
+			else:
+				pass
+				#print "FAIL"
+			continue
+		if evt.cat==evt.END:
+			tree.delete(evt.lines[0],evt.lon)
+			continue
+		if evt.cat==evt.INTERSECT:
+			tree.delete(evt.lines[0],evt.lon)
+			tree.delete(evt.lines[1],evt.lon)
+			tree.put(evt.lines[0],evt.lon)
+			tree.put(evt.lines[1],evt.lon)
+			continue
+	return lines
+
+
+def calcCollision(line1,line2):
+	lon1 = line1.start.lon
+	lon2 = line1.end.lon
+	lat1 = line1.start.lat
+	lat2 = line1.end.lat
+	lon3 = line2.start.lon
+	lon4 = line2.end.lon
+	lat3 = line2.start.lat
+	lat4 = line2.end.lat
+	cit = (lat2-lat1)*(lon4-lon3)*lon1+(lon2-lon1)*(lon4-lon3)*(lat3-lat1)-(lat4-lat3)*(lon2-lon1)*lon3
+	jm = (lat2-lat1)*(lon4-lon3)-(lon2-lon1)*(lat4-lat3)
+	if jm == 0:
+		return None
+	lon = cit/jm
+	lat = (lon*(lat2-lat1)+lon1*(lon2-lon1)-lon1*(lat2-lat1))/(lon2-lon1)
+	if (lon1 < lon and lon < lon2 and 
+		lon3 < lon and lon < lon4 and 
+		lat1 < lat and lat < lat2 and 
+		lat3 < lat and lat < lat4):
+		return (lon,lat)
+	return None
+
+def makeDirect(amap,lines):
+	for line in lines:
+		if (not line.broken) and (not line.isBar):
+			way = pb.Way()
+			way.type = pbtypes.DIRECT
+			way.area = False
+			way.id = amap.newWayid()
+			way.barrier = False
+			way.render = True
+			way.refs.append(line.start.id)
+			way.refs.append(line.end.id)
+			amap.ways.append(way)
+	
 
 
 start = time.time()
@@ -451,13 +753,6 @@ end = time.time()
 print "Multipolygons took "+str(end-start)
 start = time.time()
 
-raster = Raster(amap)
-markInside(amap,raster)
-
-end = time.time()
-print "Making raster took "+str(end-start)
-start = time.time()
-
 (G,broken) = makeNeighGraph(amap,nodeways)
 print "Components",len(nx.connected_components(G))
 
@@ -466,17 +761,33 @@ print "Neighs took "+str(end-start)
 start = time.time()
 
 remove = mergeComponents(amap,G,broken)
+print "To remove:",len(remove)
+removeMerged(amap,remove)
 amap.updateWaysIdx()
 
 end = time.time()
 print "Merge took "+str(end-start)
 start = time.time()
 
-print "To remove:",len(remove)
-removeMerged(amap,remove)
+nodeways=nodeWays(amap)
+deleteAloneNodes(amap,nodeways)
+amap.updateNodesIdx()
 
 end = time.time()
-print "Removing took "+str(end-start)
+print "Deleting alone nodes took "+str(end-start)
+start = time.time()
+
+raster = Raster(amap)
+
+end = time.time()
+print "Making raster took "+str(end-start)
+start = time.time()
+
+markInside(amap,raster)
+unmarkBorderNodes(amap)
+
+end = time.time()
+print "Marking inside nodes took "+str(end-start)
 start = time.time()
 
 divideLongEdges(amap)
@@ -484,6 +795,15 @@ amap.updateNodesIdx()
 
 end = time.time()
 print "Long edges took "+str(end-start)
+start = time.time()
+
+(wayGraph,barGraph)=makeGraph(amap)
+candidates = makeDirectCandidates(amap,raster,wayGraph,20)
+lines = findDirectWays(amap,candidates,barGraph)
+makeDirect(amap,lines)
+
+end = time.time()
+print "Making graph took "+str(end-start)
 start = time.time()
 
 

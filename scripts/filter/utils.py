@@ -1,12 +1,14 @@
 import math
-
+import pyproj
 
 scale = 1000000
+geod = pyproj.Geod(ellps="WGS84")
 
 def angle(ux,uy,vx,vy):
 	try:
-		cos = (ux*vx + uy*vy)/(math.sqrt(ux*ux+uy*uy)*math.sqrt(vx*vx+vy*vy))
+		cos = 1.0*(ux*vx + uy*vy)/(math.sqrt(ux*ux+uy*uy)*math.sqrt(vx*vx+vy*vy))
 	except ZeroDivisionError:
+		print "ZDE"
 		return 0
 	try:
 		angle = math.acos(cos)
@@ -40,3 +42,6 @@ def int2deg(intdeg):
 
 def deg2int(deg):
 	return int(deg*scale)
+
+def distance(node1,node2):
+	return geod.inv(int2deg(node1.lat),int2deg(node1.lon),int2deg(node2.lat),int2deg(node2.lon))[2]

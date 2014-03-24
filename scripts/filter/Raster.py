@@ -36,14 +36,14 @@ class Raster:
 		print "Lon:",self.minlon," -- ",maxlon
 		print "Lat:",self.minlon," -- ",maxlon
 
-		self.lonparts = int(math.ceil(londist/self.dimension))
-		self.latparts = int(math.ceil(latdist/self.dimension))
+		self.lonparts = int(math.ceil(londist/self.dimension))+10
+		self.latparts = int(math.ceil(latdist/self.dimension))+10
 
 		print "Creating raster",self.lonparts,"x",self.latparts
 
 		self.steplon = int(math.ceil(1.0*dlon/self.lonparts))
 		self.steplat = int(math.ceil(1.0*dlat/self.latparts))
-		self.raster = [[[] for j in range(self.latparts+10)] for i in range(self.lonparts+10)]
+		self.raster = [[[] for j in range(self.latparts)] for i in range(self.lonparts)]
 		for node in amap.nodes:
 			self.raster[(node.lon-self.minlon)/self.steplon][(node.lat-self.minlat)/self.steplat].append(node.id)
 
