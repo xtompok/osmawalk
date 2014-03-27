@@ -17,7 +17,6 @@ import networkx as nx
 from utils import angle,int2deg,deg2int,distance
 from Map import Map
 from Raster import Raster
-from imposm.parser import OSMParser
 
 scale = 1000000
 walkTypes = [pbtypes.PAVED,pbtypes.UNPAVED,pbtypes.STEPS,pbtypes.HIGHWAY]
@@ -522,11 +521,26 @@ def makeDirectCandidates(amap,raster,wayGraph,maxdist):
 	return candidates
 			
 class Line:
-	start = None
-	end = None
+	startlon = 0
+	startid = 0
+	startlat = 0
+	endlon = 0
+	endlat = 0
+	endid = 0
 	isBar = False
 	broken = False
 	angle = 0
+
+	def __init__(self,start,end,isBar=False):
+		self.startlon=start.lon
+		self.startlat=start.lat
+		self.endlon=end.lon
+		self.endlat=end.lat
+		self.startid=start.id
+		self.endid=end.id
+		self.isBar=isBar
+		self.broken=False
+		self.angle = angle(0,-100,self.endlon-self.startlon,self.endlat-self.startlat)
 
 	def __eq__(self,other):
 		if isinstance(other,Line):
@@ -537,15 +551,15 @@ class Line:
 	def __cmp__(self,other):
 		if not isinstance(other,Line):
 			return NotImplemented
-		return cmp((self.start.id,self.end.id,self.angle,self.isBar),(other.start.id,other.end.id,other.angle,other.isBar))
+		return cmp((self.startid,self.endid,self.isBar),(other.startid,other.endid,other.isBar))
 	def __str__(self):
-		return "Start:"+str(self.start.id)+" End:"+str(self.end.id)+" Angle:"+str(self.angle)
+		return "Start:"+str(self.startid)+" End:"+str(self.endid)+" Angle:"+str(self.angle)
 
 	def calcLatForLon(self,lon):
-		minlon = self.start.lon
-		maxlon = self.end.lon
-		minlat = min(self.start.lat,self.end.lat)
-		maxlat = max(self.start.lat,self.end.lat)
+		minlon = self.startlon
+		maxlon = self.endlon
+		minlat = min(self.startlat,self.endlat)
+		maxlat = max(self.startlat,self.endlat)
 		return ((lon-minlon)/(maxlon-minlon))*(maxlat-minlat)+minlat
 
 	def compare(self,lon):
@@ -587,30 +601,19 @@ def findDirectWays(amap,candidates,barGraph):
 	for (n1id,n2id) in candidates:
 		n1 = amap.nodes[amap.nodesidx[n1id]]
 		n2 = amap.nodes[amap.nodesidx[n2id]]
-		line = Line()
-		line.isBar = False
-		line.broken = False
 		if (n2.lon < n1.lon):
-			line.start = n2
-			line.end = n1
+			line = Line(n2,n1)
 		else:
-			line.start = n1
-			line.end = n2
-		line.angle = angle(0,-100,line.end.lon-line.start.lon,line.end.lat-line.start.lat)
+			line = Line(n1,n2)
 		lines.append(line)
 
 	for (n1id,n2id) in barGraph:
 		n1 = amap.nodes[amap.nodesidx[n1id]]
 		n2 = amap.nodes[amap.nodesidx[n2id]]
-		line = Line()
-		line.isBar = True
 		if (n2.lon < n1.lon):
-			line.start = n2
-			line.end = n1
+			line = Line(n2,n1,isBar=True)
 		else:
-			line.start = n1
-			line.end = n2
-		line.angle = angle(0,-100,line.end.lon-line.start.lon,line.end.lat-line.start.lat)
+			line = Line(n1,n2,isBar=True)
 		lines.append(line)
 	print "Lines:",len(lines)
 	lines.sort()
@@ -630,15 +633,15 @@ def findDirectWays(amap,candidates,barGraph):
 	for line in lines:
 		evt = Event()
 		evt.cat = evt.START
-		evt.lon = line.start.lon
-		evt.lat = line.start.lat
+		evt.lon = line.startlon
+		evt.lat = line.startlat
 		evt.angle = line.angle
 		evt.lines = [line]
 		heapq.heappush(queue,evt)
 		evt = Event()
 		evt.cat = evt.END
-		evt.lon = line.end.lon
-		evt.lat = line.end.lat
+		evt.lon = line.endlon
+		evt.lat = line.endlat
 		evt.angle = -line.angle
 		evt.lines = [line]
 		heapq.heappush(queue,evt)
@@ -647,7 +650,7 @@ def findDirectWays(amap,candidates,barGraph):
 	while len(queue) > 0:
 		evt = heapq.heappop(queue)
 		line = evt.lines[0]
-		if line.start.lon==line.end.lon:
+		if line.startlon==line.endlon:
 		#	print "Special case"
 			continue
 		if evt.cat==evt.START:
@@ -695,14 +698,14 @@ def findDirectWays(amap,candidates,barGraph):
 
 
 def calcCollision(line1,line2):
-	lon1 = line1.start.lon
-	lon2 = line1.end.lon
-	lat1 = line1.start.lat
-	lat2 = line1.end.lat
-	lon3 = line2.start.lon
-	lon4 = line2.end.lon
-	lat3 = line2.start.lat
-	lat4 = line2.end.lat
+	lon1 = line1.startlon
+	lon2 = line1.endlon
+	lat1 = line1.startlat
+	lat2 = line1.endlat
+	lon3 = line2.startlon
+	lon4 = line2.endlon
+	lat3 = line2.startlat
+	lat4 = line2.endlat
 	cit = (lat2-lat1)*(lon4-lon3)*lon1+(lon2-lon1)*(lon4-lon3)*(lat3-lat1)-(lat4-lat3)*(lon2-lon1)*lon3
 	jm = (lat2-lat1)*(lon4-lon3)-(lon2-lon1)*(lat4-lat3)
 	if jm == 0:
@@ -725,8 +728,8 @@ def makeDirect(amap,lines):
 			way.id = amap.newWayid()
 			way.barrier = False
 			way.render = True
-			way.refs.append(line.start.id)
-			way.refs.append(line.end.id)
+			way.refs.append(line.startid)
+			way.refs.append(line.endid)
 			amap.ways.append(way)
 	
 
