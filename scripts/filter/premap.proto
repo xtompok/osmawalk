@@ -6,8 +6,9 @@ message Node {
 	required sint64 id = 1;
 	required sint64 lat = 2;
 	required sint64 lon = 3;
-	optional objtype objtype = 4;
-	optional bool inside = 5 [default=false];
+	optional sint32	height = 4;
+	optional objtype objtype = 5;
+	optional bool inside = 6 [default=false];
 	optional int64 nodeidx = 200;
 }
 

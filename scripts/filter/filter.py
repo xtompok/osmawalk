@@ -558,6 +558,8 @@ class Line:
 	def calcLatForLon(self,lon):
 		minlon = self.startlon
 		maxlon = self.endlon
+		if lon > maxlon:
+			print "lon greater maxlon"
 		minlat = min(self.startlat,self.endlat)
 		maxlat = max(self.startlat,self.endlat)
 		return ((lon-minlon)/(maxlon-minlon))*(maxlat-minlat)+minlat
@@ -646,10 +648,11 @@ def findDirectWays(amap,candidates,barGraph):
 		evt.lines = [line]
 		heapq.heappush(queue,evt)
 	
-	tree = bst.BinarySearchTree()
+	tree = bst.BinarySearchTree(100*len(queue))
 	while len(queue) > 0:
 		evt = heapq.heappop(queue)
 		line = evt.lines[0]
+		print line
 		if line.startlon==line.endlon:
 		#	print "Special case"
 			continue
@@ -798,18 +801,19 @@ amap.updateNodesIdx()
 
 end = time.time()
 print "Long edges took "+str(end-start)
+#start = time.time()
+#
+#(wayGraph,barGraph)=makeGraph(amap)
+#candidates = makeDirectCandidates(amap,raster,wayGraph,20)
+#lines = findDirectWays(amap,candidates,barGraph)
+#makeDirect(amap,lines)
+
+#end = time.time()
+#print "Making graph took "+str(end-start)
 start = time.time()
 
-(wayGraph,barGraph)=makeGraph(amap)
-candidates = makeDirectCandidates(amap,raster,wayGraph,20)
-lines = findDirectWays(amap,candidates,barGraph)
-makeDirect(amap,lines)
 
-end = time.time()
-print "Making graph took "+str(end-start)
-start = time.time()
-
-
+print len(amap.nodes)," nodes, ",len(amap.ways)," ways"
 outfile = open("praha-union.pbf","w")
 outfile.write(amap.toPB().SerializeToString())
 outfile.close()
