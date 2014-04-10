@@ -31,10 +31,10 @@ class Raster:
 		londist = geod.inv(int2deg(self.minlon),int2deg(self.minlat+dlat/2),
 				int2deg(maxlon),int2deg(self.minlat+dlat/2))[2]
 		latdist = geod.inv(int2deg(self.minlon+dlon/2),int2deg(self.minlat),
-				int2deg(maxlon+dlon/2),int2deg(maxlat))[2]
+				int2deg(self.minlon+dlon/2),int2deg(maxlat))[2]
 		
 		print "Lon:",self.minlon," -- ",maxlon
-		print "Lat:",self.minlon," -- ",maxlon
+		print "Lat:",self.minlat," -- ",maxlat
 
 		self.lonparts = int(math.ceil(londist/self.dimension))+10
 		self.latparts = int(math.ceil(latdist/self.dimension))+10

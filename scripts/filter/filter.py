@@ -480,7 +480,6 @@ def makeGraph(amap):
 	
 def makeDirectCandidates(amap,raster,wayGraph,maxdist):
 	candidates = []
-	geod = pyproj.Geod(ellps="WGS84")
 	for lonidx in range(raster.lonparts-1):
 		for latidx in range(raster.latparts-1):
 			waynodes = [nid for nid in raster.raster[lonidx][latidx] if wayGraph[nid] != []]
