@@ -496,6 +496,7 @@ def makeDirectCandidates(amap,raster,wayGraph,maxdist):
 			candidates.extend([(u,v) for u in waynodes 
 					for v in waynodesNeigh 
 					if distance(amap.nodes[amap.nodesidx[u]],amap.nodes[amap.nodesidx[v]]) <= 20])
+        print "Unfiltered candidates:",len(candidates)
 	remove = []
 	for i in range(len(candidates)):
 		(n1id,n2id) = candidates[i]
@@ -800,15 +801,18 @@ amap.updateNodesIdx()
 
 end = time.time()
 print "Long edges took "+str(end-start)
-#start = time.time()
-#
-#(wayGraph,barGraph)=makeGraph(amap)
-#candidates = makeDirectCandidates(amap,raster,wayGraph,20)
+start = time.time()
+
+for lon in range(raster.lonparts):
+    for lat in range(raster.latparts):
+        print "raster[",lon,"][",lat,"]=",len(raster.raster[lon][lat])
+(wayGraph,barGraph)=makeGraph(amap)
+candidates = makeDirectCandidates(amap,raster,wayGraph,20)
 #lines = findDirectWays(amap,candidates,barGraph)
 #makeDirect(amap,lines)
 
-#end = time.time()
-#print "Making graph took "+str(end-start)
+end = time.time()
+print "Making graph took "+str(end-start)
 start = time.time()
 
 

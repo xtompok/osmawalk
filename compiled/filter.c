@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <inttypes.h>
 
 #include <ucw/gary.h>
 #include "include/premap.pb-c.h"
@@ -180,7 +181,7 @@ struct raster_t {
 	int64_t latparts;
 	int64_t steplon;
 	int64_t steplat;
-	int64_t *** raster;
+	int *** raster;
 };
 
 
@@ -243,7 +244,7 @@ struct raster_t makeRaster(struct map_t map){
 		node = map.nodes[i];
 		int * ptr;
 		ptr = GARY_PUSH(raster.raster[(node->lon-raster.minlon)/raster.steplon][(node->lat-raster.minlat)/raster.steplat]);
-		* ptr = node->id;
+		* ptr = nodesIdx_find(node->id)->idx;
 	}
 
 	return raster;
@@ -295,8 +296,8 @@ struct graph_t makeGraph(struct map_t map)
 			for (int j=0;j<way->n_refs-1;j++){
 					int ** ptr = GARY_PUSH(barGraph);
 					* ptr = malloc(sizeof(int)*2);
-					* ptr[0]=nodesIdx_find(way->refs[j])->idx;
-					* ptr[1]=nodesIdx_find(way->refs[j+1])->idx;
+					(* ptr)[0]=nodesIdx_find(way->refs[j])->idx;
+					(* ptr)[1]=nodesIdx_find(way->refs[j+1])->idx;
 				}
 		}
 	}
@@ -307,11 +308,84 @@ struct graph_t makeGraph(struct map_t map)
 	return graph;
 }
 
-int * makeDirectCandidates(struct map_t map, struct raster_t raster, int ** wayGraph, int maxdist){
+int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** wayGraph, int maxdist){
 
-	int * candidates;
+	int ** candidates;
 
-	GARY_INIT(candidates,128);
+	GARY_INIT_SPACE(candidates,100000);
+
+	for (int lonidx=0;lonidx<raster.lonparts-1;lonidx++){
+		for (int latidx=0;latidx<raster.latparts-1;latidx++){
+			int count;
+			count = GARY_SIZE(raster.raster[lonidx][latidx]);
+			//printf("raster[%"PRId64"][%"PRId64"]=%d\n",lonidx,latidx,count);
+			for (int i=0; i<count; i++) {
+				int nidx1;
+				nidx1 = raster.raster[lonidx][latidx][i];
+				if (!wayGraph[nidx1]){
+					continue;
+				}
+
+				for (int j=0;j<count;j++){
+					int nidx2;
+					nidx2 = raster.raster[lonidx][latidx][j];
+					if ((nidx1 < nidx2)&&wayGraph[nidx2]){
+						int ** ptr;
+						ptr = GARY_PUSH(candidates);
+						* ptr = malloc(2*sizeof(int));
+						(* ptr)[0] = nidx1;
+						(* ptr)[1] = nidx2;
+					}
+				}
+				int neighCount;
+				neighCount=GARY_SIZE(raster.raster[lonidx+1][latidx]);
+				for (int j=0;j<neighCount;j++){
+					int nidx2;
+					nidx2 = raster.raster[lonidx+1][latidx][j];
+					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)){
+						int ** ptr;
+						ptr = GARY_PUSH(candidates);
+						* ptr = malloc(2*sizeof(int));
+						(* ptr)[0] = nidx1; 
+						(* ptr)[1] = nidx2; 
+						
+					}
+				}
+				neighCount=GARY_SIZE(raster.raster[lonidx+1][latidx+1]);
+				for (int j=0;j<neighCount;j++){
+					int nidx2;
+					nidx2 = raster.raster[lonidx+1][latidx+1][j];
+					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)){
+						int ** ptr;
+						ptr = GARY_PUSH(candidates);
+						* ptr = malloc(2*sizeof(int));
+						(* ptr)[0] = nidx1; 
+						(* ptr)[1] = nidx2; 
+						
+					}
+				}
+				neighCount=GARY_SIZE(raster.raster[lonidx][latidx+1]);
+				for (int j=0;j<neighCount;j++){
+					int nidx2;
+					nidx2 = raster.raster[lonidx][latidx+1][j];
+					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)){
+						int ** ptr;
+						ptr = GARY_PUSH(candidates);
+						* ptr = malloc(2*sizeof(int));
+						(* ptr)[0] = nidx1; 
+						(* ptr)[1] = nidx2; 
+						
+					}
+				}
+			}
+
+		}
+
+	}
+	int candCount;
+	candCount = GARY_SIZE(candidates);
+	printf("Candidates: %d\n",candCount);
+	return candidates;
 		
 }
 	
@@ -331,7 +405,12 @@ int main (int argc, char ** argv){
 	uint8_t * buf;
 	buf = (uint8_t *)malloc(len);
 	printf("Allocated %d memory\n",len);
-	fread(buf,1,len,IN);
+	size_t read;
+	read = fread(buf,1,len,IN);
+	if (read!=len){
+		printf("Not read all file");
+		return 2;
+	}
 	fclose(IN);
 	
 	Premap__Map *pbmap;
@@ -344,9 +423,13 @@ int main (int argc, char ** argv){
 	printf("Loaded %d nodes, %d ways\n",map.n_nodes,map.n_ways);
 	nodesIdx_refresh(map.n_nodes,map.nodes);
 	waysIdx_refresh(map.n_ways,map.ways);
-	makeGraph(map);
-	makeRaster(map);
-	printf("%d",map.nodes[nodesIdx_find(1132352548)->idx]->id);
+	waysIdx_find(0);
+	struct graph_t graph;
+	graph = makeGraph(map);
+	struct raster_t raster;
+	raster = makeRaster(map);
+	makeDirectCandidates(map,raster,graph.wayGraph,20);
+	//printf("%d",map.nodes[nodesIdx_find(1132352548)->idx]->id);
 	
 	return 0;
 }
