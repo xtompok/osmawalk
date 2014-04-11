@@ -803,9 +803,9 @@ end = time.time()
 print "Long edges took "+str(end-start)
 start = time.time()
 
-for lon in range(raster.lonparts):
-    for lat in range(raster.latparts):
-        print "raster[",lon,"][",lat,"]=",len(raster.raster[lon][lat])
+#for lon in range(raster.lonparts):
+#    for lat in range(raster.latparts):
+#        print "raster[",lon,"][",lat,"]=",len(raster.raster[lon][lat])
 (wayGraph,barGraph)=makeGraph(amap)
 candidates = makeDirectCandidates(amap,raster,wayGraph,20)
 #lines = findDirectWays(amap,candidates,barGraph)

@@ -100,6 +100,17 @@ void initMap(Premap__Map *pbmap){
 	}
 }
 
+void mapToPBF(struct map_t map, Premap__Map * pbmap){
+	pbmap->n_nodes = map.n_nodes;
+	pbmap->nodes = map.nodes;
+	pbmap->n_ways = map.n_ways;
+	pbmap->ways = map.ways;
+	pbmap->n_relations = map.n_relations;
+	pbmap->relations = map.relations;
+	pbmap->n_multipols = map.n_multipols;
+	pbmap->multipols = map.multipols;
+}
+
 struct line_t {
 	int64_t startlon;
 	int64_t startlat;
@@ -388,6 +399,25 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 	return candidates;
 		
 }
+
+struct map_t addCandidatesToMap(int ** candidates, struct map_t map){
+	for (int i=0;i<GARY_SIZE(candidates);i++){
+		Premap__Way * way;
+		way = malloc(sizeof(Premap__Way));
+		premap__way__init(way);
+		way->id = -2000-i;
+		way->refs = malloc(sizeof(way->refs[0])*2);
+		way->refs[0] = candidates[i][0];
+		way->refs[1] = candidates[i][1];
+		way->type = OBJTYPE__DIRECT;
+		Premap__Way ** ptr;
+		ptr = GARY_PUSH(map.ways);
+		*ptr = way;
+		map.n_ways++;
+	}
+
+	return map;
+}
 	
 
 int main (int argc, char ** argv){
@@ -428,8 +458,24 @@ int main (int argc, char ** argv){
 	graph = makeGraph(map);
 	struct raster_t raster;
 	raster = makeRaster(map);
-	makeDirectCandidates(map,raster,graph.wayGraph,20);
+	int ** candidates;
+	candidates = makeDirectCandidates(map,raster,graph.wayGraph,20);
 	//printf("%d",map.nodes[nodesIdx_find(1132352548)->idx]->id);
+	map = addCandidatesToMap(candidates,map);
+	mapToPBF(map,pbmap);
+	len = premap__map__get_packed_size(pbmap);
+	buf = malloc(len);
+	premap__map__pack(pbmap,buf);
+	FILE * OUT;
+	OUT = fopen("../scripts/filter/praha-union-c.pbf","w");
+	if (IN==NULL){
+		printf("File opening error\n");	
+		return 1;
+	}
+	fwrite(buf,1,len,OUT);
+	fclose(OUT);
+
+	
 	
 	return 0;
 }
