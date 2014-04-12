@@ -6,6 +6,7 @@
 #include <inttypes.h>
 
 #include <ucw/gary.h>
+#include <ucw/heap.h>
 #include "include/premap.pb-c.h"
 #include "include/geodesic.h"
 
@@ -155,16 +156,16 @@ int calcCollision(struct line_t line1, struct line_t line2){
 }
 
 
-enum evt_type  {START,END,INTERSECT};
+enum evt_type  {EVT_START,EVT_END,EVT_INTERSECT};
 struct event_t {
 	enum evt_type type;
 	int64_t lon;
 	int64_t lat;
 	int64_t dlon;
 	int64_t dlat;	
+	unsigned int lineIdx;
 };
 
-#define CMP_EVENT(x,y) (((x).lon<(y).lon)||((x).lat<(y).lat)||(((x).dlon*(y).dlat)<((x).dlat*(y).dlon)))
 
 inline double int2deg(int intdeg){
 	return 1.0*intdeg/scale;		
@@ -400,15 +401,118 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 		
 }
 
+void findDirectWays(struct map_t map, int ** candidates, int ** barGraph){
+	int n_cand;
+	n_cand = GARY_SIZE(candidates);
+	struct line_t * lines;
+	GARY_INIT_SPACE(lines,n_cand);
+	for (int i=0;i<n_cand;i++){
+		Premap__Node * n1;
+		Premap__Node * n2;
+		n1 = map.nodes[candidates[i][0]];
+		n2 = map.nodes[candidates[i][1]];
+		
+		struct line_t * line;
+		line = GARY_PUSH(lines);
+
+		if (n2->lon < n1->lon){
+			line->startlon = n2->lon;
+			line->startlat = n2->lat;
+			line->endlon = n1->lon;
+			line->endlat = n1->lat;
+			line->startid = n2->id;
+			line->endid = n1->id;
+		} else {
+			line->startlon = n1->lon;
+			line->startlat = n1->lat;
+			line->endlon = n2->lon;
+			line->endlat = n2->lat;
+			line->startid = n1->id;
+			line->endid = n2->id;
+		}
+		line->isBar = 0;
+		line->broken = 0;
+	}
+
+	int n_bars;
+	n_bars = GARY_SIZE(barGraph);
+
+	for (int i=0;i<n_bars;i++){
+		Premap__Node * n1;
+		Premap__Node * n2;
+		n1 = map.nodes[barGraph[i][0]];
+		n2 = map.nodes[barGraph[i][1]];
+
+		struct line_t * line;
+		line = GARY_PUSH(lines);
+
+		if (n2->lon < n1->lon){
+			line->startlon = n2->lon;
+			line->startlat = n2->lat;
+			line->endlon = n1->lon;
+			line->endlat = n1->lat;
+			line->startid = n2->id;
+			line->endid = n1->id;
+		} else {
+			line->startlon = n1->lon;
+			line->startlat = n1->lat;
+			line->endlon = n2->lon;
+			line->endlat = n2->lat;
+			line->startid = n1->id;
+			line->endid = n2->id;
+		}
+		line->isBar = 1;
+		line->broken = 0;
+	}
+
+	// Sort
+	#define ASORT_PREFIX(X) lines_##X
+	#define ASORT_KEY_TYPE struct line_t
+	#define ASORT_LT(x,y) (((x).startid<(y).startid)||((x).endid<(y).endid)||((x).isBar<(y).isBar))
+	#include <ucw/sorter/array-simple.h>
+	// Remove duplicities
+	// Make queue
+	int n_lines;
+	n_lines = GARY_SIZE(lines);
+	struct event_t * queue;
+	GARY_INIT_SPACE(queue,n_lines);
+	for (int i=0;i<n_lines;i++){
+		struct event_t * event;
+		event = GARY_PUSH(queue);
+		event->type = EVT_START;
+		event->lon = lines[i].startlon;
+		event->lat = lines[i].startlat;
+		event->dlon = lines[i].endlon-lines[i].startlon;
+		event->dlat = lines[i].endlat-lines[i].startlat;
+		event->lineIdx = i;
+
+		event = GARY_PUSH(queue);
+		event->type = EVT_END;
+		event->lon = lines[i].endlon;
+		event->lat = lines[i].endlat;
+		event->dlon = lines[i].startlon-lines[i].endlon;
+		event->dlat = lines[i].startlat-lines[i].endlat;
+		event->lineIdx = i;
+	}
+	
+	#define EVENT_CMP(x,y) (((x).lon<(y).lon)||((x).lat<(y).lat)||(((x).dlon*(y).dlat)<((x).dlat*(y).dlon)))
+
+
+	// Do sweeping
+
+} 
+
+
 struct map_t addCandidatesToMap(int ** candidates, struct map_t map){
 	for (int i=0;i<GARY_SIZE(candidates);i++){
 		Premap__Way * way;
 		way = malloc(sizeof(Premap__Way));
 		premap__way__init(way);
 		way->id = -2000-i;
+		way->n_refs=2;
 		way->refs = malloc(sizeof(way->refs[0])*2);
-		way->refs[0] = candidates[i][0];
-		way->refs[1] = candidates[i][1];
+		way->refs[0] = map.nodes[candidates[i][0]]->id;
+		way->refs[1] = map.nodes[candidates[i][1]]->id;
 		way->type = OBJTYPE__DIRECT;
 		Premap__Way ** ptr;
 		ptr = GARY_PUSH(map.ways);
@@ -460,7 +564,7 @@ int main (int argc, char ** argv){
 	raster = makeRaster(map);
 	int ** candidates;
 	candidates = makeDirectCandidates(map,raster,graph.wayGraph,20);
-	//printf("%d",map.nodes[nodesIdx_find(1132352548)->idx]->id);
+	findDirectWays(map,candidates,graph.barGraph);
 	map = addCandidatesToMap(candidates,map);
 	mapToPBF(map,pbmap);
 	len = premap__map__get_packed_size(pbmap);
