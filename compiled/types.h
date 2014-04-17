@@ -41,6 +41,8 @@ struct line_t {
 	int64_t endid;
 	bool isBar;
 	bool broken;
+	bool started;
+	bool ended;
 };
 
 struct tree_node_t{

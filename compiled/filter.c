@@ -353,7 +353,7 @@ int tree_cmp(int idx1, int idx2){
 	
 	line1 = lines[idx1];
 	line2 = lines[idx2];
-
+	
 	// DEBUG
 	if (line1.startid<line2.startid)
 		return -1;
@@ -367,8 +367,8 @@ int tree_cmp(int idx1, int idx2){
 	if (line1.endid>line2.endid)
 		return 1;
 	return 0;
-/*	
-
+	
+	int anglesign = 1;
 	int64_t lat1;
 	int64_t lat2;
 	lat1 = calcLatForLon(line1,lon);
@@ -390,13 +390,8 @@ int tree_cmp(int idx1, int idx2){
 	if (dlat1*dlon2 > dlat2*dlon1)
 		return 1*anglesign;
 	return 0;
-*/
-}
-void tree_dump_key(struct fastbuf * fb,struct tree_node_t * node){
-	printf("%d", node->lineIdx);
-}
 
-void tree_dump_data(struct fastbuf * fb,struct tree_node_t * node){}
+}
 #define TREE_PREFIX(X) tree_##X 
 #define TREE_NODE struct tree_node_t
 #define TREE_KEY_ATOMIC lineIdx
@@ -404,8 +399,8 @@ void tree_dump_data(struct fastbuf * fb,struct tree_node_t * node){}
 #define TREE_WANT_FIND
 #define TREE_WANT_ADJACENT
 #define TREE_WANT_DELETE
-#define TREE_WANT_DUMP
 #define TREE_WANT_NEW
+#define TREE_WANT_ITERATOR
 #define TREE_GIVE_CMP
 #include <ucw/redblack.h>
 
@@ -423,7 +418,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 		struct line_t * line;
 		line = GARY_PUSH(lines);
 
-		if (n2->lon < n1->lon){
+		if ((n2->lon < n1->lon)||((n2->lon==n1->lon)&&(n2->lat<n1->lat))){
 			line->startlon = n2->lon;
 			line->startlat = n2->lat;
 			line->endlon = n1->lon;
@@ -440,6 +435,8 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 		}
 		line->isBar = 0;
 		line->broken = 0;
+		line->started = 0;
+		line->ended = 0;
 	}
 
 	int n_bars;
@@ -454,7 +451,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 		struct line_t * line;
 		line = GARY_PUSH(lines);
 
-		if (n2->lon < n1->lon){
+		if ((n2->lon < n1->lon)||((n2->lon==n1->lon)&&(n2->lat<n1->lat))){
 			line->startlon = n2->lon;
 			line->startlat = n2->lat;
 			line->endlon = n1->lon;
@@ -532,7 +529,9 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 		printf("Heap has %d events\n",n_queue);
 		HEAP_DELETE_MIN(struct event_t,queue,n_queue,EVENT_CMP,HEAP_SWAP);
 		struct event_t evt;
+		printf("LineIdx: %d %d\n",evt.lineIdx, evt.type);
 		evt = queue[n_queue+1];
+
 		printf("Event: %d %d %d %d\n",evt.lon,evt.lat,evt.type,(evt.dlon==0)?-1:evt.dlat/evt.dlon);
 		//tree_check(*tree,lines,evt.lon);
 
@@ -550,13 +549,17 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 		// /Debug
 		struct event_t intevt;
 
-		struct fastbuf * fb;
-		fb = malloc(sizeof(struct fastbuf));
 		//struct tree_t * item;
 		switch (evt.type){
 			case EVT_START:
 				printf("EVT_START\n");
 				struct tree_node_t * node;
+				node = tree_find(tree,evt.lineIdx);
+				lines[evt.lineIdx].started=1;
+				if (node){
+					printf("Node already present\n");
+					continue;
+				}
 				node = tree_new(tree,evt.lineIdx);
 				struct tree_node_t * prev;
 				struct tree_node_t * next;
@@ -605,32 +608,71 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 				//if (item==NULL){
 				//	printf("Node disappeared\n");
 				//}
-
+				line = lines[evt.lineIdx];
+				lines[evt.lineIdx].ended=1;
+				if (!line.started){
+					printf("Ended before started!\n");
+					printf("%d:(%d,%d)--%d:(%d,%d),%d\n",line.startid, line.startlat, line.startlon, line.endid, line.endlat, line.endlon, line.isBar);
+				} else {
+					printf("Ended ok\n");
+				}
 				node = tree_find(tree,evt.lineIdx);
 				if (node){
-					printf("O");
+					printf("%d O\n",node->lineIdx);
 					//tree_dump(fb, tree);
 					tree_delete(tree,evt.lineIdx);
 					printf("K\n");
+				}else
+				{
+					printf("Nothing to delete!\n");
 				}
 				break;
 			case EVT_INTERSECT:
 				printf("EVT_INT\n");
 				printf("Event lon: %d lat: %d\n",evt.lon,evt.lat);
 				struct line_t l;
-				l = lines[evt.lineIdx];
+			//	l = lines[evt.lineIdx];
 			//	printf("Line1: (%d,%d)--(%d,%d)\n",l.startlon,l.startlat,l.endlon,l.endlat);
-				l = lines[evt.line2Idx];
+			//	l = lines[evt.line2Idx];
 			//	printf("Line2: (%d,%d)--(%d,%d)\n",l.startlon,l.startlat,l.endlon,l.endlat);
-				tree_delete(tree,evt.lineIdx);
-				tree_delete(tree,evt.line2Idx);
+				node = tree_find(tree,evt.lineIdx);
+				if (node){
+					printf("%d O\n",node->lineIdx);
+					tree_delete(tree,evt.lineIdx);
+					printf("K\n");
+				}
+				node = tree_find(tree,evt.line2Idx);
+				if (node){
+					printf("%d O\n",node->lineIdx);
+					tree_delete(tree,evt.line2Idx);
+					printf("K\n");
+				}
 				printf("Deleted\n");
-				tree_new(tree,evt.lineIdx);
-				tree_new(tree,evt.line2Idx);
+				if (!lines[evt.lineIdx].ended)
+					tree_new(tree,evt.lineIdx);
 				break;
+				tree_new(tree,evt.line2Idx);
 		}
 	//	printf("Lon:%d Lat:%d\n",queue[n_queue+1].lon,queue[n_queue+1].lat);
 	}
+	printf("Check\n");
+	for (int i=0;i<GARY_SIZE(lines);i++){
+		if (lines[i].started && !lines[i].ended){
+			struct line_t l;
+			l = lines[i];
+			printf("%d:(%d,%d)--%d:(%d,%d),%d\n",l.startid,l.startlat,l.startlon,l.endid, l.endlat, l.endlon, l.isBar);
+		}
+	}
+	
+
+	TREE_FOR_ALL(tree,tree,iternode)
+	{
+		struct line_t l;
+		l = lines[iternode->lineIdx];
+	//	printf("%11d:(%10d,%10d)--%11d:(%10d,%10d),%d\n",l.startid,l.startlat,l.startlon,l.endid, l.endlat, l.endlon, l.isBar);
+		
+	}
+	TREE_END_FOR;
 	
 	tree_cleanup(tree);
 	
@@ -641,7 +683,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 struct map_t addDirectToMap(struct line_t * lines, struct map_t map){
 	for (int i=0;i<GARY_SIZE(lines);i++){
 		if (lines[i].broken){
-			printf("Broken line");
+			//printf("Broken line\n");
 			continue;
 		}
 		Premap__Way * way;
