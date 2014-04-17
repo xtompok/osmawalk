@@ -70,7 +70,7 @@ def drawWays(pbMap,d, node_ids):
 
 print "Loading map..."
 pbMap = pb.Map()
-with open("../filter/praha-union.pbf","rb") as infile:
+with open("../filter/praha-union-c.pbf","rb") as infile:
 	pbMap.ParseFromString(infile.read())
 
 node_ids = {}
