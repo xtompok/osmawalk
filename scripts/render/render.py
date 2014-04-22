@@ -22,6 +22,7 @@ def drawWays(pbMap,d, node_ids):
 			except KeyError:
 				pass
 		style={"stroke" : "black", "stroke-width" : "5", "fill" : "none"}
+                print "Waytype:",way.type
 		if way.type==pbtypes.WAY:
 			pass
 		elif way.type==pbtypes.RAILWAY:
@@ -48,6 +49,10 @@ def drawWays(pbMap,d, node_ids):
 			style["stroke"] = "darkslategray"
 		elif way.type==pbtypes.DIRECT:
 			style["stroke"] = "magenta"
+                        print "Way found"
+		elif way.type==pbtypes.DIRECT_BAD:
+                        print "Bad way found"
+			style["stroke"] = "orange"
 
 		elif way.type==pbtypes.MULTIPOLYGON:
 			style["stroke"] = "orange"

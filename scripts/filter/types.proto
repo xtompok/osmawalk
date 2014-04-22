@@ -19,7 +19,8 @@ enum objtype {
 
 	
 	DIRECT = 50;
-
+	
+	DIRECT_BAD = 252;
 	MULTIPOLYGON = 250;
 	INSIDE = 251;
 	IGNORE = 256;
