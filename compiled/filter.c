@@ -636,10 +636,10 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 						intevt.lat = col[1];
 						intevt.lineIdx = evt.lineIdx;
 						intevt.line2Idx = prev->lineIdx;
-						//if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
+						if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
 							lines[evt.lineIdx].broken = 1;
 							lines[prev->lineIdx].broken = 1;
-						//}
+						}
 						HEAP_INSERT(struct event_t, queue, n_queue, EVENT_CMP, HEAP_SWAP, intevt);
 					}
 					free(col);
@@ -653,10 +653,10 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 						intevt.lat = col[1];
 						intevt.lineIdx = evt.lineIdx;
 						intevt.line2Idx = next->lineIdx;
-						//if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
+						if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
 							lines[evt.lineIdx].broken = 1;
 							lines[next->lineIdx].broken = 1;
-						//}
+						}
 						HEAP_INSERT(struct event_t, queue, n_queue, EVENT_CMP, HEAP_SWAP, intevt);
 					}
 					free(col);
@@ -754,10 +754,10 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 							intevt.lat = col[1];
 							intevt.lineIdx = evt.lineIdx;
 							intevt.line2Idx = prev->lineIdx;
-							//if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
+							if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
 								lines[evt.lineIdx].broken = 1;
 								lines[prev->lineIdx].broken = 1;
-							//}
+							}
 							HEAP_INSERT(struct event_t, queue, n_queue, EVENT_CMP, HEAP_SWAP, intevt);
 						}
 						free(col);
@@ -771,10 +771,10 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 							intevt.lat = col[1];
 							intevt.lineIdx = evt.lineIdx;
 							intevt.line2Idx = next->lineIdx;
-							//if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
+							if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
 								lines[evt.lineIdx].broken = 1;
 								lines[next->lineIdx].broken = 1;
-							//}
+							}
 							HEAP_INSERT(struct event_t, queue, n_queue, EVENT_CMP, HEAP_SWAP, intevt);
 						}
 						free(col);
@@ -802,10 +802,10 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 							intevt.lat = col[1];
 							intevt.lineIdx = evt.line2Idx;
 							intevt.line2Idx = prev->lineIdx;
-							//if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
+							if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
 								lines[evt.line2Idx].broken = 1;
 								lines[prev->lineIdx].broken = 1;
-							//}
+							}
 							HEAP_INSERT(struct event_t, queue, n_queue, EVENT_CMP, HEAP_SWAP, intevt);
 						}
 						free(col);
@@ -819,10 +819,10 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 							intevt.lat = col[1];
 							intevt.lineIdx = evt.line2Idx;
 							intevt.line2Idx = next->lineIdx;
-							//if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
+							if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
 								lines[evt.line2Idx].broken = 1;
 								lines[next->lineIdx].broken = 1;
-							//}
+							}
 							HEAP_INSERT(struct event_t, queue, n_queue, EVENT_CMP, HEAP_SWAP, intevt);
 						}
 						free(col);
@@ -873,6 +873,7 @@ struct map_t addDirectToMap(struct line_t * lines, struct map_t map){
 		way->refs = malloc(sizeof(way->refs[0])*2);
 		way->refs[0] = lines[i].startid;
 		way->refs[1] = lines[i].endid;
+		way->has_type = true;
 		if (!lines[i].broken){
 			way->type = OBJTYPE__DIRECT;
 			printf("Writing way %d\n",way->type);
@@ -903,6 +904,7 @@ struct map_t addCandidatesToMap(int ** candidates, struct map_t map){
 		way->refs[0] = map.nodes[candidates[i][0]]->id;
 		way->refs[1] = map.nodes[candidates[i][1]]->id;
 		way->type = OBJTYPE__DIRECT;
+		way->has_type = true;
 		Premap__Way ** ptr;
 		ptr = GARY_PUSH(map.ways);
 		*ptr = way;
@@ -910,6 +912,13 @@ struct map_t addCandidatesToMap(int ** candidates, struct map_t map){
 	}
 
 	return map;
+}
+
+void checkWayTypes(Premap__Map * pbmap){
+	for (int i=0;i<pbmap->n_ways;i++){
+		printf("Way: %d, type: %d\n",i,pbmap->ways[i]->type);
+	}	
+
 }
 	
 
@@ -957,6 +966,7 @@ int main (int argc, char ** argv){
 	lines = findDirectWays(map,candidates,graph.barGraph);
 	map = addDirectToMap(lines,map);
 	mapToPBF(map,pbmap);
+	checkWayTypes(pbmap);
 	len = premap__map__get_packed_size(pbmap);
 	buf = malloc(len);
 	premap__map__pack(pbmap,buf);

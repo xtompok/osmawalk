@@ -49,4 +49,11 @@ struct tree_node_t{
 	int lineIdx;
 };
 
+struct walk_area_t{
+	int n_barriers;
+	Premap__Way ** barriers;
+	int n_perimeter;
+	Premap__Way ** perimeter;
+}
+
 #endif
