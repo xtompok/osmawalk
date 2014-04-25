@@ -14,39 +14,51 @@ from imposm.parser import OSMParser
 scale = 1000000
 
 class counter():
-	ways = 0
-	nodes = 0
-	relations = 0
-	areas=0
-
-	def __init__(self,waysConf):
+	def __init__(self,waysConf,areasConf,bridgesConf,tunnelsConf):
 		self.Map = Map()
 		self.waysConf = waysConf
+		self.areasConf = areasConf
+		self.bridgesConf = bridgesConf
+		self.tunnelsConf = tunnelsConf
 
 	def ways_cb(self,ways):
 		for osmid,tags,refs in ways:
-			self.ways+=1
 			pbway = pb.Way()
 			pbway.id = int(osmid)
 			pbway.refs.extend(map(int,refs))
 			for key in tags.keys():
-				if key[:5]=="addr:" or key[:4]=="name" or key=="source" or key=="is_in" or key[:4]=="ref:" or key=="created_by":
-					del tags[key]
+				if key=="boundary":
+					break
 
-				if key in waysConf.keys():
+				if key in waysConf:
 					if waysConf[key].keys()==["*"]:
 						pbway.type = waysConf[key]["*"]
 					val = tags[key]
-					if val in waysConf[key].keys():
+					if val in waysConf[key]:
 						pbway.type = waysConf[key][val]
 
-				if key in areasConf.keys():
+				if key in areasConf:
 					if areasConf[key].keys()==["*"]:
 						pbway.area = areasConf[key]["*"]
 					val = tags[key]
-					if val in areasConf[key].keys():
+					if val in areasConf[key]:
 						pbway.area = areasConf[key][val]
-			if "boundary" in tags.keys() and pbway.type==pbtypes.IGNORE and pbway.area==False:
+
+				if key in bridgesConf:
+					if bridgesConf[key].keys()==["*"]:
+						pbway.bridge = bridgesConf[key]["*"]
+					val = tags[key]
+					if val in bridgesConf[key]:
+						pbway.bridge = bridgesConf[key][val]
+
+				if key in tunnelsConf:
+					if tunnelsConf[key].keys()==["*"]:
+						pbway.tunnel = tunnelsConf[key]["*"]
+					val = tags[key]
+					if val in tunnelsConf[key]:
+						pbway.tunnel = tunnelsConf[key][val]
+
+			if "boundary" in tags:
 				continue
 			if pbway.type == pbtypes.IGNORE:
 				pbway.render = False
@@ -54,33 +66,17 @@ class counter():
 				pbway.render = True
 			self.Map.ways.append(pbway)
 
-			if "area" in tags.keys() and tags["area"]=="yes":
-				self.areas+=1
-			if "building" in tags.keys():
-				self.areas+=1
-			if "landuse" in tags.keys():
-				self.areas+=1
-			if "leisure" in tags.keys():
-				self.areas+=1
-			if "natural" in tags.keys():
-				self.areas+=1
-
 
 	def nodes_cb(self,nodes):
 		for osmid,tags,coords in nodes:
-			self.nodes+=1
 			pbnode = pb.Node()
 			pbnode.id = int(osmid)
 			pbnode.lat = int(coords[1]*scale)
 			pbnode.lon = int(coords[0]*scale)
-			for key in tags.keys():
-				if key[:5]=="addr:" or key=="name" or key=="source" or key=="is_in" or key[:4]=="ref:" or key=="created_by":
-					del tags[key]
 			self.Map.nodes.append(pbnode)
 	
 	def coords_cb(self,coords):
 		for (osmid,lon,lat) in coords:
-			self.nodes+=1
 			pbnode = pb.Node()
 			pbnode.id = int(osmid)
 			pbnode.lat = int(lat*scale)
@@ -89,25 +85,17 @@ class counter():
 
 	def relations_cb(self,relations):
 		for osmid,tags,refs in relations:
-			self.relations+=1
-			ignore = False
-			for key in tags.keys():
-				if key=="boundary":
-					ignore = True
-					break
-				if key[:5]=="addr:" or key=="name" or key=="source" or key=="is_in" or key[:4]=="ref:" or key=="created_by":
-					del tags[key]
-			if ignore == True:
-				continue
-			if "type" in tags.keys() and tags["type"]=="multipolygon":
-				self.areas+=1
+			if "boundary" in tags:
+			    continue
+
+			if "type" in tags and tags["type"]=="multipolygon":
 				pbpol = pb.Multipolygon()
 				for key in tags.keys():
-					if key in waysConf.keys():
+					if key in waysConf:
 						if waysConf[key].keys()==["*"]:
 							pbpol.type = waysConf[key]["*"]
 						val = tags[key]
-						if val in waysConf[key].keys():
+						if val in waysConf[key]:
 							pbpol.type = waysConf[key][val]
 				pbpol.id = int(osmid)
 				pbpol.refs.extend([int(item[0]) for item in refs])
@@ -130,34 +118,35 @@ def loadWaysConf(filename):
 			"paved":pbtypes.PAVED,
 			"unpaved":pbtypes.UNPAVED,
 			"steps":pbtypes.STEPS,
-			"highway":pbtypes.HIGHWAY
+			"highway":pbtypes.HIGHWAY,
+                        "bridge":pbtypes.BRIDGE
 			}
 	for cat in config["Way"].keys():
 		catenum = str2pb[cat]
 		for key in config["Way"][cat]:
-			if key not in ways.keys():
+			if key not in ways:
 				ways[key] = {}
 			for value in config["Way"][cat][key]:
 				ways[key][value]=catenum
 	return ways
 
 
-def loadAreasConf(filename):
+def loadBoolConf(filename):
 	config = {}
 	with open(filename) as conffile:
 		config = yaml.load(conffile.read())
-	areas = {}
+	boolcfg = {}
 	for key in config[True]:
-		if key not in areas.keys():
-			areas[key] = {}
+		if key not in boolcfg:
+			boolcfg[key] = {}
 		for value in config[True][key]:
-			areas[key][value]=True
+			boolcfg[key][value]=True
 	for key in config[False]:
-		if key not in areas.keys():
-			areas[key] = {}
+		if key not in boolcfg:
+			boolcfg[key] = {}
 		for value in config[False][key]:
-			areas[key][value]=False
-	return areas
+			boolcfg[key][value]=False
+	return boolcfg
 
 def nodeWays(amap):
 	missingcnt=0
@@ -189,8 +178,8 @@ def deleteAloneNodes(amap,nodeways):
 		amap.nodesidx[amap.nodes[i].id]=i
 	return amap
 
-def parseOSMfile(filename):	
-	cnt = counter(waysConf)
+def parseOSMfile(filename,waysConf,areasConf,bridgesConf,tunnelsConf):	
+	cnt = counter(waysConf,areasConf,bridgesConf,tunnelsConf)
 	p = OSMParser(concurrency=4, ways_callback=cnt.ways_cb, nodes_callback=cnt.nodes_cb, relations_callback=cnt.relations_cb, coords_callback=cnt.coords_cb)
 	p.parse(filename)
 	cnt.Map.nodes.sort(key=lambda node: node.id)
@@ -200,30 +189,33 @@ def parseOSMfile(filename):
 	return cnt.Map
 
 		
+# Where find YAML config files
+configDir="../../config/"
 
+# Load config from YAML
+waysConf=loadWaysConf(configDir+"types.yaml")
+areasConf=loadBoolConf(configDir+"area.yaml")
+bridgesConf=loadBoolConf(configDir+"bridge.yaml")
+tunnelsConf=loadBoolConf(configDir+"tunnel.yaml")
 
-waysConf=loadWaysConf("types.yaml")
-areasConf=loadAreasConf("area.yaml")
-
+# Parse file
 start = time.time()
-
-amap = parseOSMfile("../../osm/praha.osm")
-
+amap = parseOSMfile("../../osm/praha.osm",waysConf,areasConf,bridgesConf,tunnelsConf)
 end = time.time()
 print "Parsing took "+str(end-start)
-start = time.time()
 
+# Delete nodes without ways
+start = time.time()
 nodeways=nodeWays(amap)
 amap = deleteAloneNodes(amap,nodeways)
-
 end = time.time()
 print "Deleting alone nodes took "+str(end-start)
-start = time.time()
 
+# Write map to file
+start = time.time()
 outfile = open("praha-pre.pbf","w")
 outfile.write(amap.toPB().SerializeToString())
 outfile.close()
-
 end = time.time()
 print "Saving took "+str(end-start)
 

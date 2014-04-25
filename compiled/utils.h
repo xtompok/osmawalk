@@ -13,5 +13,5 @@ static inline int deg2int(double deg){
 unsigned int isDirectable(Premap__Way * way);
 unsigned int isBarrier(Premap__Way * way);
 unsigned int isWay(Premap__Way * way);
-
+int isWalkArea(Premap__Way * way);
 #endif

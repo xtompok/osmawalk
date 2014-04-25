@@ -19,3 +19,9 @@ preprocess: filter.c
 
 clean:
 	rm *.o include/*.o
+
+protobuf:
+	protoc-c --proto_path ../scripts/filter/ ../scripts/filter/types.proto --c_out include/
+	protoc-c --proto_path ../scripts/filter/ ../scripts/filter/premap.proto --c_out include/
+
+.PHONY: protobuf

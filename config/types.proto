@@ -16,6 +16,9 @@ enum objtype {
 	SOLID = 32;
 
 	ENTRANCE = 40;
+	
+	BRIDGE = 45;
+	TUNNEL = 46;
 
 	
 	DIRECT = 50;

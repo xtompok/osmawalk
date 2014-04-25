@@ -21,6 +21,8 @@ message Way {
 	optional objtype type = 12 [default=WAY];
 	optional objtype bordertype = 13;
 	optional objtype crossing = 14;
+	optional bool bridge = 16 [default=false];
+	optional bool tunnel = 17 [default=false];
 	optional int64 wayidx = 200;
 	optional bool render = 220;
 }

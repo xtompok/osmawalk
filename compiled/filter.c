@@ -944,13 +944,6 @@ void checkWayTypes(Premap__Map * pbmap){
 	}	
 
 }
-int isWalkArea(Premap__Way * way){
-	if (way->area && way->type < 10)
-		return true;
-	else 
-		return false;
-
-}
 uint8_t nodeInPolygon(struct map_t map, Premap__Node * node, Premap__Way * way){
 	if (way->refs[0]!=way->refs[way->n_refs-1]){
 		printf("Way is not closed!\n");
@@ -999,6 +992,7 @@ uint8_t nodeInPolygon(struct map_t map, Premap__Node * node, Premap__Way * way){
 		crosses++;
 	}
 
+	printf("Crosses:%d\n",crosses);
 	return crosses%2;
 
 }
@@ -1050,7 +1044,7 @@ struct walk_area_t * findWalkAreas(struct map_t map, struct raster_t raster){
 				int * idxs;
 				idxs = raster.raster[x][y];
 				for (int k=0;k<GARY_SIZE(idxs);k++){
-					if (0 &&!nodeInPolygon(map,map.nodes[idxs[k]],map.ways[i])){
+					if (!nodeInPolygon(map,map.nodes[idxs[k]],map.ways[i])){
 						continue;
 					}
 					int64_t * nways = nodeWays_find(map.nodes[idxs[k]]->id)->ways;
@@ -1156,8 +1150,8 @@ int main (int argc, char ** argv){
 	int ** candidates;
 	candidates = makeDirectCandidates(map,raster,graph.wayGraph,20);
 	struct line_t * lines;
-	//lines = findDirectWays(map,candidates,graph.barGraph);
-	//map = addDirectToMap(lines,map);
+	lines = findDirectWays(map,candidates,graph.barGraph);
+	map = addDirectToMap(lines,map);
 	struct walk_area_t * walkareas;
 	walkareas = findWalkAreas(map,raster);
 	printf("Found %d walk areas\n",GARY_SIZE(walkareas));
