@@ -20,6 +20,10 @@ enum objtype {
 	
 	DIRECT = 50;
 	
+	WALKAREA = 100;
+	AREAWAY = 101;
+	AREABAR = 102;
+
 	DIRECT_BAD = 252;
 	MULTIPOLYGON = 250;
 	INSIDE = 251;

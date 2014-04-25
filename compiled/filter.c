@@ -42,6 +42,27 @@ void waysIdx_refresh(int n_ways, Premap__Way ** ways){
 	}
 }
 
+void nodeWays_refresh(struct map_t map){
+	nodeWays_cleanup();
+	nodeWays_init();
+	for (int i=0;i<map.n_nodes;i++){
+		struct nodeWaysNode * val;
+		val = nodeWays_new(map.nodes[i]->id);
+		GARY_INIT(val->ways,0);
+	}
+	for (int i=0;i<map.n_ways;i++){
+		Premap__Way * way;
+		way = map.ways[i];
+		for (int j=0;j<way->n_refs;j++){
+			struct nodeWaysNode * node;
+			node = nodeWays_find(way->refs[j]);
+			int64_t * wayid;
+			wayid = GARY_PUSH(node->ways);
+			* wayid = way->id;
+		}
+	}
+
+}
 
 struct map_t map;
 void initMap(Premap__Map *pbmap){
@@ -137,10 +158,13 @@ int64_t * calcCollision(struct line_t line1, struct line_t line2){
 	int64_t jm = (lon1-lon2)*(lat3-lat4)-(lat1-lat2)*(lon3-lon4);	
 	//int64_t cit = (lat2-lat1)*(lon4-lon3)*lon1+(lon2-lon1)*(lon4-lon3)*(lat3-lat1)-(lat4-lat3)*(lon2-lon1)*lon3;
 	//int64_t jm = (lat2-lat1)*(lon4-lon3)-(lon2-lon1)*(lat4-lat3);
+	//printf("Line 1: (%d,%d)--(%d,%d)\n",lon1,lat1,lon2,lat2);
+	//printf("Line 2: (%d,%d)--(%d,%d)\n",lon3,lat3,lon4,lat4);
 	if (jm == 0)
 		return NULL;
 	int64_t lon = cit/jm;
-	if (lon1 > lon || lon > lon2 || lon3 > lon || lon > lon4){
+	if (MAX(lon1,lon2) < lon || lon < MIN(lon1,lon2) || MAX(lon3,lon4) < lon || lon < MIN(lon3,lon4)){
+		//printf("Lon out of range\n");
 		return NULL;    
 	}
 	cit = (lon1*lat2-lat1*lon2)*(lat3-lat4)-(lon3*lat4-lat3*lon4)*(lat1-lat2);
@@ -150,7 +174,7 @@ int64_t * calcCollision(struct line_t line1, struct line_t line2){
 	//printf("Line 1: (%d,%d)--(%d,%d)\n",lon1,lat1,lon2,lat2);
 	//printf("Line 2: (%d,%d)--(%d,%d)\n",lon3,lat3,lon4,lat4);
 	//printf("Intersection: %d,%d\n",lon,lat);
-	if (lat1 > lat || lat > lat2 || lat3 > lat || lat > lat4){
+	if (MAX(lat1,lat2) < lat || lat < MIN(lat1,lat2) || MAX(lat3,lat4) < lat || lat < MIN(lat3,lat4)){
 		return NULL;
 	}
 	//return (lon,lat)
@@ -202,7 +226,7 @@ struct graph_t makeGraph(struct map_t map)
 	for (int i=0;i < map.n_ways;i++){
 		Premap__Way * way;
 		way = map.ways[i];
-		if (map.ways[i]->type<25){ // ugly
+		if (isDirectable(map.ways[i])){ 
 			for (int j=0;j<way->n_refs-1;j++){
 				int n1idx = nodesIdx_find(way->refs[j])->idx;
 				int n2idx = nodesIdx_find(way->refs[j+1])->idx;
@@ -222,7 +246,7 @@ struct graph_t makeGraph(struct map_t map)
 				}
 			}
 		}
-		else if ((map.ways[i]->type>=30)&&(map.ways[i]->type<40)){ //ugly
+		else if (isBarrier(map.ways[i])){ 
 			for (int j=0;j<way->n_refs-1;j++){
 					int ** ptr = GARY_PUSH(barGraph);
 					* ptr = malloc(sizeof(int)*2);
@@ -876,12 +900,12 @@ struct map_t addDirectToMap(struct line_t * lines, struct map_t map){
 		way->has_type = true;
 		if (!lines[i].broken){
 			way->type = OBJTYPE__DIRECT;
-			printf("Writing way %d\n",way->type);
+			//printf("Writing way %d\n",way->type);
 		}
 		else
 			{
 			way->type = OBJTYPE__DIRECT_BAD;
-			printf("Writing bad way %d\n",way->type);
+			//printf("Writing bad way %d\n",way->type);
 			}
 		Premap__Way ** ptr;
 		ptr = GARY_PUSH(map.ways);
@@ -920,6 +944,175 @@ void checkWayTypes(Premap__Map * pbmap){
 	}	
 
 }
+int isWalkArea(Premap__Way * way){
+	if (way->area && way->type < 10)
+		return true;
+	else 
+		return false;
+
+}
+uint8_t nodeInPolygon(struct map_t map, Premap__Node * node, Premap__Way * way){
+	if (way->refs[0]!=way->refs[way->n_refs-1]){
+		printf("Way is not closed!\n");
+		return 0;
+	}
+	int64_t min_lon;
+	min_lon = map.nodes[nodesIdx_find(way->refs[0])->idx]->lon;
+	int64_t lat;
+	lat = map.nodes[nodesIdx_find(way->refs[0])->idx]->lat;
+	for (int i=1;i<way->n_refs;i++){
+		min_lon = MIN(min_lon,map.nodes[nodesIdx_find(way->refs[i])->idx]->lon);
+	}
+
+	struct line_t nodeLine;
+	struct line_t periLine;
+	nodeLine.startlon = node->lon;
+	nodeLine.startlat = node->lat;
+	nodeLine.endlon = min_lon-100;
+	nodeLine.endlat = lat ;
+
+	//printf("Polygon has %d lines\n",way->n_refs);
+
+	int crosses;
+	crosses = 0;
+	for (int i=0;i<way->n_refs-1;i++){
+		Premap__Node * n1;
+		Premap__Node * n2;
+		n1 = map.nodes[nodesIdx_find(way->refs[i])->idx];
+		n2 = map.nodes[nodesIdx_find(way->refs[i+1])->idx];
+		periLine.startlon = n1->lon;
+		periLine.startlat = n1->lat;
+		periLine.endlon = n2->lon;
+		periLine.endlat = n2->lat;
+
+		int64_t * col;
+		col = calcCollision(nodeLine,periLine);
+	//	printf("Calc Collision!\n");
+		if (col==NULL)
+			continue;
+
+
+		if (((col[0]!=periLine.startlon)&&(col[0]!=periLine.endlon))||
+		    ((col[1]!=periLine.startlat)&&(col[1]!=periLine.endlat)))
+			crosses++;
+		// FIXME special cases
+		crosses++;
+	}
+
+	return crosses%2;
+
+}
+
+#define ASORT_PREFIX(X) int64_##X
+#define ASORT_KEY_TYPE int64_t
+#include <ucw/sorter/array-simple.h>
+
+struct walk_area_t * findWalkAreas(struct map_t map, struct raster_t raster){
+	struct walk_area_t * walkareas;	
+	GARY_INIT(walkareas,0);
+	for (int i=0;i<map.n_ways;i++){	
+		if (!isWalkArea(map.ways[i]))
+			continue;
+		struct walk_area_t * area;
+		area = GARY_PUSH(walkareas);
+		area->periIdx = i;
+
+		int64_t * refs;
+
+		refs = map.ways[i]->refs;
+		
+		int minx;
+		int maxx;
+		int miny;
+		int maxy;
+		
+		int * box;
+
+		box = getRasterBox(raster,map.nodes[nodesIdx_find(refs[0])->idx]->lon,map.nodes[nodesIdx_find(refs[0])->idx]->lat);
+
+		minx = maxx = box[0];
+		miny = maxy = box[1];
+
+		for (int j=0;j<map.ways[i]->n_refs;j++){
+			int nidx;
+			nidx = nodesIdx_find(refs[j])->idx;
+			box = getRasterBox(raster,map.nodes[nidx]->lon, map.nodes[nidx]->lat);
+			minx = MIN(minx,box[0]);
+			maxx = MAX(maxx,box[0]);
+			miny = MIN(miny,box[1]);
+			maxy = MAX(maxy,box[1]);
+		}
+
+		int64_t * ways;
+		GARY_INIT(ways,0);
+		for (int x=minx;x<=maxx;x++){
+			for (int y=miny;y<=maxy;y++){
+				int * idxs;
+				idxs = raster.raster[x][y];
+				for (int k=0;k<GARY_SIZE(idxs);k++){
+					if (0 &&!nodeInPolygon(map,map.nodes[idxs[k]],map.ways[i])){
+						continue;
+					}
+					int64_t * nways = nodeWays_find(map.nodes[idxs[k]]->id)->ways;
+					for (int j=0;j<GARY_SIZE(nways);j++){
+						int64_t * way;
+						way = GARY_PUSH(ways);
+						* way = nways[j]; 
+					}
+				}
+			}
+		}
+
+		map.ways[i]->type = OBJTYPE__WALKAREA;
+		
+		printf("Area has %d squares\n",(maxx-minx)*(maxy-miny));
+
+		if (GARY_SIZE(ways)==0){
+			area->n_bars=0;
+			area->n_ways=0;
+			continue;
+		} 
+
+		int64_sort(ways,GARY_SIZE(ways));
+		
+		printf("Ways: %d\n",GARY_SIZE(ways));
+
+		GARY_INIT(area->barIdxs,0);
+		GARY_INIT(area->wayIdxs,0);
+
+		int64_t item;
+		item = ways[0];
+		int64_t memitem;
+		memitem = ways[0];
+		int index;
+		for (int j=0;j<GARY_SIZE(ways);j++){
+			if (memitem==ways[j])
+				continue;
+			printf("Item\n");
+			memitem = ways[j];
+			index = waysIdx_find(ways[j])->idx;
+			if (isBarrier(map.ways[index])){
+				printf("Barrier\n");
+				int * last;
+				last = GARY_PUSH(area->barIdxs);
+				*last = index;
+				map.ways[index]->type = OBJTYPE__AREABAR;
+			}
+			if (isWay(map.ways[index])){
+				printf("Way\n");
+				int * last;
+				last = GARY_PUSH(area->wayIdxs);
+				*last = index;
+				map.ways[index]->type = OBJTYPE__AREAWAY;
+			}
+		}
+		area->n_bars = GARY_SIZE(area->barIdxs);
+		area->n_ways = GARY_SIZE(area->wayIdxs);
+
+
+	}
+	return walkareas;
+} 
 	
 
 int main (int argc, char ** argv){
@@ -955,7 +1148,7 @@ int main (int argc, char ** argv){
 	printf("Loaded %d nodes, %d ways\n",map.n_nodes,map.n_ways);
 	nodesIdx_refresh(map.n_nodes,map.nodes);
 	waysIdx_refresh(map.n_ways,map.ways);
-	waysIdx_find(0);
+	nodeWays_refresh(map);
 	struct graph_t graph;
 	graph = makeGraph(map);
 	struct raster_t raster;
@@ -963,10 +1156,13 @@ int main (int argc, char ** argv){
 	int ** candidates;
 	candidates = makeDirectCandidates(map,raster,graph.wayGraph,20);
 	struct line_t * lines;
-	lines = findDirectWays(map,candidates,graph.barGraph);
-	map = addDirectToMap(lines,map);
+	//lines = findDirectWays(map,candidates,graph.barGraph);
+	//map = addDirectToMap(lines,map);
+	struct walk_area_t * walkareas;
+	walkareas = findWalkAreas(map,raster);
+	printf("Found %d walk areas\n",GARY_SIZE(walkareas));
 	mapToPBF(map,pbmap);
-	checkWayTypes(pbmap);
+	//checkWayTypes(pbmap);
 	len = premap__map__get_packed_size(pbmap);
 	buf = malloc(len);
 	premap__map__pack(pbmap,buf);

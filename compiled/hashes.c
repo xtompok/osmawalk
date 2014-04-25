@@ -25,4 +25,14 @@
 #define HASH_WANT_NEW
 #include <ucw/hashtable.h>
 
+#define HASH_NODE struct nodeWaysNode
+#define HASH_PREFIX(name) nodeWays_##name
+#define HASH_KEY_ATOMIC nodeid
+#define HASH_ATOMIC_TYPE int64_t
+#define HASH_DEFAULT_SIZE 100000
+#define HASH_WANT_CLEANUP
+#define HASH_WANT_FIND
+#define HASH_WANT_NEW
+#include <ucw/hashtable.h>
+
 #endif

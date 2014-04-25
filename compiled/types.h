@@ -11,6 +11,11 @@ struct waysIdxNode {
 	int64_t key;
 	int idx;
 };
+struct nodeWaysNode {
+	int64_t nodeid;
+	int64_t * ways;
+};
+
 struct map_t {
 	int n_nodes;
 	Premap__Node ** nodes;
@@ -50,10 +55,11 @@ struct tree_node_t{
 };
 
 struct walk_area_t{
-	int n_barriers;
-	Premap__Way ** barriers;
-	int n_perimeter;
-	Premap__Way ** perimeter;
-}
+	int n_bars;
+	int * barIdxs;
+	int n_ways;
+	int * wayIdxs;
+	int  periIdx;
+};
 
 #endif

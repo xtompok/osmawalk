@@ -1,7 +1,13 @@
 *.py[cod]
+*.swm
+*.swn
+*.swo
 *.swp
 *.pbf
 *.osm
+
+# Generated PBF files
+*_pb2.py
 
 # C extensions
 *.so
