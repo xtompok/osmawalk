@@ -78,9 +78,11 @@ def drawWays(pbMap,d, node_ids):
 			#stylestr = ";".join([key+":"+value for key,value in style.iteritems()])
 			d.add(svgwrite.shapes.Circle((node.lon-shiftlon,-(node.lat-shiftlat)),10))
 
+datadir="../../data/"
+
 print "Loading map..."
 pbMap = pb.Map()
-with open("../filter/praha-union-c.pbf","rb") as infile:
+with open(datadir+"/praha-union-c.pbf","rb") as infile:
 	pbMap.ParseFromString(infile.read())
 
 node_ids = {}

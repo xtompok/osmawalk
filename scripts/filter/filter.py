@@ -48,7 +48,7 @@ def deleteAloneNodes(amap,nodeways):
 	for i in range(len(amap.nodes)-1,toidx,-1):
 		del amap.nodes[i]
 
-	
+# Next node on border	
 def onBorder(amap,neighs,nodeid,lastnodeid):
 	lastnode = amap.nodes[amap.nodesidx[lastnodeid]]
 	node = amap.nodes[amap.nodesidx[nodeid]]
@@ -214,7 +214,6 @@ def getbbox(amap,wayid):
 	return (minlon,minlat,maxlon,maxlat)
 
 
-		
 def isIn(amap,node,way):
 	if node.id in way.refs:
 		return True
@@ -466,11 +465,12 @@ def divideLongEdges(amap):
 		newway.refs.append(way.refs[-1])
 		amap.ways[wayidx] = newway
 		
+datadir="../../data/"
 
 start = time.time()
 
 amap = Map()
-amap.loadFromPB("praha-pre.pbf")
+amap.loadFromPB(datadir+"praha-pre.pbf")
 
 end = time.time()
 print "Loading took "+str(end-start)
@@ -527,7 +527,7 @@ print "Marking inside nodes took "+str(end-start)
 start = time.time()
 
 divideLongEdges(amap)
-amap.updateNodesIdx()
+#amap.updateNodesIdx()
 
 end = time.time()
 print "Long edges took "+str(end-start)
@@ -535,7 +535,7 @@ start = time.time()
 
 
 print len(amap.nodes)," nodes, ",len(amap.ways)," ways"
-outfile = open("praha-union.pbf","w")
+outfile = open(datadir+"praha-union.pbf","w")
 outfile.write(amap.toPB().SerializeToString())
 outfile.close()
 

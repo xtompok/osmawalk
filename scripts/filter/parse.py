@@ -191,6 +191,8 @@ def parseOSMfile(filename,waysConf,areasConf,bridgesConf,tunnelsConf):
 		
 # Where find YAML config files
 configDir="../../config/"
+# Where save PBF file
+dataDir="../../data/"
 
 # Load config from YAML
 waysConf=loadWaysConf(configDir+"types.yaml")
@@ -213,7 +215,7 @@ print "Deleting alone nodes took "+str(end-start)
 
 # Write map to file
 start = time.time()
-outfile = open("praha-pre.pbf","w")
+outfile = open(datadir+"praha-pre.pbf","w")
 outfile.write(amap.toPB().SerializeToString())
 outfile.close()
 end = time.time()
