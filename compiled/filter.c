@@ -10,8 +10,14 @@
 #include <ucw/heap.h>
 #include "include/geodesic.h"
 
+#define PF2(tok) #tok
+#define PF(tok) PF2(tok)
+
 #define SCALE 1000000
 #define SWEEP_SCALE 100
+#define EPSILON 0
+#define SWEEP_TYPE int64_t
+#define S_P d
 
 #include "types.h"
 #include "raster.h"
@@ -89,7 +95,6 @@ void initMap(Premap__Map *pbmap){
 }
 
 void mapToPBF(struct map_t map, Premap__Map * pbmap){
-	printf("Ways: %d\n",map.n_ways);
 	pbmap->n_nodes = map.n_nodes;
 	pbmap->nodes = map.nodes;
 	pbmap->n_ways = map.n_ways;
@@ -100,7 +105,7 @@ void mapToPBF(struct map_t map, Premap__Map * pbmap){
 	pbmap->multipols = map.multipols;
 }
 
-double  calcLatForLon(struct line_t line,double lon){
+SWEEP_TYPE  calcLatForLon(struct line_t line,SWEEP_TYPE lon){
 
 //	if (line.endlon < lon){
 //		return line.endlat;
@@ -111,14 +116,14 @@ double  calcLatForLon(struct line_t line,double lon){
 
 //	return line.startlat;
 
-	double minlat = MIN(line.startlat,line.endlat);
-	double maxlat = MAX(line.startlat,line.endlat);	
+	SWEEP_TYPE minlat = MIN(line.startlat,line.endlat);
+	SWEEP_TYPE maxlat = MAX(line.startlat,line.endlat);	
 
-	double b = line.endlon-line.startlon;
-	double a = -(line.endlat-line.startlat);
-	double c = (a*line.startlon+b*line.startlat);
+	SWEEP_TYPE b = line.endlon-line.startlon;
+	SWEEP_TYPE a = -(line.endlat-line.startlat);
+	SWEEP_TYPE c = (a*line.startlon+b*line.startlat);
 
-	double lat;
+	SWEEP_TYPE lat;
 	if (b!=0)
 		lat = (-a*lon+c)/b;
 	else
@@ -146,30 +151,30 @@ double  calcLatForLon(struct line_t line,double lon){
 	return lat;
 }
 
-double * calcCollision(struct line_t line1, struct line_t line2){
-	double lon1 = line1.startlon;
-	double lon2 = line1.endlon;
-	double lat1 = line1.startlat;
-	double lat2 = line1.endlat;
-	double lon3 = line2.startlon;
-	double lon4 = line2.endlon;
-	double lat3 = line2.startlat;
-	double lat4 = line2.endlat;
-	double cit = (lon1*lat2-lat1*lon2)*(lon3-lon4)-(lon3*lat4-lat3*lon4)*(lon1-lon2);
-	double jm = (lon1-lon2)*(lat3-lat4)-(lat1-lat2)*(lon3-lon4);	
+SWEEP_TYPE * calcCollision(struct line_t line1, struct line_t line2){
+	SWEEP_TYPE lon1 = line1.startlon;
+	SWEEP_TYPE lon2 = line1.endlon;
+	SWEEP_TYPE lat1 = line1.startlat;
+	SWEEP_TYPE lat2 = line1.endlat;
+	SWEEP_TYPE lon3 = line2.startlon;
+	SWEEP_TYPE lon4 = line2.endlon;
+	SWEEP_TYPE lat3 = line2.startlat;
+	SWEEP_TYPE lat4 = line2.endlat;
+	SWEEP_TYPE cit = (lon1*lat2-lat1*lon2)*(lon3-lon4)-(lon3*lat4-lat3*lon4)*(lon1-lon2);
+	SWEEP_TYPE jm = (lon1-lon2)*(lat3-lat4)-(lat1-lat2)*(lon3-lon4);	
 	//int64_t cit = (lat2-lat1)*(lon4-lon3)*lon1+(lon2-lon1)*(lon4-lon3)*(lat3-lat1)-(lat4-lat3)*(lon2-lon1)*lon3;
 	//int64_t jm = (lat2-lat1)*(lon4-lon3)-(lon2-lon1)*(lat4-lat3);
 	//printf("Line 1: (%d,%d)--(%d,%d)\n",lon1,lat1,lon2,lat2);
 	//printf("Line 2: (%d,%d)--(%d,%d)\n",lon3,lat3,lon4,lat4);
 	if (jm == 0)
 		return NULL;
-	double lon = cit/jm;
+	SWEEP_TYPE lon = cit/jm;
 	if (MAX(lon1,lon2) < lon || lon < MIN(lon1,lon2) || MAX(lon3,lon4) < lon || lon < MIN(lon3,lon4)){
 		//printf("Lon out of range\n");
 		return NULL;    
 	}
 	cit = (lon1*lat2-lat1*lon2)*(lat3-lat4)-(lon3*lat4-lat3*lon4)*(lat1-lat2);
-	double lat = cit/jm;
+	SWEEP_TYPE lat = cit/jm;
 	//int64_t lat = (lon*(lat2-lat1)+lon1*(lon2-lon1)-lon1*(lat2-lat1))/(lon2-lon1);
 
 	//printf("Line 1: (%d,%d)--(%d,%d)\n",lon1,lat1,lon2,lat2);
@@ -179,8 +184,8 @@ double * calcCollision(struct line_t line1, struct line_t line2){
 		return NULL;
 	}
 	//return (lon,lat)
-	double * result;
-	result = malloc(sizeof(double)*2);
+	SWEEP_TYPE * result;
+	result = malloc(sizeof(SWEEP_TYPE)*2);
 	result[0] = lon;
 	result[1] = lat;
 	return result;
@@ -188,16 +193,6 @@ double * calcCollision(struct line_t line1, struct line_t line2){
 }
 
 
-enum event_type  {EVT_START=2,EVT_END=0,EVT_INTERSECT=1};
-struct event_t {
-	enum event_type type;
-	double lon;
-	double lat;
-	double dlon;
-	double dlat;	
-	unsigned int lineIdx;
-	unsigned int line2Idx;
-};
 
 
 
@@ -398,7 +393,7 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 
 
 
-double lon;
+SWEEP_TYPE lon;
 unsigned char anglesign;
 
 struct line_t * lines;
@@ -427,18 +422,18 @@ int tree_cmp(int idx1, int idx2){
 	return 0;
 	*/
 //	anglesign=1;
-	double lat1;
-	double lat2;
+	SWEEP_TYPE lat1;
+	SWEEP_TYPE lat2;
 	lat1 = calcLatForLon(line1,lon);
 	lat2 = calcLatForLon(line2,lon);
 	if (lat1 < lat2)
 		return -1;
 	if (lat1 > lat2)
 		return 1;
-	double dlat1;
-	double dlon1;
-	double dlat2;
-	double dlon2;
+	SWEEP_TYPE dlat1;
+	SWEEP_TYPE dlon1;
+	SWEEP_TYPE dlat2;
+	SWEEP_TYPE dlon2;
 	dlat1 = line1.endlat - line1.startlat;
 	dlon1 = line1.endlon - line1.startlon;
 	dlat2 = line2.endlat - line2.startlat;
@@ -603,18 +598,30 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 	struct tree_tree * tree;
 	tree = malloc(sizeof(struct tree_tree));
 	tree_init(tree);
+	struct event_t memevt;
 	while (n_queue >0)
 	{
 		if ((n_queue & 0xFFFF) == 0)
 			printf("Queue: %d, tree: %d\n",n_queue,tree->count);
-//		printf("Tree has %d nodes\n",tree->count);
-//		printf("Heap has %d events\n",n_queue);
+		printf("Tree has %d nodes\n",tree->count);
+		printf("Heap has %d events\n",n_queue);
 		HEAP_DELETE_MIN(struct event_t,queue,n_queue,EVENT_CMP,HEAP_SWAP);
 		struct event_t evt;
 //		printf("LineIdx: %d %d\n",evt.lineIdx, evt.type);
 		evt = queue[n_queue+1];
 
-//		printf("Event: %d %d %d %d\n",evt.lon,evt.lat,evt.type,(evt.dlon==0)?-1:evt.dlat/evt.dlon);
+		if ((evt.type==memevt.type)&&
+			(evt.lineIdx==memevt.lineIdx)&&
+			((evt.type!=EVT_INTERSECT)||(evt.line2Idx==memevt.line2Idx))){
+			continue;	
+		}
+		memevt.type=evt.type;
+		memevt.lineIdx=evt.lineIdx;
+		memevt.line2Idx=evt.line2Idx;
+
+		printf("Event: %"PF(S_P)" %"PF(S_P)" %d %d\n",evt.lon,evt.lat,evt.type,(evt.dlon==0)?-1:evt.dlat/evt.dlon);
+
+
 
 		struct line_t line;
 		line = lines[evt.lineIdx];
@@ -623,7 +630,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 			continue;
 		}
 		//struct tree_ins_t ins;
-		double * col;
+		SWEEP_TYPE * col;
 		lon = evt.lon;
 		//Debug
 		//evt.lon = 50091234;
@@ -634,7 +641,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 		switch (evt.type){
 			case EVT_START:
 				anglesign = 1;
-//				printf("EVT_START\n");
+				printf("EVT_START\n");
 				struct tree_node_t * node;
 				node = tree_find(tree,evt.lineIdx);
 				if (node){
@@ -656,14 +663,14 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 				//printf("Neighs: %p %d %d\n",*tree,prev.lineIdx,next.lineIdx);
 				if (prev){
 					col = calcCollision(lines[evt.lineIdx],lines[prev->lineIdx]);					
-					if (col){
+					if (col && (col[0]>evt.lon+EPSILON)){
 //						printf("Intersection\n");
 						intevt.type = EVT_INTERSECT;
 						intevt.lon = col[0];
 						intevt.lat = col[1];
 						intevt.lineIdx = evt.lineIdx;
 						intevt.line2Idx = prev->lineIdx;
-						if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
+						if (lines[intevt.lineIdx].isBar || lines[intevt.line2Idx].isBar){
 							lines[evt.lineIdx].broken = 1;
 							lines[prev->lineIdx].broken = 1;
 						}
@@ -673,14 +680,14 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 				}
 				if (next){
 					col = calcCollision(lines[evt.lineIdx],lines[next->lineIdx]);
-					if (col){
+					if (col && (col[0]>evt.lon+EPSILON)){
 //						printf("Intersection\n");
 						intevt.type = EVT_INTERSECT;
 						intevt.lon = col[0];
 						intevt.lat = col[1];
 						intevt.lineIdx = evt.lineIdx;
 						intevt.line2Idx = next->lineIdx;
-						if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
+						if (lines[intevt.lineIdx].isBar || lines[intevt.line2Idx].isBar){
 							lines[evt.lineIdx].broken = 1;
 							lines[next->lineIdx].broken = 1;
 						}
@@ -691,12 +698,13 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 				break;
 			case EVT_END:
 				anglesign=-1;
-//				printf("EVT_END\n");
+				printf("EVT_END\n");
 				//item = tree_find(*tree,lines,evt.lineIdx,evt.lon,-1);
 				//if (item==NULL){
 				//	printf("Node disappeared\n");
 				//}
 				line = lines[evt.lineIdx];
+				printf("Line: F:%d, T:%d (%"PF(S_P)",%"PF(S_P)")--(%"PF(S_P)",%"PF(S_P)")\n",line.startid, line.endid,line.startlon,line.startlat,line.endlon,line.endlat);
 				lines[evt.lineIdx].ended=1;
 				if (!line.started){
 //					printf("Ended before started!\n");
@@ -706,11 +714,34 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 				}
 				node = tree_find(tree,evt.lineIdx);
 				if (node){
+					struct tree_node_t * prev;
+					struct tree_node_t * next;
+					prev = tree_adjacent(node,0);
+					next = tree_adjacent(node,1);
+
+					//printf("Neighs: %p %d %d\n",*tree,prev.lineIdx,next.lineIdx);
+					if (prev && next){
+						col = calcCollision(lines[evt.lineIdx],lines[prev->lineIdx]);					
+						if (col && (col[0]>evt.lon+EPSILON)){
+	//						printf("Intersection\n");
+							intevt.type = EVT_INTERSECT;
+							intevt.lon = col[0];
+							intevt.lat = col[1];
+							intevt.lineIdx = prev->lineIdx;
+							intevt.line2Idx = next->lineIdx;
+							if (lines[intevt.lineIdx].isBar || lines[intevt.line2Idx].isBar){
+								lines[prev->lineIdx].broken = 1;
+								lines[next->lineIdx].broken = 1;
+							}
+							HEAP_INSERT(struct event_t, queue, n_queue, EVENT_CMP, HEAP_SWAP, intevt);
+						}
+						free(col);
+					}
 					tree_delete(tree,evt.lineIdx);
 				}else
 				{
 					if (line.started){
-//						printf("Zobie!\n");
+						printf("Zobie!\n");
 						tree_dezombification(tree,lines,evt.lineIdx,evt.lon);
 //						printf("Line1: (%d,%d)--(%d,%d)\n",line.startlon,line.startlat,line.endlon,line.endlat);
 
@@ -719,20 +750,25 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 				break;
 			case EVT_INTERSECT:
 				anglesign = -1;
-//				printf("EVT_INT\n");
+				printf("EVT_INT\n");
 //				printf("Event lon: %d lat: %d\n",evt.lon,evt.lat);
 				struct line_t l1;
 				struct line_t l2;
-				int64_t lat1;
-				int64_t lat2;
+				SWEEP_TYPE lat1;
+				SWEEP_TYPE lat2;
 
 				l1 = lines[evt.lineIdx];
 				l2 = lines[evt.line2Idx];
+
+				if (l1.ended || l2.ended){
+					printf("Invalid intersection\n");
+					break;
+				}
 			
 				lat1 = calcLatForLon(lines[evt.lineIdx],evt.lon);
 				lat2 = calcLatForLon(lines[evt.line2Idx],evt.lon);
 				if ((lat1!=lat2)||(lat1!=evt.lat)||(lat2!=evt.lat)){
-//					printf("Lat error: l1:%d, l2:%d, evt:%d \n",lat1,lat2,evt.lat);
+					printf("Lat error: l1:%"PF(S_P)", l2:%"PF(S_P)", evt:%"PF(S_P)" \n",lat1,lat2,evt.lat);
 //					printf("Line1: (%d,%d)--(%d,%d)\n",l1.startlon,l1.startlat,l1.endlon,l1.endlat);
 //					printf("Line2: (%d,%d)--(%d,%d)\n",l2.startlon,l2.startlat,l2.endlon,l2.endlat);
 				}
@@ -741,9 +777,9 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 					tree_delete(tree,evt.lineIdx);
 				}{
 					if (l1.started){
-//						printf("Zobie!\n");
+						printf("Zombie!\n");
 						tree_dezombification(tree,lines,evt.lineIdx,evt.lon);
-//						printf("Line1: (%d,%d)--(%d,%d)\n",l1.startlon,l1.startlat,l1.endlon,l1.endlat);
+						printf("Line: F:%d, T:%d (%"PF(S_P)",%"PF(S_P)")--(%"PF(S_P)",%"PF(S_P)")\n",l1.startid, l1.endid,l1.startlon,l1.startlat,l1.endlon,l1.endlat);
 					}
 				}
 				node = tree_find(tree,evt.line2Idx);
@@ -751,9 +787,9 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 					tree_delete(tree,evt.line2Idx);
 				}{
 					if (l2.started){
-//						printf("Zobie!\n");
+						printf("Zombie!\n");
 						tree_dezombification(tree,lines,evt.line2Idx,evt.lon);
-//						printf("Line1: (%d,%d)--(%d,%d)\n",l2.startlon,l2.startlat,l2.endlon,l2.endlat);
+						printf("Line2: F:%d, T:%d (%"PF(S_P)",%"PF(S_P)")--(%"PF(S_P)",%"PF(S_P)")\n",l2.startid, l2.endid,l2.startlon,l2.startlat,l2.endlon,l2.endlat);
 					}
 				}
 
@@ -766,22 +802,17 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 					prev = tree_adjacent(node,0);
 					next = tree_adjacent(node,1);
 
-					//ins = tree_insert(tree,lines,evt.lineIdx,evt.lon);
-					//item = tree_find(*tree,lines,evt.lineIdx,evt.lon,1);
-					//if (item==NULL){
-					//	printf("Item lost\n");
-					//}
 					//printf("Neighs: %p %d %d\n",*tree,prev.lineIdx,next.lineIdx);
 					if (prev){
 						col = calcCollision(lines[evt.lineIdx],lines[prev->lineIdx]);					
-						if ((col)&&(col[0]>evt.lon)){
-//							printf("Intersection at %d\n",col[0]);
+						if ((col)&&(col[0]>evt.lon+EPSILON)){
+							printf("Intersection at %d\n",col[0]);
 							intevt.type = EVT_INTERSECT;
 							intevt.lon = col[0];
 							intevt.lat = col[1];
 							intevt.lineIdx = evt.lineIdx;
 							intevt.line2Idx = prev->lineIdx;
-							if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
+							if (lines[intevt.lineIdx].isBar || lines[intevt.line2Idx].isBar){
 								lines[evt.lineIdx].broken = 1;
 								lines[prev->lineIdx].broken = 1;
 							}
@@ -791,14 +822,14 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 					}
 					if (next){
 						col = calcCollision(lines[evt.lineIdx],lines[next->lineIdx]);
-						if (col&&(col[0]>evt.lon)){
-//							printf("Intersection at %d\n",col[0]);
+						if (col&&(col[0]>evt.lon+EPSILON)){
+							printf("Intersection at %d\n",col[0]);
 							intevt.type = EVT_INTERSECT;
 							intevt.lon = col[0];
 							intevt.lat = col[1];
 							intevt.lineIdx = evt.lineIdx;
 							intevt.line2Idx = next->lineIdx;
-							if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
+							if (lines[intevt.lineIdx].isBar || lines[intevt.line2Idx].isBar){
 								lines[evt.lineIdx].broken = 1;
 								lines[next->lineIdx].broken = 1;
 							}
@@ -814,16 +845,11 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 					prev = tree_adjacent(node,0);
 					next = tree_adjacent(node,1);
 
-					//ins = tree_insert(tree,lines,evt.lineIdx,evt.lon);
-					//item = tree_find(*tree,lines,evt.lineIdx,evt.lon,1);
-					//if (item==NULL){
-					//	printf("Item lost\n");
-					//}
 					//printf("Neighs: %p %d %d\n",*tree,prev.lineIdx,next.lineIdx);
 					if (prev){
 						col = calcCollision(lines[evt.line2Idx],lines[prev->lineIdx]);					
-						if (col && (col[0]>evt.lon)){
-//							printf("Intersection at %d\n",col[0]);
+						if (col && (col[0]>evt.lon+EPSILON)){
+							printf("Intersection at %d\n",col[0]);
 							intevt.type = EVT_INTERSECT;
 							intevt.lon = col[0];
 							intevt.lat = col[1];
@@ -839,8 +865,8 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 					}
 					if (next){
 						col = calcCollision(lines[evt.line2Idx],lines[next->lineIdx]);
-						if (col&&(col[0]>evt.lon)){
-//							printf("Intersection at %d\n",col[0]);
+						if (col&&(col[0]>evt.lon+EPSILON)){
+							printf("Intersection at %d\n",col[0]);
 							intevt.type = EVT_INTERSECT;
 							intevt.lon = col[0];
 							intevt.lat = col[1];
@@ -981,7 +1007,7 @@ uint8_t nodeInPolygon(struct map_t map, Premap__Node * node, Premap__Way * way){
 		periLine.endlon = n2->lon;
 		periLine.endlat = n2->lat;
 
-		double * col;
+		SWEEP_TYPE * col;
 		col = calcCollision(nodeLine,periLine);
 	//	printf("Calc Collision!\n");
 		if (col==NULL)
@@ -1194,8 +1220,8 @@ int main (int argc, char ** argv){
 	int ** candidates;
 	candidates = makeDirectCandidates(map,raster,graph.wayGraph,20);
 	struct line_t * lines;
-//	lines = findDirectWays(map,candidates,graph.barGraph,raster.minlon,raster.minlat);
-//	map = addDirectToMap(lines,map);
+	lines = findDirectWays(map,candidates,graph.barGraph,raster.minlon,raster.minlat);
+	map = addDirectToMap(lines,map);
 //	struct walk_area_t * walkareas;
 //	walkareas = findWalkAreas(map,raster);
 	map = removeBarriers(map);

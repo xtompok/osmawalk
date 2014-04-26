@@ -37,11 +37,22 @@ struct raster_t {
 	int *** raster;
 };
 
+enum event_type  {EVT_START=2,EVT_END=0,EVT_INTERSECT=1};
+struct event_t {
+	enum event_type type;
+	SWEEP_TYPE lon;
+	SWEEP_TYPE lat;
+	SWEEP_TYPE dlon;
+	SWEEP_TYPE dlat;	
+	unsigned int lineIdx;
+	unsigned int line2Idx;
+};
+
 struct line_t {
-	double  startlon;
-	double  startlat;
-	double endlon;
-	double endlat;
+	SWEEP_TYPE  startlon;
+	SWEEP_TYPE  startlat;
+	SWEEP_TYPE endlon;
+	SWEEP_TYPE endlat;
 	int64_t startid;
 	int64_t endid;
 	bool isBar;
