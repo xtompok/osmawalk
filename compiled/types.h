@@ -38,10 +38,10 @@ struct raster_t {
 };
 
 struct line_t {
-	int64_t startlon;
-	int64_t startlat;
-	int64_t endlon;
-	int64_t endlat;
+	double  startlon;
+	double  startlat;
+	double endlon;
+	double endlat;
 	int64_t startid;
 	int64_t endid;
 	bool isBar;

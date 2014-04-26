@@ -89,6 +89,7 @@ void initMap(Premap__Map *pbmap){
 }
 
 void mapToPBF(struct map_t map, Premap__Map * pbmap){
+	printf("Ways: %d\n",map.n_ways);
 	pbmap->n_nodes = map.n_nodes;
 	pbmap->nodes = map.nodes;
 	pbmap->n_ways = map.n_ways;
@@ -99,7 +100,7 @@ void mapToPBF(struct map_t map, Premap__Map * pbmap){
 	pbmap->multipols = map.multipols;
 }
 
-int64_t calcLatForLon(struct line_t line,int64_t lon){
+double  calcLatForLon(struct line_t line,double lon){
 
 //	if (line.endlon < lon){
 //		return line.endlat;
@@ -110,22 +111,22 @@ int64_t calcLatForLon(struct line_t line,int64_t lon){
 
 //	return line.startlat;
 
-	int64_t minlat = MIN(line.startlat,line.endlat);
-	int64_t maxlat = MAX(line.startlat,line.endlat);	
+	double minlat = MIN(line.startlat,line.endlat);
+	double maxlat = MAX(line.startlat,line.endlat);	
 
-	int64_t b = line.endlon-line.startlon;
-	int64_t a = -(line.endlat-line.startlat);
-	int64_t c = (a*line.startlon+b*line.startlat);
+	double b = line.endlon-line.startlon;
+	double a = -(line.endlat-line.startlat);
+	double c = (a*line.startlon+b*line.startlat);
 
-	int64_t lat;
+	double lat;
 	if (b!=0)
 		lat = (-a*lon+c)/b;
 	else
 		lat = line.startlat;
 
 
-	int64_t cit = (lon-line.startlon)*(line.endlat-line.startlat);
-	int64_t jm = line.endlon - line.startlon;
+	//int64_t cit = (lon-line.startlon)*(line.endlat-line.startlat);
+	//int64_t jm = line.endlon - line.startlon;
 	
 	//printf("LFL: %d %d\n",line.startlon,line.startlat);
 	//printf("LFL: %d %d\n",lon, (cit/jm)+line.startlat);
@@ -134,41 +135,41 @@ int64_t calcLatForLon(struct line_t line,int64_t lon){
 	
 //	printf("Line: (%d,%d)--(%d,%d), lon: %d, lat: %d\n",line.startlon,line.startlat,line.endlon,line.endlat,lon,cit/jm);
 	if ((line.endlon < lon)||(line.startlon > lon)){
-		printf("Line already ended!, lon:%d\n",lon);
-		printf("Line: (%d,%d)--(%d,%d)\n",line.startlon,line.startlat,line.endlon,line.endlat);
+//		printf("Line already ended!, lon:%d\n",lon);
+//		printf("Line: (%d,%d)--(%d,%d)\n",line.startlon,line.startlat,line.endlon,line.endlat);
 	}else
 	if ((lat < minlat) || (lat > maxlat)){
-		printf("Latitude is terribly wrong\n");
+//		printf("Latitude is terribly wrong\n");
 	}
 
 	//return (cit/jm)+line.startlat;
 	return lat;
 }
 
-int64_t * calcCollision(struct line_t line1, struct line_t line2){
-	int64_t lon1 = line1.startlon;
-	int64_t lon2 = line1.endlon;
-	int64_t lat1 = line1.startlat;
-	int64_t lat2 = line1.endlat;
-	int64_t lon3 = line2.startlon;
-	int64_t lon4 = line2.endlon;
-	int64_t lat3 = line2.startlat;
-	int64_t lat4 = line2.endlat;
-	int64_t cit = (lon1*lat2-lat1*lon2)*(lon3-lon4)-(lon3*lat4-lat3*lon4)*(lon1-lon2);
-	int64_t jm = (lon1-lon2)*(lat3-lat4)-(lat1-lat2)*(lon3-lon4);	
+double * calcCollision(struct line_t line1, struct line_t line2){
+	double lon1 = line1.startlon;
+	double lon2 = line1.endlon;
+	double lat1 = line1.startlat;
+	double lat2 = line1.endlat;
+	double lon3 = line2.startlon;
+	double lon4 = line2.endlon;
+	double lat3 = line2.startlat;
+	double lat4 = line2.endlat;
+	double cit = (lon1*lat2-lat1*lon2)*(lon3-lon4)-(lon3*lat4-lat3*lon4)*(lon1-lon2);
+	double jm = (lon1-lon2)*(lat3-lat4)-(lat1-lat2)*(lon3-lon4);	
 	//int64_t cit = (lat2-lat1)*(lon4-lon3)*lon1+(lon2-lon1)*(lon4-lon3)*(lat3-lat1)-(lat4-lat3)*(lon2-lon1)*lon3;
 	//int64_t jm = (lat2-lat1)*(lon4-lon3)-(lon2-lon1)*(lat4-lat3);
 	//printf("Line 1: (%d,%d)--(%d,%d)\n",lon1,lat1,lon2,lat2);
 	//printf("Line 2: (%d,%d)--(%d,%d)\n",lon3,lat3,lon4,lat4);
 	if (jm == 0)
 		return NULL;
-	int64_t lon = cit/jm;
+	double lon = cit/jm;
 	if (MAX(lon1,lon2) < lon || lon < MIN(lon1,lon2) || MAX(lon3,lon4) < lon || lon < MIN(lon3,lon4)){
 		//printf("Lon out of range\n");
 		return NULL;    
 	}
 	cit = (lon1*lat2-lat1*lon2)*(lat3-lat4)-(lon3*lat4-lat3*lon4)*(lat1-lat2);
-	int64_t lat = cit/jm;
+	double lat = cit/jm;
 	//int64_t lat = (lon*(lat2-lat1)+lon1*(lon2-lon1)-lon1*(lat2-lat1))/(lon2-lon1);
 
 	//printf("Line 1: (%d,%d)--(%d,%d)\n",lon1,lat1,lon2,lat2);
@@ -178,8 +179,8 @@ int64_t * calcCollision(struct line_t line1, struct line_t line2){
 		return NULL;
 	}
 	//return (lon,lat)
-	int64_t * result;
-	result = malloc(sizeof(int64_t)*2);
+	double * result;
+	result = malloc(sizeof(double)*2);
 	result[0] = lon;
 	result[1] = lat;
 	return result;
@@ -190,10 +191,10 @@ int64_t * calcCollision(struct line_t line1, struct line_t line2){
 enum event_type  {EVT_START=2,EVT_END=0,EVT_INTERSECT=1};
 struct event_t {
 	enum event_type type;
-	int64_t lon;
-	int64_t lat;
-	int64_t dlon;
-	int64_t dlat;	
+	double lon;
+	double lat;
+	double dlon;
+	double dlat;	
 	unsigned int lineIdx;
 	unsigned int line2Idx;
 };
@@ -343,7 +344,7 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 		
 }
 
-int linesCmp(struct line_t  line1,struct line_t  line2, int64_t lon,int anglesign){
+/*int linesCmp(struct line_t  line1,struct line_t  line2, int64_t lon,int anglesign){
 	
 	// DEBUG
 	if (line1.startid<line2.startid)
@@ -387,7 +388,7 @@ int linesCmp(struct line_t  line1,struct line_t  line2, int64_t lon,int anglesig
 	}
 	return 0;
 
-}
+}*/
 // Sort
 #define ASORT_PREFIX(X) lines_##X
 #define ASORT_KEY_TYPE struct line_t
@@ -397,7 +398,7 @@ int linesCmp(struct line_t  line1,struct line_t  line2, int64_t lon,int anglesig
 
 
 
-int64_t lon;
+double lon;
 unsigned char anglesign;
 
 struct line_t * lines;
@@ -426,18 +427,18 @@ int tree_cmp(int idx1, int idx2){
 	return 0;
 	*/
 //	anglesign=1;
-	int64_t lat1;
-	int64_t lat2;
+	double lat1;
+	double lat2;
 	lat1 = calcLatForLon(line1,lon);
 	lat2 = calcLatForLon(line2,lon);
 	if (lat1 < lat2)
 		return -1;
 	if (lat1 > lat2)
 		return 1;
-	int dlat1;
-	int dlon1;
-	int dlat2;
-	int dlon2;
+	double dlat1;
+	double dlon1;
+	double dlat2;
+	double dlon2;
 	dlat1 = line1.endlat - line1.startlat;
 	dlon1 = line1.endlon - line1.startlon;
 	dlat2 = line2.endlat - line2.startlat;
@@ -486,7 +487,7 @@ void tree_dezombification(struct tree_tree * tree, struct line_t * lines,int lin
 
 }
 
-struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGraph){
+struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGraph,int64_t minlon, int64_t minlat){
 	int n_cand;
 	n_cand = GARY_SIZE(candidates);
 	//struct line_t * lines;
@@ -501,17 +502,17 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 		line = GARY_PUSH(lines);
 
 		if ((n2->lon < n1->lon)||((n2->lon==n1->lon)&&(n2->lat<n1->lat))){
-			line->startlon = n2->lon*SWEEP_SCALE;
-			line->startlat = n2->lat*SWEEP_SCALE;
-			line->endlon = n1->lon*SWEEP_SCALE;
-			line->endlat = n1->lat*SWEEP_SCALE;
+			line->startlon = (n2->lon-minlon)*SWEEP_SCALE;
+			line->startlat = (n2->lat-minlat)*SWEEP_SCALE;
+			line->endlon = (n1->lon-minlon)*SWEEP_SCALE;
+			line->endlat = (n1->lat-minlat)*SWEEP_SCALE;
 			line->startid = n2->id;
 			line->endid = n1->id;
 		} else {
-			line->startlon = n1->lon*SWEEP_SCALE;
-			line->startlat = n1->lat*SWEEP_SCALE;
-			line->endlon = n2->lon*SWEEP_SCALE;
-			line->endlat = n2->lat*SWEEP_SCALE;
+			line->startlon = (n1->lon-minlon)*SWEEP_SCALE;
+			line->startlat = (n1->lat-minlat)*SWEEP_SCALE;
+			line->endlon = (n2->lon-minlon)*SWEEP_SCALE;
+			line->endlat = (n2->lat-minlat)*SWEEP_SCALE;
 			line->startid = n1->id;
 			line->endid = n2->id;
 		}
@@ -534,17 +535,17 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 		line = GARY_PUSH(lines);
 
 		if ((n2->lon < n1->lon)||((n2->lon==n1->lon)&&(n2->lat<n1->lat))){
-			line->startlon = n2->lon*SWEEP_SCALE;
-			line->startlat = n2->lat*SWEEP_SCALE;
-			line->endlon = n1->lon*SWEEP_SCALE;
-			line->endlat = n1->lat*SWEEP_SCALE;
+			line->startlon = (n2->lon-minlon)*SWEEP_SCALE;
+			line->startlat = (n2->lat-minlat)*SWEEP_SCALE;
+			line->endlon = (n1->lon-minlon)*SWEEP_SCALE;
+			line->endlat = (n1->lat-minlat)*SWEEP_SCALE;
 			line->startid = n2->id;
 			line->endid = n1->id;
 		} else {
-			line->startlon = n1->lon*SWEEP_SCALE;
-			line->startlat = n1->lat*SWEEP_SCALE;
-			line->endlon = n2->lon*SWEEP_SCALE;
-			line->endlat = n2->lat*SWEEP_SCALE;
+			line->startlon = (n1->lon-minlon)*SWEEP_SCALE;
+			line->startlat = (n1->lat-minlat)*SWEEP_SCALE;
+			line->endlon = (n2->lon-minlon)*SWEEP_SCALE;
+			line->endlat = (n2->lat-minlat)*SWEEP_SCALE;
 			line->startid = n1->id;
 			line->endid = n2->id;
 		}
@@ -622,7 +623,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 			continue;
 		}
 		//struct tree_ins_t ins;
-		int64_t * col;
+		double * col;
 		lon = evt.lon;
 		//Debug
 		//evt.lon = 50091234;
@@ -948,7 +949,7 @@ void checkWayTypes(Premap__Map * pbmap){
 }
 uint8_t nodeInPolygon(struct map_t map, Premap__Node * node, Premap__Way * way){
 	if (way->refs[0]!=way->refs[way->n_refs-1]){
-		printf("Way is not closed!\n");
+//		printf("Way is not closed!\n");
 		return 0;
 	}
 	int64_t min_lon;
@@ -980,7 +981,7 @@ uint8_t nodeInPolygon(struct map_t map, Premap__Node * node, Premap__Way * way){
 		periLine.endlon = n2->lon;
 		periLine.endlat = n2->lat;
 
-		int64_t * col;
+		double * col;
 		col = calcCollision(nodeLine,periLine);
 	//	printf("Calc Collision!\n");
 		if (col==NULL)
@@ -994,7 +995,7 @@ uint8_t nodeInPolygon(struct map_t map, Premap__Node * node, Premap__Way * way){
 		crosses++;
 	}
 
-	printf("Crosses:%d\n",crosses);
+//	printf("Crosses:%d\n",crosses);
 	return crosses%2;
 
 }
@@ -1109,6 +1110,47 @@ struct walk_area_t * findWalkAreas(struct map_t map, struct raster_t raster){
 	}
 	return walkareas;
 } 
+
+void prepareForVoronoi(struct map_t map, struct walk_area_t * waklareas){
+	
+}
+
+struct map_t removeBarriers(struct map_t map){
+	Premap__Way ** newways;
+	GARY_INIT(newways,0);
+	for (int i=0;i<map.n_ways;i++){
+		if (isBarrier(map.ways[i])){
+			free(map.ways[i]);
+			continue;
+		}
+		Premap__Way ** way;
+		way = GARY_PUSH(newways);
+		*way = map.ways[i];
+	}
+	GARY_FREE(map.ways);
+	map.ways = newways;
+	map.n_ways = GARY_SIZE(newways);
+
+	Premap__Node ** newnodes;
+	GARY_INIT(newnodes,0);
+
+	nodeWays_refresh(map);
+	for (int i=0;i<map.n_nodes;i++){
+		if (GARY_SIZE(nodeWays_find(map.nodes[i]->id)->ways)==0){
+			free(map.nodes[i]);
+			continue;
+		}
+		Premap__Node ** node;
+		node = GARY_PUSH(newnodes);
+		*node = map.nodes[i];
+	}
+	GARY_FREE(map.nodes);
+	map.nodes=newnodes;
+	map.n_nodes = GARY_SIZE(newnodes);
+
+	return map;
+}
+
 	
 
 int main (int argc, char ** argv){
@@ -1152,11 +1194,12 @@ int main (int argc, char ** argv){
 	int ** candidates;
 	candidates = makeDirectCandidates(map,raster,graph.wayGraph,20);
 	struct line_t * lines;
-	lines = findDirectWays(map,candidates,graph.barGraph);
-	map = addDirectToMap(lines,map);
-	struct walk_area_t * walkareas;
-	walkareas = findWalkAreas(map,raster);
-	printf("Found %d walk areas\n",GARY_SIZE(walkareas));
+//	lines = findDirectWays(map,candidates,graph.barGraph,raster.minlon,raster.minlat);
+//	map = addDirectToMap(lines,map);
+//	struct walk_area_t * walkareas;
+//	walkareas = findWalkAreas(map,raster);
+	map = removeBarriers(map);
+//	printf("Found %d walk areas\n",GARY_SIZE(walkareas));
 	mapToPBF(map,pbmap);
 	//checkWayTypes(pbmap);
 	len = premap__map__get_packed_size(pbmap);

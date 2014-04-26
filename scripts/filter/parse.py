@@ -215,7 +215,7 @@ print "Deleting alone nodes took "+str(end-start)
 
 # Write map to file
 start = time.time()
-outfile = open(datadir+"praha-pre.pbf","w")
+outfile = open(dataDir+"praha-pre.pbf","w")
 outfile.write(amap.toPB().SerializeToString())
 outfile.close()
 end = time.time()
