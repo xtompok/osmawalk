@@ -1,0 +1,20 @@
+speeds:
+        WAY: 4
+        PARK: 4
+        GREEN: 3
+        FOREST: 3
+        PAVED: 5
+        UNPAVED: 4
+        STEPS: 2.5
+        HIGHWAY: 5
+        DIRECT: 3
+
+ratios:
+        PARK: 1
+        GREEN: 1
+        FOREST: 0.75
+        PAVED: 1.2
+        UNPAVED: 1
+        STEPS: 0.6
+        HIGHWAY: 1.2
+        DIRECT: 0.8

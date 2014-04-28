@@ -14,7 +14,7 @@
 #define PF(tok) PF2(tok)
 
 #define SCALE 1000000
-#define SWEEP_SCALE 100
+#define SWEEP_SCALE 10000
 #define EPSILON 0
 #define SWEEP_TYPE int64_t
 #define S_P d
@@ -482,6 +482,74 @@ void tree_dezombification(struct tree_tree * tree, struct line_t * lines,int lin
 
 }
 
+struct event_t makeIntEvent(struct line_t * lines,int l1Idx, int l2Idx, SWEEP_TYPE lon){
+	struct event_t intevt;
+	SWEEP_TYPE * col;
+	col = calcCollision(lines[l1Idx],lines[l2Idx]);					
+	if (col && (col[0]>lon+EPSILON)){
+//		printf("Intersection\n");
+		intevt.type = EVT_INTERSECT;
+		intevt.lon = col[0];
+		intevt.lat = col[1];
+		SWEEP_TYPE dlat1;
+		SWEEP_TYPE dlat2;
+		SWEEP_TYPE dlon1;
+		SWEEP_TYPE dlon2;
+		dlat1 = lines[l1Idx].endlat-lines[l1Idx].startlat;
+		dlat2 = lines[l2Idx].endlat-lines[l2Idx].startlat;
+		dlon1 = lines[l1Idx].endlon-lines[l1Idx].startlon;
+		dlon2 = lines[l2Idx].endlon-lines[l2Idx].startlon;
+		if (dlat1*dlon2 < dlon1*dlat2){
+			intevt.dlat = dlat1;
+			intevt.dlon = dlon1;
+		}else{
+			intevt.dlat = dlat2;
+			intevt.dlon = dlon2;
+		}
+		intevt.lineIdx = l1Idx;
+		intevt.line2Idx = l2Idx;
+		if (lines[intevt.lineIdx].isBar || lines[intevt.line2Idx].isBar){
+			lines[l1Idx].broken = 1;
+			lines[l2Idx].broken = 1;
+		}
+		free(col);
+		return intevt; 
+	}
+	intevt.lineIdx=-1;
+	return intevt;
+
+
+}
+int eventCmp(struct event_t evt1,struct event_t evt2){
+	if (evt1.lon<evt2.lon)
+		return 1;
+	if (evt1.lon>evt2.lon)
+		return 0;
+	if (evt1.lat<evt2.lat)
+		return 1;
+	if (evt1.lat>evt2.lat)
+		return 0;
+	if (evt1.type<evt2.type)
+		return 1;
+	if (evt1.type>evt2.type)
+		return 0;
+	if (evt1.dlat*evt2.dlon < evt1.dlon*evt2.dlat)
+		return 1;
+	if (evt1.dlat*evt2.dlon > evt1.dlon*evt2.dlat)
+		return 0;
+	if (evt1.lineIdx < evt2.lineIdx)
+		return 1;
+	if (evt1.lineIdx > evt2.lineIdx)
+		return 0;
+	if (evt1.line2Idx < evt2.line2Idx)
+		return 1;
+	if (evt1.line2Idx > evt2.line2Idx)
+		return 0;
+	return 0;
+	
+
+}
+
 struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGraph,int64_t minlon, int64_t minlat){
 	int n_cand;
 	n_cand = GARY_SIZE(candidates);
@@ -574,6 +642,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 		event->lineIdx = i;
 	}
 	
+	/*
 	#define EVENT_CMP(x,y) (\
 		((x).lon<(y).lon)||\
 		(\
@@ -592,13 +661,15 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 				)\
 			)\
 		)\
-	)
+	)*/
+	#define EVENT_CMP(x,y) eventCmp(x,y)
 
 	HEAP_INIT(struct event_t,queue,n_queue,EVENT_CMP,HEAP_SWAP);
 	struct tree_tree * tree;
 	tree = malloc(sizeof(struct tree_tree));
 	tree_init(tree);
 	struct event_t memevt;
+	lon=0;
 	while (n_queue >0)
 	{
 		if ((n_queue & 0xFFFF) == 0)
@@ -629,9 +700,6 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 //			printf("Special case\n");
 			continue;
 		}
-		//struct tree_ins_t ins;
-		SWEEP_TYPE * col;
-		lon = evt.lon;
 		//Debug
 		//evt.lon = 50091234;
 		// /Debug
@@ -655,45 +723,18 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 				prev = tree_adjacent(node,0);
 				next = tree_adjacent(node,1);
 
-				//ins = tree_insert(tree,lines,evt.lineIdx,evt.lon);
-				//item = tree_find(*tree,lines,evt.lineIdx,evt.lon,1);
-				//if (item==NULL){
-				//	printf("Item lost\n");
-				//}
 				//printf("Neighs: %p %d %d\n",*tree,prev.lineIdx,next.lineIdx);
 				if (prev){
-					col = calcCollision(lines[evt.lineIdx],lines[prev->lineIdx]);					
-					if (col && (col[0]>evt.lon+EPSILON)){
-//						printf("Intersection\n");
-						intevt.type = EVT_INTERSECT;
-						intevt.lon = col[0];
-						intevt.lat = col[1];
-						intevt.lineIdx = evt.lineIdx;
-						intevt.line2Idx = prev->lineIdx;
-						if (lines[intevt.lineIdx].isBar || lines[intevt.line2Idx].isBar){
-							lines[evt.lineIdx].broken = 1;
-							lines[prev->lineIdx].broken = 1;
-						}
+					intevt = makeIntEvent(lines,evt.lineIdx,prev->lineIdx,evt.lon);
+					if (intevt.lineIdx!=-1){
 						HEAP_INSERT(struct event_t, queue, n_queue, EVENT_CMP, HEAP_SWAP, intevt);
 					}
-					free(col);
 				}
 				if (next){
-					col = calcCollision(lines[evt.lineIdx],lines[next->lineIdx]);
-					if (col && (col[0]>evt.lon+EPSILON)){
-//						printf("Intersection\n");
-						intevt.type = EVT_INTERSECT;
-						intevt.lon = col[0];
-						intevt.lat = col[1];
-						intevt.lineIdx = evt.lineIdx;
-						intevt.line2Idx = next->lineIdx;
-						if (lines[intevt.lineIdx].isBar || lines[intevt.line2Idx].isBar){
-							lines[evt.lineIdx].broken = 1;
-							lines[next->lineIdx].broken = 1;
-						}
+					intevt = makeIntEvent(lines,evt.lineIdx,next->lineIdx,evt.lon);
+					if (intevt.lineIdx!=-1){
 						HEAP_INSERT(struct event_t, queue, n_queue, EVENT_CMP, HEAP_SWAP, intevt);
 					}
-					free(col);
 				}
 				break;
 			case EVT_END:
@@ -721,21 +762,10 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 
 					//printf("Neighs: %p %d %d\n",*tree,prev.lineIdx,next.lineIdx);
 					if (prev && next){
-						col = calcCollision(lines[evt.lineIdx],lines[prev->lineIdx]);					
-						if (col && (col[0]>evt.lon+EPSILON)){
-	//						printf("Intersection\n");
-							intevt.type = EVT_INTERSECT;
-							intevt.lon = col[0];
-							intevt.lat = col[1];
-							intevt.lineIdx = prev->lineIdx;
-							intevt.line2Idx = next->lineIdx;
-							if (lines[intevt.lineIdx].isBar || lines[intevt.line2Idx].isBar){
-								lines[prev->lineIdx].broken = 1;
-								lines[next->lineIdx].broken = 1;
-							}
+						intevt = makeIntEvent(lines,prev->lineIdx,next->lineIdx,evt.lon);
+						if (intevt.lineIdx!=-1){
 							HEAP_INSERT(struct event_t, queue, n_queue, EVENT_CMP, HEAP_SWAP, intevt);
 						}
-						free(col);
 					}
 					tree_delete(tree,evt.lineIdx);
 				}else
@@ -804,38 +834,16 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 
 					//printf("Neighs: %p %d %d\n",*tree,prev.lineIdx,next.lineIdx);
 					if (prev){
-						col = calcCollision(lines[evt.lineIdx],lines[prev->lineIdx]);					
-						if ((col)&&(col[0]>evt.lon+EPSILON)){
-							printf("Intersection at %d\n",col[0]);
-							intevt.type = EVT_INTERSECT;
-							intevt.lon = col[0];
-							intevt.lat = col[1];
-							intevt.lineIdx = evt.lineIdx;
-							intevt.line2Idx = prev->lineIdx;
-							if (lines[intevt.lineIdx].isBar || lines[intevt.line2Idx].isBar){
-								lines[evt.lineIdx].broken = 1;
-								lines[prev->lineIdx].broken = 1;
-							}
+						intevt = makeIntEvent(lines,evt.lineIdx,prev->lineIdx,evt.lon);
+						if (intevt.lineIdx!=-1){
 							HEAP_INSERT(struct event_t, queue, n_queue, EVENT_CMP, HEAP_SWAP, intevt);
 						}
-						free(col);
 					}
 					if (next){
-						col = calcCollision(lines[evt.lineIdx],lines[next->lineIdx]);
-						if (col&&(col[0]>evt.lon+EPSILON)){
-							printf("Intersection at %d\n",col[0]);
-							intevt.type = EVT_INTERSECT;
-							intevt.lon = col[0];
-							intevt.lat = col[1];
-							intevt.lineIdx = evt.lineIdx;
-							intevt.line2Idx = next->lineIdx;
-							if (lines[intevt.lineIdx].isBar || lines[intevt.line2Idx].isBar){
-								lines[evt.lineIdx].broken = 1;
-								lines[next->lineIdx].broken = 1;
-							}
+						intevt = makeIntEvent(lines,evt.lineIdx,next->lineIdx,evt.lon);
+						if (intevt.lineIdx!=-1){
 							HEAP_INSERT(struct event_t, queue, n_queue, EVENT_CMP, HEAP_SWAP, intevt);
 						}
-						free(col);
 					}
 				}
 				if (!lines[evt.line2Idx].ended){
@@ -847,45 +855,23 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 
 					//printf("Neighs: %p %d %d\n",*tree,prev.lineIdx,next.lineIdx);
 					if (prev){
-						col = calcCollision(lines[evt.line2Idx],lines[prev->lineIdx]);					
-						if (col && (col[0]>evt.lon+EPSILON)){
-							printf("Intersection at %d\n",col[0]);
-							intevt.type = EVT_INTERSECT;
-							intevt.lon = col[0];
-							intevt.lat = col[1];
-							intevt.lineIdx = evt.line2Idx;
-							intevt.line2Idx = prev->lineIdx;
-							if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
-								lines[evt.line2Idx].broken = 1;
-								lines[prev->lineIdx].broken = 1;
-							}
+						intevt = makeIntEvent(lines,evt.line2Idx,prev->lineIdx,evt.lon);
+						if (intevt.lineIdx!=-1){
 							HEAP_INSERT(struct event_t, queue, n_queue, EVENT_CMP, HEAP_SWAP, intevt);
 						}
-						free(col);
 					}
 					if (next){
-						col = calcCollision(lines[evt.line2Idx],lines[next->lineIdx]);
-						if (col&&(col[0]>evt.lon+EPSILON)){
-							printf("Intersection at %d\n",col[0]);
-							intevt.type = EVT_INTERSECT;
-							intevt.lon = col[0];
-							intevt.lat = col[1];
-							intevt.lineIdx = evt.line2Idx;
-							intevt.line2Idx = next->lineIdx;
-							if (lines[evt.lineIdx].isBar || lines[evt.line2Idx].isBar){
-								lines[evt.line2Idx].broken = 1;
-								lines[next->lineIdx].broken = 1;
-							}
+						intevt = makeIntEvent(lines,evt.line2Idx,next->lineIdx,evt.lon);
+						if (intevt.lineIdx!=-1){
 							HEAP_INSERT(struct event_t, queue, n_queue, EVENT_CMP, HEAP_SWAP, intevt);
 						}
-						free(col);
 					}
 
 				}
 				break;
 		}
 
-		TREE_FOR_ALL(tree,tree,iternode)
+		/*TREE_FOR_ALL(tree,tree,iternode)
 		{
 			struct line_t l;
 			l = lines[iternode->lineIdx];
@@ -893,7 +879,9 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 			
 		}
 		TREE_END_FOR;
+		*/
 	//	printf("Lon:%d Lat:%d\n",queue[n_queue+1].lon,queue[n_queue+1].lat);
+		lon = evt.lon;
 	}
 	printf("Check\n");
 	for (int i=0;i<GARY_SIZE(lines);i++){
@@ -1224,7 +1212,7 @@ int main (int argc, char ** argv){
 	map = addDirectToMap(lines,map);
 //	struct walk_area_t * walkareas;
 //	walkareas = findWalkAreas(map,raster);
-	map = removeBarriers(map);
+//	map = removeBarriers(map);
 //	printf("Found %d walk areas\n",GARY_SIZE(walkareas));
 	mapToPBF(map,pbmap);
 	//checkWayTypes(pbmap);

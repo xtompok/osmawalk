@@ -2,14 +2,21 @@ CC=gcc
 CFLAGS= -c -g -Wall -Wno-format -std=gnu99 -O0 -march=native -I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw
 PFLAGS= -E -Wall -std=gnu99 -O3 -march=native -I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw
 LDFLAGS= -lprotobuf-c -lucw-6.0 -lproj -lm -L/mnt/sda1/home/jethro/Programy/libucw/obj/ucw 
-SOURCES=filter.c raster.c hashes.c utils.c include/premap.pb-c.c include/types.pb-c.c include/geodesic.c
+SOURCES=raster.c hashes.c utils.c include/premap.pb-c.c include/types.pb-c.c include/graph.pb-c.c include/geodesic.c
 OBJECTS=$(SOURCES:.c=.o)
-EXECUTABLE=filter
+EXECUTABLE1=filter
+EXECUTABLE2=search
 
-all: $(SOURCES) $(EXECUTABLE)
+all: $(SOURCES) $(EXECUTABLE1) $(EXECUTABLE2)
+
 	
-$(EXECUTABLE): $(OBJECTS) 
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+$(EXECUTABLE1): $(OBJECTS) $@.c 
+	$(CC) $(CFLAGS) $@.c -o $@.o
+	$(CC) $(LDFLAGS) $(OBJECTS) $@.o -o $@
+
+$(EXECUTABLE2): $(OBJECTS) $@.c
+	$(CC) $(CFLAGS) $@.c -o $@.o
+	$(CC) $(LDFLAGS) $(OBJECTS) $@.o -o $@
 
 .c.o:
 	$(CC) $(CFLAGS) $< -o $@
@@ -21,7 +28,8 @@ clean:
 	rm *.o include/*.o
 
 protobuf:
-	protoc-c --proto_path ../scripts/filter/ ../scripts/filter/types.proto --c_out include/
-	protoc-c --proto_path ../scripts/filter/ ../scripts/filter/premap.proto --c_out include/
+	protoc-c --proto_path ../config/ ../config/types.proto --c_out include/
+	protoc-c --proto_path ../config/ ../config/premap.proto --c_out include/
+	protoc-c --proto_path ../config/ ../config/graph.proto --c_out include/
 
 .PHONY: protobuf
