@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 
 import sys
 sys.path.append("../svgwrite-1.1.3")
@@ -50,6 +50,7 @@ def drawWays(pbMap,d, node_ids):
 			style["stroke"] = "magenta"
 		elif way.type==pbtypes.DIRECT_BAD:
 			style["stroke"] = "orange"
+                        print "Found broken line"
 
 		elif way.type==pbtypes.MULTIPOLYGON:
 			style["stroke"] = "orange"
