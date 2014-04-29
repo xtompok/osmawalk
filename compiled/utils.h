@@ -4,7 +4,7 @@
 
 #include "include/premap.pb-c.h" 
 static inline double int2deg(int intdeg){
-	return 1.0*intdeg/SCALE;		
+	return (1.0*intdeg)/SCALE;		
 }
 
 static inline int deg2int(double deg){

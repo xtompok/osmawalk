@@ -166,6 +166,7 @@ struct nodeways_t * makeNodeWays(Graph__Graph * graph){
 	nodeways = malloc(sizeof(struct nodeways_t)*graph->n_vertices);
 	for (int i=0;i<graph->n_vertices;i++){
 		nodeways[i].n_ways=0;
+//		printf("%f %f\n",graph->vertices[i]->lat,graph->vertices[i]->lon);
 	}
 	for (int i=0;i<graph->n_edges;i++){
 		nodeways[graph->edges[i]->vfrom].n_ways++;
@@ -233,47 +234,67 @@ void findWay(Graph__Graph * graph, struct config_t conf, struct nodeways_t * nod
 	dijArray[fromIdx].reached=true;
 	dijArray[fromIdx].dist=0;
 	
-	int tmp;
+/*	int tmp;
 	tmp=fromIdx;
 	fromIdx=toIdx;
 	toIdx=tmp;
-
+*/
 	int * heap;
 	int n_heap;
-	n_heap = graph->n_vertices;
-	heap = malloc(sizeof(int)*n_heap);
-	for (int i=0;i<n_heap;i++){
+	//n_heap = graph->n_vertices;
+	heap = malloc(sizeof(int)*graph->n_vertices);
+	/*for (int i=0;i<n_heap;i++){
 		heap[i]=i;
-	}
+	}*/
+	n_heap = 0;
 	#define DIJ_CMP(x,y) (dijArray[x].dist<dijArray[y].dist)
-
-	HEAP_INIT(int,heap,n_heap,DIJ_CMP,HEAP_SWAP);
+	
+	HEAP_INSERT(int,heap,n_heap,DIJ_CMP,HEAP_SWAP,fromIdx);
 
 	while(!dijArray[toIdx].completed){
-		printf("Heap has %d vertices\n", n_heap);
+		//printf("Heap has %d vertices\n", n_heap);
 		HEAP_DELETE_MIN(int,heap,n_heap,DIJ_CMP,HEAP_SWAP);
 		int vIdx;
 		vIdx = heap[n_heap+1];
+		
+		if (!dijArray[vIdx].reached){
+			printf("Found unreagched vertex, exitting\n");
+			return;
+		
+		}
+		if (dijArray[vIdx].completed){
+			continue;
+		}
+		//printf("%d %f\n",vIdx,dijArray[vIdx].dist);
 		for (int i=0;i<nodeways[vIdx].n_ways;i++){
 			Graph__Edge * way;
 			way = graph->edges[nodeways[vIdx].ways[i]];
 			double len;
 			len = calcTime(graph,conf,way);
+		//	printf("Neigh len %f\n",len);
 			if (dijArray[way->vto].dist <= (dijArray[vIdx].dist+len))
 				continue;
+		//	printf("Replacing\n");
 			dijArray[way->vto].dist = dijArray[vIdx].dist+len;
 			dijArray[way->vto].fromIdx = vIdx;
 			dijArray[way->vto].fromEdgeIdx = nodeways[vIdx].ways[i];
 			dijArray[way->vto].reached = true;
+			HEAP_INSERT(int,heap,n_heap,DIJ_CMP,HEAP_SWAP,way->vto);
 		
 		}
 		dijArray[vIdx].completed=true;
+		HEAP_INIT(int,heap,n_heap,DIJ_CMP,HEAP_SWAP);
 	}
 }
 
-void printResults(Graph__Graph * graph, struct config_t conf, struct dijnode_t * dijArray, int fromIdx){
+void printResults(Graph__Graph * graph, struct config_t conf, struct dijnode_t * dijArray, int fromIdx, int toIdx){
+/*	if (!dijArray[toIdx].completed){
+		printf("Route not found\n");
+		return;
+	}
+*/	printf("D1: %f, D2:%f\n",dijArray[fromIdx].dist,dijArray[toIdx].dist);
 	int idx;
-	idx = fromIdx;
+	idx = toIdx;
 	while (dijArray[idx].fromIdx!=-1){
 		printf("%f,%f,%d\n",graph->vertices[idx]->lat,graph->vertices[idx]->lon,graph->edges[dijArray[idx].fromEdgeIdx]->type);
 		idx = dijArray[idx].fromIdx;
@@ -311,6 +332,7 @@ Graph__Graph * loadMap(char * filename){
 }
 	
 int findNearestVertex(Graph__Graph * graph, double lon, double lat){
+	printf("Lat: %f, lon: %f\n",lat,lon);
 	double minDist;
 	int minIdx;
 	minDist = DBL_MAX;
@@ -326,6 +348,8 @@ int findNearestVertex(Graph__Graph * graph, double lon, double lat){
 			minIdx = i;
 		}
 	}
+	printf("Min dist: %f\n",minDist*1000000);
+	printf("Point %d: %f, %f\n",minIdx,graph->vertices[minIdx]->lon,graph->vertices[minIdx]->lat);
 	return minIdx;
 }
 
@@ -336,7 +360,7 @@ void usage(void){
 int main (int argc, char ** argv){
 	if (argc<5){
 		usage();
-		return;
+		return 1;
 	}
 	struct config_t conf;
 	conf = parseConfigFile("../config/speeds.yaml");
@@ -347,6 +371,8 @@ int main (int argc, char ** argv){
 		printf("Error loading map\n");	
 		return 2;
 	}
+
+	printf("Graph has %d vertices and %d edges\n",graph->n_vertices,graph->n_edges);
 	double lon;
 	double lat;
 	lat = atof(argv[1]);
@@ -359,6 +385,14 @@ int main (int argc, char ** argv){
 	int toIdx;
 	toIdx = findNearestVertex(graph,lon,lat);
 
+	printf("Searching from %lld(%f,%f) to %lld(%f,%f)\n",graph->vertices[fromIdx]->osmid,
+			graph->vertices[fromIdx]->lat,
+			graph->vertices[fromIdx]->lon,
+			graph->vertices[toIdx]->osmid,
+			graph->vertices[toIdx]->lat,
+			graph->vertices[toIdx]->lon
+			);
+
 	struct dijnode_t * dijArray;
 	dijArray = prepareDijkstra(graph);
 
@@ -366,28 +400,7 @@ int main (int argc, char ** argv){
 	nodeWays = makeNodeWays(graph);
 
 	findWay(graph, conf, nodeWays, dijArray,fromIdx, toIdx);
-/*
+	printResults(graph, conf, dijArray, fromIdx, toIdx);
 
-	initMap(pbmap);
-	printf("Loaded %d nodes, %d ways\n",map.n_nodes,map.n_ways);
-	nodesIdx_refresh(map.n_nodes,map.nodes);
-	waysIdx_refresh(map.n_ways,map.ways);
-	nodeWays_refresh(map);
-	struct graph_t graph;
-	graph = makeGraph(map);
-	struct raster_t raster;
-	raster = makeRaster(map);
-	int ** candidates;
-	candidates = makeDirectCandidates(map,raster,graph.wayGraph,20);
-	struct line_t * lines;
-	lines = findDirectWays(map,candidates,graph.barGraph,raster.minlon,raster.minlat);
-	map = addDirectToMap(lines,map);
-//	struct walk_area_t * walkareas;
-//	walkareas = findWalkAreas(map,raster);
-//	map = removeBarriers(map);
-//	printf("Found %d walk areas\n",GARY_SIZE(walkareas));
-
-*/	
-	
 	return 0;
 }

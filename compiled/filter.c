@@ -9,6 +9,7 @@
 #include <ucw/gary.h>
 #include <ucw/heap.h>
 #include "include/geodesic.h"
+#include "include/graph.pb-c.h"
 
 #define PF2(tok) #tok
 #define PF(tok) PF2(tok)
@@ -16,7 +17,6 @@
 #define SCALE 1000000
 #define SWEEP_SCALE 10000
 #define EPSILON 0
-#define SWEEP_TYPE int64_t
 #define S_P d
 
 #include "types.h"
@@ -1165,15 +1165,12 @@ struct map_t removeBarriers(struct map_t map){
 	return map;
 }
 
-	
-
-int main (int argc, char ** argv){
-	
+Premap__Map * loadMap(char * filename){
 	FILE * IN;
-	IN = fopen("../data/praha-union.pbf","r");
+	IN = fopen(filename,"r");
 	if (IN==NULL){
 		printf("File opening error\n");	
-		return 1;
+		return NULL;
 	}
 	fseek(IN,0,SEEK_END);
 	long int len;
@@ -1186,14 +1183,118 @@ int main (int argc, char ** argv){
 	read = fread(buf,1,len,IN);
 	if (read!=len){
 		printf("Not read all file");
-		return 2;
+		return NULL;
 	}
 	fclose(IN);
 	
 	Premap__Map *pbmap;
 	pbmap = premap__map__unpack(NULL,len,buf);
+	return pbmap;
+}
+	
+int saveMap(Premap__Map * pbmap,char * filename){
+	int64_t len;
+	uint8_t * buf;
+	len = premap__map__get_packed_size(pbmap);
+	buf = malloc(len);
+	premap__map__pack(pbmap,buf);
+	FILE * OUT;
+	OUT = fopen(filename,"w");
+	if (OUT==NULL){
+		printf("File opening error\n");	
+		return 1;
+	}
+	fwrite(buf,1,len,OUT);
+	fclose(OUT);
+	return 0;
+
+}
+
+int saveSearchGraph(Graph__Graph * graph,char * filename){
+	int64_t len;
+	uint8_t * buf;
+	len = graph__graph__get_packed_size(graph);
+	buf = malloc(len);
+	graph__graph__pack(graph,buf);
+	FILE * OUT;
+	OUT = fopen(filename,"w");
+	if (OUT==NULL){
+		printf("File opening error\n");	
+		return 1;
+	}
+	fwrite(buf,1,len,OUT);
+	fclose(OUT);
+	return 0;
+
+}
+Graph__Graph * makeSearchGraph(struct map_t map){
+	Graph__Graph * graph;
+	graph = malloc(sizeof(Graph__Graph));
+	graph__graph__init(graph);
+	Graph__Vertex ** vertices;
+	vertices = malloc(sizeof(Graph__Vertex *)*map.n_nodes);
+	for (int i=0;i<map.n_nodes;i++){
+		Graph__Vertex * v;
+		v = malloc(sizeof(Graph__Vertex));
+		graph__vertex__init(v);
+		v->idx = i;
+		v->osmid = map.nodes[i]->id;
+		v->lat = int2deg(map.nodes[i]->lat);
+		v->lon = int2deg(map.nodes[i]->lon);
+		vertices[i]=v;
+	}
+	graph->vertices = vertices;
+	graph->n_vertices = map.n_nodes;
+
+	Graph__Edge ** edges;
+	GARY_INIT(edges,0);
+	int edgecnt;
+	edgecnt = 0;
+	for (int i=0;i<map.n_ways;i++){
+		Premap__Way * way;
+		way = map.ways[i];
+		for (int j=0;j<(way->n_refs-1);j++){
+			int fromIdx;
+			int toIdx;
+			fromIdx = nodesIdx_find(way->refs[j])->idx;
+			toIdx = nodesIdx_find(way->refs[j+1])->idx;
+			Graph__Edge * e;
+			e = malloc(sizeof(Graph__Edge));
+			graph__edge__init(e);
+			e->idx = edgecnt++;
+			e->osmid = way->id;
+			e->vfrom = fromIdx;
+			e->vto = toIdx;
+			e->type = way->type;
+			Graph__Edge ** eptr;
+			eptr = GARY_PUSH(edges);
+			*eptr = e;
+
+			e = malloc(sizeof(Graph__Edge));
+			graph__edge__init(e);
+			e->idx = edgecnt++;
+			e->osmid = way->id;
+			e->vfrom = toIdx;
+			e->vto = fromIdx;
+			e->type = way->type;
+			eptr = GARY_PUSH(edges);
+			*eptr = e;
+		}
+			
+	}
+	graph->edges = edges;
+	graph->n_edges = GARY_SIZE(edges);
+	return graph;
+	
+	
+}
+
+int main (int argc, char ** argv){
+	
+	Premap__Map * pbmap;
+	pbmap = loadMap("../data/praha-union.pbf");
 	if (pbmap==NULL){
-		printf("Error unpacking protocolbuffer\n");	
+		printf("Error loading file\n");	
 		return 2;
 	}
 	initMap(pbmap);
@@ -1216,18 +1317,12 @@ int main (int argc, char ** argv){
 //	printf("Found %d walk areas\n",GARY_SIZE(walkareas));
 	mapToPBF(map,pbmap);
 	//checkWayTypes(pbmap);
-	len = premap__map__get_packed_size(pbmap);
-	buf = malloc(len);
-	premap__map__pack(pbmap,buf);
-	FILE * OUT;
-	OUT = fopen("../data/praha-union-c.pbf","w");
-	if (IN==NULL){
-		printf("File opening error\n");	
-		return 1;
-	}
-	fwrite(buf,1,len,OUT);
-	fclose(OUT);
-
+	if (saveMap(pbmap,"../data/praha-union-c.pbf")!=0)
+		printf("Saving map failed\n");
+	Graph__Graph * searchGraph;
+	searchGraph = makeSearchGraph(map);
+	saveSearchGraph(searchGraph,"../data/praha-graph.pbf");
+	
 	
 	
 	return 0;

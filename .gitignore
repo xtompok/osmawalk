@@ -9,8 +9,12 @@
 # Generated PBF files
 *_pb2.py
 
+# Log files
+*.log
+
 # C extensions
 *.so
+*.o
 
 # Packages
 *.egg

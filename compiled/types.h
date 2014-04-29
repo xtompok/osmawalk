@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include "include/premap.pb-c.h"
 
+#define SWEEP_TYPE int64_t
+
 struct nodesIdxNode {
 	int64_t key;
 	int idx;
