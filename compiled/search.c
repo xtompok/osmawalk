@@ -21,6 +21,7 @@
 //#include "tree.h"
 //#include "hashes.c"
 #include "utils.h"
+#include "writegpx.h"
 
 int scale = 1000000;
 
@@ -288,11 +289,11 @@ void findWay(Graph__Graph * graph, struct config_t conf, struct nodeways_t * nod
 }
 
 void printResults(Graph__Graph * graph, struct config_t conf, struct dijnode_t * dijArray, int fromIdx, int toIdx){
-/*	if (!dijArray[toIdx].completed){
+	if (!dijArray[toIdx].completed){
 		printf("Route not found\n");
 		return;
 	}
-*/	printf("D1: %f, D2:%f\n",dijArray[fromIdx].dist,dijArray[toIdx].dist);
+	printf("D1: %f, D2:%f\n",dijArray[fromIdx].dist,dijArray[toIdx].dist);
 	int idx;
 	idx = toIdx;
 	while (dijArray[idx].fromIdx!=-1){
@@ -357,6 +358,29 @@ void usage(void){
 	printf("Usage: ./search fromlat fromlon tolat tolon\n");		
 }
 
+
+void writeGpxFile(Graph__Graph * graph, struct config_t conf, struct dijnode_t * dijArray,char * filename, int fromIdx, int toIdx){
+	if (!dijArray[toIdx].completed){
+		return;
+	}
+	printf("Writing results to file %s\n",filename);
+	FILE * OUT;
+	OUT = fopen(filename,"w");
+	writeGpxHeader(OUT);
+	writeGpxStartTrack(OUT);
+	int idx;
+	idx = toIdx;
+	while (dijArray[idx].fromIdx!=-1){
+		writeGpxTrkpt(OUT,graph->vertices[idx]->lat,graph->vertices[idx]->lon,0);
+		//printf("%f,%f,%d\n",graph->vertices[idx]->lat,graph->vertices[idx]->lon,graph->edges[dijArray[idx].fromEdgeIdx]->type);
+		idx = dijArray[idx].fromIdx;
+	}
+	printf("%f,%f,\n",graph->vertices[idx]->lat, graph->vertices[idx]->lon);	
+	writeGpxEndTrack(OUT);
+	writeGpxFooter(OUT);
+	fclose(OUT);
+}
+
 int main (int argc, char ** argv){
 	if (argc<5){
 		usage();
@@ -401,6 +425,7 @@ int main (int argc, char ** argv){
 
 	findWay(graph, conf, nodeWays, dijArray,fromIdx, toIdx);
 	printResults(graph, conf, dijArray, fromIdx, toIdx);
+	writeGpxFile(graph, conf, dijArray,"track.gpx", fromIdx, toIdx);
 
 	return 0;
 }
