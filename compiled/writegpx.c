@@ -43,9 +43,6 @@ void writeGpxTrkpt(FILE * OUT, double lat, double lon, double ele){
 	fprintf(OUT,"\
     <trkpt lat=\"%f\" lon=\"%f\">\n\
         <ele>%f</ele>\n\
-        <time>2007-10-02T07:54:30Z</time>\n\
-        <fix>3d</fix>\n\
-        <hdop>300</hdop><vdop>300</vdop><pdop>300</pdop>\n\
     </trkpt>\n",lat,lon,ele);
 
 }

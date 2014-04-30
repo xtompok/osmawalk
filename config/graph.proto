@@ -17,6 +17,7 @@ message Edge {
 	required sint64 vto = 3;
 	required objtype type = 4;
 	repeated objtype crossing = 5; 
+	optional double dist = 10;
 
 }
 

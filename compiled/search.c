@@ -26,6 +26,7 @@
 int scale = 1000000;
 
 
+
 struct config_t {
 	ProtobufCEnumDescriptor desc;
 	int maxvalue;
@@ -156,6 +157,23 @@ struct config_t parseConfigFile(char * filename){
 
 
 }
+void calcDistances(Graph__Graph * graph){
+	for (int i=0;i<graph->n_edges;i++){
+		Graph__Edge * edge;
+		edge = graph->edges[i];
+		double g_a = 6378137, g_f = 1/298.257223563; /* WGS84 */
+		struct geod_geodesic geod;
+		geod_init(&geod, g_a, g_f);
+		double dist;
+		double tmp1;
+		double tmp2;
+		geod_inverse(&geod,graph->vertices[edge->vfrom]->lat,
+				graph->vertices[edge->vfrom]->lon,
+				graph->vertices[edge->vto]->lat,
+				graph->vertices[edge->vto]->lon,&dist,&tmp1,&tmp2);
+		edge->dist = dist;
+	}
+}
 
 struct nodeways_t{
 	int n_ways;
@@ -195,7 +213,7 @@ double calcTime(Graph__Graph * graph,struct config_t conf,Graph__Edge * edge){
 	speed = conf.speeds[edge->type];
 	if (speed==0)
 		return DBL_MAX;
-	double g_a = 6378137, g_f = 1/298.257223563; /* WGS84 */
+	/*double g_a = 6378137, g_f = 1/298.257223563; // WGS84 
 	struct geod_geodesic geod;
 	geod_init(&geod, g_a, g_f);
 	double dist;
@@ -205,7 +223,8 @@ double calcTime(Graph__Graph * graph,struct config_t conf,Graph__Edge * edge){
 			graph->vertices[edge->vfrom]->lon,
 			graph->vertices[edge->vto]->lat,
 			graph->vertices[edge->vto]->lon,&dist,&tmp1,&tmp2);
-	return dist/speed;
+	*/
+	return edge->dist/speed;
 }
 
 
@@ -242,24 +261,38 @@ void findWay(Graph__Graph * graph, struct config_t conf, struct nodeways_t * nod
 */
 	int * heap;
 	int n_heap;
-	//n_heap = graph->n_vertices;
-	heap = malloc(sizeof(int)*graph->n_vertices);
-	/*for (int i=0;i<n_heap;i++){
-		heap[i]=i;
-	}*/
-	n_heap = 0;
+	n_heap = graph->n_vertices;
+	heap = malloc(sizeof(int)*(graph->n_vertices+1));
+	int * heapIndex;
+	heapIndex = malloc(sizeof(int)*graph->n_vertices);
+	//for (int i=0;i<graph->n_vertices;i++){
+	//	heapIndex[i]=i+1;
+	//	heap[i+1]=i;
+	//}
+	//heap[1]=fromIdx;
+
+	#define DIJ_SWAP(heap,a,b,t) ( \
+		heapIndex[heap[a]]=b,heapIndex[heap[b]]=a,\
+		t=heap[a],heap[a]=heap[b],heap[b]=t)
+
 	#define DIJ_CMP(x,y) (dijArray[x].dist<dijArray[y].dist)
 	
-	HEAP_INSERT(int,heap,n_heap,DIJ_CMP,HEAP_SWAP,fromIdx);
+	n_heap = 0;
+
+	//HEAP_INIT(int,heap,n_heap,DIJ_CMP,DIJ_SWAP);
+	
+	heapIndex[fromIdx]=1;
+	HEAP_INSERT(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,fromIdx);
 
 	while(!dijArray[toIdx].completed){
-		//printf("Heap has %d vertices\n", n_heap);
-		HEAP_DELETE_MIN(int,heap,n_heap,DIJ_CMP,HEAP_SWAP);
+	//	printf("Heap has %d vertices\n", n_heap);
+		HEAP_DELETE_MIN(int,heap,n_heap,DIJ_CMP,DIJ_SWAP);
 		int vIdx;
 		vIdx = heap[n_heap+1];
+	//	printf("Dist: %f\n",dijArray[vIdx].dist);
 		
 		if (!dijArray[vIdx].reached){
-			printf("Found unreagched vertex, exitting\n");
+			printf("Found unreached vertex, exitting\n");
 			return;
 		
 		}
@@ -275,16 +308,25 @@ void findWay(Graph__Graph * graph, struct config_t conf, struct nodeways_t * nod
 		//	printf("Neigh len %f\n",len);
 			if (dijArray[way->vto].dist <= (dijArray[vIdx].dist+len))
 				continue;
-		//	printf("Replacing\n");
+//			printf("Replacing\n");
 			dijArray[way->vto].dist = dijArray[vIdx].dist+len;
 			dijArray[way->vto].fromIdx = vIdx;
 			dijArray[way->vto].fromEdgeIdx = nodeways[vIdx].ways[i];
-			dijArray[way->vto].reached = true;
-			HEAP_INSERT(int,heap,n_heap,DIJ_CMP,HEAP_SWAP,way->vto);
+			if (dijArray[way->vto].reached){
+				HEAP_DECREASE(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,heapIndex[way->vto],way->vto);
+			}else {
+
+				dijArray[way->vto].reached = true;
+				heapIndex[way->vto]=n_heap+1;
+				HEAP_INSERT(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,way->vto);
+			}
+//			printf("id %d idx: %d\n",way->vto,heapIndex[way->vto]);
+//			printf("id:%d, dist:\n",heap[heapIndex[way->vto]]);
+//			printf("id:%d, dist:\n",heap[heapIndex[way->vto]]);
 		
 		}
+		HEAP_INIT(int,heap,n_heap,DIJ_CMP,DIJ_SWAP);
 		dijArray[vIdx].completed=true;
-		HEAP_INIT(int,heap,n_heap,DIJ_CMP,HEAP_SWAP);
 	}
 }
 
@@ -408,6 +450,8 @@ int main (int argc, char ** argv){
 	lon = atof(argv[4]);
 	int toIdx;
 	toIdx = findNearestVertex(graph,lon,lat);
+
+	calcDistances(graph);
 
 	printf("Searching from %lld(%f,%f) to %lld(%f,%f)\n",graph->vertices[fromIdx]->osmid,
 			graph->vertices[fromIdx]->lat,
