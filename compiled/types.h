@@ -18,6 +18,12 @@ struct nodeWaysNode {
 	int64_t * ways;
 };
 
+struct mixed_num_t {
+	int64_t base;
+	int64_t numer;
+	int64_t denom;
+};
+
 struct map_t {
 	int n_nodes;
 	Premap__Node ** nodes;
@@ -44,6 +50,15 @@ struct event_t {
 	enum event_type type;
 	SWEEP_TYPE lon;
 	SWEEP_TYPE lat;
+	SWEEP_TYPE dlon;
+	SWEEP_TYPE dlat;	
+	unsigned int lineIdx;
+	unsigned int line2Idx;
+};
+struct int_event_t {
+	enum event_type type;
+	struct mixed_num_t lon;
+	struct mixed_num_t lat;
 	SWEEP_TYPE dlon;
 	SWEEP_TYPE dlat;	
 	unsigned int lineIdx;
