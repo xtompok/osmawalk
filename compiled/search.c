@@ -208,7 +208,7 @@ struct nodeways_t * makeNodeWays(Graph__Graph * graph){
 	return nodeways;
 }
 
-double calcTime(Graph__Graph * graph,struct config_t conf,Graph__Edge * edge){
+static inline  double calcTime(Graph__Graph * graph,struct config_t conf,Graph__Edge * edge){
 	double speed;
 	speed = conf.speeds[edge->type];
 	if (speed==0)
@@ -251,81 +251,59 @@ struct dijnode_t *  prepareDijkstra(Graph__Graph * graph){
 
 
 void findWay(Graph__Graph * graph, struct config_t conf, struct nodeways_t * nodeways,struct dijnode_t * dijArray,int fromIdx, int toIdx){
-	dijArray[fromIdx].reached=true;
-	dijArray[fromIdx].dist=0;
 	
-/*	int tmp;
+	int tmp;
 	tmp=fromIdx;
 	fromIdx=toIdx;
 	toIdx=tmp;
-*/
+
 	int * heap;
 	int n_heap;
 	n_heap = graph->n_vertices;
 	heap = malloc(sizeof(int)*(graph->n_vertices+1));
 	int * heapIndex;
 	heapIndex = malloc(sizeof(int)*graph->n_vertices);
-	//for (int i=0;i<graph->n_vertices;i++){
-	//	heapIndex[i]=i+1;
-	//	heap[i+1]=i;
-	//}
-	//heap[1]=fromIdx;
 
 	#define DIJ_SWAP(heap,a,b,t) ( \
 		heapIndex[heap[a]]=b,heapIndex[heap[b]]=a,\
 		t=heap[a],heap[a]=heap[b],heap[b]=t)
 
 	#define DIJ_CMP(x,y) (dijArray[x].dist<dijArray[y].dist)
+
+	dijArray[fromIdx].reached=true;
+	dijArray[fromIdx].dist=0;
 	
 	n_heap = 0;
-
-	//HEAP_INIT(int,heap,n_heap,DIJ_CMP,DIJ_SWAP);
-	
 	heapIndex[fromIdx]=1;
 	HEAP_INSERT(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,fromIdx);
 
 	while(!dijArray[toIdx].completed){
-	//	printf("Heap has %d vertices\n", n_heap);
 		HEAP_DELETE_MIN(int,heap,n_heap,DIJ_CMP,DIJ_SWAP);
 		int vIdx;
 		vIdx = heap[n_heap+1];
-	//	printf("Dist: %f\n",dijArray[vIdx].dist);
 		
 		if (!dijArray[vIdx].reached){
 			printf("Found unreached vertex, exitting\n");
 			return;
-		
 		}
-		if (dijArray[vIdx].completed){
-			continue;
-		}
-		//printf("%d %f\n",vIdx,dijArray[vIdx].dist);
 		for (int i=0;i<nodeways[vIdx].n_ways;i++){
 			Graph__Edge * way;
 			way = graph->edges[nodeways[vIdx].ways[i]];
 			double len;
 			len = calcTime(graph,conf,way);
-		//	printf("Neigh len %f\n",len);
 			if (dijArray[way->vto].dist <= (dijArray[vIdx].dist+len))
 				continue;
-//			printf("Replacing\n");
 			dijArray[way->vto].dist = dijArray[vIdx].dist+len;
 			dijArray[way->vto].fromIdx = vIdx;
 			dijArray[way->vto].fromEdgeIdx = nodeways[vIdx].ways[i];
 			if (dijArray[way->vto].reached){
 				HEAP_DECREASE(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,heapIndex[way->vto],way->vto);
 			}else {
-
 				dijArray[way->vto].reached = true;
 				heapIndex[way->vto]=n_heap+1;
 				HEAP_INSERT(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,way->vto);
 			}
-//			printf("id %d idx: %d\n",way->vto,heapIndex[way->vto]);
-//			printf("id:%d, dist:\n",heap[heapIndex[way->vto]]);
-//			printf("id:%d, dist:\n",heap[heapIndex[way->vto]]);
-		
 		}
-		HEAP_INIT(int,heap,n_heap,DIJ_CMP,DIJ_SWAP);
 		dijArray[vIdx].completed=true;
 	}
 }
@@ -337,7 +315,7 @@ void printResults(Graph__Graph * graph, struct config_t conf, struct dijnode_t *
 	}
 	printf("D1: %f, D2:%f\n",dijArray[fromIdx].dist,dijArray[toIdx].dist);
 	int idx;
-	idx = toIdx;
+	idx = fromIdx;
 	while (dijArray[idx].fromIdx!=-1){
 		printf("%f,%f,%d\n",graph->vertices[idx]->lat,graph->vertices[idx]->lon,graph->edges[dijArray[idx].fromEdgeIdx]->type);
 		idx = dijArray[idx].fromIdx;
@@ -411,7 +389,7 @@ void writeGpxFile(Graph__Graph * graph, struct config_t conf, struct dijnode_t *
 	writeGpxHeader(OUT);
 	writeGpxStartTrack(OUT);
 	int idx;
-	idx = toIdx;
+	idx = fromIdx;
 	while (dijArray[idx].fromIdx!=-1){
 		writeGpxTrkpt(OUT,graph->vertices[idx]->lat,graph->vertices[idx]->lon,0);
 		//printf("%f,%f,%d\n",graph->vertices[idx]->lat,graph->vertices[idx]->lon,graph->edges[dijArray[idx].fromEdgeIdx]->type);
