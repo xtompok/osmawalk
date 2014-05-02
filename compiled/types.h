@@ -24,6 +24,13 @@ struct mixed_num_t {
 	int64_t denom;
 };
 
+struct col_t {
+	uint8_t isCol;
+	uint8_t atEndpoint;
+	struct mixed_num_t lon;
+	struct mixed_num_t lat;
+};
+
 struct map_t {
 	int n_nodes;
 	Premap__Node ** nodes;
