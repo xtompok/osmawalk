@@ -1,4 +1,8 @@
 #include "utils.h"
+
+#include <stdlib.h>
+#include <stdio.h>
+
 unsigned int isDirectable(Premap__Way * way){
 	unsigned int t;
 	t = way->type;

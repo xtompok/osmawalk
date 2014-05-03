@@ -12,13 +12,13 @@ scale = 1000000
 shiftlat = scale*49.941901
 shiftlon = scale*14.224436
 
-def drawWays(pbMap,d, node_ids):
+def drawWays(pbMap,d, node_ids,minlon,minlat):
 	for way in pbMap.ways:
 		coord=[]
 		for ref in way.refs:
 			try:
 				node = (pbMap.nodes[node_ids[ref]])
-				coord.append((node.lon-shiftlon,-(node.lat-shiftlat)))
+				coord.append((node.lon-minlon,-(node.lat-minlat)))
 			except KeyError:
 				pass
 		style={"stroke" : "black", "stroke-width" : "5", "fill" : "none"}
@@ -50,14 +50,14 @@ def drawWays(pbMap,d, node_ids):
 			style["stroke"] = "magenta"
 		elif way.type==pbtypes.DIRECT_BAD:
 			style["stroke"] = "orange"
-                        print "Found broken line"
+                        #print "Found broken line"
 
 		elif way.type==pbtypes.MULTIPOLYGON:
 			style["stroke"] = "orange"
 			print "Multipoly found"
 
                 elif way.type==pbtypes.WALKAREA:
-                        style["stroke"] = "yellow"
+                        style["stroke"] = "blue"
                 elif way.type==pbtypes.AREAWAY:
                         style["stroke"] = "khaki"
                 elif way.type==pbtypes.AREABAR:
@@ -87,13 +87,17 @@ with open(datadir+"/praha-union-c.pbf","rb") as infile:
 	pbMap.ParseFromString(infile.read())
 
 node_ids = {}
+minlon = 99999999999999999999
+minlat = 99999999999999999999
 for i in range(len(pbMap.nodes)):
 	node_ids[pbMap.nodes[i].id]=i
+        minlon = min(minlon,pbMap.nodes[i].lon)
+        minlat = min(minlat,pbMap.nodes[i].lat)
 
 print "Generating SVG..."
 
 d = svgwrite.Drawing()
-drawWays(pbMap,d,node_ids)
+drawWays(pbMap,d,node_ids,minlon,minlat)
 
 print "Saving SVG..."
 d.save()

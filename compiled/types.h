@@ -1,5 +1,6 @@
 #ifndef TYPES_H
 #define TYPES_H
+#include <ucw/lib.h>
 #include <stdint.h>
 #include "include/premap.pb-c.h"
 
@@ -90,11 +91,13 @@ struct tree_node_t{
 };
 
 struct walk_area_t{
+	int  periIdx;
+	int n_nodes;
+	int * nodeIdxs;
 	int n_bars;
 	int * barIdxs;
 	int n_ways;
 	int * wayIdxs;
-	int  periIdx;
 };
 
 #endif
