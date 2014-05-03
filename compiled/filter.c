@@ -143,7 +143,6 @@ struct col_t calcMixCollision(struct line_t line1, struct line_t line2){
 		return result;
 	}
 	if (sameEnd(line1,line2)){
-		struct col_t result;
 		result.atEndpoint = 1;
 		result.lon = makeMix(line1.endlon,0,1);
 		result.lat = makeMix(line1.endlat,0,1);
@@ -239,6 +238,13 @@ static inline int distance(Premap__Node * node1, Premap__Node * node2){
 	return (int)dist;
 }
 
+void addCandidate(int *** candidates,int nidx1,int nidx2){
+	int ** ptr;
+	ptr = GARY_PUSH(*candidates);
+	* ptr = malloc(2*sizeof(int));
+	(* ptr)[0] = nidx1;
+	(* ptr)[1] = nidx2;
+}
 
 struct graph_t {
 	int ** barGraph;
@@ -276,11 +282,8 @@ struct graph_t makeGraph(struct map_t map)
 		}
 		else if (isBarrier(map.ways[i])){ 
 			for (int j=0;j<way->n_refs-1;j++){
-					int ** ptr = GARY_PUSH(barGraph);
-					* ptr = malloc(sizeof(int)*2);
-					(* ptr)[0]=nodesIdx_find(way->refs[j])->idx;
-					(* ptr)[1]=nodesIdx_find(way->refs[j+1])->idx;
-				}
+				addCandidate(&barGraph,nodesIdx_find(way->refs[j])->idx,nodesIdx_find(way->refs[j+1])->idx);	
+			}
 		}
 	}
 
@@ -314,42 +317,45 @@ int64_t onSameWay(int64_t nid1,int64_t nid2){
 	return 0;
 }
 int ** makeAreaBarGraph(struct map_t map,struct walk_area_t area){
+	Premap__Way * way;
 	int ** barGraph;
 	GARY_INIT(barGraph,0);
 	for (int i=0;i<area.n_bars;i++){
-		Premap__Way * way;
 		way = map.ways[area.barIdxs[i]];
 		for (int j=0;j<way->n_refs-1;j++){
 			addCandidate(&barGraph,nodesIdx_find(way->refs[j])->idx,nodesIdx_find(way->refs[j+1])->idx);
 		}
 	}
 	for (int i=0;i<area.n_ways;i++){
-		Premap__Way * way;
 		way = map.ways[area.wayIdxs[i]];
 		for (int j=0;j<way->n_refs-1;j++){
 			addCandidate(&barGraph,nodesIdx_find(way->refs[j])->idx,nodesIdx_find(way->refs[j+1])->idx);
 		}
 	}
+	way = map.ways[area.periIdx];
+	for (int j=0;j<way->n_refs-1;j++){
+		addCandidate(&barGraph,nodesIdx_find(way->refs[j])->idx,nodesIdx_find(way->refs[j+1])->idx);
+	}
 	return barGraph;
 
 }
 
-void addCandidate(int *** candidates,int nidx1,int nidx2){
-	int ** ptr;
-	ptr = GARY_PUSH(*candidates);
-	* ptr = malloc(2*sizeof(int));
-	(* ptr)[0] = nidx1;
-	(* ptr)[1] = nidx2;
-}
 
-int ** makeAreaCandidates(struct map_t map, struct walk_area_t area,  int maxdist){
+int ** makeAreaCandidates(struct map_t map, struct walk_area_t area,  int maxdist, int deg){
 
 	int ** candidates;
 
 	GARY_INIT_SPACE(candidates,0);
 	printf("Area nodes:%d\n",area.n_nodes);
 
+	struct line_t memline;
+	memline = makeLine(0,0,0,0,-1,-1);
+	
+	int modulus;
+	modulus = (area.n_nodes)/deg+1;
+
 	for (int i=0;i<area.n_nodes;i++){
+
 		for (int j=i+1; j<area.n_nodes;j++){
 			int nidx1;
 			int64_t nid1;
@@ -360,10 +366,37 @@ int ** makeAreaCandidates(struct map_t map, struct walk_area_t area,  int maxdis
 			nid1 = map.nodes[nidx1]->id;
 			nidx2 = area.nodeIdxs[j];
 			nid2 = map.nodes[nidx2]->id;
+			Premap__Node * node1;
+			Premap__Node * node2;
+			node1 = map.nodes[nidx1];
+			node2 = map.nodes[nidx2];
 			
-			if (onSameWay(nid1,nid2)||distance(map.nodes[nidx1],map.nodes[nidx2])>maxdist)
+			if (onSameWay(node1->id,node2->id)||distance(node1,node2)>maxdist)
 				continue;
-			
+			/*if (memline.startid==-1){
+				memline = makeLine(node1->lon,node1->lat,node2->lon,node2->lat,0,0);
+				printf("Candidates %d %d, distance: %d\n",nidx1,nidx2,distance(map.nodes[nidx1],map.nodes[nidx2]));	
+				addCandidate(&candidates,nidx1,nidx2);
+				continue;
+			} */
+			struct line_t line;
+			line = makeLine(node1->lon,node1->lat,node2->lon,node2->lat,0,0);
+			/*
+				
+			struct col_t col;
+			col = calcMixCollision(line,memline);
+			if (col.isCol && !col.atEndpoint){
+				printf("Not at endpoint!\n");
+				memline = line;
+				continue;
+			}
+			if (col.isCol && col.atEndpoint){
+				printf("At endpoint!\n");
+				continue;
+			}*/
+
+			if (rand()%modulus!=0)
+				continue;
 			printf("Candidates %d %d, distance: %d\n",nidx1,nidx2,distance(map.nodes[nidx1],map.nodes[nidx2]));	
 			addCandidate(&candidates,nidx1,nidx2);
 
@@ -376,7 +409,7 @@ int ** makeAreaCandidates(struct map_t map, struct walk_area_t area,  int maxdis
 		
 }
 
-int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** wayGraph, int maxdist){
+int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** wayGraph, int maxdist, int deg){
 
 	int ** candidates;
 
@@ -398,7 +431,11 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 					continue;
 				}
 
+				int modulus;
+				modulus = (count)/deg+1;
 				for (int j=i+1;j<count;j++){
+					if (rand()%modulus!=0)
+						continue;
 					nidx2 = raster.raster[lonidx][latidx][j];
 					nid2 = map.nodes[nidx2]->id;
 					if (wayGraph[nidx2]&& !onSameWay(nid1,nid2)){
@@ -407,7 +444,10 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 				}
 				int neighCount;
 				neighCount=GARY_SIZE(raster.raster[lonidx+1][latidx]);
+				modulus = (neighCount)/deg+1;
 				for (int j=0;j<neighCount;j++){
+					if (rand()%modulus!=0)
+						continue;
 					nidx2 = raster.raster[lonidx+1][latidx][j];
 					nid2 = map.nodes[nidx2]->id;
 					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)&& !onSameWay(nid1,nid2)){
@@ -415,7 +455,10 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 					}
 				}
 				neighCount=GARY_SIZE(raster.raster[lonidx+1][latidx+1]);
+				modulus = (neighCount)/deg+1;
 				for (int j=0;j<neighCount;j++){
+					if (rand()%modulus!=0)
+						continue;
 					nidx2 = raster.raster[lonidx+1][latidx+1][j];
 					nid2 = map.nodes[nidx2]->id;
 					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)&& !onSameWay(nid1,nid2)){
@@ -423,7 +466,10 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 					}
 				}
 				neighCount=GARY_SIZE(raster.raster[lonidx][latidx+1]);
+				modulus = (neighCount)/deg+1;
 				for (int j=0;j<neighCount;j++){
+					if (rand()%modulus!=0)
+						continue;
 					nidx2 = raster.raster[lonidx][latidx+1][j];
 					nid2 = map.nodes[nidx2]->id;
 					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)&& !onSameWay(nid1,nid2)){
@@ -513,9 +559,19 @@ int tree_cmp(int idx1, int idx2){
 struct int_event_t makeIntEvent(struct line_t * lines,int l1Idx, int l2Idx, struct mixed_num_t lon){
 	struct int_event_t intevt;
 	struct col_t col;
-	printf("Lon: %lld + %lld/%lld ~ %lld\n",lon.base,lon.numer,lon.denom,lon.base+(lon.numer/lon.denom));
-	printf("Line: (%"PF(S_P)",%"PF(S_P)")--(%"PF(S_P)",%"PF(S_P)")\n",lines[l1Idx].startlon,lines[l1Idx].startlat,lines[l1Idx].endlon,lines[l1Idx].endlat);
-	printf("Line: (%"PF(S_P)",%"PF(S_P)")--(%"PF(S_P)",%"PF(S_P)")\n",lines[l2Idx].startlon,lines[l2Idx].startlat,lines[l2Idx].endlon,lines[l2Idx].endlat);
+	printf("Lon: %lld + %lld/%lld ~ %lld, l1: %d, l2: %d\n",
+		lon.base,lon.numer,lon.denom,lon.base+(lon.numer/lon.denom),
+		l1Idx,l2Idx);
+	printf("Line: (%"PF(S_P)",%"PF(S_P)")--(%lld,%lld) %lld/%lld\n",
+			lines[l1Idx].startlon,lines[l1Idx].startlat,
+			lines[l1Idx].endlon,lines[l1Idx].endlat,
+			lines[l1Idx].endlat-lines[l1Idx].startlat,
+			lines[l1Idx].endlon-lines[l1Idx].startlon);
+	printf("Line: (%"PF(S_P)",%"PF(S_P)")--(%lld,%lld) %lld/%lld\n",
+			lines[l2Idx].startlon,lines[l2Idx].startlat,
+			lines[l2Idx].endlon,lines[l2Idx].endlat,
+			lines[l2Idx].endlat-lines[l2Idx].startlat,
+			lines[l2Idx].endlon-lines[l2Idx].startlon);
 	col = calcMixCollision(lines[l1Idx],lines[l2Idx]);					
 	if (col.isCol==0){
 		intevt.lineIdx=-1;
@@ -524,37 +580,37 @@ struct int_event_t makeIntEvent(struct line_t * lines,int l1Idx, int l2Idx, stru
 	if (!col.atEndpoint){
 		printf("Col: %lld + %lld/%lld ~ %lld\n",col.lon.base,col.lon.numer,col.lon.denom,col.lon.base+col.lon.numer/col.lon.denom);
 	}
-	if ((mixedCmp(col.lon,lon)>0)){
-		printf("Intersection\n");
-
-		intevt.type = EVT_INTERSECT;
-		intevt.lon = col.lon;
-		intevt.lat = col.lat;
-		SWEEP_TYPE dlat1;
-		SWEEP_TYPE dlat2;
-		SWEEP_TYPE dlon1;
-		SWEEP_TYPE dlon2;
-		dlat1 = lines[l1Idx].endlat-lines[l1Idx].startlat;
-		dlat2 = lines[l2Idx].endlat-lines[l2Idx].startlat;
-		dlon1 = lines[l1Idx].endlon-lines[l1Idx].startlon;
-		dlon2 = lines[l2Idx].endlon-lines[l2Idx].startlon;
-		if (dlat1*dlon2 < dlon1*dlat2){
-			intevt.dlat = dlat1;
-			intevt.dlon = dlon1;
-		}else{
-			intevt.dlat = dlat2;
-			intevt.dlon = dlon2;
-		}
-		intevt.lineIdx = l1Idx;
-		intevt.line2Idx = l2Idx;
-		if (lines[intevt.lineIdx].isBar || lines[intevt.line2Idx].isBar){
-			lines[l1Idx].broken = 1;
-			lines[l2Idx].broken = 1;
-		}
-		return intevt; 
+	if ((mixedCmp(col.lon,lon)<=0)){
+		intevt.lineIdx=-1;
+		return intevt;
 	}
-	intevt.lineIdx=-1;
-	return intevt;
+	printf("Intersection");
+
+	intevt.type = EVT_INTERSECT;
+	intevt.lon = col.lon;
+	intevt.lat = col.lat;
+	SWEEP_TYPE dlat1;
+	SWEEP_TYPE dlat2;
+	SWEEP_TYPE dlon1;
+	SWEEP_TYPE dlon2;
+	dlat1 = lines[l1Idx].endlat-lines[l1Idx].startlat;
+	dlat2 = lines[l2Idx].endlat-lines[l2Idx].startlat;
+	dlon1 = lines[l1Idx].endlon-lines[l1Idx].startlon;
+	dlon2 = lines[l2Idx].endlon-lines[l2Idx].startlon;
+	if (dlat1*dlon2 < dlon1*dlat2){
+		intevt.dlat = dlat1;
+		intevt.dlon = dlon1;
+	}else{
+		intevt.dlat = dlat2;
+		intevt.dlon = dlon2;
+	}
+	intevt.lineIdx = l1Idx;
+	intevt.line2Idx = l2Idx;
+	if (lines[intevt.lineIdx].isBar || lines[intevt.line2Idx].isBar){
+		lines[l1Idx].broken = 1;
+		lines[l2Idx].broken = 1;
+	}
+	return intevt; 
 
 
 }
@@ -883,7 +939,16 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 
 			anglesign = -1;
 			printf("EVT_INT\n");
-			printf("Event lon: ~ %lld lat: ~ %d\n",evt.lon.base+evt.lon.numer/evt.lon.denom,evt.lat.base+evt.lon.numer/evt.lon.denom);
+			if (evt.lineIdx == memevt.lineIdx && evt.line2Idx == memevt.line2Idx){
+				printf("Duplicit event, skipping\n");
+				continue;
+			}
+			memevt.lineIdx = evt.lineIdx;
+			memevt.line2Idx = evt.line2Idx;
+			printf("Event lon: ~ %lld lat: ~ %d l1: %d l2: %d\n",
+				evt.lon.base+evt.lon.numer/evt.lon.denom,
+				evt.lat.base+evt.lon.numer/evt.lon.denom,
+				evt.lineIdx,evt.line2Idx);
 			lon = evt.lon.base;
 			struct line_t l1;
 			struct line_t l2;
@@ -896,47 +961,49 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 				continue;
 			}
 
-			struct tree_node_t * willHigher;
-			struct tree_node_t * willLower;
+			struct tree_node_t * higher;
+			struct tree_node_t * lower;
 
-			int willLowerIdx;
-			int willHigherIdx;
 			
 			if (tree_adjacent(lineNodes[evt.lineIdx],1)==lineNodes[evt.line2Idx]){
-				willHigher = lineNodes[evt.lineIdx];
-				willHigherIdx =  evt.lineIdx;
-				willLower = lineNodes[evt.line2Idx];
-				willLowerIdx = evt.line2Idx;
-				lineNodes[evt.lineIdx]=willLower;
-				lineNodes[evt.line2Idx]=willHigher;
-			} else if (tree_adjacent(lineNodes[evt.lineIdx],0)==lineNodes[evt.line2Idx]){
-				willHigher = lineNodes[evt.line2Idx];
-				willHigherIdx = evt.line2Idx;
-				willLower = lineNodes[evt.lineIdx];
-				willLowerIdx = evt.lineIdx;
-				lineNodes[evt.line2Idx]=willLower;
-				lineNodes[evt.lineIdx]=willHigher;
+				lower = lineNodes[evt.lineIdx];
+				higher = lineNodes[evt.line2Idx];
+
+				lineNodes[evt.lineIdx]=higher;
+				lineNodes[evt.line2Idx]=lower;
+			} else 
+			if (tree_adjacent(lineNodes[evt.lineIdx],0)==lineNodes[evt.line2Idx]){
+				lower = lineNodes[evt.line2Idx];
+				higher = lineNodes[evt.lineIdx];
+
+				lineNodes[evt.lineIdx]=lower;
+				lineNodes[evt.line2Idx]=higher;
 			} else {
 				printf("Problem with adjacency\n");
 				continue;
 			}
 
 			int tmp;
-			tmp = willHigher->lineIdx;
-			willHigher->lineIdx = willLower->lineIdx;
-			willLower->lineIdx = tmp;
+			tmp = higher->lineIdx;
+			higher->lineIdx = lower->lineIdx;
+			lower->lineIdx = tmp;
+
+			int lowerIdx;
+			int higherIdx;
+			lowerIdx = lower->lineIdx;
+			higherIdx = higher->lineIdx;
 			
 			struct tree_node_t * prev;
 			struct tree_node_t * next;
 
-			prev = tree_adjacent(willLower,0);
-			next = tree_adjacent(willHigher,1);
+			prev = tree_adjacent(lower,0);
+			next = tree_adjacent(higher,1);
 
 			struct int_event_t intevt;
 
 			if (prev){
 				printf("Int after int\n");
-				intevt = makeIntEvent(lines,willLowerIdx,prev->lineIdx,evt.lon);
+				intevt = makeIntEvent(lines,lowerIdx,prev->lineIdx,evt.lon);
 				if (intevt.lineIdx!=-1){
 					GARY_PUSH(intQueue);
 					HEAP_INSERT(struct int_event_t, intQueue, n_intQueue, intEventCmp, HEAP_SWAP, intevt);
@@ -944,7 +1011,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 			}
 			if (next){
 				printf("Int after int\n");
-				intevt = makeIntEvent(lines,willHigherIdx,next->lineIdx,evt.lon);
+				intevt = makeIntEvent(lines,higherIdx,next->lineIdx,evt.lon);
 				if (intevt.lineIdx!=-1){
 					GARY_PUSH(intQueue);
 					HEAP_INSERT(struct int_event_t, intQueue, n_intQueue, intEventCmp, HEAP_SWAP, intevt);
@@ -953,7 +1020,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 
 		}
 		
-		continue;
+	//	continue;
 		// Debug tree order
 		struct mixed_num_t memlat;
 		memlat = makeMix(0,0,1);
@@ -965,20 +1032,19 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 			struct mixed_num_t lat;
 			lat = calcMixLatForLon(l,lon);
 			if (mixedCmp(memlat,lat)>0){
-				printf("Wrong order:");
-				mixedPrint(memlat);
-				printf(" vs ");
-				mixedPrint(lat);
-				printf(" %d/%d\n",l.endlat-l.startlat,l.endlon-l.startlon);
+				if (memlat.base == lat.base)
+					printf("Bad order:");
+				else
+					printf("Wrong order:");
 		//		TREE_BREAK;
 			}
 			else{ 
 				printf("OK:");
-				mixedPrint(memlat);
-				printf(" vs ");
-				mixedPrint(lat);
-				printf(" %d/%d\n",l.endlat-l.startlat,l.endlon-l.startlon);
 			}
+			mixedPrint(memlat);
+			printf(" vs ");
+			mixedPrint(lat);
+			printf(" %d/%d\n",l.endlat-l.startlat,l.endlon-l.startlon);
 			memlat = lat;
 		}
 		TREE_END_FOR;
@@ -1191,7 +1257,7 @@ struct walk_area_t * findWalkAreas(struct map_t map, struct raster_t raster){
 				int * last;
 				last = GARY_PUSH(area->wayIdxs);
 				*last = index;
-				map.ways[index]->type = OBJTYPE__AREAWAY;
+			//	map.ways[index]->type = OBJTYPE__AREAWAY;
 			}
 		}
 		area->n_bars = GARY_SIZE(area->barIdxs);
@@ -1389,7 +1455,7 @@ int main (int argc, char ** argv){
 	struct raster_t raster;
 	raster = makeRaster(map);
 	int ** candidates;
-	candidates = makeDirectCandidates(map,raster,graph.wayGraph,20);
+	candidates = makeDirectCandidates(map,raster,graph.wayGraph,20,2);
 	lines = findDirectWays(map,candidates,graph.barGraph);
 	freeNX2Array(graph.barGraph);
 	freeNX2Array(candidates);
@@ -1397,7 +1463,7 @@ int main (int argc, char ** argv){
 	struct walk_area_t * walkareas;
 	walkareas = findWalkAreas(map,raster);
 	for (int i=0;i<GARY_SIZE(walkareas);i++){
-		candidates = makeAreaCandidates(map,walkareas[i],100);
+		candidates = makeAreaCandidates(map,walkareas[i],300,2);
 	//	map = addCandidatesToMap(candidates,map);
 		int ** barGraph = makeAreaBarGraph(map,walkareas[i]);
 		lines = findDirectWays(map,candidates,barGraph);
