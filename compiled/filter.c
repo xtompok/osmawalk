@@ -950,6 +950,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 			anglesign = -1;
 			printf("EVT_INT\n");
 			printf("Event lon: ~ %lld lat: ~ %d\n",evt.lon.base+evt.lon.numer/evt.lon.denom,evt.lat.base+evt.lon.numer/evt.lon.denom);
+			lon = evt.lon.base;
 			struct line_t l1;
 			struct line_t l2;
 			//struct mixed_num_t lat1;
@@ -974,11 +975,15 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 				willHigherIdx =  evt.lineIdx;
 				willLower = lineNodes[evt.line2Idx];
 				willLowerIdx = evt.line2Idx;
+				lineNodes[evt.lineIdx]=willLower;
+				lineNodes[evt.line2Idx]=willHigher;
 			} else if (tree_adjacent(lineNodes[evt.lineIdx],0)==lineNodes[evt.line2Idx]){
 				willHigher = lineNodes[evt.line2Idx];
 				willHigherIdx = evt.line2Idx;
 				willLower = lineNodes[evt.lineIdx];
 				willLowerIdx = evt.lineIdx;
+				lineNodes[evt.line2Idx]=willLower;
+				lineNodes[evt.lineIdx]=willHigher;
 			} else {
 				printf("Problem with adjacency\n");
 				continue;
