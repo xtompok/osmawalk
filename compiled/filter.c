@@ -27,6 +27,9 @@
 
 int scale = 1000000;
 
+#define ASORT_PREFIX(X) int64_##X
+#define ASORT_KEY_TYPE int64_t
+#include <ucw/sorter/array-simple.h>
 
 void nodesIdx_refresh(int n_nodes, Premap__Node ** nodes){
 	nodesIdx_cleanup();
@@ -68,6 +71,12 @@ void nodeWays_refresh(struct map_t map){
 		}
 	}
 
+	for (int i=0;i<map.n_nodes;i++){
+		int64_t * ways;
+		ways = nodeWays_find(map.nodes[i]->id)->ways;
+		int64_sort(ways,GARY_SIZE(ways));
+	}
+
 }
 
 struct map_t map;
@@ -105,51 +114,6 @@ void mapToPBF(struct map_t map, Premap__Map * pbmap){
 	pbmap->multipols = map.multipols;
 }
 
-SWEEP_TYPE  calcLatForLon(struct line_t line,SWEEP_TYPE lon){
-
-//	if (line.endlon < lon){
-//		return line.endlat;
-//	}
-//	if (line.startlon > lon){
-//		return line.startlat;
-//	}
-
-//	return line.startlat;
-
-	SWEEP_TYPE minlat = MIN(line.startlat,line.endlat);
-	SWEEP_TYPE maxlat = MAX(line.startlat,line.endlat);	
-
-	SWEEP_TYPE b = line.endlon-line.startlon;
-	SWEEP_TYPE a = -(line.endlat-line.startlat);
-	SWEEP_TYPE c = (a*line.startlon+b*line.startlat);
-
-	SWEEP_TYPE lat;
-	if (b!=0)
-		lat = (-a*lon+c)/b;
-	else
-		lat = line.startlat;
-
-
-	//int64_t cit = (lon-line.startlon)*(line.endlat-line.startlat);
-	//int64_t jm = line.endlon - line.startlon;
-	
-	//printf("LFL: %d %d\n",line.startlon,line.startlat);
-	//printf("LFL: %d %d\n",lon, (cit/jm)+line.startlat);
-	//printf("LFL: %d %d\n",line.endlon,line.endlat);
-	//printf("LFL: \n");
-	
-//	printf("Line: (%d,%d)--(%d,%d), lon: %d, lat: %d\n",line.startlon,line.startlat,line.endlon,line.endlat,lon,cit/jm);
-	if ((line.endlon < lon)||(line.startlon > lon)){
-//		printf("Line already ended!, lon:%d\n",lon);
-//		printf("Line: (%d,%d)--(%d,%d)\n",line.startlon,line.startlat,line.endlon,line.endlat);
-	}else
-	if ((lat < minlat) || (lat > maxlat)){
-//		printf("Latitude is terribly wrong\n");
-	}
-
-	//return (cit/jm)+line.startlat;
-	return lat;
-}
 
 struct mixed_num_t makeMix(int64_t base,int64_t numer,int64_t denom){
 	if (denom<0){
@@ -177,46 +141,7 @@ struct mixed_num_t  calcMixLatForLon(struct line_t line,SWEEP_TYPE lon){
 	return lat;
 }
 
-SWEEP_TYPE * calcCollision(struct line_t line1, struct line_t line2){
-	SWEEP_TYPE lon1 = line1.startlon;
-	SWEEP_TYPE lon2 = line1.endlon;
-	SWEEP_TYPE lat1 = line1.startlat;
-	SWEEP_TYPE lat2 = line1.endlat;
-	SWEEP_TYPE lon3 = line2.startlon;
-	SWEEP_TYPE lon4 = line2.endlon;
-	SWEEP_TYPE lat3 = line2.startlat;
-	SWEEP_TYPE lat4 = line2.endlat;
-	SWEEP_TYPE cit = (lon1*lat2-lat1*lon2)*(lon3-lon4)-(lon3*lat4-lat3*lon4)*(lon1-lon2);
-	SWEEP_TYPE jm = (lon1-lon2)*(lat3-lat4)-(lat1-lat2)*(lon3-lon4);	
-	//int64_t cit = (lat2-lat1)*(lon4-lon3)*lon1+(lon2-lon1)*(lon4-lon3)*(lat3-lat1)-(lat4-lat3)*(lon2-lon1)*lon3;
-	//int64_t jm = (lat2-lat1)*(lon4-lon3)-(lon2-lon1)*(lat4-lat3);
-	//printf("Line 1: (%d,%d)--(%d,%d)\n",lon1,lat1,lon2,lat2);
-	//printf("Line 2: (%d,%d)--(%d,%d)\n",lon3,lat3,lon4,lat4);
-	if (jm == 0)
-		return NULL;
-	SWEEP_TYPE lon = cit/jm;
-	if (MAX(lon1,lon2) < lon || lon < MIN(lon1,lon2) || MAX(lon3,lon4) < lon || lon < MIN(lon3,lon4)){
-		//printf("Lon out of range\n");
-		return NULL;    
-	}
-	cit = (lon1*lat2-lat1*lon2)*(lat3-lat4)-(lon3*lat4-lat3*lon4)*(lat1-lat2);
-	SWEEP_TYPE lat = cit/jm;
-	//int64_t lat = (lon*(lat2-lat1)+lon1*(lon2-lon1)-lon1*(lat2-lat1))/(lon2-lon1);
-
-	//printf("Line 1: (%d,%d)--(%d,%d)\n",lon1,lat1,lon2,lat2);
-	//printf("Line 2: (%d,%d)--(%d,%d)\n",lon3,lat3,lon4,lat4);
-	//printf("Intersection: %d,%d\n",lon,lat);
-	if (MAX(lat1,lat2) < lat || lat < MIN(lat1,lat2) || MAX(lat3,lat4) < lat || lat < MIN(lat3,lat4)){
-		return NULL;
-	}
-	//return (lon,lat)
-	SWEEP_TYPE * result;
-	result = malloc(sizeof(SWEEP_TYPE)*2);
-	result[0] = lon;
-	result[1] = lat;
-	return result;
 	
-}
 static inline unsigned int sameStart(struct line_t l1, struct line_t l2){
 	return ((l1.startlon==l2.startlon) && (l1.startlat==l2.startlat));
 }
@@ -381,6 +306,38 @@ struct graph_t makeGraph(struct map_t map)
 	return graph;
 }
 
+int64_t onSameWay(int64_t nid1,int64_t nid2){
+	int64_t * ways1;
+	int64_t * ways2;
+	ways1 = nodeWays_find(nid1)->ways;
+	ways2 = nodeWays_find(nid2)->ways;
+	int n_ways1 = GARY_SIZE(ways1);
+	int n_ways2 = GARY_SIZE(ways2);
+	int i1;
+	int i2;
+	i1 = 0;
+	i2 = 0;
+	while (i1 < n_ways1 && i2 < n_ways2){
+		if (ways1[i1]==ways2[i2])
+			return ways1[i1];
+		if (ways1[i1]<ways2[i2]){
+			i1++;
+			continue;
+		}
+		i2++;
+		continue;
+	}
+	return 0;
+}
+
+void addCandidate(int *** candidates,int nidx1,int nidx2){
+	int ** ptr;
+	ptr = GARY_PUSH(*candidates);
+	* ptr = malloc(2*sizeof(int));
+	(* ptr)[0] = nidx1;
+	(* ptr)[1] = nidx2;
+}
+
 int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** wayGraph, int maxdist){
 
 	int ** candidates;
@@ -394,60 +351,47 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 			//printf("raster[%"PRId64"][%"PRId64"]=%d\n",lonidx,latidx,count);
 			for (int i=0; i<count; i++) {
 				int nidx1;
+				int64_t nid1;
+				int nidx2;
+				int64_t nid2;
 				nidx1 = raster.raster[lonidx][latidx][i];
+				nid1 = map.nodes[i]->id;
 				if (!wayGraph[nidx1]){
 					continue;
 				}
 
 				for (int j=0;j<count;j++){
-					int nidx2;
 					nidx2 = raster.raster[lonidx][latidx][j];
-					if ((nidx1 < nidx2)&&wayGraph[nidx2]){
-						int ** ptr;
-						ptr = GARY_PUSH(candidates);
-						* ptr = malloc(2*sizeof(int));
-						(* ptr)[0] = nidx1;
-						(* ptr)[1] = nidx2;
+					nid2 = map.nodes[j]->id;
+					if ((nidx1 < nidx2)&&
+							wayGraph[nidx2]&& 
+							!onSameWay(nid1,nid2)){
+						addCandidate(&candidates,nidx1,nidx2);
 					}
 				}
 				int neighCount;
 				neighCount=GARY_SIZE(raster.raster[lonidx+1][latidx]);
 				for (int j=0;j<neighCount;j++){
-					int nidx2;
 					nidx2 = raster.raster[lonidx+1][latidx][j];
-					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)){
-						int ** ptr;
-						ptr = GARY_PUSH(candidates);
-						* ptr = malloc(2*sizeof(int));
-						(* ptr)[0] = nidx1; 
-						(* ptr)[1] = nidx2; 
-						
+					nid2 = map.nodes[j]->id;
+					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)&& !onSameWay(nid1,nid2)){
+						addCandidate(&candidates,nidx1,nidx2);
 					}
 				}
 				neighCount=GARY_SIZE(raster.raster[lonidx+1][latidx+1]);
 				for (int j=0;j<neighCount;j++){
-					int nidx2;
 					nidx2 = raster.raster[lonidx+1][latidx+1][j];
-					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)){
-						int ** ptr;
-						ptr = GARY_PUSH(candidates);
-						* ptr = malloc(2*sizeof(int));
-						(* ptr)[0] = nidx1; 
-						(* ptr)[1] = nidx2; 
-						
+					nid2 = map.nodes[j]->id;
+					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)&& !onSameWay(nid1,nid2)){
+						addCandidate(&candidates,nidx1,nidx2);
 					}
 				}
 				neighCount=GARY_SIZE(raster.raster[lonidx][latidx+1]);
 				for (int j=0;j<neighCount;j++){
-					int nidx2;
 					nidx2 = raster.raster[lonidx][latidx+1][j];
-					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)){
-						int ** ptr;
-						ptr = GARY_PUSH(candidates);
-						* ptr = malloc(2*sizeof(int));
-						(* ptr)[0] = nidx1; 
-						(* ptr)[1] = nidx2; 
-						
+					nid2 = map.nodes[j]->id;
+					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)&& !onSameWay(nid1,nid2)){
+						addCandidate(&candidates,nidx1,nidx2);
 					}
 				}
 			}
@@ -484,22 +428,6 @@ int tree_cmp(int idx1, int idx2){
 	line1 = lines[idx1];
 	line2 = lines[idx2];
 	
-	/*
-	// DEBUG
-	if (line1.startid<line2.startid)
-		return -1;
-
-	if (line1.startid>line2.startid)
-		return 1;
-
-	if (line1.endid<line2.endid)
-		return -1;
-
-	if (line1.endid>line2.endid)
-		return 1;
-	return 0;
-	*/
-//	anglesign=1;
 	struct mixed_num_t lat1;
 	struct mixed_num_t lat2;
 	lat1 = calcMixLatForLon(line1,lon);
@@ -603,10 +531,6 @@ struct int_event_t makeIntEvent(struct line_t * lines,int l1Idx, int l2Idx, stru
 		}
 		return intevt; 
 	}
-	/*if (col){
-		lines[l1Idx].broken = 1;
-		lines[l2Idx].broken = 1;
-	}*/
 	intevt.lineIdx=-1;
 	return intevt;
 
@@ -850,14 +774,10 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 	//			printf("Special case\n");
 				continue;
 			}
-			//Debug
-			//evt.lon = 50091234;
-			// /Debug
 			struct int_event_t intevt;
 			struct tree_node_t * prev;
 			struct tree_node_t * next;
 
-			//struct tree_t * item;
 			switch (evt.type){
 				case EVT_START:
 					anglesign = 1;
@@ -900,10 +820,6 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 				case EVT_END:
 					anglesign=-1;
 					printf("EVT_END\n");
-					//item = tree_find(*tree,lines,evt.lineIdx,evt.lon,-1);
-					//if (item==NULL){
-					//	printf("Node disappeared\n");
-					//}
 					
 					line = lines[evt.lineIdx];
 					printf("Line: F:%d, T:%d (%"PF(S_P)",%"PF(S_P)")--(%"PF(S_P)",%"PF(S_P)")\n",line.startid, line.endid,line.startlon,line.startlat,line.endlon,line.endlat);
@@ -1086,7 +1002,7 @@ struct map_t addDirectToMap(struct line_t * lines, struct map_t map){
 		way->refs[0] = lines[i].startid;
 		way->refs[1] = lines[i].endid;
 		way->has_type = true;
-		if (!lines[i].broken){
+		if (!lines[i].broken && lines[i].isBar==0){
 			way->type = OBJTYPE__DIRECT;
 			//printf("Writing way %d\n",way->type);
 		}
@@ -1166,16 +1082,16 @@ uint8_t nodeInPolygon(struct map_t map, Premap__Node * node, Premap__Way * way){
 		periLine.endlon = n2->lon;
 		periLine.endlat = n2->lat;
 
-		SWEEP_TYPE * col;
-		col = calcCollision(nodeLine,periLine);
-	//	printf("Calc Collision!\n");
-		if (col==NULL)
+		struct col_t col;
+		col = calcMixCollision(nodeLine,periLine);
+		if (!col.isCol)
 			continue;
 
 
-		if (((col[0]!=periLine.startlon)&&(col[0]!=periLine.endlon))||
-		    ((col[1]!=periLine.startlat)&&(col[1]!=periLine.endlat)))
+		if (!col.atEndpoint){
 			crosses++;
+			continue;
+		}
 		// FIXME special cases
 		crosses++;
 	}
@@ -1185,9 +1101,6 @@ uint8_t nodeInPolygon(struct map_t map, Premap__Node * node, Premap__Way * way){
 
 }
 
-#define ASORT_PREFIX(X) int64_##X
-#define ASORT_KEY_TYPE int64_t
-#include <ucw/sorter/array-simple.h>
 
 struct walk_area_t * findWalkAreas(struct map_t map, struct raster_t raster){
 	struct walk_area_t * walkareas;	
@@ -1482,10 +1395,10 @@ int main (int argc, char ** argv){
 	struct line_t * lines;
 	lines = findDirectWays(map,candidates,graph.barGraph,raster.minlon,raster.minlat);
 	map = addDirectToMap(lines,map);
-//	struct walk_area_t * walkareas;
-//	walkareas = findWalkAreas(map,raster);
+	struct walk_area_t * walkareas;
+	walkareas = findWalkAreas(map,raster);
 //	map = removeBarriers(map);
-//	printf("Found %d walk areas\n",GARY_SIZE(walkareas));
+	printf("Found %d walk areas\n",GARY_SIZE(walkareas));
 	mapToPBF(map,pbmap);
 	//checkWayTypes(pbmap);
 	if (saveMap(pbmap,"../data/praha-union-c.pbf")!=0)
