@@ -1,0 +1,43 @@
+\chapter{Vstupní data}
+\section{Projekt OpenStreetMap}
+\subsection{O projektu}
+Projekt OpenStreetMap\cite{osmweb} vznikl v Anglii v roce 2004 a jeho prvotním cílem bylo
+vytvořit volně dostupná geografická data pro Velkou Británii. Iniciativa se
+postupně rozrostla do celého světa a dnes mapu pomáhá tvořit přes milion
+dobrovolníků. Česká republika je dnes poměrně kvalitně pokryta a zvláště velká
+města mají dostatečně detailní pokrytí i pro vyhledávání pěších tras.
+\subsection{Datová primitiva TODO: Češtin být můj kamarád} 
+Projekt OpenStreetMap používá tři základní geografická primitiva: uzly, cesty a
+relace. Ke každému z těchto primitiv mohou být přiřazeny atributy, což jsou
+dvojice klíče a hodnoty. 
+U polohových dat se neukládá výška, výsledná mapa je pouze dvourozměrná.
+Každé primitivum má jedinečné id.
+Nyní popíšeme jednotlivá primitiva
+
+{\em Uzly} reprezentují body. Každý bod má určené souřadnice a může, ale nemusí,
+mít atributy.
+
+{\em Cesty} reprezentují linie a plochy. Cesta je definována posloupností uzlů.
+Pokud má být cesta plochou, musí být první a poslední prvek této posloupnosti
+stejný, ale ne každá uzavřená cesta je plocha. Tento problém rozebíráme níže.
+Cesty většinou mají atributy, které říkají, co daná cesta reprezentuje. Jedna
+cesta také může reprezentovat více fyzických objektů (například silnici s
+tramvajovou tratí, park s oplocením).
+
+{\em Relace} reprezentují složtější objekty. Pro náš účel jsou významné relace
+typu multipolygon, kterými se reprezentují složitější plochy (nesouvislé, s
+dírami). Každá relace obsahuje seznam prvků, ze kterých se skládá. Prvky také
+mohou mít uvedenu roli, kterou v dané relaci mají, například u multipolygonů,
+zda jsou vnitřní či vnější okraj. Opět mívají atributy určující jejich typ.
+Relacemi se dále reprezentují územní hranice, trasy linek MHD, cyklotrasy a
+jiné.
+
+\subsection{OSM XML}
+Nejobvyklej
+
+
+\section{Výšková data}
+Abychom mohli správně odhadnout náročnost pěší trasy, musíme znát i informace o
+nadmořské výšce jednotlivých bodů. Stejně tak jako většina jiných projektů jsme
+použili data SRTM\cite{srtmweb}, což jsou volně dostupná výšková data pro celý
+svět. % TODO Přepsat!  
