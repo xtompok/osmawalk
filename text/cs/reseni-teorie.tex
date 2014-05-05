@@ -6,12 +6,71 @@ dlouhé cesty, doplníme spojky mezi cestami, připravíme zkratky pro trasy př
 průchozí prostranství a nakonec ze všech dat vytvoříme vyhledávací graf.
 
 \section{Klasifikace OSM dat}
+Protože OSM XML obsahuje poměrně mnoho dat, která nepotřebujeme a navíc je práce
+s XML pomalá, vytvořili jsme pro zpracovávání formát, který obsahuje jen
+potřebné informace, cesty jsou v něm rozděleny do kategorií podle typu objektů,
+které reprezentují a data jsou uložena v Protocol Bufferech. Kategorie jsou
+následující:
+\begin{itemize}
+	\item \verb|WAY| - cesta, o které nic nevíme, rezervováno pro speciální
+	případy
+	\item \verb|WATER| - strouha či přeskočitelný potok
+	\item \verb|PARK| - plocha s udržovanou zelení, nízkou trávou
+	\item \verb|GREEN| - plocha s neudržovanou zelení, často jsou v ní
+	prošlapané nezmapované cestičky
+	\item \verb|FOREST| - les v městském slova smyslu, obvykle bývá pěšky
+	průchozí
+	\item \verb|PAVED| - zpevněná cesta či plocha
+	\item \verb|UNPAVED| - nezpevněná cesta či plocha
+	\item \verb|STEPS| - schody
+	\item \verb|HIGHWAY| - silnice, silnice s chodníkem
+	\item \verb|BARRIER| - překážka pro chodce nepřekonatelná, typ se
+	nerozlišuje, například budova, řeka, plot
+	\item \verb|DIRECT| - spojka mezi cestami
+\end{itemize}
+Rozdělení do kategorií probíhá s pomocí konfiguračního souboru, ve ktreém můžeme
+zvolit jaké atributy mají objekty mít, aby patřily do dané kategorie. Protože
+ani informace, zda jde o plochu, není ve specifikaci OSM přesně definována, jsou
+pro určení, zda jde o plochu, použity údaje z konfiguračního souboru. Po
+rozdělení objektů do kategorií jsou smazány body, které neleží na žádné cestě,
+protože takovéto body dále nikde nepotřebujeme.
 
 \section{Vyřešení multipolygonů}
+Multipolygony popisují objekty se složitější strukturou. Každý multipolygon se
+skládá z několika cest, přičemž cesty mohou být vnější --- obvodové --- a
+vnitřní, pokud má objekt díry. Při správné definici by mělo sjednocení cest
+vypadat jako několik kružnic. Takto je také řešen převod multipolygonů na běžné
+cesty. Dokud má nějaké vnější cesty, pokusíme se z nich udělat složit kružnici.
+Pokud se stane, že některý segment kružnice chybí, je vypsána chyba a
+multipolygon se dále nezpracovává. Stejně tak, pokud kružnice končí v nějakém
+svém bodě, který ale není počáteční. 
 
 \section{Zjednodušení budov}
+Ve městě jsou velmi časté bloky budov. V OSM datech jsou budovy reprezentovány
+obvykle samostatně, přičemž nám stačí znát obvod celého bloku. Proto cesty v
+jednotlivých blocích nahradíme jednou cestou reprezentující obvod tohoto bloku.
+Nejprve vybereme všechny budovy a vytvoříme si z nich graf sousednosti
+jednotlivých budov. Poté v každé komponentě najdeme bod na obvodu a postupně
+po obejdeme po obvodu celou budovu a vytváříme při tom novou cestu. Původní
+cesty potom smažeme. Když máme zpracované všechny budovy, smažeme body uvnitř
+budov, které nyní neleží na žádné cestě.
+
+Při zpracování se mohou vyskytnout dva druhy problémů. Jednak se uvnitř bloků
+mohou vyskytovat cesty, v tom případě spojování cest přerušíme, protože bychom
+se mohli připravit o možnost přidání spojek mezi cestami uvnitř bloku. Druhý
+problém souvisí s problémem více bodů na stejných souřadnicích. Může se stát, že
+jsou budovy špatně navázané, potom výsledek může vypadat zvláštně, ale stále se
+bude jednat o korektní cestu. Budovy také mohou mít na obvodu dva sousední body
+na stejných souřadnicích. Pokud narazíme na tuto situaci, zjednodušování
+ukončíme, protože nedokážeme určit, jestli tento bod leží na cestě tvořící
+obvod, nebo na cestě vedoucí dovnitř budovy. Tento problém se ale nevyskytuje
+příliš často, proto jsme ho speciálně neošetřovali.
 
 \section{Rozdělení dlouhých úseků}
+Pro další zpracování se nám bude hodit, abychom cesty, po kterých budeme
+plánovat trasy, neměly příliš dlouhé úseky. Proto se na všechny takové cesty
+podíváme a v případě, že obsahují úseky delší než zvolená vzdálenost, tyto úseky
+rovnoměrně rozdělíme na kratší. 
 
 \section{Spojky mezi cestami}
 
