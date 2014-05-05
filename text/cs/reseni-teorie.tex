@@ -1,65 +1,18 @@
-\chapter{Zpracování OSM dat}
-Našim cílem je vytvořit data ve formátu vhodném na rychlé vyhledávání pěších
-tras. K tomu potřebujeme jednak samotný formát a jednak postup, kterým z OSM a
-SRTM dat vytvoříme kvalitní data pro vyhledávání. Při výběru vhodného formátu
-ukládání dat jsme zvolili Protocol Buffery vyvinuté Googlem\cite{pbfweb}. Data
-pro vyhledávání budeme ukládat jako graf, jako seznam vrcholů a seznam hran.
+\chapter{Příprava dat}
+V této kapitole si popíšeme, jak z OSM dat vyrobíme graf pro vyhledávání pěších
+tras. Nejprve z dat vybereme pouze ta, která potřebujeme, a uložíme si je do
+našeho formátu k dalšímu zpracování. Poté zjednodušíme budovy, rozdělíme příliš
+dlouhé cesty, doplníme spojky mezi cestami, připravíme zkratky pro trasy přes
+průchozí prostranství a nakonec ze všech dat vytvoříme vyhledávací graf.
 
-\section{Protocol Buffer}
-Protocol Buffer je technologie vyvinutá Googlem a jejím cílem je vytvořit systém
-pro ukládání strukturovaných dat, který by byl jednoduchý, rychlý a nezávislý na
-použitém programovacím jazyku a platformě.
+\section{Klasifikace OSM dat}
 
-Jestliže chceme přenášet data pomocí Protocol Bufferů, musíme nejprve
-specifikovat formát dat. Základní jednotkou pro přenos dat je zpráva, která
-obsahuje datové položky. Každá položka má svůj určený typ, značku a násobnost.
-{\tuc Typy} jsou podobné typům v programovacích jazycích, obsahují několik typů celých
-čísel, čísla s plovoucí desetinnou čárkou, řetězce a logické hodnoty. Typem může
-být také zpráva, těmi se vytváří hierarchická struktura dat. 
-{\tuc Značka} je jednoznačný číselný identifikátor každé položky, musí být v rámci
-zprávy jedinečná a pokud se formát zprávy v čase mění, neměly by se značky znovu
-používat pro jiné položky.
-{\tuc Násobnost} určuje, kolik prvků může být v položce uloženo. Možnosti jsou
-\verb|required|, pak musí každá zpráva mít v položce právě jeden prvek,
-\verb|optional|, pak ve zprávě tato položka může, ale nemusí mít jeden prvek,
-\verb|repeated|, pak ve zprávě může být pod položkou uloženo libovolné množství
-prvků, i žádný. Tato násobnost fugnuje obdobně jako pole v programovacích
-jazycích. Dále také může být deklarován výčtový typ, kterým můžeme vytvořit
-pojmenovaná čísla. TODO: přeformulovat.
+\section{Vyřešení multipolygonů}
 
-Když máme specifikovaný formát, necháme si vygenerovat kód pro práci s tímto
-formátem. V tom je velká výhoda Protocol Bufferů, pomocí kompilátoru se ze
-souboru ze specifikací formátu vygeneruje kód v cílovém jazyce, který nám umožní
-pracovat se zprávami jako s objekty v objektových jazycích či jako se
-strukturami v C. Takto můžeme s vytvořenými daty pro vyhledávání jednoduše
-pracovat z mnoha podporovaných jazyků. Pokud bychom chtěli použít programovací
-jazyk, který není podporován, je možné si napsat vlastní dekodér, binární forma
-Protocol Bufferů je veřejně zdokumentována. TODO odkaz.
+\section{Zjednodušení budov}
 
-TODO: ukázka
+\section{Rozdělení dlouhých úseků}
 
-\section{Formát vyhledávacího grafu}
-Graf ukládáme jako dva seznamy --- seznam vrcholů a seznam hran. U každého
-vrcholu si pamatujeme jeho souřadnice ve formátu UTM, jeho nadmořskou výšku v
-metrech a jeho identifikátor v OSM. U hrany si pamatujeme počáteční a koncový
-vrchol a její typ značící typ cesty, kterou reprezentuje. Všechny hrany jsou
-brány jako obousměrné.
+\section{Spojky mezi cestami}
 
-Vyhledávací graf ukládáme jako zprávu \verb|Graph| se dvěma položkami ---
-seznamem vrcholů \verb|vertices| a seznamem hran \verb|edges|. Zpráva
-\verb|Vertex| popisující vrchol obsahuje položky:
-\begin{itemize}
-	\item \verb|osmid| - identifikátor vrcholu v OSM
-	\item \verb|lat| - zeměpisná šířka v UTM
-	\item \verb|lon| - zeměpisná délka v UTM
-	\item \verb|height| - nadmořská výška v metrech
-\end{itemize}
-Zpráva \verb|Edge| popisující hranu obsahuje tyto položky:
-\begin{itemize}
-	\item \verb|vfrom| - index prvního vrcholu
-	\item \verb|vto| - index druhého vrcholu
-	\item \verb|type| - typ cesty, po které hrana vede
-\end{itemize}
-
-\seciton{Připrava dat pro vyhledávání}
-Abychom mohli vytvořit 
+\section{Zkratky přes průchozí prostranství}
