@@ -1,12 +1,12 @@
-\chapter{Vstupní data}
-\section{Projekt OpenStreetMap}
-\subsection{O projektu}
+\chapter{Projekt OpenStreetMap}
+\section{O projektu}
 Projekt OpenStreetMap\cite{osmweb} vznikl v Anglii v roce 2004 a jeho prvotním cílem bylo
 vytvořit volně dostupná geografická data pro Velkou Británii. Iniciativa se
 postupně rozrostla do celého světa a dnes mapu pomáhá tvořit přes milion
 dobrovolníků. Česká republika je dnes poměrně kvalitně pokryta a zvláště velká
 města mají dostatečně detailní pokrytí i pro vyhledávání pěších tras.
-\subsection{Datová primitiva TODO: Češtin být můj kamarád} 
+
+\section{Datová primitiva} 
 Projekt OpenStreetMap používá tři základní geografická primitiva: uzly, cesty a
 relace. Ke každému z těchto primitiv mohou být přiřazeny atributy, což jsou
 dvojice klíče a hodnoty. 
@@ -32,7 +32,7 @@ zda jsou vnitřní či vnější okraj. Opět mívají atributy určující jeji
 Relacemi se dále reprezentují územní hranice, trasy linek MHD, cyklotrasy a
 jiné.
 
-\subsection{OSM XML}
+\section{OSM XML}
 Nejobvyklejší způsob ukládání OSM dat je ve formátu XML. Všechna primitiva mají
 jako jeden z atributů \verb|id|, který značí jejich jednoznačný identifikátor.
 Každý typ primitiva má svou vlastní číselnou řadu. V OSM XML jsou
@@ -69,9 +69,54 @@ nepotřebuje data z celého světa, jsou k dispozici i data pro jednotlivé
 kontinenty a státy, někdy i s
 historií\footnote{\url{http://osm.kyblsoft.cz/archiv/}}. 
 
+\section{Problémy v OSM datech}
+Ačkoli jsou data z OSM poměrně kvalitní a přesné, během jejich zpracování jsme
+narazili na některá problematická místa. 
 
-\section{Výšková data}
-Abychom mohli správně odhadnout náročnost pěší trasy, musíme znát i informace o
-nadmořské výšce jednotlivých bodů. Stejně tak jako většina jiných projektů jsme
-použili data SRTM\cite{srtmweb}, což jsou volně dostupná výšková data pro celý
-svět. % TODO Přepsat!  
+Různorodé označování ploch. Tento problém plyne již z definice geografických
+primitiv a atributů objektů. Protože jak plochy, tak linie jsou označovány v OSM
+stejným primitivem {\em cesta}, musí se při rozlišování hledět na jejich atributy.
+Bohužel ani zde není jejich používání sjednoceno. Aby mohla být {\em cesta}
+plochou, musí mít první a poslední {\em uzel} stejný. Ale ne každá uzavřená {\em
+cesta } je plochou. Například uzavřená silnice se pokládá za kruhový objezd a
+nikoli plochu. Aby byla považována za plochu, musí mít nastaven klíč
+\verb|area| hodnotu \verb|yes|. Naopak pokud má {\em cesta} například klíč \verb|landuse|
+nebo \verb|building|, je za plochu považována, i když nemá klíč \verb|area|.
+
+Nekorektní objekty. I přesto, že editory používané pro úpravu OSM se snaží
+hlídat správnost vytvořených objektů, se v mapě vyskytují různé chybně
+definované objekty. Nalezli jsme například cesty, které samy sebe kříží,
+chybějící elementy v hranicích multipolygonu a jiné. Výhodou OSM je, že jsme je
+mohli ihned opravit, ale přesto je musí umět program korektně vyhodnotit.
+
+Více bodů na stejných souřadnicích. Ač by se pro spojování sousedních ploch měly
+využívat společné body na hranicích, v některých oblastech jsme našli
+problematická místa, kde polovina ploch používala jeden bod a druhá polovina
+jiný na stejných souřadnicích. Tyto dva body spolu nebyly nijak propojeny a
+pravděpodobně vznikly při některém importu z jiných datových zdrojů. Bohužel
+takovéto složité chyby se nedají jednoduše ručně opravit a je opět potřeba je
+korektně zpracovat.
+
+Různá sémantika atributů na různých místech. Při výběru atributů, které zahrnout
+ke zpracování, jsme se setkali s používáním stejných atributů v různých
+významech. Například klíč \verb|landuse| s hodnotou \verb|residential| v
+některých místech označoval velké plochy s obytnými budovami, jinde volně
+přístupná prostranství mezi těmito budovami. Kvůli těmto nejednoznačnostem jsme
+některé atributy nemohli použít, protože by vytvářely v některých částech města
+nekorektní výsledky.
+
+Neúplně navazující cesty. Kvalita mapovaných cest v OSM je silně závislá na typu
+cesty. Zatímco silnice, které jsou často využívány pro hledání tras, jsou
+většinou navzájem navázány správně, chodníky často v datech úplně chybí, nebo
+nejsou napojeny na silnice. Rovněž přechody často chybí. Proto v našem programu
+zkoumáme i okolí cest a přidáváme možné spojky mezi chodníky a silnicemi.
+
+\section{Využívané informace z OSM}
+Protože chceme umět nejen vyhledávat po cestách, ale i vytvářet trasy přes
+průchozí prostranství, potřebujeme mimo cest zpracovávat i budovy, prostranství 
+a další objekty. Zpracováváme cesty, které popisují fyzické objekty v terénu,
+naopak vynecháváme správní hranice, podzemní objekty (např. metro) a cesty
+popisující služby a občanskou vybavenost. Uzly zpracováváme jen jako body s
+danou polohou, jejich atributy nevyužíváme. Z relací používáme pouze
+multipolygon, kterým jsou často reprezentovány budovy.
+
