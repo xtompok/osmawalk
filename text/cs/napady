@@ -1,0 +1,12 @@
+Pouzite knihovny
+- libUCW
+- GeographicLib
+- protobuf a protobuf-c
+
+Seznam vyhledavacu v OSM
+# http://wiki.openstreetmap.org/wiki/Routing
+  - sekce online routers, offline routers
+
+Map features OSM
+# http://wiki.openstreetmap.org/wiki/Map_Features
+

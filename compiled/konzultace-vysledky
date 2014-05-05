@@ -1,0 +1,81 @@
+Hledani 
+- klikaci aplikace s mapou
+- export GPX - vytvaret rucne
+
+Vysky
+- STRM
+- pocitat ohodnoceni i hran
+
+YAML staci jednoduchy
+
+- predpocitavat delky hran
+- ukladat UTM?
+- udelat poradnou haldu
+- prihradkova struktura - skripta z GA - zminit v textu
+- A* potencialy - skripta z GA
+- pricitat cas pr iprechazeni silnice
+
+Presnost
+- najit ekvivalencni tridy pro souradnice
+- vsechyn body nahradit jednim
+- posloupnost stejnych bodu v cestach smazat  - mozne smazani cele cesty
+
+Zametani
+- udalosti maji celociselne souradnice
+//- vzdy porovnavam bod a primku (je vlevo ci vpravo?)
+- vsechno pocitat zlomkove
+- pruseciky resim prohazovanim ve strome
+- 128bit integer? __int128
+- primky si musi pamatovat pozici ve stromu
+- poresit determinanty - mely by tam byt jenom rozdily
+  - mohlo by mi stacit 64bitu
+  - souradnice pruseciku jako slozene cislo
+- dve haldy - zacatky a konce usecek | pruseciky
+- pruseciky vice usecek
+
+- vykaslat se na prechody
+
+Triangulace 
+- v knizce
+
+Text
+W abstrakt
+- kontakt na sebe 
+1. kapitola
+- formulace problemu
+  - co chci pocitat
+  - ze chci z verejnych dat
+  - jaka data sehnat + chyby v nich
+- co uz kdo naprogramoval
+  - google pesi trasy - srovnani
+  - mapy.cz - dtto
+- uvod
+  - ma to byt modul pro obecnejsi dopravni vhledavac
+
+2. kapitola
+- struktura vstupnich dat
+W - format OSM
+  - co se hodi, co ne
+  - DEM
+
+3. kapitola
+- popis reseni teoreticky
+  - chci vlastni meziformat
+    - co ma znamenat
+    - jak se vyrabi
+    - jak vypada
+  - vyhledavaci algoritmus
+
+4. kapitola
+- implementace jednotlivych casti
+
+5. kapitola
+- experimenty
+  - rychlost
+  - rozumnost cest
+    - srovnani s jinymi vyhledavaci a osobni zkusenosti
+6. kapitola
+- zaver
+- namety do budoucna
+
+Posilat prubezne
