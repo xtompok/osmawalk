@@ -12,7 +12,7 @@ potřebné informace, cesty jsou v něm rozděleny do kategorií podle typu obje
 které reprezentují a data jsou uložena v Protocol Bufferech. Kategorie jsou
 následující:
 \begin{itemize}
-	\item \verb|WAY| - cesta, o které nic nevíme, rezervováno pro speciální
+	\item \verb|WAY| -- cesta, o které nic nevíme, rezervováno pro speciální
 	případy
 	\item \verb|WATER| - strouha či přeskočitelný potok
 	\item \verb|PARK| - plocha s udržovanou zelení, nízkou trávou
@@ -28,7 +28,7 @@ následující:
 	nerozlišuje, například budova, řeka, plot
 	\item \verb|DIRECT| - spojka mezi cestami
 \end{itemize}
-Rozdělení do kategorií probíhá s pomocí konfiguračního souboru, ve ktreém můžeme
+Rozdělení do kategorií probíhá s pomocí konfiguračního souboru, ve kterém můžeme
 zvolit jaké atributy mají objekty mít, aby patřily do dané kategorie. Protože
 ani informace, zda jde o plochu, není ve specifikaci OSM přesně definována, jsou
 pro určení, zda jde o plochu, použity údaje z konfiguračního souboru. Po
@@ -37,7 +37,7 @@ protože takovéto body dále nikde nepotřebujeme.
 
 \section{Vyřešení multipolygonů}
 Multipolygony popisují objekty se složitější strukturou. Každý multipolygon se
-skládá z několika cest, přičemž cesty mohou být vnější --- obvodové --- a
+skládá z několika cest, přičemž cesty mohou být vnější -- obvodové -- a
 vnitřní, pokud má objekt díry. Při správné definici by mělo sjednocení cest
 vypadat jako několik kružnic. Takto je také řešen převod multipolygonů na běžné
 cesty. Dokud má nějaké vnější cesty, pokusíme se z nich udělat složit kružnici.
@@ -85,7 +85,7 @@ navíc nepřinášely významné zkrácení trasy, proto jsme u každého uzlu v
 spojky s určitou pravděpodobností tak, aby měl každý uzel průměrný stupeň šest.
 Tyto spojky navíc mohou vést přes nějakou překážku, jako je plot nebo zeď, proto
 potřebujeme zkontrolovat kolize všech nových úseček s překážkami. K tomuto účelu
-jsme využili algoritmus zametání roviny TODO: rozepsat?.  
+jsme využili algoritmus zametání roviny TODO: rozepsat, obrázek.  
 
 \section{Zkratky přes průchozí prostranství}
 Pokud procházíme ve městě přes větší park nebo náměstí, často nemusíme chodit

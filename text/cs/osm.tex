@@ -16,6 +16,8 @@ Nyní popíšeme jednotlivá primitiva
 
 {\tuc Uzly} reprezentují body. Každý bod má určené souřadnice a může, ale nemusí,
 mít atributy.
+- mapove objekty samy o sobe
+- body bez atributu pro ostatni objekty
 
 {\tuc Cesty} reprezentují linie a plochy. Cesta je definována posloupností uzlů.
 Pokud má být cesta plochou, musí být první a poslední prvek této posloupnosti
@@ -23,6 +25,10 @@ stejný, ale ne každá uzavřená cesta je plocha. Tento problém rozebíráme 
 Cesty většinou mají atributy, které říkají, co daná cesta reprezentuje. Jedna
 cesta také může reprezentovat více fyzických objektů (například silnici s
 tramvajovou tratí, park s oplocením).
+Cesta
+- posloupnost uzlu opatrena atributy
+- mají orientaci
+- pouziva se k ...
 
 {\tuc Relace} reprezentují složtější objekty. Pro náš účel jsou významné relace
 typu multipolygon, kterými se reprezentují složitější plochy (nesouvislé, s
@@ -31,19 +37,28 @@ mohou mít uvedenu roli, kterou v dané relaci mají, například u multipolygon
 zda jsou vnitřní či vnější okraj. Opět mívají atributy určující jejich typ.
 Relacemi se dále reprezentují územní hranice, trasy linek MHD, cyklotrasy a
 jiné.
+Relace
+- posloupnost uzlu a cest (a relaci)
+- opeatrena atributy
+- pouziva se k ...
+
+- rozdelit na dva odstavce
 
 \section{OSM XML}
 Nejobvyklejší způsob ukládání OSM dat je ve formátu XML. Všechna primitiva mají
 jako jeden z atributů \verb|id|, který značí jejich jednoznačný identifikátor.
-Každý typ primitiva má svou vlastní číselnou řadu. V OSM XML jsou
+Každý typ primitiva má svou vlastní číselnou řadu. V OSM XML\cite{osmxml} jsou
 všechna primitiva uložena v následujícím pořadí:
+
+%Ukázka
 
 {\tuc Hlavička souboru.} V XML hlavičce je určeno kódování UTF-8 a následně je
 otevřen element \verb|osm|, jehož atributem je také použitá verze API. 
 
 {\tuc Uzly.} Zde jsou za sebou postupně vypsány všechny uzly. Uzly jsou
 reprezentovány elementem \verb|node|, každý má atribut \verb|lat| a \verb|lon|
-určující jejich zeměpisnou šířku a délku, používá se elipsoid WGS-84. Dále mohou
+určující jejich zeměpisnou šířku a délku, používá se souřadný systém
+WGS-84\cite{wgsnorma}. Dále mohou
 mít vnořené elementy \verb|tag|. Každý tento element má atribut \verb|k|
 reprezentující klíč a \verb|v| reprezentující hodnotu pro atributy uzlu.
 
@@ -59,6 +74,7 @@ primitiva jde, \verb|ref| určující identifikátor tohoto primitiva a \verb|ro
 určující roli daného prvku v relaci. I relace mohou mít vnořené elementy
 \verb|tag|.
 
+
 Toto pořadí umožňuje proudově zpracovávat XML, protože když zpracováváme cesty,
 tak již máme v paměti všechny uzly, na které se cesty mohou odkazovat, obdobně
 s relacemi. 
@@ -69,11 +85,11 @@ nepotřebuje data z celého světa, jsou k dispozici i data pro jednotlivé
 kontinenty a státy, někdy i s
 historií\footnote{\url{http://osm.kyblsoft.cz/archiv/}}. 
 
-\section{Problémy v OSM datech}
+\section{Problémy v datech}
 Ačkoli jsou data z OSM poměrně kvalitní a přesné, během jejich zpracování jsme
 narazili na některá problematická místa. 
 
-Různorodé označování ploch. Tento problém plyne již z definice geografických
+{\tuc Různorodé označování ploch.} Tento problém plyne již z definice geografických
 primitiv a atributů objektů. Protože jak plochy, tak linie jsou označovány v OSM
 stejným primitivem {\em cesta}, musí se při rozlišování hledět na jejich atributy.
 Bohužel ani zde není jejich používání sjednoceno. Aby mohla být {\em cesta}
@@ -83,13 +99,13 @@ nikoli plochu. Aby byla považována za plochu, musí mít nastaven klíč
 \verb|area| hodnotu \verb|yes|. Naopak pokud má {\em cesta} například klíč \verb|landuse|
 nebo \verb|building|, je za plochu považována, i když nemá klíč \verb|area|.
 
-Nekorektní objekty. I přesto, že editory používané pro úpravu OSM se snaží
+{\tuc Nekorektní objekty.} I přesto, že editory používané pro úpravu OSM se snaží
 hlídat správnost vytvořených objektů, se v mapě vyskytují různé chybně
 definované objekty. Nalezli jsme například cesty, které samy sebe kříží,
 chybějící elementy v hranicích multipolygonu a jiné. Výhodou OSM je, že jsme je
 mohli ihned opravit, ale přesto je musí umět program korektně vyhodnotit.
 
-Více bodů na stejných souřadnicích. Ač by se pro spojování sousedních ploch měly
+{\tuc Více bodů na stejných souřadnicích.} Ač by se pro spojování sousedních ploch měly
 využívat společné body na hranicích, v některých oblastech jsme našli
 problematická místa, kde polovina ploch používala jeden bod a druhá polovina
 jiný na stejných souřadnicích. Tyto dva body spolu nebyly nijak propojeny a
@@ -97,7 +113,7 @@ pravděpodobně vznikly při některém importu z jiných datových zdrojů. Boh
 takovéto složité chyby se nedají jednoduše ručně opravit a je opět potřeba je
 korektně zpracovat.
 
-Různá sémantika atributů na různých místech. Při výběru atributů, které zahrnout
+{\tuc Různá sémantika atributů na různých místech.} Při výběru atributů, které zahrnout
 ke zpracování, jsme se setkali s používáním stejných atributů v různých
 významech. Například klíč \verb|landuse| s hodnotou \verb|residential| v
 některých místech označoval velké plochy s obytnými budovami, jinde volně
@@ -105,7 +121,7 @@ přístupná prostranství mezi těmito budovami. Kvůli těmto nejednoznačnost
 některé atributy nemohli použít, protože by vytvářely v některých částech města
 nekorektní výsledky.
 
-Neúplně navazující cesty. Kvalita mapovaných cest v OSM je silně závislá na typu
+{\tuc Neúplně navazující cesty.} Kvalita mapovaných cest v OSM je silně závislá na typu
 cesty. Zatímco silnice, které jsou často využívány pro hledání tras, jsou
 většinou navzájem navázány správně, chodníky často v datech úplně chybí, nebo
 nejsou napojeny na silnice. Rovněž přechody často chybí. Proto v našem programu
