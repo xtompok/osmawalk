@@ -73,5 +73,37 @@ podíváme a v případě, že obsahují úseky delší než zvolená vzdálenos
 rovnoměrně rozdělíme na kratší. 
 
 \section{Spojky mezi cestami}
+Jak již bylo zmíněno, chodníky jsou v OSM zmapovány jen některé a často nejsou
+na sebe správně navázány. Proto jsme se rozhodli prohledat okolí každého uzlu a
+spojit každé dva uzly, které jsou k sobě blíže než 20 m, úsečkou. Při zkoumání
+OSM dat jsme zjistili, že mnohé obytné domy kolem sebe nemají značené ploty a
+proto jsme vzdálenost zvolili takto nízkou, protože poté je pravděpodobnost, že
+jde například o dvě ulice oddělené domky se zahrádkami, poměrně malá.  
+
+Mezi velmi blízkými uzly ale vznikalo příliš velké množství spojek, které by
+navíc nepřinášely významné zkrácení trasy, proto jsme u každého uzlu vybrali
+spojky s určitou pravděpodobností tak, aby měl každý uzel průměrný stupeň šest.
+Tyto spojky navíc mohou vést přes nějakou překážku, jako je plot nebo zeď, proto
+potřebujeme zkontrolovat kolize všech nových úseček s překážkami. K tomuto účelu
+jsme využili algoritmus zametání roviny TODO: rozepsat?.  
 
 \section{Zkratky přes průchozí prostranství}
+Pokud procházíme ve městě přes větší park nebo náměstí, často nemusíme chodit
+jen po chodnících, ale můžeme projít přes prostranství přímo. Přímé cesty přes
+průchozí prostranství proto také chceme zanést do vyhledávacího grafu. K jejich
+vytvoření jsme využili modifikovaný algoritmus vytváření spojek mezi cestami.
+Dvojice bodů v průchozích prostranstvích jsme spojovali úsečkami. Tentokrát jsme
+ale hledali dvojice bližší než 300 m, protože parky mohou být poměrně rozlehlé.
+Omezení na průměrný stupeň jsme snížili na dva, protože zvýšením vzdálenosti
+hledání při vyšším stupni vznikalo příliš mnoho úseček, které vedly podobně a
+proto nepřinášely významné zlepšení vyhledané trasy. Protože i na průchozích
+prostranstvích se vyskytují překážky, opět jsme pomocí zametání roviny
+odstranili všechny úsečky, které procházely přes nějakou překážku.
+
+\section{Vytvoření vyhledávacího grafu}
+Poté, co jsme připravili data, jsme vytvořili vyhledávací graf. Protože kolize
+přímých cest s překážkami jsme vyřešili již při jejich vytváření, jsou všechny
+cesty korektní. Proto se překážkami již dále nezabýváme a pouze z cest vytvoříme
+vyhledávací graf. Uložíme seznam všech uzlů, které jsou na cestách použity a
+cesty rozdělíme na jednotlivé hrany grafu mezi dvěma uzly. U hran zachováme
+údaje o typu cesty, protože je budeme využívat při vyhledávání.
