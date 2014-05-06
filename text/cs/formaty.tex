@@ -41,6 +41,49 @@ Protocol Bufferů je veřejně zdokumentována. TODO odkaz.
 
 TODO: ukázka
 
+\section{Přípravný meziformát}
+Pro zpracovávání OSM dat jsme navrhnuli vlastní formát, protože formát OSM
+obsahuje mnoho údajů, které nepotřebujeme a je tak zbytečně pomalý na zpracování
+a naopak některé údaje, které vytváříme během zpracování, by se v něm obtížně
+reprezntovaly. Základní struktura zůstává zachována. Mapu ukládáme jako zprávu
+\verb|Map|, která obsahuje seznamy zpráv \verb|Node| pro uzly, \verb|Way| pro
+cesty, \verb|Relation| pro relace a \verb|Multipolygon| pro multipolygony.
+
+Zpráva \verb|Node| pro uzel obsahuje položky:
+\begin{itemize}
+	\item \verb|id| - OSM identifikátor uzlu
+	\item \verb|lat| - zeměpisná šířka v UTM
+	\item \verb|lon| - zeměpisná délka v UTM
+	\item \verb|height| - nadmořská výška v metrech
+	%\item \verb|objtype| - typ uzlu
+	\item \verb|inside| - logická hodnota, jestli je uzel uvnitř nějaké
+	překážky, například uzly reprezentující pasáž procházející domem
+	%\item \verb|nodeidx| - pořadí uzlu v seznamu
+\end{itemize}
+Seznam uzlů se v průběhu zpracování mění, jsou z něho mazány uzly, které již
+nebudou potřeba a jsou do něj přidávány uzly vzniklé například dělením příliš
+dlouhých úseků.
+
+Zpráva \verb|Way| pro cestu obsahuje položky:
+\begin{itemize}
+	\item \verb|id| - OSM identifikátor cesty
+	\item \verb|refs| - seznam OSM identifikátorů uzlů, ze kterých se cesta
+	skládá
+	\item \verb|area| - logická hodnota určující, jestli je daná cesta
+	plochou
+	%\item \verb|barrier| - logická hodnota určující, jestli je daná cesta
+	překážkou
+	\item \verb|type| - kategorie cesty TODO: odkaz
+	%\item \verb|bordertype| - pokud je cesta plocha, jakým způsobem je
+	ohraničena
+	%\item \verb|crossing| - jaké kategorie cest cesta kříží
+	\item \verb|bridge| - logická hodnota vyjadřující, zda vede cesta na mostě
+	\item \verb|tunnel| - logická hodnota vyjadřující, zda vede cesta v
+	tunelu, průchodu, \dots
+	%\item \verb|wayidx| - pořadí cesty v seznamu
+	%\item \verb|render| - logická hodnota vyjadřující, jestli se bude cesta rednerovat
+\end{itemize}
+
 \section{Formát vyhledávacího grafu}
 Graf ukládáme jako dva seznamy --- seznam vrcholů a seznam hran. U každého
 vrcholu si pamatujeme jeho souřadnice ve formátu UTM, jeho nadmořskou výšku v
