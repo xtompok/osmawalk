@@ -12,9 +12,20 @@
 # Log files
 *.log
 
+# TeX logs
+*.aux
+*.toc
+
+# TeX output
+*.dvi
+*.ps
+
 # C extensions
 *.so
 *.o
+
+# Profiler output
+gmon.out
 
 # Packages
 *.egg

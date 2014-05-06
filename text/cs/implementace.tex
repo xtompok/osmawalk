@@ -1,0 +1,16 @@
+\chapter{Implementace}
+Pro implementaci programu převádějícího OSM data do formátu vyhledávacího grafu
+jsme zvolili v první části Python, protože pro něj existuje široké množství
+knihoven, které nám pomohly při řešení jednotlivých dílčích problémů. Při
+vytváření spojek mezi cestami a jejich následné kontrole již ale nedostačoval,
+proto tuto a další části jsme implementovali v jazyce C. Mezi těmito částmi
+předáváme data pomocí Protocol Bufferu v souboru. Vyhledávání je také
+implementováno v jazyce C kvůli rychlosti a paměťové nenáročnosti.
+
+\section{Klasifikace OSM dat}
+\section{Vyřešení multipolygonů}
+\section{Zjednodušení budov}
+\section{Rozdělení dlouhých úseků}
+\section{Spojky mezi cestami}
+\section{Zkratky přes průchozí prostranství}
+\section{Vytvoření vyhledávacího grafu}
