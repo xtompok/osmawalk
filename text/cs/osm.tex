@@ -14,43 +14,83 @@ U polohových dat se neukládá výška, výsledná mapa je pouze dvourozměrná
 Každé primitivum má jedinečné id.
 Nyní popíšeme jednotlivá primitiva
 
-{\tuc Uzly} reprezentují body. Každý bod má určené souřadnice a může, ale nemusí,
-mít atributy.
-- mapove objekty samy o sobe
-- body bez atributu pro ostatni objekty
+{\tuc Uzly} jsou body s určenými souřadnicemi. Uzly mohou mít atributy, ty pak
+určují bodový mapový objekt, například rozcestník nebo závora. Existují i uzly
+bez atributů sloužící pouze jako součást cest nebo relací.
 
-{\tuc Cesty} reprezentují linie a plochy. Cesta je definována posloupností uzlů.
-Pokud má být cesta plochou, musí být první a poslední prvek této posloupnosti
-stejný, ale ne každá uzavřená cesta je plocha. Tento problém rozebíráme níže.
-Cesty většinou mají atributy, které říkají, co daná cesta reprezentuje. Jedna
-cesta také může reprezentovat více fyzických objektů (například silnici s
+{\tuc Cesty} jsou posloupnosti uzlů. Uzly se na cestě nemohou opakovat s
+jedinnou výjimkou, že první a poslední bod mohou být shodné, potom se jedná o
+uzavřenou cestu. Cesty jsou orientované, tzn. na pořadí uzlů záleží. Mohou
+existovat cesty bez atributů jako součásti relace, ale obvykle mají atributy
+učující, jaký objekt je jimi reprezentován.
+
+Cestami jsou reprezentovány linie a plochy. Pokud má být cesta plochou, musí být
+uzavřená, ale ne každá uzavřená cesta je plocha. Tento problém rozebíráme níže.
+Jedna cesta také může reprezentovat více fyzických objektů (například silnici s
 tramvajovou tratí, park s oplocením).
-Cesta
-- posloupnost uzlu opatrena atributy
-- mají orientaci
-- pouziva se k ...
 
-{\tuc Relace} reprezentují složtější objekty. Pro náš účel jsou významné relace
-typu multipolygon, kterými se reprezentují složitější plochy (nesouvislé, s
-dírami). Každá relace obsahuje seznam prvků, ze kterých se skládá. Prvky také
-mohou mít uvedenu roli, kterou v dané relaci mají, například u multipolygonů,
-zda jsou vnitřní či vnější okraj. Opět mívají atributy určující jejich typ.
-Relacemi se dále reprezentují územní hranice, trasy linek MHD, cyklotrasy a
-jiné.
-Relace
-- posloupnost uzlu a cest (a relaci)
-- opeatrena atributy
-- pouziva se k ...
+{\tuc Relace} jsou posloupnosti uzlů a cest opatřená atributy. Každý prvek v
+relaci navíc může mít určenou roli. Relace může obsahovat jako prvek i relaci,
+ale tato situace není příliš dobře podporována.  Obvykle jsou relacemi
+reprezentovány složitější objekty, které by se cestami a uzly reprezentovaly
+obtížně, jako například trasy linek MHD, cyklotrasy a územní hranice.
 
-- rozdelit na dva odstavce
+Pro nás důležitý typ relace je multipolygon, který se používá k reprezentaci
+složitějších ploch. Multipolygon obsahuje cesty s rolemi \verb|INNER| resp.
+\verb|OUTER| reprezentující vnitřní respektive vnější okraj plochy.
 
 \section{OSM XML}
 Nejobvyklejší způsob ukládání OSM dat je ve formátu XML. Všechna primitiva mají
 jako jeden z atributů \verb|id|, který značí jejich jednoznačný identifikátor.
-Každý typ primitiva má svou vlastní číselnou řadu. V OSM XML\cite{osmxml} jsou
-všechna primitiva uložena v následujícím pořadí:
+Každý typ primitiva má svou vlastní číselnou řadu. V OSM XML\cite{osmxml} je
+nejprve hlavička, následně seznam uzlů, seznam cest a seznam relací. Níže je
+příklad takového souboru.
 
-%Ukázka
+% Pozor na zlom stránky
+\begin{verbatim}
+<!-- Hlavicka !-->
+<?xml version='1.0' encoding='UTF-8'?>
+<osm version="0.6" generator="osmconvert 0.7T">
+	<bounds minlat="49.4645" minlon="14.334" maxlat="49.466" 
+	maxlon="14.339"/>
+
+<!-- Uzly !-->
+	<node id="962931066" lat="49.4647188" lon="14.3384903" version="1" 
+	timestamp="2010-10-24T05:47:30Z" changeset="6153364" uid="1066" />
+
+<!-- Cesty !-->
+	<way id="82704082" version="1" timestamp="2010-10-24T06:27:17Z" 
+	changeset="6153364" uid="1066" user="pavel">
+		<nd ref="962425008"/>
+		<nd ref="962931066"/>
+		<nd ref="962738699"/>
+		<nd ref="962425008"/>
+		<tag k="dibavod:id" v="9890"/>
+		<tag k="natural" v="wetland"/>
+		<tag k="source" v="dibavod A06"/>
+	</way>
+
+<!-- Relace !-->
+	<relation id="25793" version="3" timestamp="2012-07-31T09:21:12Z" 
+			changeset="12558592" uid="82083" user="petr_balicek">
+		<member type="way" ref="26082949" role="outer"/>
+		<member type="way" ref="26080423" role="inner"/>
+		<member type="way" ref="26080424" role="inner"/>
+		<tag k="landuse" v="forest"/>
+		<tag k="type" v="multipolygon"/>
+	</relation>
+	<relation id="2331090" version="3" timestamp="2012-10-03T21:29:24Z"
+			changeset="13353948" uid="8007" user="vrabcak">
+		<member type="way" ref="174291392" role=""/>
+		<tag k="boundary" v="protected_area"/>
+		<tag k="leisure" v="nature_reserve"/>
+		<tag k="name" v="PP Boukal"/>
+		<tag k="type" v="boundary"/>
+	</relation>
+</osm>
+\end{verbatim}
+
+Popišme si nyní jednotlivé části:
 
 {\tuc Hlavička souboru.} V XML hlavičce je určeno kódování UTF-8 a následně je
 otevřen element \verb|osm|, jehož atributem je také použitá verze API. 
@@ -82,8 +122,7 @@ s relacemi.
 OSM XML se dá volně stáhnout, většinou jsou tyto soubory pro úsporu místa
 zaarchivované a aktualizují se jednou denně. Protože většina aplikací
 nepotřebuje data z celého světa, jsou k dispozici i data pro jednotlivé
-kontinenty a státy, někdy i s
-historií\footnote{\url{http://osm.kyblsoft.cz/archiv/}}. 
+kontinenty a státy\footnote{\url{http://osm.kyblsoft.cz/archiv/}}. 
 
 \section{Problémy v datech}
 Ačkoli jsou data z OSM poměrně kvalitní a přesné, během jejich zpracování jsme
