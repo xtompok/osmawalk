@@ -6,27 +6,25 @@ dlouhé cesty, doplníme spojky mezi cestami, připravíme zkratky pro trasy př
 průchozí prostranství a nakonec ze všech dat vytvoříme vyhledávací graf.
 
 \section{Klasifikace OSM dat}
-Protože OSM XML obsahuje poměrně mnoho dat, která nepotřebujeme a navíc je práce
-s XML pomalá, vytvořili jsme pro zpracovávání formát, který obsahuje jen
-potřebné informace, cesty jsou v něm rozděleny do kategorií podle typu objektů,
-které reprezentují a data jsou uložena v Protocol Bufferech. Kategorie jsou
+V našem formátu pro přípravu dat jsou cesty a multipolygony rozděleny do
+kategorií podle typů objektů, které reprezentují. Kategorie jsou
 následující:
 \begin{itemize}
 	\item \verb|WAY| -- cesta, o které nic nevíme, rezervováno pro speciální
 	případy
-	\item \verb|WATER| - strouha či přeskočitelný potok
-	\item \verb|PARK| - plocha s udržovanou zelení, nízkou trávou
-	\item \verb|GREEN| - plocha s neudržovanou zelení, často jsou v ní
+	\item \verb|WATER| -- strouha či přeskočitelný potok
+	\item \verb|PARK| -- plocha s udržovanou zelení, nízkou trávou
+	\item \verb|GREEN| -- plocha s neudržovanou zelení, často jsou v ní
 	prošlapané nezmapované cestičky
-	\item \verb|FOREST| - les v městském slova smyslu, obvykle bývá pěšky
+	\item \verb|FOREST| -- les v městském slova smyslu, obvykle bývá pěšky
 	průchozí
-	\item \verb|PAVED| - zpevněná cesta či plocha
-	\item \verb|UNPAVED| - nezpevněná cesta či plocha
-	\item \verb|STEPS| - schody
-	\item \verb|HIGHWAY| - silnice, silnice s chodníkem
-	\item \verb|BARRIER| - překážka pro chodce nepřekonatelná, typ se
+	\item \verb|PAVED| -- zpevněná cesta či plocha
+	\item \verb|UNPAVED| -- nezpevněná cesta či plocha
+	\item \verb|STEPS| -- schody
+	\item \verb|HIGHWAY| -- silnice, silnice s chodníkem
+	\item \verb|BARRIER| -- překážka pro chodce nepřekonatelná, typ se
 	nerozlišuje, například budova, řeka, plot
-	\item \verb|DIRECT| - spojka mezi cestami
+	\item \verb|DIRECT| -- spojka mezi cestami
 \end{itemize}
 Rozdělení do kategorií probíhá s pomocí konfiguračního souboru, ve kterém můžeme
 zvolit jaké atributy mají objekty mít, aby patřily do dané kategorie. Protože
@@ -35,7 +33,7 @@ pro určení, zda jde o plochu, použity údaje z konfiguračního souboru. Po
 rozdělení objektů do kategorií jsou smazány body, které neleží na žádné cestě,
 protože takovéto body dále nikde nepotřebujeme.
 
-\section{Vyřešení multipolygonů}
+\section{Převod multipolygonů na cesty}
 Multipolygony popisují objekty se složitější strukturou. Každý multipolygon se
 skládá z několika cest, přičemž cesty mohou být vnější -- obvodové -- a
 vnitřní, pokud má objekt díry. Při správné definici by mělo sjednocení cest
@@ -45,7 +43,7 @@ Pokud se stane, že některý segment kružnice chybí, je vypsána chyba a
 multipolygon se dále nezpracovává. Stejně tak, pokud kružnice končí v nějakém
 svém bodě, který ale není počáteční. 
 
-\section{Zjednodušení budov}
+\section{Spojení budov}
 Ve městě jsou velmi časté bloky budov. V OSM datech jsou budovy reprezentovány
 obvykle samostatně, přičemž nám stačí znát obvod celého bloku. Proto cesty v
 jednotlivých blocích nahradíme jednou cestou reprezentující obvod tohoto bloku.

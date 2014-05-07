@@ -2,63 +2,94 @@
 Našim cílem je vytvořit data ve formátu vhodném na rychlé vyhledávání pěších
 tras. K tomu potřebujeme jednak samotný formát a jednak postup, kterým z OSM a
 SRTM dat vytvoříme kvalitní data pro vyhledávání. Při výběru vhodného formátu
-ukládání dat jsme zvolili Protocol Buffery vyvinuté Googlem\cite{pbfweb}. Data
+ukládání dat jsme zvolili Protocol Buffery\cite{pbfweb} vyvinuté Googlem. Data
 pro vyhledávání budeme ukládat jako graf, jako seznam vrcholů a seznam hran.
 
-\section{Protocol Buffer}
-Protocol Buffer je technologie vyvinutá Googlem a jejím cílem je vytvořit systém
-pro ukládání strukturovaných dat, který by byl jednoduchý, rychlý a nezávislý na
-použitém programovacím jazyku a platformě.
 
-Jestliže chceme přenášet data pomocí Protocol Bufferů, musíme nejprve
-specifikovat formát dat. Základní jednotkou pro přenos dat je zpráva, která
-obsahuje datové položky. Každá položka má svůj určený typ, značku a násobnost.
+
+\section{Protocol Buffer}
+Protocol Buffer je technologie vyvinutá Googlem a jejím cílem je vytvořit způsob
+pro ukládání strukturovaných dat, který by byl jednoduchý, rychlý a nezávislý na
+použitém programovacím jazyku a platformě. 
+
+Strukturu dat nejprve popíšeme ve zvláštním souboru pomocí definovaného
+jazyka\cite{pbfspec}. Z něj se následně generují funkce pro použití v
+jednotlivých programovacích jazycích. Základní jednotkou pro přenos dat je
+zpráva, která obsahuje datové položky. Každá položka má určenou násobnost, typ a
+značku.
+
+\begin{verbatim}
+
+package graph;
+import "types.proto";
+
+message Vertex {
+	required sint64 idx = 4;
+	required sint64 osmid = 1;
+	required double lat = 2;
+	required double lon = 3;
+	optional sint32 height = 5;
+	
+}
+
+message Graph {
+	repeated Vertex vertices = 1;
+	repeated Edge edges = 2;
+}
+\end{verbatim}
+
+{\tuc Násobnost} určuje, kolik prvků může být v položce uloženo. Možnosti jsou
+\verb|required|, pak musí každá zpráva mít v položce právě jeden prvek,
+\verb|optional|, pak ve zprávě tato položka může, ale nemusí mít přiřazen prvek,
+\verb|repeated|, pak ve zprávě může být pod položkou uloženo libovolné množství
+prvků, i žádný. Tato násobnost fugnuje obdobně jako pole v programovacích
+jazycích. 
 
 {\tuc Typy} jsou podobné typům v programovacích jazycích, obsahují několik typů celých
 čísel, čísla s plovoucí desetinnou čárkou, řetězce a logické hodnoty. Typem může
-být také zpráva, těmi se vytváří hierarchická struktura dat. 
+být také zpráva, což umožňuje hierarchické strukturování dat. 
+
+{\tuc Jméno} položky slouží pro generování jmen funkcí pro přístup k dané
+položce. Ve vygenerované binární podobě zprávy není obsaženo. 
 
 {\tuc Značka} je jednoznačný číselný identifikátor každé položky, musí být v rámci
 zprávy jedinečná a pokud se formát zprávy v čase mění, neměly by se značky znovu
 používat pro jiné položky.
 
-{\tuc Násobnost} určuje, kolik prvků může být v položce uloženo. Možnosti jsou
-\verb|required|, pak musí každá zpráva mít v položce právě jeden prvek,
-\verb|optional|, pak ve zprávě tato položka může, ale nemusí mít jeden prvek,
-\verb|repeated|, pak ve zprávě může být pod položkou uloženo libovolné množství
-prvků, i žádný. Tato násobnost fugnuje obdobně jako pole v programovacích
-jazycích. Dále také může být deklarován výčtový typ, kterým můžeme vytvořit
-pojmenovaná čísla. TODO: přeformulovat.
+Dále také může být deklarován výčtový typ, kterým můžeme popisovat prvky
+nějaké množiny, je možné vytvářet jmenné prostory pomocí balíčků a používat
+definice z jiných souborů se specifikací.
 
 Když máme specifikovaný formát, necháme si vygenerovat kód pro práci s tímto
 formátem. V tom je velká výhoda Protocol Bufferů, pomocí kompilátoru se ze
 souboru ze specifikací formátu vygeneruje kód v cílovém jazyce, který nám umožní
 pracovat se zprávami jako s objekty v objektových jazycích či jako se
-strukturami v C. Takto můžeme s vytvořenými daty pro vyhledávání jednoduše
-pracovat z mnoha podporovaných jazyků. Pokud bychom chtěli použít programovací
-jazyk, který není podporován, je možné si napsat vlastní dekodér, binární forma
-Protocol Bufferů je veřejně zdokumentována. TODO odkaz.
+strukturami v C. Takto můžeme s vytvořenými daty jednoduše pracovat z mnoha
+podporovaných jazyků. Pokud bychom chtěli použít programovací jazyk, který není
+podporován, je možné si napsat vlastní dekodér, binární forma Protocol Bufferů
+je veřejně zdokumentována.\cite{pbfenc}
 
-TODO: ukázka
 
-\section{Přípravný meziformát}
+
+\section{Formát pro přípravu dat}
 Pro zpracovávání OSM dat jsme navrhnuli vlastní formát, protože formát OSM
 obsahuje mnoho údajů, které nepotřebujeme a je tak zbytečně pomalý na zpracování
 a naopak některé údaje, které vytváříme během zpracování, by se v něm obtížně
 reprezntovaly. Základní struktura zůstává zachována. Mapu ukládáme jako zprávu
 \verb|Map|, která obsahuje seznamy zpráv \verb|Node| pro uzly, \verb|Way| pro
-cesty, \verb|Relation| pro relace a \verb|Multipolygon| pro multipolygony.
+cesty a \verb|Multipolygon| pro multipolygony. Jiné typy relací nejsou
+využívány, proto se do tohoto formátu neukládají.
 
 Zpráva \verb|Node| pro uzel obsahuje položky:
 \begin{itemize}
-	\item \verb|id| - OSM identifikátor uzlu
-	\item \verb|lat| - zeměpisná šířka v UTM
-	\item \verb|lon| - zeměpisná délka v UTM
-	\item \verb|height| - nadmořská výška v metrech
-	%\item \verb|objtype| - typ uzlu
-	\item \verb|inside| - logická hodnota, jestli je uzel uvnitř nějaké
-	překážky, například uzly reprezentující pasáž procházející domem
-	%\item \verb|nodeidx| - pořadí uzlu v seznamu
+	\item \verb|id| -- OSM identifikátor uzlu
+	\item \verb|lat| -- zeměpisná šířka v UTM
+	\item \verb|lon| -- zeměpisná délka v UTM
+	\item \verb|height| -- nadmořská výška v metrech
+	%\item \verb|objtype| -- typ uzlu
+	\item \verb|inside| -- logická hodnota vyjadřující, zda leží uzel uvnitř
+	nějaké překážky, například uzly reprezentující pasáž procházející domem
+	%\item \verb|nodeidx| -- pořadí uzlu v seznamu
 \end{itemize}
 Seznam uzlů se v průběhu zpracování mění, jsou z něho mazány uzly, které již
 nebudou potřeba a jsou do něj přidávány uzly vzniklé například dělením příliš
@@ -66,23 +97,40 @@ dlouhých úseků.
 
 Zpráva \verb|Way| pro cestu obsahuje položky:
 \begin{itemize}
-	\item \verb|id| - OSM identifikátor cesty
-	\item \verb|refs| - seznam OSM identifikátorů uzlů, ze kterých se cesta
+	\item \verb|id| -- OSM identifikátor cesty
+	\item \verb|refs| -- seznam OSM identifikátorů uzlů, ze kterých se cesta
 	skládá
-	\item \verb|area| - logická hodnota určující, jestli je daná cesta
+	\item \verb|area| -- logická hodnota určující, jestli je daná cesta
 	plochou
-	%\item \verb|barrier| - logická hodnota určující, jestli je daná cesta
+	%\item \verb|barrier| -- logická hodnota určující, jestli je daná cesta
 	překážkou
-	\item \verb|type| - kategorie cesty TODO: odkaz
-	%\item \verb|bordertype| - pokud je cesta plocha, jakým způsobem je
+	\item \verb|type| -- kategorie reprezentovaného objektu TODO: odkaz
+	%\item \verb|bordertype| -- pokud je cesta plocha, jakým způsobem je
 	ohraničena
-	%\item \verb|crossing| - jaké kategorie cest cesta kříží
-	\item \verb|bridge| - logická hodnota vyjadřující, zda vede cesta na mostě
-	\item \verb|tunnel| - logická hodnota vyjadřující, zda vede cesta v
+	%\item \verb|crossing| -- jaké kategorie cest cesta kříží
+	\item \verb|bridge| -- logická hodnota vyjadřující, zda vede cesta na mostě
+	\item \verb|tunnel| -- logická hodnota vyjadřující, zda vede cesta v
 	tunelu, průchodu, \dots
-	%\item \verb|wayidx| - pořadí cesty v seznamu
-	%\item \verb|render| - logická hodnota vyjadřující, jestli se bude cesta rednerovat
+	%\item \verb|wayidx| -- pořadí cesty v seznamu
+	%\item \verb|render| -- logická hodnota vyjadřující, jestli se bude cesta rednerovat
 \end{itemize}
+Seznam hran se v průběhu zpracování také mění, jsou do něj přidávány obrysy
+bloků budov a naopak odebírány obrysy jednotlivých budov v bloku.
+
+Zpráva \verb|Multipolygon| slouží k uložení těch relací, které jsou
+multipolygony. Obsahuje následující položky:
+\begin{itemize}
+	\item \verb|id| -- OSM identifikátor relace
+	\item \verb|refs| -- seznam OSM identifikátorů cest, ze kterých se
+	multipolygon skládá
+	\item \verb|roles| -- role jednotlivých cest (zda jde o vnitřní či vnější
+	okraj)
+	\item \verb|type| -- kategorie reprezentovaného objektu
+\end{itemize}
+Seznam multipolygonů se v průběhu zpracování zkracuje, multipolygony jsou
+převáděny na cesty a žádné nové vytvářeny nejsou.
+
+
 
 \section{Formát vyhledávacího grafu}
 Graf ukládáme jako dva seznamy --- seznam vrcholů a seznam hran. U každého
@@ -95,15 +143,15 @@ Vyhledávací graf ukládáme jako zprávu \verb|Graph| se dvěma položkami ---
 seznamem vrcholů \verb|vertices| a seznamem hran \verb|edges|. Zpráva
 \verb|Vertex| popisující vrchol obsahuje položky:
 \begin{itemize}
-	\item \verb|osmid| - identifikátor vrcholu v OSM
-	\item \verb|lat| - zeměpisná šířka v UTM
-	\item \verb|lon| - zeměpisná délka v UTM
-	\item \verb|height| - nadmořská výška v metrech
+	\item \verb|osmid| -- identifikátor vrcholu v OSM
+	\item \verb|lat| -- zeměpisná šířka v UTM
+	\item \verb|lon| -- zeměpisná délka v UTM
+	\item \verb|height| -- nadmořská výška v metrech
 \end{itemize}
 Zpráva \verb|Edge| popisující hranu obsahuje tyto položky:
 \begin{itemize}
-	\item \verb|vfrom| - index prvního vrcholu
-	\item \verb|vto| - index druhého vrcholu
-	\item \verb|type| - typ cesty, po které hrana vede
+	\item \verb|vfrom| -- index prvního vrcholu
+	\item \verb|vto| -- index druhého vrcholu
+	\item \verb|type| -- typ cesty, po které hrana vede
 \end{itemize}
 

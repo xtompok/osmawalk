@@ -44,7 +44,7 @@ Nejobvyklejší způsob ukládání OSM dat je ve formátu XML. Všechna primiti
 jako jeden z atributů \verb|id|, který značí jejich jednoznačný identifikátor.
 Každý typ primitiva má svou vlastní číselnou řadu. V OSM XML\cite{osmxml} je
 nejprve hlavička, následně seznam uzlů, seznam cest a seznam relací. Níže je
-příklad takového souboru.
+příklad takového souboru, za ním následuje popis jednotlivých částí souboru.
 
 % Pozor na zlom stránky
 \begin{verbatim}
@@ -89,8 +89,6 @@ příklad takového souboru.
 	</relation>
 </osm>
 \end{verbatim}
-
-Popišme si nyní jednotlivé části:
 
 {\tuc Hlavička souboru.} V XML hlavičce je určeno kódování UTF-8 a následně je
 otevřen element \verb|osm|, jehož atributem je také použitá verze API. 
