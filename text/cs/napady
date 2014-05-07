@@ -1,7 +1,5 @@
-Pouzite knihovny
-- libUCW
-- GeographicLib
-- protobuf a protobuf-c
+- uvest licenci a odkaz na GitHub
+- kontakt
 
 Seznam vyhledavacu v OSM
 # http://wiki.openstreetmap.org/wiki/Routing
@@ -9,4 +7,5 @@ Seznam vyhledavacu v OSM
 
 Map features OSM
 # http://wiki.openstreetmap.org/wiki/Map_Features
+
 

@@ -7,11 +7,48 @@ proto tuto a další části jsme implementovali v jazyce C. Mezi těmito část
 předáváme data pomocí Protocol Bufferu v souboru. Vyhledávání je také
 implementováno v jazyce C kvůli rychlosti a paměťové nenáročnosti.
 
-\section{Použité knihovny}
+\section{Použité knihovny a pomocné programy}
 Během implementace programu pro přípravu dat jsme se snažili použít co nejvíce
-již existujících knihoven a programů pro jednotlivé řešené problémy. Popíšeme je
-v tom pořadí, v jakém se používají při zpracovávání dat. 
+již existujících knihoven a programů pro jednotlivé řešené problémy. Všechny
+tyto knihovny a programy jsou nutné pro spuštění a používání programu. 
+
+\medskip
+\noindent Používáme tyto pomocné programy:
+\begin{itemize}
+	\item Výřez s městem z dat pro republiku vyrábíme pomocí 
+	{\tuc Osmconvert} (GNU AGPL)\footurl{http://wiki.openstreetmap.org/wiki/Osmconvert}.
+	\item Pro práci s Protocol Buffery v Pythonu využíváme třídy generované
+	kompilátorem {\tuc protoc} (BSD	New).\footurl{http://code.google.com/p/protobuf/}.
+	\item Pro práci s Protocol Buffery v C využíváme funkce a struktury
+	generované kompilátorem {\tuc protobuf-c} 
+	(BSD 2-Clause)\footurl{https://github.com/protobuf-c/protobuf-c}.
+\end{itemize}
+
+\noindent V programech napsaných v Pythonu využíváme následující knihovny:
+\begin{itemize}
+	\item Na parsování konfiguračních souborů používáme 
+	{\tuc PyYAML} (MIT)\footurl{http://pyyaml.org/wiki/PyYAML}.
+	\item Na parsování OSM XML používáme {\tuc imposm.parser} 
+	(Apache)\footurl{http://imposm.org/docs/imposm.parser/latest/}.
+	\item Souřadnice konvertujeme pomocí {\tuc pyproj}
+	(MIT)\footurl{http://code.google.com/p/pyproj/}.
+	\item Pro hledání komponent grafu využíváme {\tuc networkx} 
+	(BSD)\footurl{http://networkx.github.io/}.
+\end{itemize}
+
+\noindent V programech napsaných v C využíváme následující knihovny:
+\begin{itemize}
+	\item Datové struktury, dynamická pole a další potřebné funkce zajišťuje
+	{\tuc LibUCW} (GNU LGPL)\footurl{http://www.ucw.cz/libucw/}.
+	\item Výpočty se zeměpisnými souřadnicemi provádí {\tuc GeographicLib}
+	(MIT)\footurl{http://geographiclib.sourceforge.net/}.
+\end{itemize}
+
+Program osmconvert a knihovna GeographicLib jsou již zahrnuty ve zdrojovém kódu,
+ostatní knihovny je potřeba zajistit v systému.
+
 \section{Příprava dat}
+
 \section{Klasifikace OSM dat}
 \section{Vyřešení multipolygonů}
 \section{Zjednodušení budov}
