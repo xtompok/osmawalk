@@ -31,11 +31,8 @@ class classifier():
 			if "boundary" in tags:
 				continue
 			for key in tags.keys():
-				if key=="boundary":
-					break
-
 				if key in waysConf:
-					if waysConf[key].keys()==["*"]:
+					if waysConf[key].keys()==["*"] and pbway.type == pbtypes.WAY:
 						pbway.type = waysConf[key]["*"]
 					val = tags[key]
 					if val in waysConf[key]:
@@ -123,12 +120,12 @@ def loadWaysConf(filename):
 			"highway":pbtypes.HIGHWAY,
                         "bridge":pbtypes.BRIDGE
 			}
-	for cat in config["Way"].keys():
+	for cat in config.keys():
 		catenum = str2pb[cat]
-		for key in config["Way"][cat]:
+		for key in config[cat]:
 			if key not in ways:
 				ways[key] = {}
-			for value in config["Way"][cat][key]:
+			for value in config[cat][key]:
 				ways[key][value]=catenum
 	return ways
 
@@ -196,5 +193,5 @@ print "Saving took "+str(end-start)
 
 print "Ways:",len(amap.ways)
 print "Nodes:",len(amap.nodes)
-print "Nodes on ways",len(nodeways)
+print "Multipolygons:",len(amap.multipols)
 
