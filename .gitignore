@@ -1,8 +1,5 @@
 *.py[cod]
-*.swm
-*.swn
-*.swo
-*.swp
+*.sw[a-z]
 *.pbf
 *.osm
 
@@ -19,13 +16,32 @@
 # TeX output
 *.dvi
 *.ps
+/text/cs/prace.pdf
 
 # C extensions
 *.so
 *.o
 
+# Binaries
+/osm/osmconvert
+/compiled/filter
+/compiled/search
+
+# Generated includes
+/compiled/include
+
 # Profiler output
 gmon.out
+gmon-praha.out
+
+# Programs output
+/compiled/track.gpx
+
+# Libraries
+/scripts/imposm-parser
+/scripts/svgwrite-1.1.3
+/text/jakpsat
+/GeographicLib-1.32/
 
 # Packages
 *.egg
@@ -46,15 +62,3 @@ __pycache__
 # Installer logs
 pip-log.txt
 
-# Unit test / coverage reports
-.coverage
-.tox
-nosetests.xml
-
-# Translations
-*.mo
-
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
