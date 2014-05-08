@@ -1,6 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
-#define SCALE 1000000
+#define SCALE 10
 
 #include "types.h"
 #include "include/premap.pb-c.h" 
@@ -22,6 +22,14 @@ unsigned int isDirectable(Premap__Way * way);
 unsigned int isBarrier(Premap__Way * way);
 unsigned int isWay(Premap__Way * way);
 int isWalkArea(Premap__Way * way);
+
+static inline int distance(Premap__Node * node1, Premap__Node * node2){
+	uint64_t dlon;
+	uint64_t dlat;
+	dlon = node2->lon-node1->lon;
+	dlat = node2->lat-node1->lat;
+	return (int)(sqrt(dlon*dlon+dlat*dlat)/10);
+}
 
 static inline struct line_t makeLine(int64_t startlon,int64_t startlat, int64_t endlon, int64_t endlat, int64_t startid, int64_t endid){
 	struct line_t line;

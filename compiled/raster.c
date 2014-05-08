@@ -12,10 +12,10 @@
 struct raster_t makeRaster(struct map_t map){
 	int dimension = 20;
 
-	double g_a = 6378137, g_f = 1/298.257223563; /* WGS84 */
+//	double g_a = 6378137, g_f = 1/298.257223563; /* WGS84 */
 //	double lat1, lon1, azi1, lat2, lon2, azi2, s12;
-	struct geod_geodesic geod;
-	geod_init(&geod, g_a, g_f);
+//	struct geod_geodesic geod;
+//	geod_init(&geod, g_a, g_f);
 
 	struct raster_t raster;
 	
@@ -41,11 +41,9 @@ struct raster_t makeRaster(struct map_t map){
 
 	double londist;
 	double latdist;
-	double tmp1;
-	double tmp2;
-
-	geod_inverse(&geod,int2deg(maxlat-dlat/2),int2deg(raster.minlon),int2deg(maxlat-dlat/2),int2deg(maxlon),&londist,&tmp1,&tmp2);
-	geod_inverse(&geod,int2deg(raster.minlat),int2deg(maxlon-dlon/2),int2deg(maxlat),int2deg(maxlon-dlon/2),&latdist,&tmp1,&tmp2);
+	
+	londist = int2deg(maxlon-raster.minlon);
+	latdist = int2deg(maxlat-raster.minlat);
 	
 	raster.lonparts = (int)(londist/dimension)+10;
 	raster.latparts = (int)(latdist/dimension)+10;

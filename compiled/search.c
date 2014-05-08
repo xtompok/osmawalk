@@ -7,6 +7,7 @@
 #include <float.h>
 #include <inttypes.h>
 
+#include <proj_api.h>
 #include <ucw/gary.h>
 #include <ucw/heap.h>
 #include "include/geodesic.h"
@@ -23,7 +24,7 @@
 #include "utils.h"
 #include "writegpx.h"
 
-int scale = 1000000;
+int scale = 10;
 
 
 
@@ -161,17 +162,28 @@ void calcDistances(Graph__Graph * graph){
 	for (int i=0;i<graph->n_edges;i++){
 		Graph__Edge * edge;
 		edge = graph->edges[i];
-		double g_a = 6378137, g_f = 1/298.257223563; /* WGS84 */
-		struct geod_geodesic geod;
-		geod_init(&geod, g_a, g_f);
+		//double g_a = 6378137, g_f = 1/298.257223563; /* WGS84 */
+		//struct geod_geodesic geod;
+		//geod_init(&geod, g_a, g_f);
 		double dist;
 		double tmp1;
 		double tmp2;
-		geod_inverse(&geod,graph->vertices[edge->vfrom]->lat,
-				graph->vertices[edge->vfrom]->lon,
-				graph->vertices[edge->vto]->lat,
-				graph->vertices[edge->vto]->lon,&dist,&tmp1,&tmp2);
-		edge->dist = dist;
+		if (edge->vfrom >= graph->n_vertices){
+			printf("Wrong point %lld\n",edge->vfrom);	
+			edge->dist = DBL_MAX;
+			continue;
+		}
+		if (edge->vto >= graph->n_vertices){
+			printf("Wrong point %lld\n",edge->vto);	
+			edge->dist = DBL_MAX;
+			continue;
+		}
+		int64_t dlon;
+		int64_t dlat;
+		dlon = graph->vertices[edge->vto]->lon-graph->vertices[edge->vfrom]->lon;
+		dlat = graph->vertices[edge->vto]->lat-graph->vertices[edge->vfrom]->lat;
+
+		edge->dist = sqrt(dlon*dlon+dlat*dlat);
 	}
 }
 
@@ -369,7 +381,7 @@ int findNearestVertex(Graph__Graph * graph, double lon, double lat){
 			minIdx = i;
 		}
 	}
-	printf("Min dist: %f\n",minDist*1000000);
+	printf("Min dist: %f\n",minDist*1000);
 	printf("Point %d: %f, %f\n",minIdx,graph->vertices[minIdx]->lon,graph->vertices[minIdx]->lat);
 	return minIdx;
 }
@@ -390,8 +402,13 @@ void writeGpxFile(Graph__Graph * graph, struct config_t conf, struct dijnode_t *
 	writeGpxStartTrack(OUT);
 	int idx;
 	idx = fromIdx;
+	double lon;
+	double lat;
 	while (dijArray[idx].fromIdx!=-1){
-		writeGpxTrkpt(OUT,graph->vertices[idx]->lat,graph->vertices[idx]->lon,0);
+		lon = graph->vertices[idx]->lon;
+		lat = graph->vertices[idx]->lat;
+		utm2wgs(&lon,&lat);
+		writeGpxTrkpt(OUT,lat,lon,0);
 		//printf("%f,%f,%d\n",graph->vertices[idx]->lat,graph->vertices[idx]->lon,graph->edges[dijArray[idx].fromEdgeIdx]->type);
 		idx = dijArray[idx].fromIdx;
 	}
@@ -400,12 +417,34 @@ void writeGpxFile(Graph__Graph * graph, struct config_t conf, struct dijnode_t *
 	writeGpxFooter(OUT);
 	fclose(OUT);
 }
+projPJ pj_wgs84;
+projPJ pj_utm;
+
+
+int utm2wgs(double * lon, double * lat){
+	int res;
+	printf("ll: %f %f\n",*lon,*lat);
+	res= pj_transform(pj_utm,pj_wgs84,1,1,lon,lat,NULL);
+	*lon = (*lon * 180)/M_PI;
+	*lat = (*lat * 180)/M_PI;
+	printf("ll: %f %f\n",*lon,*lat);
+	return res;
+}
+int wgs2utm(double * lon, double * lat){
+	printf("ll: %f %f\n",*lon,*lat);
+	*lon = (*lon/180)*M_PI;
+	*lat = (*lat/180)*M_PI;
+	printf("ll: %f %f\n",*lon,*lat);
+	return pj_transform(pj_wgs84,pj_utm,1,1,lon,lat,NULL);
+}
 
 int main (int argc, char ** argv){
 	if (argc<5){
 		usage();
 		return 1;
 	}
+	pj_wgs84 = pj_init_plus("+proj=longlat +datum=WGS84 +no_defs");
+	pj_utm = pj_init_plus("+proj=utm +zone=33 +ellps=WGS84 +units=m +no_defs");
 	struct config_t conf;
 	conf = parseConfigFile("../config/speeds.yaml");
 	
@@ -421,11 +460,13 @@ int main (int argc, char ** argv){
 	double lat;
 	lat = atof(argv[1]);
 	lon = atof(argv[2]);
+	wgs2utm(&lon,&lat);
 	int fromIdx;
 	fromIdx = findNearestVertex(graph,lon,lat);
 
 	lat = atof(argv[3]);
 	lon = atof(argv[4]);
+	wgs2utm(&lon,&lat);
 	int toIdx;
 	toIdx = findNearestVertex(graph,lon,lat);
 

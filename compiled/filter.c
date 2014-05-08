@@ -14,7 +14,7 @@
 #define PF2(tok) #tok
 #define PF(tok) PF2(tok)
 
-#define SCALE 1000000
+#define SCALE 10
 #define SWEEP_SCALE 100
 #define EPSILON 0
 #define S_P d
@@ -25,7 +25,7 @@
 #include "utils.h"
 #include "mixnum.h"
 
-int scale = 1000000;
+int scale = 10;
 
 #define ASORT_PREFIX(X) int64_##X
 #define ASORT_KEY_TYPE int64_t
@@ -224,19 +224,6 @@ struct col_t calcMixCollision(struct line_t line1, struct line_t line2){
 	return result;
 }
 
-
-
-
-static inline int distance(Premap__Node * node1, Premap__Node * node2){
-	double g_a = 6378137, g_f = 1/298.257223563; /* WGS84 */
-	struct geod_geodesic geod;
-	geod_init(&geod, g_a, g_f);
-	double dist;
-	double tmp1;
-	double tmp2;
-	geod_inverse(&geod,int2deg(node1->lat),int2deg(node1->lon),int2deg(node2->lat),int2deg(node2->lon),&dist,&tmp1,&tmp2);
-	return (int)dist;
-}
 
 void addCandidate(int *** candidates,int nidx1,int nidx2){
 	int ** ptr;
@@ -1020,7 +1007,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 
 		}
 		
-	//	continue;
+		continue;
 		// Debug tree order
 		struct mixed_num_t memlat;
 		memlat = makeMix(0,0,1);
@@ -1472,6 +1459,8 @@ int main (int argc, char ** argv){
 		freeNX2Array(candidates);
 	}
 	map = removeBarriers(map);
+	nodesIdx_refresh(map.n_nodes,map.nodes);
+	waysIdx_refresh(map.n_ways,map.ways);
 	printf("Found %d walk areas\n",GARY_SIZE(walkareas));
 	mapToPBF(map,pbmap);
 	//checkWayTypes(pbmap);
