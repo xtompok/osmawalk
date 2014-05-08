@@ -6,8 +6,8 @@ class Map:
 	ways = []
 	relations = []
 	multipols = []
-	nodesidx = {}
-	waysidx = {}
+	nodesIdx = {}
+	waysIdx = {}
 	lastnodeid = -1
 	lastwayid = -1
 
@@ -41,7 +41,7 @@ class Map:
 
 	def updateNodesIdx(self):
 		for i in range(len(self.nodes)):
-			self.nodesidx[self.nodes[i].id]=i
+			self.nodesIdx[self.nodes[i].id]=i
 	def updateWaysIdx(self):
 		for i in range(len(self.ways)):
-			self.waysidx[self.ways[i].id]=i
+			self.waysIdx[self.ways[i].id]=i

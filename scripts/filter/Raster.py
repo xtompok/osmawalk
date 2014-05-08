@@ -3,6 +3,7 @@ import pyproj
 import math
 from utils import int2deg, deg2int
 
+scale = 10
 
 class Raster:
 	
@@ -27,11 +28,8 @@ class Raster:
 		dlon = maxlon-self.minlon
 		dlat = maxlat-self.minlat
 
-		geod = pyproj.Geod(ellps="WGS84")
-		londist = geod.inv(int2deg(self.minlon),int2deg(self.minlat+dlat/2),
-				int2deg(maxlon),int2deg(self.minlat+dlat/2))[2]
-		latdist = geod.inv(int2deg(self.minlon+dlon/2),int2deg(self.minlat),
-				int2deg(self.minlon+dlon/2),int2deg(maxlat))[2]
+                londist = dlon/scale
+                latdist = dlat/scale
 		
 		print "Lon:",self.minlon," -- ",maxlon
 		print "Lat:",self.minlat," -- ",maxlat

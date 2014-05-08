@@ -5,16 +5,18 @@ sys.path.append("../imposm-parser")
 
 import time
 import yaml
-import pprint
+import pyproj
 import premap_pb2 as pb
 import types_pb2 as pbtypes
+from utils import nodeWays, deleteAloneNodes 
 from Map import Map
 from imposm.parser import OSMParser
 
-scale = 1000000
+scale = 10
 
-class counter():
+class classifier():
 	def __init__(self,waysConf,areasConf,bridgesConf,tunnelsConf):
+                self.proj = pyproj.Proj(proj='utm', zone=33, ellps='WGS84')
 		self.Map = Map()
 		self.waysConf = waysConf
 		self.areasConf = areasConf
@@ -26,6 +28,8 @@ class counter():
 			pbway = pb.Way()
 			pbway.id = int(osmid)
 			pbway.refs.extend(map(int,refs))
+			if "boundary" in tags:
+				continue
 			for key in tags.keys():
 				if key=="boundary":
 					break
@@ -58,8 +62,6 @@ class counter():
 					if val in tunnelsConf[key]:
 						pbway.tunnel = tunnelsConf[key][val]
 
-			if "boundary" in tags:
-				continue
 			if pbway.type == pbtypes.IGNORE:
 				pbway.render = False
 			else:
@@ -71,24 +73,24 @@ class counter():
 		for osmid,tags,coords in nodes:
 			pbnode = pb.Node()
 			pbnode.id = int(osmid)
-			pbnode.lat = int(coords[1]*scale)
-			pbnode.lon = int(coords[0]*scale)
+			(lon,lat) = self.proj(coords[0],coords[1])
+                        pbnode.lat = int(lat*scale)
+			pbnode.lon = int(lon*scale)
 			self.Map.nodes.append(pbnode)
 	
 	def coords_cb(self,coords):
 		for (osmid,lon,lat) in coords:
 			pbnode = pb.Node()
 			pbnode.id = int(osmid)
-			pbnode.lat = int(lat*scale)
+			(lon,lat) = self.proj(lon,lat)
+                        pbnode.lat = int(lat*scale)
 			pbnode.lon = int(lon*scale)
 			self.Map.nodes.append(pbnode)
 
 	def relations_cb(self,relations):
 		for osmid,tags,refs in relations:
-			if "boundary" in tags:
-			    continue
+			if not ("type" in tags and tags["type"]=="multipolygon"):
 
-			if "type" in tags and tags["type"]=="multipolygon":
 				pbpol = pb.Multipolygon()
 				for key in tags.keys():
 					if key in waysConf:
@@ -148,45 +150,16 @@ def loadBoolConf(filename):
 			boolcfg[key][value]=False
 	return boolcfg
 
-def nodeWays(amap):
-	missingcnt=0
-	nodeways = [ [] for i in amap.nodes]
-	for way in amap.ways:
-		missing = []
-		for node in way.refs:
-			try:
-				nodeways[amap.nodesidx[node]].append(way.id)
-			except KeyError:
-				missingcnt+=1
-				missing.append(node)
-		for node in missing:
-			way.refs.remove(node)
-	print "Missing "+str(missingcnt)+" nodes"
-
-	return nodeways	
-
-def deleteAloneNodes(amap,nodeways):
-	toidx = 0
-	for fromidx in range(len(amap.nodes)):
-		if len(nodeways[fromidx])==0:
-			continue
-		amap.nodes[toidx]=amap.nodes[fromidx]
-		toidx+=1
-	for i in range(len(amap.nodes)-1,toidx,-1):
-		del amap.nodes[i]
-	for i in range(len(amap.nodes)):
-		amap.nodesidx[amap.nodes[i].id]=i
-	return amap
 
 def parseOSMfile(filename,waysConf,areasConf,bridgesConf,tunnelsConf):	
-	cnt = counter(waysConf,areasConf,bridgesConf,tunnelsConf)
-	p = OSMParser(concurrency=4, ways_callback=cnt.ways_cb, nodes_callback=cnt.nodes_cb, relations_callback=cnt.relations_cb, coords_callback=cnt.coords_cb)
+	clas = classifier(waysConf,areasConf,bridgesConf,tunnelsConf)
+	p = OSMParser(concurrency=4, ways_callback=clas.ways_cb, nodes_callback=clas.nodes_cb, relations_callback=clas.relations_cb, coords_callback=clas.coords_cb)
 	p.parse(filename)
-	cnt.Map.nodes.sort(key=lambda node: node.id)
-	cnt.Map.ways.sort(key=lambda way: way.id)
-	for i in range(len(cnt.Map.nodes)):
-		cnt.Map.nodesidx[cnt.Map.nodes[i].id]=i
-	return cnt.Map
+	clas.Map.nodes.sort(key=lambda node: node.id)
+	clas.Map.ways.sort(key=lambda way: way.id)
+	for i in range(len(clas.Map.nodes)):
+		clas.Map.nodesIdx[clas.Map.nodes[i].id]=i
+	return clas.Map
 
 		
 # Where find YAML config files

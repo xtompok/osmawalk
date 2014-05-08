@@ -7,51 +7,23 @@ sys.path.append("../imposm-parser")
 import time
 import math
 import yaml
-import pprint
 import pyproj
-import heapq
-import bst
+import networkx as nx
+
 import premap_pb2 as pb
 import types_pb2 as pbtypes
-import networkx as nx
-from utils import angle,int2deg,deg2int,distance
+
+from utils import angle,int2deg,deg2int,distance, nodeWays, deleteAloneNodes
 from Map import Map
 from Raster import Raster
 
-scale = 1000000
+scale = 10
 walkTypes = [pbtypes.PAVED,pbtypes.UNPAVED,pbtypes.STEPS,pbtypes.HIGHWAY]
-
-def nodeWays(amap):
-	missingcnt=0
-	nodeways = [ [] for i in amap.nodes]
-	for way in amap.ways:
-		missing = []
-		for node in way.refs:
-			try:
-				nodeways[amap.nodesidx[node]].append(way.id)
-			except IndexError:
-				missingcnt+=1
-				missing.append(node)
-		for node in missing:
-			way.refs.remove(node)
-	print "Missing "+str(missingcnt)+" nodes"
-
-	return nodeways	
-
-def deleteAloneNodes(amap,nodeways):
-	toidx = 0
-	for fromidx in range(len(amap.nodes)):
-		if len(nodeways[fromidx])==0:
-			continue
-		amap.nodes[toidx]=amap.nodes[fromidx]
-		toidx+=1
-	for i in range(len(amap.nodes)-1,toidx,-1):
-		del amap.nodes[i]
 
 # Next node on border	
 def onBorder(amap,neighs,nodeid,lastnodeid):
-	lastnode = amap.nodes[amap.nodesidx[lastnodeid]]
-	node = amap.nodes[amap.nodesidx[nodeid]]
+	lastnode = amap.nodes[amap.nodesIdx[lastnodeid]]
+	node = amap.nodes[amap.nodesIdx[nodeid]]
 
 	vx = lastnode.lon-node.lon
 	vy = lastnode.lat-node.lat
@@ -61,7 +33,7 @@ def onBorder(amap,neighs,nodeid,lastnodeid):
 		if nid==lastnodeid:
 			continue
 		#print "with ",nid
-		n = amap.nodes[amap.nodesidx[nid]]
+		n = amap.nodes[amap.nodesIdx[nid]]
 		ux = n.lon-node.lon
 		uy = n.lat-node.lat
 		ang = angle(ux,uy,vx,vy)
@@ -77,7 +49,7 @@ def firstBorder(amap,neighs,node):
 	neighangles = []
 	#print "Node ",node.id,"neighs:",neighs[node.id]
 	for nid in neighs[node.id]:
-		n = amap.nodes[amap.nodesidx[nid]]
+		n = amap.nodes[amap.nodesIdx[nid]]
 		ux = n.lon-node.lon
 		uy = n.lat-node.lat
 		ang = angle(ux,uy,vx,vy)
@@ -88,12 +60,12 @@ def firstBorder(amap,neighs,node):
 
 def mergeWays(amap,wayids):
 	newway = pb.Way()
-	way1 = amap.ways[amap.waysidx[wayids[0]]]
+	way1 = amap.ways[amap.waysIdx[wayids[0]]]
 	neighs = {}
 	nodes = []
 	for wayid in wayids:
-		way = amap.ways[amap.waysidx[wayid]]
-		waynodes = [amap.nodes[amap.nodesidx[ref]] for ref in way.refs]
+		way = amap.ways[amap.waysIdx[wayid]]
+		waynodes = [amap.nodes[amap.nodesIdx[ref]] for ref in way.refs]
 		if len(waynodes)<3:
 			continue
 		if len(waynodes)==3 and waynodes[-1]==waynodes[0]:
@@ -121,7 +93,7 @@ def mergeWays(amap,wayids):
 
 	first = bylatlon[0]
 	#print neighs[first.id]
-	second = amap.nodes[amap.nodesidx[firstBorder(amap,neighs,first)]]
+	second = amap.nodes[amap.nodesIdx[firstBorder(amap,neighs,first)]]
 	#print "edge:",first.id," ",second.id
 	newway.refs.append(first.id)
 	newway.refs.append(second.id)
@@ -150,12 +122,12 @@ def makeNeighGraph(amap,nodeways):
 	broken = {way.id : False for way in amap.ways }
 	bcnt = 0
 	for n in amap.nodes:
-		nidx = amap.nodesidx[n.id]
+		nidx = amap.nodesIdx[n.id]
 		ways = nodeways[nidx]
 		isbroken = False
 		buildings = []
 		for wayid in ways:
-			wayidx = amap.waysidx[wayid]
+			wayidx = amap.waysIdx[wayid]
 			way = amap.ways[wayidx]
 			if way.type != pbtypes.BARRIER or way.area!=True:
 				isbroken = True
@@ -165,7 +137,7 @@ def makeNeighGraph(amap,nodeways):
 		if isbroken:
 			for wayidx in buildings:
 				broken[amap.ways[wayidx].id]=True
-		else:
+		elif len(buildings) > 0:
 			firstwayid = amap.ways[buildings[0]].id
 			for wayidx in buildings[1:]:
 				G.add_edge(firstwayid,amap.ways[wayidx].id)
@@ -185,7 +157,7 @@ def mergeComponents(amap,G,broken):
 	return remove
 
 def removeMerged(amap,remove):
-	removeidxs = [amap.waysidx[r] for r in remove]
+	removeidxs = [amap.waysIdx[r] for r in remove]
 	removeidxs.sort()
 	toidx = 0
 	ridx = 0
@@ -199,14 +171,14 @@ def removeMerged(amap,remove):
 		del amap.ways[i]
 
 def getbbox(amap,wayid):
-	way = amap.ways[amap.waysidx[wayid]]
+	way = amap.ways[amap.waysIdx[wayid]]
 	nodeids = way.refs
 	minlon = 10**10
 	minlat = 10**10
 	maxlon = 0
 	maxlat = 0
 	for nid in nodeids:
-		node = amap.nodes[amap.nodesidx[nid]]
+		node = amap.nodes[amap.nodesIdx[nid]]
 		maxlon = max(maxlon,node.lon)
 		maxlat = max(maxlat,node.lat)
 		minlon = min(minlon,node.lon)
@@ -226,11 +198,11 @@ def isIn(amap,node,way):
 	up = False
 	lat = node.lat
 	lon = node.lon
-	memnode = amap.nodes[amap.nodesidx[way.refs[0]]]
+	memnode = amap.nodes[amap.nodesIdx[way.refs[0]]]
 	if memnode.lat == lat and memnode.lon >= lon: #FIXME
 		return True
 	for nid in way.refs[1:]:
-		node = amap.nodes[amap.nodesidx[nid]]
+		node = amap.nodes[amap.nodesIdx[nid]]
 		if node.lat == lat and node.lon == lon:
 			return True
 		if (memnode.lon < lon) and node.lon < lon:
@@ -294,8 +266,8 @@ def markInside(amap,raster):
 			for j in range(minbox[1],maxbox[1]+1):
 				nodes += raster.raster[i][j]
 		for node in nodes:
-			if isIn(amap,amap.nodes[amap.nodesidx[node]],way):
-				amap.nodes[amap.nodesidx[node]].inside = True
+			if isIn(amap,amap.nodes[amap.nodesIdx[node]],way):
+				amap.nodes[amap.nodesIdx[node]].inside = True
 				incnt+=1
 			
 		print "Way ",way.id," should collide with ",len(nodes)," nodes."
@@ -306,10 +278,10 @@ def unmarkBorderNodes(amap):
 	for way in amap.ways:
 		if way.area or way.type==pbtypes.BARRIER or way.type == pbtypes.IGNORE:
 			continue
-		memnode = amap.nodes[amap.nodesidx[way.refs[0]]]
+		memnode = amap.nodes[amap.nodesIdx[way.refs[0]]]
 		border = False
 		for nodeid in way.refs[1:]:
-			node = amap.nodes[amap.nodesidx[nodeid]]
+			node = amap.nodes[amap.nodesIdx[nodeid]]
 			if memnode.inside==node.inside:
 				memnode = node
 				continue
@@ -329,12 +301,12 @@ def unmarkBorderNodes(amap):
 
 def mergeMultipolygon(amap,wayids):
 	newway = pb.Way()
-	way1 = amap.ways[amap.waysidx[wayids[0]]]
+	way1 = amap.ways[amap.waysIdx[wayids[0]]]
 	neighs = {}
 	nodeways = {}
 	for wayid in wayids:
-		way = amap.ways[amap.waysidx[wayid]]
-		waynodes = [amap.nodes[amap.nodesidx[ref]] for ref in way.refs]
+		way = amap.ways[amap.waysIdx[wayid]]
+		waynodes = [amap.nodes[amap.nodesIdx[ref]] for ref in way.refs]
 		for i in range(len(waynodes)):
 			wniid = waynodes[i].id
 			if wniid not in nodeways:
@@ -356,8 +328,8 @@ def mergeMultipolygon(amap,wayids):
 			print neighs
 			return (None,None)
 
-	first = amap.nodes[amap.nodesidx[way1.refs[0]]]
-	second = amap.nodes[amap.nodesidx[neighs[first.id][0]]]
+	first = amap.nodes[amap.nodesIdx[way1.refs[0]]]
+	second = amap.nodes[amap.nodesIdx[neighs[first.id][0]]]
 	#print "edge:",first.id," ",second.id
 	newway.refs.append(first.id)
 	newway.refs.append(second.id)
@@ -397,7 +369,7 @@ def mergeMultipolygons(amap):
 			if multi.roles[i] == pb.Multipolygon.INNER:
 				hasInner = True
 			else:
-				if multi.refs[i] in amap.waysidx:
+				if multi.refs[i] in amap.waysIdx:
 					outer.append(multi.refs[i])
 		if hasInner:
 			winner +=1
@@ -421,10 +393,15 @@ def mergeMultipolygons(amap):
 	print "With Inner: ",winner
 	print "Without Inner: ",woinner
 
+def divideEdge(slon,slat,elon,elat,cnt):
+	dlon = (elon-slon)/cnt;
+	dlat = (elat-slat)/cnt;
+	lonlats = [(slon+i*dlon,slat+i*dlat) for i in range(1,cnt)]
+	return lonlats
+
 def divideLongEdges(amap):
 	longcnt = 0
 	edgecnt = 0
-	geod = pyproj.Geod(ellps="WGS84")
 	for wayidx in range(len(amap.ways)):
 		way = amap.ways[wayidx]		
 		if not (way.type in walkTypes):
@@ -432,26 +409,19 @@ def divideLongEdges(amap):
 		newway = pb.Way()
 		replace = False
 		for i in range(len(way.refs)-1):
-			ref1 = amap.nodes[amap.nodesidx[way.refs[i]]]
-			ref2 = amap.nodes[amap.nodesidx[way.refs[i+1]]]
+			ref1 = amap.nodes[amap.nodesIdx[way.refs[i]]]
+			ref2 = amap.nodes[amap.nodesIdx[way.refs[i+1]]]
 			newway.refs.append(ref1.id)
-			try:
-				r1lon = int2deg(ref1.lon)
-				r1lat = int2deg(ref1.lat)
-				r2lon = int2deg(ref2.lon)
-				r2lat = int2deg(ref2.lat)
-				(azim,_,dist)=geod.inv(r1lon,r1lat,r2lon,r2lat)
-			except ValueError:
-				continue
+			dist = distance(ref1,ref2)
 			if dist<30:
 				continue
 			replace=True
-			lonlats = geod.npts(r1lon,r1lat,r2lon,r2lat,dist/20)
+			lonlats = divideEdge(ref1.lon,ref1.lat,ref2.lon,ref2.lat,int(dist/20))
 			for lon,lat in lonlats:
 				newnode = pb.Node()
 				newnode.id = amap.newNodeid()
-				newnode.lon = deg2int(lon)
-				newnode.lat = deg2int(lat)
+				newnode.lon = lon
+				newnode.lat = lat
 				newnode.inside = ref1.inside and ref2.inside
 				newway.refs.append(newnode.id)
 				amap.nodes.append(newnode)

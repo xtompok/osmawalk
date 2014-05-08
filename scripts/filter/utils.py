@@ -1,8 +1,6 @@
 import math
-import pyproj
 
-scale = 1000000
-geod = pyproj.Geod(ellps="WGS84")
+scale = 10
 
 def angle(ux,uy,vx,vy):
 	try:
@@ -22,21 +20,6 @@ def angle(ux,uy,vx,vy):
 		angle=2*math.pi-angle
 	return angle
 
-def binary_search(alist,func,item):
-    lo = 0
-    hi = len(alist)
-    mid = 1
-    while lo < hi:
-        mid = (lo+hi)//2
-        midval = alist[mid]
-        if func(midval) < item:
-            lo = mid+1
-        elif func(midval) > item: 
-            hi = mid
-        else:
-            return mid
-    return -(mid-1)
-
 def int2deg(intdeg):
 	return 1.0*intdeg/scale
 
@@ -44,4 +27,32 @@ def deg2int(deg):
 	return int(deg*scale)
 
 def distance(node1,node2):
-	return geod.inv(int2deg(node1.lat),int2deg(node1.lon),int2deg(node2.lat),int2deg(node2.lon))[2]
+        return math.sqrt((node1.lat-node2.lat)*(node1.lat-node2.lat)+(node1.lon-node2.lon)*(node1.lon-node2.lon))/scale;
+
+def nodeWays(amap):
+	missingcnt=0
+	nodeways = [ [] for i in amap.nodes]
+	for way in amap.ways:
+		missing = []
+		for node in way.refs:
+			try:
+				nodeways[amap.nodesIdx[node]].append(way.id)
+			except KeyError:
+				missingcnt+=1
+				missing.append(node)
+		for node in missing:
+			way.refs.remove(node)
+	print "Missing "+str(missingcnt)+" nodes"
+
+	return nodeways	
+
+def deleteAloneNodes(amap,nodeways):
+	toidx = 0
+	for fromidx in range(len(amap.nodes)):
+		if len(nodeways[fromidx])==0:
+			continue
+		amap.nodes[toidx]=amap.nodes[fromidx]
+		toidx+=1
+	for i in range(len(amap.nodes)-1,toidx,-1):
+		del amap.nodes[i]
+	return amap
