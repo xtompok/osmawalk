@@ -47,9 +47,57 @@ tyto knihovny a programy jsou nutné pro spuštění a používání programu.
 Program osmconvert a knihovna GeographicLib jsou již zahrnuty ve zdrojovém kódu,
 ostatní knihovny je potřeba zajistit v systému.
 
-\section{Příprava dat}
+\section{Datové struktury}
+V průběhu celé přípravy vyhledávacích dat často využíváme několik struktur,
+které nyní popíšeme. Datové struktury využívané jen v konkrétních případech
+popíšeme u těchto případů.
 
-\section{Klasifikace OSM dat}
+Při přípravě dat používáme několik {\tuc hešovacích tabulek}. Často potřebujeme
+získat uzel respektive cestu s konkrétním identifikátorem, pro tento účel nám
+slouží tabulky \verb|nodesIdx| respektive \verb|waysIdx|. V Pythonu jsou
+reprezentovány typem slovník, v C využíváme součást knihovny libUCW
+\verb|hashtable|. V obou případech je klíčem OSM identifikátor objektu a
+hodnotou index do pole uzlů resp. cest, kde je daný objekt uložen.
+
+U každé cesty je v datech uložen seznam uzlů, přes které prochází. Je ale vhodné
+mít i pro každý vrchol uložen seznam cest, které jím prochází. Pro tento účel
+máme seznam \verb|nodeWays|. Je to seznam seznamů, kdy pod indexem $i$ je seznam
+všech identifikátorů cest, které prochází vrcholem na indexu $i$. V Pythonu jde
+o seznam seznamů, v C je to rostoucí pole rostoucích polí z libUCW.
+
+Během zpracování hledáme uzly blízké daným uzlů. Abychom pro každé takové
+hledání nemuseli procházet všechny uzly, vytvoříme si na začátku {\tuc mřížku}.
+Tato mřížka dělí plochu mapy na čtverce $20 \times 20$\,m a v každém čtverci si
+uložíme seznam identifikátorů vrcholů, které v něm leží. Poté nám při hledání
+sousedů bodu stačí zjistit, do kterého čtverce patří a následně prohledat jen
+několik okolních čtverců.
+
+V Pythonu se jedná o třídu \verb|Raster|, která při vytvoření vyrobí mřížku z
+mapy. Mřížka je uložena v atributu \verb|raster|, třída má metodu
+\verb|getBox(lon,lat)|, která pro bod s  délku \verb|lon| a šířku \verb|lat|
+vrátí tuple se souřadnicemi buňky, ve které se bod nachází. Mřížka \verb|raster|
+je seznam seznamů seznamů.
+
+V C je mřížka reprezentována strukturou \verb|raster_t|. Samotná mřížka je prvek
+\verb|raster| této struktury. V souboru \verb|raster.h| jsou definovány funkce
+pro práci s mřížkou. Funkce \verb|makeRaster(map_t map)| vyrobí z mapy mřížku a
+vrátí ji. Funkce \verb|getRasterBox(raster_t raster, int64_t lon, int64_t lat)|
+dostane jako paramter mřížku, délku a šířku bodu a vrátí pole se dvěma prvky --
+souřadnicemi buňky, kde se bod nachází. Mřížka \verb|raster| je reprezentována
+rostoucím polem rostoucích polí rostoucích polí z knihovny libUCW.
+
+\medskip
+
+
+\section{Stažení dat OSM}
+Abychom mohli připravovat data pro vyhledávání, musíme nejprve získat data OSM
+pro dané město. O tuto činnost se stará skript \verb|prepare.sh|, který stáhne
+data pro celou Českou republiku a pomocí osmconvert z ní vyřízne obdélník s
+městem. Ten uloží jako \verb|praha.osm|\footnote{Program byl připravován pro vyhledávání tras po Praze, proto soubory obvykle
+obsahují název praha.} k dalšímu zpracování.
+
+\section{Klasifikace dat}
+
 \section{Vyřešení multipolygonů}
 \section{Zjednodušení budov}
 \section{Rozdělení dlouhých úseků}
