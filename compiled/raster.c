@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <ucw/gary.h>
 
-#include "include/geodesic.h"
 #include "types.h"
 #include "raster.h"
 #include "hashes.c"
@@ -11,11 +10,6 @@
 
 struct raster_t makeRaster(struct map_t map){
 	int dimension = 20;
-
-//	double g_a = 6378137, g_f = 1/298.257223563; /* WGS84 */
-//	double lat1, lon1, azi1, lat2, lon2, azi2, s12;
-//	struct geod_geodesic geod;
-//	geod_init(&geod, g_a, g_f);
 
 	struct raster_t raster;
 	

@@ -3,7 +3,7 @@ PG=
 CFLAGS= -c $(PG)  -ggdb3 -Wall -Wno-format -std=gnu99 -O2 -march=native -I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw
 PFLAGS= -E -Wall -std=gnu99 -O3 -march=native -I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw
 LDFLAGS= $(PG) -lprotobuf-c -lucw-6.0 -lproj -lyaml -lm -L/mnt/sda1/home/jethro/Programy/libucw/obj/ucw 
-SOURCES=raster.c hashes.c utils.c writegpx.c mixnum.c include/premap.pb-c.c include/types.pb-c.c include/graph.pb-c.c include/geodesic.c
+SOURCES=raster.c hashes.c utils.c writegpx.c mixnum.c include/premap.pb-c.c include/types.pb-c.c include/graph.pb-c.c
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE1=filter
 EXECUTABLE2=search

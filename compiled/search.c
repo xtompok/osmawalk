@@ -10,7 +10,6 @@
 #include <proj_api.h>
 #include <ucw/gary.h>
 #include <ucw/heap.h>
-#include "include/geodesic.h"
 
 #include "include/graph.pb-c.h"
 
@@ -162,9 +161,6 @@ void calcDistances(Graph__Graph * graph){
 	for (int i=0;i<graph->n_edges;i++){
 		Graph__Edge * edge;
 		edge = graph->edges[i];
-		//double g_a = 6378137, g_f = 1/298.257223563; /* WGS84 */
-		//struct geod_geodesic geod;
-		//geod_init(&geod, g_a, g_f);
 		double dist;
 		double tmp1;
 		double tmp2;
@@ -225,17 +221,6 @@ static inline  double calcTime(Graph__Graph * graph,struct config_t conf,Graph__
 	speed = conf.speeds[edge->type];
 	if (speed==0)
 		return DBL_MAX;
-	/*double g_a = 6378137, g_f = 1/298.257223563; // WGS84 
-	struct geod_geodesic geod;
-	geod_init(&geod, g_a, g_f);
-	double dist;
-	double tmp1;
-	double tmp2;
-	geod_inverse(&geod,graph->vertices[edge->vfrom]->lat,
-			graph->vertices[edge->vfrom]->lon,
-			graph->vertices[edge->vto]->lat,
-			graph->vertices[edge->vto]->lon,&dist,&tmp1,&tmp2);
-	*/
 	return edge->dist/speed;
 }
 

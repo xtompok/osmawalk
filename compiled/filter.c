@@ -8,7 +8,6 @@
 
 #include <ucw/gary.h>
 #include <ucw/heap.h>
-#include "include/geodesic.h"
 #include "include/graph.pb-c.h"
 
 #define PF2(tok) #tok
