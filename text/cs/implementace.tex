@@ -93,10 +93,69 @@ rostoucím polem rostoucích polí rostoucích polí z knihovny libUCW.
 Abychom mohli připravovat data pro vyhledávání, musíme nejprve získat data OSM
 pro dané město. O tuto činnost se stará skript \verb|prepare.sh|, který stáhne
 data pro celou Českou republiku a pomocí osmconvert z ní vyřízne obdélník s
-městem. Ten uloží jako \verb|praha.osm|\footnote{Program byl připravován pro vyhledávání tras po Praze, proto soubory obvykle
-obsahují název praha.} k dalšímu zpracování.
+městem. Ten uloží jako \verb|praha.osm|\footnote{Program byl připravován pro
+vyhledávání tras po Praze, proto soubory obvykle obsahují název praha.} k
+dalšímu zpracování.
 
 \section{Klasifikace dat}
+Nejdříve potřebujeme data OSM převést do formátu pro přípravu dat (premap). K
+tomuto účelu slouží program \verb|parse.py|, který si načte konfigurační soubory
+a podle nich rozdělí jednotlivé uzly a cesty do kategorií. Současně také převede
+souřadnice do formátu UTM. Následně smaže všechny uzly, které neleží na žádné
+cestě a uloží data do formátu premap.
+
+Konfigurační soubory jsou soubory ve formátu YAML. Používají se následující
+konfigurační soubory:
+\begin{itemize}
+	\item \verb|types.yaml| pro rozdělení cest a multipolygonů do
+kategorií 
+	\item \verb|area.yaml| pro určení, zda je daný objekt plochou
+	\item \verb|tunnel.yaml| pro určení, zda je daný objekt tunelem,
+	průchodem či jinou podobnou stavbou
+	\item \verb|bridge.yaml| pro určení, zda je daný objekt mostem nebo na
+	něm leží
+\end{itemize}
+
+Konfigurační soubory mají následující formát:
+\begin{verbatim}
+barrier: 
+    barrier : "*"
+    waterway:
+        - river
+        - canal
+water:
+    waterway:
+        - riverbank
+        - stream
+\end{verbatim}
+Konfigurační soubor se skládá z několika mapování, u každého klíč určuje, jaká
+kategorie resp. hodnota se přiřadí, hodnotou mapování první úrovně jsou mapování
+druhé úrovně, které určují, za jakých podmínek se hodnota přiřadí. Přiřazuje se
+vždy, když je splněna alespoň jedna podmínka. 
+
+V mapování druhé úrovně je klíčem vždy klíč vlastnosti objektu OSM. Hodnota může
+být dvou druhů. Buď je to \verb|"*"|, pak stačí, že se shoduje klíč vlastnosti
+OSM a na hodnoty se nehledí, nebo je hodnota mapování seznam hodnot objektu OSM.
+Pokud má objekt OSM pro daný klíč jednu z těchto hodnot, je  podmínka splněna. 
+
+V příkladu rozdělujeme do kategorií \verb|barrier| a \verb|water|. Pokud má
+objekt OSM nějaký atribut s klíčem \verb|barrier|, je tomuto objektu přiřazena
+kategorie \verb|barrier| nezávisle na hodnotě tohoto klíče. Obdobně je jako
+\verb|barrier| označen objekt OSM, který má atribut s klíčem \verb|waterway| a
+hodnotou \verb|river|. Pokud má ale objekt atribut s klíčem \verb|waterway| a
+hodnotou \verb|stream|, je klasifikován jako \verb|water|.
+
+Při procházení uzlů převádíme souřadnice do formátu UTM\cite{utmnorma}. Tento
+formát používá místo stupňů metry, tudíž se v něm lépe počítají vzdálenosti. To
+se nám hodí nejen při přípravě dat, ale i při samotném hledání, protože při
+testování se souřadnicemi ve formátu WGS-84 se více času trávilo výpočtem
+vzdáleností než zbytkem algoritmu. V našem případě ještě {\tuc vynásobíme souřadnice
+UTM desíti}, čímž bude jednotkou 10\,cm což nám jako přesnost stačí a můžeme
+všechny výpočty provádět v celých číslech.
+
+Následně vytvoříme hešovací tabulku nodeWays a jejím průchodem zjistíme, které
+uzly neleží na žádných cestách a tyto uzly smažeme. Nakonec převedeme data do
+formátu premap a uložíme jako soubor \verb|praha-pre.pbf| do složky \verb|data|.
 
 \section{Vyřešení multipolygonů}
 \section{Zjednodušení budov}
