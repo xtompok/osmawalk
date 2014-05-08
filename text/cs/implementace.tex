@@ -40,12 +40,12 @@ tyto knihovny a programy jsou nutné pro spuštění a používání programu.
 \begin{itemize}
 	\item Datové struktury, dynamická pole a další potřebné funkce zajišťuje
 	{\tuc LibUCW} (GNU LGPL)\footurl{http://www.ucw.cz/libucw/}.
-	\item Výpočty se zeměpisnými souřadnicemi provádí {\tuc GeographicLib}
-	(MIT)\footurl{http://geographiclib.sourceforge.net/}.
+	\item Výpočty se zeměpisnými souřadnicemi provádí {\tuc PROJ.4}
+	(MIT)\footurl{http://trac.osgeo.org/proj/}.
 \end{itemize}
 
-Program osmconvert a knihovna GeographicLib jsou již zahrnuty ve zdrojovém kódu,
-ostatní knihovny je potřeba zajistit v systému.
+Program osmconvert je již zahrnut ve zdrojovém kódu, ostatní knihovny je potřeba
+zajistit v systému.
 
 \section{Datové struktury}
 V průběhu celé přípravy vyhledávacích dat často využíváme několik struktur,
@@ -157,9 +157,32 @@ Následně vytvoříme hešovací tabulku nodeWays a jejím průchodem zjistíme
 uzly neleží na žádných cestách a tyto uzly smažeme. Nakonec převedeme data do
 formátu premap a uložíme jako soubor \verb|praha-pre.pbf| do složky \verb|data|.
 
-\section{Vyřešení multipolygonů}
-\section{Zjednodušení budov}
+\section{Převod multipolygonů na cesty}
+S multipolygony se v původní formě pracuje obtížně, protože se jejich obvod
+skládá z neseřazených cest. Pro naše účely se hodí vytvořit cesty reprezentující
+obvod multipolygonu. Těchto cest může být více, protože multipolygon se může
+skládat z více komponent. 
+
+Pro každý multipolygon si vytvoříme seznam všech vnějších cest. Pak vytvoříme
+seznam sousedů \verb|neighs|, který pro každý uzel na některé z vnějších cest
+obsahuje jeho sousedy na těchto cestách. Ve správném případě by takto měl každý
+uzel mít dva sousedy. Pokud tomu tak není, skončíme s chybou. Poté vybereme
+jeden uzel na obvodu a postupujeme po jeho sousedech, dokud se do něj opět
+nevrátíme. Použité cesty smažeme ze seznamu všech cest a opakujeme, dokud nějaké
+cesty zbývají. Pokud se vrátíme na vytvářenou cestu mimo první vrchol, skončíme
+s chybou.
+
+\section{Spojení budov}
+
 \section{Rozdělení dlouhých úseků}
+Dlouhé přímé cesty mívají i úseky mezi uzly dlouhé. V případě, že například v
+polovině tohoto úseku silnice končí souběžný chodník, chceme navázat cestu z
+chodníku na silnici spojkou. Protože spojky chceme mít krátké, hodí se nám mít i
+krátké úseky mezi uzly a tím mít možnost kdekoli podél cesty na ni udělat
+spojku. Projdeme tedy všechny cesty a na každé kontrolujeme délky úseků. Pokud
+najdeme úsek delší než 30 metrů, rozdělíme ho po 20 metrech vytvořením nových
+uzlů vložených mezi stávající.
+
 \section{Spojky mezi cestami}
 \section{Zkratky přes průchozí prostranství}
 \section{Vytvoření vyhledávacího grafu}

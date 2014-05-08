@@ -38,10 +38,10 @@ Multipolygony popisují objekty se složitější strukturou. Každý multipolyg
 skládá z několika cest, přičemž cesty mohou být vnější -- obvodové -- a
 vnitřní, pokud má objekt díry. Při správné definici by mělo sjednocení cest
 vypadat jako několik kružnic. Takto je také řešen převod multipolygonů na běžné
-cesty. Dokud má nějaké vnější cesty, pokusíme se z nich udělat složit kružnici.
-Pokud se stane, že některý segment kružnice chybí, je vypsána chyba a
-multipolygon se dále nezpracovává. Stejně tak, pokud kružnice končí v nějakém
-svém bodě, který ale není počáteční. 
+cesty. Dokud má nějaké vnější cesty, pokusíme se z nich složit kružnici.  Pokud
+se stane, že některý segment kružnice chybí, je vypsána chyba a multipolygon se
+dále nezpracovává. Stejně tak, pokud kružnice končí v nějakém svém bodě, který
+ale není počáteční. 
 
 \section{Spojení budov}
 Ve městě jsou velmi časté bloky budov. V OSM datech jsou budovy reprezentovány
