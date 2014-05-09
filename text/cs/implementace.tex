@@ -220,6 +220,26 @@ spojku. Projdeme tedy všechny cesty a na každé kontrolujeme délky úseků. P
 najdeme úsek delší než 30 metrů, rozdělíme ho po 20 metrech vytvořením nových
 uzlů vložených mezi stávající.
 
+\section{Smíšená čísla}
+Při hledání spojek mezi cestami a zkratek přes průchozí prostranství využíváme
+pro některé výpočty smíšených čísel. Důvodem pro jejich využití je nedostatečná
+přesnost 64bitových celých čísel. Předpokládejme, že máme město velikosti
+Prahy, což je přibližně $20 \times 30$\,km. Používáme přesnost 10\,cm, tudíž
+potřebujeme rozlišení $\log_2{\frac{30 000}{0.1}}\doteq18.2$ bitů. 
+
+Při počítání průsečíků úseček využíváme na neceločíselné výsledky zlomky,
+abychom neztratili přesnost. Ve zlomcích se může vyskytnout součin dvou
+souřadnic, který může být až 38 bitů velký. Pokud takovéto zlomky potřebujeme
+porovnávat, potřebujeme čitatele prvního zlomku vynásobit se jmenovatelem
+druhého zlomku, na což bychom mohli potřebovat až 76 bitů, tudíž by nám
+nestačilo 64bitové celé číslo. 
+
+Pokud porovnáváme dvě smíšená čísla, tak buď budou od sebe vzdálená, tudíž se
+budou lišit v celé části a násobení provádět nemusíme. Jestliže se čísla v celé
+části shodují, pak je potřeba násobit čitatele a jmenovatele. TODO: Rozumný
+popis.
+
+
 \section{Spojky mezi cestami}
 \section{Zkratky přes průchozí prostranství}
 \section{Vytvoření vyhledávacího grafu}
