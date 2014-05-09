@@ -192,7 +192,7 @@ def isIn(amap,node,way):
 	elif way.area == False:
 		return False
 	bbox = getbbox(amap,way.id)
-	if node.lon < bbox[0] and node.lon > bbox[2] and node.lat < bbox[1] and node.lat > bbox[3]:
+	if node.lon < bbox[0] or node.lon > bbox[2] or node.lat < bbox[1] or node.lat > bbox[3]:
 		return False
 	intcnt = 0
 	up = False

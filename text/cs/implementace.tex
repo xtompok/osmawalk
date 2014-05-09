@@ -173,6 +173,12 @@ cesty zbývají. Pokud se vrátíme na vytvářenou cestu mimo první vrchol, sk
 s chybou.
 
 \section{Spojení budov}
+Při spojování bloků budov do jejich obrysu si nejprve vytvoříme graf sousednosti
+budov. Pro jeho reprezentaci použijeme knihovnu \verb|networkx|. Jednotlivé
+budovy budou vrcholy v grafu, pokud budovy sousední, bude mezi jejich vrcholy
+hrana. 
+
+Do grafu nejprve přidáme všechny 
 
 \section{Rozdělení dlouhých úseků}
 Dlouhé přímé cesty mívají i úseky mezi uzly dlouhé. V případě, že například v
