@@ -220,25 +220,49 @@ spojku. Projdeme tedy všechny cesty a na každé kontrolujeme délky úseků. P
 najdeme úsek delší než 30 metrů, rozdělíme ho po 20 metrech vytvořením nových
 uzlů vložených mezi stávající.
 
-\section{Smíšená čísla}
-Při hledání spojek mezi cestami a zkratek přes průchozí prostranství využíváme
-pro některé výpočty smíšených čísel. Důvodem pro jejich využití je nedostatečná
-přesnost 64bitových celých čísel. Předpokládejme, že máme město velikosti
-Prahy, což je přibližně $20 \times 30$\,km. Používáme přesnost 10\,cm, tudíž
-potřebujeme rozlišení $\log_2{\frac{30 000}{0.1}}\doteq18.2$ bitů. 
+\section{Reprezentace čísel}
+V průběhu dalšího zpracování budeme potřebovat počítat průsečíky úseček daných
+uzly. Protože průsečíky úseček nebudou mít celočíselné souřadnice, je potřeba
+rozmyslet, jakým způsobem je reprezentovat.
 
-Při počítání průsečíků úseček využíváme na neceločíselné výsledky zlomky,
-abychom neztratili přesnost. Ve zlomcích se může vyskytnout součin dvou
-souřadnic, který může být až 38 bitů velký. Pokud takovéto zlomky potřebujeme
-porovnávat, potřebujeme čitatele prvního zlomku vynásobit se jmenovatelem
-druhého zlomku, na což bychom mohli potřebovat až 76 bitů, tudíž by nám
-nestačilo 64bitové celé číslo. 
+{\tuc Čísla s plovoucí desetinnou čárkou} se pro tyto účely nehodí, protože
+nejsou přesné. Při výpočtech s nimi vznikají zaokrouhlovací chyby, které mohou
+zapříčinit špatné pořadí blízkých průsečíků v uspořádání. Potřebujeme proto
+přesnou reprezentaci.
 
-Pokud porovnáváme dvě smíšená čísla, tak buď budou od sebe vzdálená, tudíž se
-budou lišit v celé části a násobení provádět nemusíme. Jestliže se čísla v celé
-části shodují, pak je potřeba násobit čitatele a jmenovatele. TODO: Rozumný
-popis.
+{\tuc Zlomky} jsou pro reprezentaci desetinných čísel vhodnější. Dokážeme pomocí
+nich přesně reprezentovat desetinná čísla.  porovnávání. Zlomky můžeme vždy
+upravit tak, aby jejich jmenovatel byl kladný.  Takové zlomky můžeme porovnávat
+podle pravidla $\frac{a}{b} < \frac{c}{d} \Leftrightarrow a\cdot d < c\cdot b $. 
+Pokud se nám ale stane, že porovnáváme dva zlomky, které mají vysoký čitatel i
+jmenovatel, nemusí nám 64 bitů přesnosti stačit.
 
+%TODO: Výpočet průsečíku
+
+%TODO: přep
+Předpokládejme, že máme město velikosti Prahy, což je přibližně $20 \times
+30$\,km. Používáme přesnost 10\,cm, tudíž potřebujeme rozlišení $\log_2{\frac{30
+000}{0.1}}\doteq18.2$ bitů. 
+
+O úsečkách víme, že žádná nebude delší než 300 metrů. Potom nám z výše uvedeného
+výpočtu vychází, že jmenovatel bude nejvýše 9 milionů, na jehož reprezentaci nám
+stačí 24 bitů. Maximální čitatel TODO
+
+{\tuc Smíšená čísla} nemají ani jednu z předchozích nevýhod. Jsou to čísla,
+která mají tvar $a+\frac{b}{c}$, kde $\frac{b}{c}<1$. $a$ nazvěme základem, $b$
+čitatelem a $c$ jmenovatelem. U těchto čísel je stejně jako u zlomků zachována
+přesnost, ale nemají problém s porovnáním. Pokud se čísla liší v základu, pak
+nemáme problém s přesností, protože základy se porovnávají přímo. Pokud mají dvě
+smíšená čísla stejné základy, pak porovnáme jejich zlomky. To ale narozdíl od
+přímého porovnávání zlomků není problém, protože jmenovatel je opět nejvýše
+24bitový a protože čitatel je nejvýše tak velký jako jmenovatel, jejich
+vynásobením vznikne nejvýše 48bitové číslo. Protože proměnné máme 64bitové,
+nikde k přetečení nedojde.
+
+Smíšená čísla jsou implementována jako struktury se členy \verb|base| pro
+základ, \verb|numer| pro čitatele a \verb|denom| pro jmenovatele. Všechny
+položky jsou 64bitová celá čísla a jmenovatel nesmí být záporný. Pro práci se
+smíšenými čísly jsou definovány pomocné funkce v souboru \verb|mixnum.h|.
 
 \section{Spojky mezi cestami}
 \section{Zkratky přes průchozí prostranství}
