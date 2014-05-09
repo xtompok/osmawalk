@@ -176,9 +176,40 @@ s chybou.
 Při spojování bloků budov do jejich obrysu si nejprve vytvoříme graf sousednosti
 budov. Pro jeho reprezentaci použijeme knihovnu \verb|networkx|. Jednotlivé
 budovy budou vrcholy v grafu, pokud budovy sousední, bude mezi jejich vrcholy
-hrana. 
+hrana. Graf sousednosti vytváříme funkcí \verb|makeNeighGraph|.
 
-Do grafu nejprve přidáme všechny 
+Do grafu nejprve přidáme všechny budovy jako vrcholy. Následně procházíme
+všechny uzly a u každého zkoumáme cesty, které jím prochází. Pokud jde jen o
+budovy, pak mezi první budovou a všemi ostatními vytvoříme v grafu hrany. Pokud
+mezi cestami je i nějaká, která není budovou, pak jsou všechny sousední budovy
+označeny za vadné a hrany nepřidáváme.
+
+Když máme graf vytvořen, procházíme ve funkci \verb|mergeComponents| jednotlivé
+jeho komponenty a ze všech cest v komponentě, které nejsou vadné, se pokoušíme
+vytvořit cestu. Pokud se to povede, přidáme ji mezi cesty a původní cesty
+jednotlivých budov vložíme do seznamu ke smazání. Nakonec funkcí
+\verb|removeMerged| smažeme všechny budovy, které jsme nahradili jejich obvodem.
+
+Když vytváříme cestu z obvodu bloku budov pomocí funkce \verb|mergeWays|,
+postupujeme obdobně jako při převodu multipolygonů na cesty. Vytvoříme si seznam
+\verb|neighs|, který obsahuje pro každý bod na některé ze spojovaných cest
+všechny jeho sousedy. Tentokrát ale může být sousedů více a je potřeba vybrat
+toho správného. Setřídíme si tedy uzly podle souřadnic a ten nejvíce na
+jihozápadě vezmeme jako první uzel obvodu.  Protože žádný západnější ani
+jižnější bod neexistuje, bude tento uzel zcela jistě na obvodu. Nyní najdeme
+druhý uzel na obvodu. Vybereme mezi sousedy prvního uzlu ten, který svírá s
+úsečkou vedoucí z prvního uzlu na jih nejmenší úhel. Žádný uzel přímo na jih od
+prvního není, proto všechny úhly budou nenulové. Uzel pod nejmenším úhlem bude
+druhým na obvodu.
+
+Pokud máme první dva body na obvodu, stačí nám již jen ze sousedů aktuálně
+zpracovávaného uzlu vybrat ten uzel, který svírá s předchozím a aktuálním uzlem
+nejmenší vnější úhel a takto pokračovat, dokud se nevrátíme do prvního uzlu.
+
+Jestliže počet uzlů je méně než tři, nejde o korektní plochu a je vrácena chyba.
+Rovněž pokud během průchodu po obvodu dojdeme do jiného než prvního bodu na
+obvodu, například pokud se dvě cesty dotýkají rohem, vrátíme chybu.
+% TODO: Obrázky
 
 \section{Rozdělení dlouhých úseků}
 Dlouhé přímé cesty mívají i úseky mezi uzly dlouhé. V případě, že například v
