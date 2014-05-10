@@ -401,7 +401,7 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 
 	GARY_INIT_SPACE(candidates,100000);
 
-	for (int lonidx=0;lonidx<raster.lonparts-1;lonidx++){
+	for (int lonidx=1;lonidx<raster.lonparts-1;lonidx++){
 		for (int latidx=0;latidx<raster.latparts-1;latidx++){
 			int count;
 			count = GARY_SIZE(raster.raster[lonidx][latidx]);
@@ -429,6 +429,17 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 					}
 				}
 				int neighCount;
+				neighCount=GARY_SIZE(raster.raster[lonidx+1][latidx-1]);
+				modulus = (neighCount)/deg+1;
+				for (int j=0;j<neighCount;j++){
+					if (rand()%modulus!=0)
+						continue;
+					nidx2 = raster.raster[lonidx+1][latidx-1][j];
+					nid2 = map.nodes[nidx2]->id;
+					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)&& !onSameWay(nid1,nid2)){
+						addCandidate(&candidates,nidx1,nidx2);
+					}
+				}
 				neighCount=GARY_SIZE(raster.raster[lonidx+1][latidx]);
 				modulus = (neighCount)/deg+1;
 				for (int j=0;j<neighCount;j++){
