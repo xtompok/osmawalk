@@ -239,7 +239,7 @@ jmenovatel, nemusí nám 64 bitů přesnosti stačit.
 
 %TODO: Výpočet průsečíku
 
-%TODO: přep
+%TODO: přepsat
 Předpokládejme, že máme město velikosti Prahy, což je přibližně $20 \times
 30$\,km. Používáme přesnost 10\,cm, tudíž potřebujeme rozlišení $\log_2{\frac{30
 000}{0.1}}\doteq18.2$ bitů. 
@@ -265,5 +265,33 @@ položky jsou 64bitová celá čísla a jmenovatel nesmí být záporný. Pro pr
 smíšenými čísly jsou definovány pomocné funkce v souboru \verb|mixnum.h|.
 
 \section{Spojky mezi cestami}
+Spojky budeme vytvářet mezi cestami, po kterých budeme posléze vyhledávat.
+Nejprve si proto všechny cesty ve funkci \verb|makeGraph| projdeme a roztřídíme
+do dvou polí. 
+
+Pole \verb|wayGraph| obsahuje pro každý uzel pole všech jeho sousedů po cestách,
+po kterých se bude vyhledávat. Pole \verb|barGraph| obshauje ty dvojice indexů
+uzlů, které spolu sousedí na některé cestě označené jako překážka. Obě pole
+reprezentují graf, první pomocí seznamu sousedů, druhý pomocí seznamu hran.
+Každé pole budeme využívat jiným způsobem a proto se nám hodí různá
+reprezentace.
+
+Jako druhý krok nalezneme všechny kandidáty na spojky. Zde využijeme mřížky.
+Protože spojky chceme dlouhé nejvíce 20 metrů a mřížka má čtverce o hraně také
+20 metrů, stačí nám při hledání možných spojek pro daný bod se podívat pouze na
+body ve čtverci, kde sám leží, v sousedních čtvercích napravo od něj a ve
+čtverci pod ním. Protože jsou spojky kratší než 20\,m, nemohou dále než do sousedního
+čtverce dosáhnout a protože procházíme postupně všechny čtverce, možné spojky
+doleva a nahoru již známe ze zpracování předchozích čtverců. 
+
+Jednotlivé počáteční a koncové body spojek získáme ze všech bodů v daném čtverci
+vytříděním těch, které mají nějaké sousedy v poli \verb|wayGraph|. Rovněž
+nepřidáváme každou spojku, ale náhodně jen některé z nich, čímž si příliš
+nezhoršíme nejkratší trasu a ušetříme místo a čas při hledání.
+
+Když máme připravené kandidáty na spojky a seznam všech překážek, můžeme
+přistoupit k zametání roviny.
+
+
 \section{Zkratky přes průchozí prostranství}
 \section{Vytvoření vyhledávacího grafu}
