@@ -142,27 +142,44 @@ definované objekty. Nalezli jsme například cesty, které samy sebe kříží,
 chybějící elementy v hranicích multipolygonu a jiné. Výhodou OSM je, že jsme je
 mohli ihned opravit, ale přesto je musí umět program korektně vyhodnotit.
 
-{\tuc Více bodů na stejných souřadnicích.} Ač by se pro spojování sousedních ploch měly
-využívat společné body na hranicích, v některých oblastech jsme našli
+{\tuc Více bodů na stejných souřadnicích.} Ač by se pro spojování sousedních
+ploch měly využívat společné body na hranicích, v některých oblastech jsme našli
 problematická místa, kde polovina ploch používala jeden bod a druhá polovina
 jiný na stejných souřadnicích. Tyto dva body spolu nebyly nijak propojeny a
-pravděpodobně vznikly při některém importu z jiných datových zdrojů. Bohužel
-takovéto složité chyby se nedají jednoduše ručně opravit a je opět potřeba je
-korektně zpracovat.
+pravděpodobně vznikly při některém importu z jiných datových zdrojů. Takovýchto
+chyb jsme nalezli mnoho a je opět potřeba je korektně zpracovat.
 
-{\tuc Různá sémantika atributů na různých místech.} Při výběru atributů, které zahrnout
-ke zpracování, jsme se setkali s používáním stejných atributů v různých
+{\tuc Různá sémantika atributů na různých místech.} Při výběru atributů, které
+zahrnout ke zpracování, jsme se setkali s používáním stejných atributů v různých
 významech. Například klíč \verb|landuse| s hodnotou \verb|residential| v
 některých místech označoval velké plochy s obytnými budovami, jinde volně
 přístupná prostranství mezi těmito budovami. Kvůli těmto nejednoznačnostem jsme
 některé atributy nemohli použít, protože by vytvářely v některých částech města
 nekorektní výsledky.
+\begin{figure}
+	\centering
+	\includegraphics[width=80mm]{../img/resident-nepruch.pdf}
+	\caption{\texttt{landuse=residential} jako označení oplocených rodinných domků.}
+	\label{fig:resident-nepruch}
+\end{figure}
+\begin{figure}
+	\centering
+	\includegraphics[width=80mm]{../img/resident-plocha.pdf}
+	\caption{\texttt{landuse=residential} jako označení průchozí plochy mezi paneláky.}
+	\label{fig:resident-volno}
+\end{figure}
 
 {\tuc Neúplně navazující cesty.} Kvalita mapovaných cest v OSM je silně závislá na typu
 cesty. Zatímco silnice, které jsou často využívány pro hledání tras, jsou
 většinou navzájem navázány správně, chodníky často v datech úplně chybí, nebo
 nejsou napojeny na silnice. Rovněž přechody často chybí. Proto v našem programu
 zkoumáme i okolí cest a přidáváme možné spojky mezi chodníky a silnicemi.
+\begin{figure}
+	\centering
+	\includegraphics[width=50mm]{../img/chodnik.pdf}
+	\caption{Špatně zmapovaný chodník}
+	\label{fig:chodnik}
+\end{figure}
 
 \section{Využívané informace z OSM}
 Protože chceme umět nejen vyhledávat po cestách, ale i vytvářet trasy přes

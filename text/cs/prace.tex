@@ -26,10 +26,10 @@
 % \let\openright=\cleardoublepage
 
 %% Pokud používáte csLaTeX (doporučeno):
-\usepackage{czech}
+%\usepackage{czech}
 %% Pokud nikoliv:
-%\usepackage[czech]{babel}
-%\usepackage[T1]{fontenc}
+\usepackage[czech]{babel}
+\usepackage[T1]{fontenc}
 
 %% Použité kódování znaků: obvykle latin2, cp1250 nebo utf8:
 \usepackage[utf8]{inputenc}
@@ -41,7 +41,7 @@
 %% Balíček hyperref, kterým jdou vyrábět klikací odkazy v PDF,
 %% ale hlavně ho používáme k uložení metadat do PDF (včetně obsahu).
 %% POZOR, nezapomeňte vyplnit jméno práce a autora.
-\usepackage[ps2pdf,unicode]{hyperref}   % Musí být za všemi ostatními balíčky
+\usepackage[unicode]{hyperref}   % Musí být za všemi ostatními balíčky
 \hypersetup{pdftitle=Hledání pěších cest v mapě}
 \hypersetup{pdfauthor=Tomáš Pokorný}
 
