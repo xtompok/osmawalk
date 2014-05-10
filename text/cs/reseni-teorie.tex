@@ -99,9 +99,10 @@ prostranstvích se vyskytují překážky, opět jsme pomocí zametání roviny
 odstranili všechny úsečky, které procházely přes nějakou překážku.
 
 \section{Vytvoření vyhledávacího grafu}
-Poté, co jsme připravili data, jsme vytvořili vyhledávací graf. Protože kolize
+Poté, co jsme připravili data, vytvoříme vyhledávací graf. Protože kolize
 přímých cest s překážkami jsme vyřešili již při jejich vytváření, jsou všechny
 cesty korektní. Proto se překážkami již dále nezabýváme a pouze z cest vytvoříme
-vyhledávací graf. Uložíme seznam všech uzlů, které jsou na cestách použity a
-cesty rozdělíme na jednotlivé hrany grafu mezi dvěma uzly. U hran zachováme
-údaje o typu cesty, protože je budeme využívat při vyhledávání.
+vyhledávací graf. Mohlo se stát, že vzniklo několik oddělených komponent, proto
+z nich vybereme tu největší. Uložíme seznam všech uzlů, které jsou na cestách
+použity a cesty rozdělíme na jednotlivé hrany grafu mezi dvěma uzly. U hran
+zachováme údaje o typu cesty, protože je budeme využívat při vyhledávání.

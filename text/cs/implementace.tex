@@ -290,8 +290,16 @@ nepřidáváme každou spojku, ale náhodně jen některé z nich, čímž si p�
 nezhoršíme nejkratší trasu a ušetříme místo a čas při hledání.
 
 Když máme připravené kandidáty na spojky a seznam všech překážek, můžeme
-přistoupit k zametání roviny.
-
+přistoupit k zametání roviny. Zametání roviny probíhá ve funkci
+\verb|findDirectWays| a využívá následující datové typy a proměnné:
+\begin{itemize}
+	\item 
+\end{itemize}
 
 \section{Zkratky přes průchozí prostranství}
 \section{Vytvoření vyhledávacího grafu}
+Když již máme všechna data připravená, vytvoříme vyhledávací graf. Nejprve do
+něj přidáme všechny vrcholy a hrany, tím ale nemáme zajištěno, že nebude mít
+více komponent. Proto následně graf projdeme do hloubky a vybereme tu
+komponentu, která bude mít více než polovinu vrcholů. Poté v grafu necháme jen
+vrcholy a hrany co do této komponenty patří a graf uložíme. 
