@@ -291,15 +291,87 @@ nezhoršíme nejkratší trasu a ušetříme místo a čas při hledání.
 
 Když máme připravené kandidáty na spojky a seznam všech překážek, můžeme
 přistoupit k zametání roviny. Zametání roviny probíhá ve funkci
-\verb|findDirectWays| a využívá následující datové typy a proměnné:
+\verb|findDirectWays|. Nejprve popíšeme používané struktury a proměnné.
+
+Struktura \verb|line_t| reprezentuje úsečku v rovině. Při vytváření se jí
+nastavují tyto atributy:
 \begin{itemize}
-	\item 
+	\item \verb|startlon| a \verb|startlat| udávají souřadnice začátku
+	úsečky. Začátek úsečky má vždy nejvýš takovou zeměpisnou délku jako
+	konec.
+	\item \verb|endlon| a \verb|endlat| udávají souřadnice konce úsečky.
+	Souřednice začátků a konců jsou vždy celočíselné, proto je
+	reprezentujeme 64bitovými celými čísly.
+	\item \verb|startid| a \verb|endid| udávají identifikátor začátku a
+	konce úsečky v OSM.
+	\item \verb|isBar| říká, jestli je daná úsečka překážkou.
+\end{itemize}
+V průběhu zametání roviny jsou úsečkám nastavovány následující atributy:
+\begin{itemize}
+	\item \verb|broken| říká, jestli má průsečík s jinou úsečkou a alespoň
+	jedna z nich je překážka.
+	\item \verb|started| udává, že byla zařazena do průřezu.
+	\item \verb|ended| udává, že byla v průžezu a již skončila.
 \end{itemize}
 
+Globální pole \verb|lines| typu \verb|line_t| obsahuje všechny kandidáty na
+spojky, globální pole \verb|bars| typu \verb|line_t| obsahuje všechny překážky. 
+
+Pro zametání budeme také potřebovat haldu, ze které budeme vybírat nejbližší
+událost. V našem případě používáme haldy dvě, první (\verb|seQueue|), kterou na
+začátku naplníme událostmi začátek a konec úsečky, a druhou(\verb|intQueue|),
+kterou budeme průběžně plnit průsečíkovými událostmi. V každém průběhu hlavního
+cyklu pak vybereme tu událost, která nastane dříve. Samotné haldy jsou pak
+reprezentovány v poli pomocí binárních hald z libUCW. 
+
+Také budeme potřebovat vyhledávací strom, ve ktreém si budeme pamatovat aktuální
+pořadí úseček v průřezu. Pro jeho reprezentaci jsme zvolili červeno-černé stromy
+z libUCW. V jeho vrcholech jsou uloženy jednotlivé úsečky, které jsou aktuální
+pro daný průřez. Protože se ale úsečky mohou křížit, použili jsme několik
+vlastních rozšíření. 
+
+Museli jsme napsat vlastní {\tuc porovnávací funkci}. Zametáme podle délky,
+tudíž ve stromě potřebujeme mít úsečky seřazené podle zeměpisné šířky v daném
+bodě. Ta se ale s kažým posunutím zametací přímky mění, proto ve stromě najdeme
+pouze indexy do pole \verb|lines| na jednotlivé úsečky. Porovnávací funkce
+dostane tyto indexy, z globální proměnné \verb|lon| zjistí, jaká je aktuální
+zeměpisná délka zametací přímky a vypočítá zeměpisnou šířku porovnávaných úseček
+v daném bodě. Pokud se šířky liší, pak vrátí výsledek, pokud mají shodnou i
+šířku, porovnávaj se podle úhlu. 
+
+K tomuto je zapotřebí globální proměnná \verb|anglesign|, která říká, s jakým
+znaménkem se má úhel brát. Pokud totiž srovnáváme úsečky při přidávání, zajímá
+nás, v jakém úhlu pokračují dále, naopak při odebírání nás zajímá, pod jakým
+úhlem přicházejí. Seřazení je v tomto případě přesně opačné. Úsečka, která
+mířila nejvíce k severu, tudíž byla na začátku poslední z daného bodu, bude na
+konci přicházet z jihu, tudíž bude mezi prvními. Úhly úseček nepotřebujeme
+počítat, stačí nám porovnat jejich směrnice, což jsou zlomky, a to umíme rychle
+a beze ztráty přesnosti.
+
+Ve stromě dále musíme umět prohodit dva sousední vrcholy při průsečíku jim
+odpovídajících úseček. Protože si ve vrcholech pamatujeme pouze indexy do pole
+úseček, stačí při překřížení tyto indexy prohodit. Struktura stromu i korektnost
+uspořádání tím zůstanou zachovány.
+
+Stromy v libUCW umí i mazání vrcholu podle pointeru na něj, což se nám hodí při
+událostech konec úsečky, protože ji nemusíme hledat, ale stačí si při vytváření
+úsečky uložit pointer na vrchol stromu do pole \verb|lineNodes| a při křížení
+úseček prohodit patřičné ukazatele. Při mazání se pak jen podíváme podle indexu
+úsečky do správného místa v poli a patřičný vrchol smažeme. Je to výhodou i v
+situaci, kdy nastal při zametání nějaký problém a neproběhla nějaká událost
+křížení a tudíž bychom standardní cestou vrchol nenašli.
+
+Při vkládání nového vrcholu do stromu také potřebujeme zjistit sousedy nově
+vloženého vrcholu, abychom přidali případné události křížení. Tuto funkci stromy
+v libUCW již také obsahují, tudíž nám stačí ji jen využít. Sousedy rovněž
+hledáme při křížení, protože překřížením úseček se sousedství změnilo.
+
 \section{Zkratky přes průchozí prostranství}
+
 \section{Vytvoření vyhledávacího grafu}
 Když již máme všechna data připravená, vytvoříme vyhledávací graf. Nejprve do
 něj přidáme všechny vrcholy a hrany, tím ale nemáme zajištěno, že nebude mít
 více komponent. Proto následně graf projdeme do hloubky a vybereme tu
 komponentu, která bude mít více než polovinu vrcholů. Poté v grafu necháme jen
-vrcholy a hrany co do této komponenty patří a graf uložíme. 
+vrcholy a hrany co do této komponenty patří a graf uložíme do souboru
+\verb|praha-graph.pbf|. 
