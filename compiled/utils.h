@@ -2,6 +2,8 @@
 #define UTILS_H
 #define SCALE 10
 
+#include <math.h>
+
 #include "types.h"
 #include "include/premap.pb-c.h" 
 

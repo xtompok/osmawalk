@@ -256,7 +256,6 @@ void findWay(Graph__Graph * graph, struct config_t conf, struct nodeways_t * nod
 
 	int * heap;
 	int n_heap;
-	n_heap = graph->n_vertices;
 	heap = malloc(sizeof(int)*(graph->n_vertices+1));
 	int * heapIndex;
 	heapIndex = malloc(sizeof(int)*graph->n_vertices);

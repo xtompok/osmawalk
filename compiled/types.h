@@ -61,7 +61,6 @@ struct event_t {
 	SWEEP_TYPE dlon;
 	SWEEP_TYPE dlat;	
 	unsigned int lineIdx;
-	unsigned int line2Idx;
 };
 struct int_event_t {
 	enum event_type type;

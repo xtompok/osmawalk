@@ -401,8 +401,8 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 
 	GARY_INIT_SPACE(candidates,100000);
 
-	for (int lonidx=1;lonidx<raster.lonparts-1;lonidx++){
-		for (int latidx=0;latidx<raster.latparts-1;latidx++){
+	for (int lonidx=0;lonidx<raster.lonparts-1;lonidx++){
+		for (int latidx=1;latidx<raster.latparts-1;latidx++){
 			int count;
 			count = GARY_SIZE(raster.raster[lonidx][latidx]);
 			//printf("raster[%"PRId64"][%"PRId64"]=%d\n",lonidx,latidx,count);
@@ -632,10 +632,6 @@ int eventCmp(struct event_t evt1,struct event_t evt2){
 		return 1;
 	if (evt1.lineIdx > evt2.lineIdx)
 		return 0;
-	if (evt1.line2Idx < evt2.line2Idx)
-		return 1;
-	if (evt1.line2Idx > evt2.line2Idx)
-		return 0;
 	return 0;
 }
 
@@ -809,7 +805,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 	struct tree_tree * tree;
 	tree = malloc(sizeof(struct tree_tree));
 	tree_init(tree);
-	struct event_t memevt;
+	struct int_event_t memevt;
 	lon=0;
 	while (n_seQueue >0)
 	{
@@ -832,16 +828,6 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 	//		printf("LineIdx: %d %d\n",evt.lineIdx, evt.type);
 			evt = seQueue[n_seQueue+1];
 			lon = evt.lon;
-			/*if ((evt.type==memevt.type)&&
-				(evt.lineIdx==memevt.lineIdx)&&
-				((evt.type!=EVT_INTERSECT)||(evt.line2Idx==memevt.line2Idx))){
-				continue;	
-			}
-			memevt.type=evt.type;
-			memevt.lineIdx=evt.lineIdx;
-			memevt.line2Idx=evt.line2Idx;
-			
-			*/
 			printf("Event: %"PF(S_P)" %"PF(S_P)" %d %d\n",evt.lon,evt.lat,evt.type,(evt.dlon==0)?-1:evt.dlat/evt.dlon);
 
 			struct line_t line;
@@ -1067,7 +1053,7 @@ struct map_t addDirectToMap(struct line_t * lines, struct map_t map){
 		way->refs[0] = lines[i].startid;
 		way->refs[1] = lines[i].endid;
 		way->has_type = true;
-		if (!lines[i].broken && lines[i].isBar==0){
+		if (!lines[i].broken && lines[i].isBar==0 && lines[i].ended){
 			way->type = OBJTYPE__DIRECT;
 			//printf("Writing way %d\n",way->type);
 		}
@@ -1263,10 +1249,6 @@ struct walk_area_t * findWalkAreas(struct map_t map, struct raster_t raster){
 	return walkareas;
 } 
 
-void prepareForVoronoi(struct map_t map, struct walk_area_t * waklareas){
-	
-}
-
 struct map_t removeBarriers(struct map_t map){
 	Premap__Way ** newways;
 	GARY_INIT(newways,0);
@@ -1347,6 +1329,114 @@ int saveMap(Premap__Map * pbmap,char * filename){
 	return 0;
 
 }
+struct vertexedges_t{
+	int n_edges;
+	int * edges;
+};
+
+struct vertexedges_t * makeVertexEdges(Graph__Graph * graph){
+	struct vertexedges_t * vertexEdges;
+	vertexEdges = malloc(sizeof(struct vertexedges_t)*graph->n_vertices);
+	printf("Vertices: %d\n",graph->n_vertices);
+	for (int i=0;i<graph->n_vertices;i++){
+		vertexEdges[i].n_edges=0;
+//		printf("%f %f\n",graph->vertices[i]->lat,graph->vertices[i]->lon);
+	}
+	for (int i=0;i<graph->n_edges;i++){
+		vertexEdges[graph->edges[i]->vfrom].n_edges++;
+		vertexEdges[graph->edges[i]->vto].n_edges++;
+	}
+	for (int i=0;i<graph->n_vertices;i++){
+		vertexEdges[i].edges = malloc(sizeof(int)*vertexEdges[i].n_edges);
+		vertexEdges[i].n_edges = 0;
+	}
+	for (int i=0;i<graph->n_edges;i++){
+		int vfIdx;
+		int vtIdx;
+		vfIdx = graph->edges[i]->vfrom;
+		vtIdx = graph->edges[i]->vto;
+		vertexEdges[vfIdx].edges[vertexEdges[vfIdx].n_edges]= i;
+		vertexEdges[vfIdx].n_edges++;
+		vertexEdges[vtIdx].edges[vertexEdges[vtIdx].n_edges]= i;
+		vertexEdges[vtIdx].n_edges++;
+	}
+	return vertexEdges;
+}
+
+
+void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges){
+	uint8_t * seen;
+	GARY_INIT(seen,graph->n_vertices);
+	int * queue;
+	GARY_INIT_ZERO(queue,graph->n_vertices);
+	int lastIdx;
+	int nodescnt;
+
+	nodescnt=0;
+	queue[0] = nodesIdx_find(graph->vertices[0]->osmid)->idx;
+
+	while(nodescnt < graph->n_vertices/2){
+		lastIdx = 0;
+		nodescnt = 0;
+
+		for (int i =0;i<GARY_SIZE(seen);i++)
+			seen[i]=0;
+		
+		while (lastIdx >= 0){
+			int vIdx;
+			vIdx = queue[lastIdx--];
+			printf("vIdx:%d\n",vIdx);
+			if (vIdx > graph->n_vertices)
+			{
+				return;
+			}
+			for (int i=0;i<vertexEdges[vIdx].n_edges;i++){
+				int neigh;
+				neigh = graph->edges[vertexEdges[vIdx].edges[i]]->vto;
+				if (!seen[neigh]){
+					nodescnt++;
+					seen[neigh]=1;
+					queue[++lastIdx]=neigh;
+					printf("Adding %d\n",neigh);
+					break;
+				}
+			}
+		}
+
+		lastIdx = 0;
+		while(seen[lastIdx])
+			lastIdx++;
+		queue[0]=lastIdx;
+	}
+
+	Graph__Vertex ** newVertices;
+	newVertices = malloc(sizeof(Graph__Vertex *)*nodescnt);
+
+	int oldIdx;
+	oldIdx = 0;
+	for (int i=0;i<nodescnt;i++){
+		while(!seen[oldIdx])
+			oldIdx++;
+		newVertices[i]=graph->vertices[i];
+	}
+	graph->n_vertices = nodescnt;
+	graph->vertices = newVertices;
+
+	Graph__Edge ** newEdges;
+	GARY_INIT(newEdges,0);
+	for (int i=0;i<graph->n_edges;i++){
+		if (seen[graph->edges[i]->vfrom]){
+			Graph__Edge ** ePtr;
+			ePtr = GARY_PUSH(newEdges);
+			ePtr = graph->edges[i];
+		}
+	
+	}
+	
+	graph->n_edges = GARY_SIZE(newEdges);
+	graph->edges = newEdges;
+
+}
 
 int saveSearchGraph(Graph__Graph * graph,char * filename){
 	int64_t len;
@@ -1363,8 +1453,8 @@ int saveSearchGraph(Graph__Graph * graph,char * filename){
 	fwrite(buf,1,len,OUT);
 	fclose(OUT);
 	return 0;
-
 }
+
 Graph__Graph * makeSearchGraph(struct map_t map){
 	Graph__Graph * graph;
 	graph = malloc(sizeof(Graph__Graph));
@@ -1396,6 +1486,8 @@ Graph__Graph * makeSearchGraph(struct map_t map){
 			int toIdx;
 			fromIdx = nodesIdx_find(way->refs[j])->idx;
 			toIdx = nodesIdx_find(way->refs[j+1])->idx;
+			if ((fromIdx > graph->n_vertices)||(toIdx > graph->n_vertices))
+				printf("Wrong index: %d,%d (of %d)\n",fromIdx,toIdx,graph->n_vertices);
 			Graph__Edge * e;
 			e = malloc(sizeof(Graph__Edge));
 			graph__edge__init(e);
@@ -1477,7 +1569,11 @@ int main (int argc, char ** argv){
 	if (saveMap(pbmap,"../data/praha-union-c.pbf")!=0)
 		printf("Saving map failed\n");
 	Graph__Graph * searchGraph;
+	printf("Making search graph\n");
 	searchGraph = makeSearchGraph(map);
+	struct vertexedges_t * vertexEdges;
+	vertexEdges = makeVertexEdges(searchGraph);
+	largestComponent(searchGraph,vertexEdges);
 	saveSearchGraph(searchGraph,"../data/praha-graph.pbf");
 	return 0;
 }
