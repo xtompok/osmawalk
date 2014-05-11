@@ -436,6 +436,23 @@ které jsou uvnitř plochy. Body přidáme do pole \verb|nodeIdxs| a cesty do po
 atributu \verb|barIdxs| a vyhledávatelné cesty, které uložíme do atributu
 \verb|wayIdxs|. Během rozdělování také odstraňujeme duplicitní cesty. 
 
+Jako další krok připravíme kandidáty na zkratky pomocí funkce
+\verb|makeAreaCandidates|. Procházíme postupně všechny dvojice bodů v dané ploše
+a pokud jsou k sobě blíže než 300\,m a zároveň nejsou na společné cestě, přidáme
+je do seznamu kandidátů. Každou dvojici přidáváme s pravěpodobností takovou, aby
+měl každý uzel průměrný stupeň dva.
+
+Vytvoříme také seznam překážek funkcí \verb|makeAreaBarGraph|. Nejprve přidáme
+všechny překážky ze seznamu \verb|barIdxs|, poté přidáme všechny cesty z
+\verb|wayIdxs| a nakonec přidáme obvod plochy. Cesty přidáváme proto, aby
+nevnikalo příliš mnoho zkratek, což by vedlo ke zvětšování vyhledávacího grafu.
+Takto vzniknou pouz zkratky přes volná prostranství a nebudou křížit cesty.
+
+Když máme kandidáty i překážky, můžeme použít již popsané funkce
+\verb|findDirectWays| a \verb|addDirectToMap| k vyřešení kolizí kandidátů s
+překážkami a cestami a k přidání výlsedných zkratek do mapy. Postup přípravy
+kandidátů až jejich přidání do mapy zopakujeme pro každou průchozí plochu.
+
 
 \section{Vytvoření vyhledávacího grafu}
 Když již máme všechna data připravená, vytvoříme vyhledávací graf. Nejprve do
