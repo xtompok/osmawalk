@@ -366,6 +366,60 @@ vloženého vrcholu, abychom přidali případné události křížení. Tuto fu
 v libUCW již také obsahují, tudíž nám stačí ji jen využít. Sousedy rovněž
 hledáme při křížení, protože překřížením úseček se sousedství změnilo.
 
+Haldy obsahují struktury typu \verb|event_t| respektive \verb|int_event_t| pro
+počáteční a koncové respektive průsečíkové události. Struktury mají následující
+prvky:
+\begin{itemize}
+	\item \verb|lon| a \verb|lat| udávají souřadnice události. V případě
+	začátků a konců se jedná o 64bitová celá čísla, v případě průsečíků se
+	jedná o čísla smíšená. 
+	\item \verb|dlon| a \verb|dlat| udávají směrnici úsečky, které se
+	událost týká. V případě průsečíků se jedná o tu, která by byla
+	zpracována dříve.
+	\item \verb|lineIdx| je index úsečky, které se událost týká
+	\item \verb|line2Idx| se vyskytuje pouze u průsečíků a jde o index druhé
+	úsečky, které se událost týká.
+\end{itemize}
+
+Události procházíme seřazené nejprve podle délky, pak podle šířky. Pokud jsou
+dvě události na stejném místě, nejprve se zpracují události konce úsečky, poté
+průsečíky a nakonec události začítku úsečky. Pokud je více událostí stejného
+typu na stejném místě, zpracovávají se podle úhlu úseček, viz pořadí ve stromě. 
+
+Dokud máme v haldě nějaké události, vybereme vždy tu nejbližší a zpracujeme ji.
+Pokud se jedná o začátek úsečky, zkontrolujeme, jestli ve stromě již není, či
+zda v něm není nějaká, se kterou by byla nerozlišitelná. Protože dvě úsečky,
+které leží přesně přes sebe jsou nedefinovaný stav, tak tu, která přijde ke
+zpracování jako druhá, ignorujeme. Úsečku následně vložíme do průřezového stromu
+a zkontrolujeme sousední úsečky, zda se s nově přidanou nekříží. POkud ano, tak
+přidáme příslušné průsečíkové události do průsečíkové haldy.
+
+Jedná-li se o konec úsečky, zkontrolujeme, zda úsečka začala (byla přidána do
+stromu). Pokud ne, skončíme. Následně zjistíme, zda odstraněním této úsečky se
+její sousedé neprotnou, případně přidáme průsečíkovou událost. Nakonec úsečku
+smažeme z průřezového stromu.
+
+Pokud se jedná o průsečík, nejprve zkontrolujeme, jestli jsme danou událost již
+nezpracovali. POkud se totiž dvě úsečky protínají a během toho, co se k sobě
+přibližují se mezi nimi objeví další úsečka, vznikne průsečíková událost těchto
+dvou krajních přímek poprvé při přidání pozdější z nich a podruhé při konci
+vnitřní úsečky, přitom se stále jedná o stejný průsečík. Protože tyto dvě
+průsečíkové události se seřadí hned za sebe a protože se každé dvě úsečky
+protnou nejvýše jednou, stačí nám si pamatovat poslední událost a pokud je nová
+průsečíková událost se stejnými úsečkami, můžeme ji zahodit.
+
+Dále zkontrolujeme, jestli některá z úseček již neskončila. Pokud se dvě úsečky
+potkávají v koncovém bodě, pak je zbytečné řešit jejich průsečík. Proto nejprve
+vyřešíme konce úseček a pokud máme řešit průsečík s již skončenou úsečkou,
+můžeme ho ignorovat. Následně zjistíme, která z úseček je nyní horní a která
+dolní a prohodíme odkazy na vrcholy stromu v poli \verb|lineNodes| a rovněž
+prohodíme indexy úseček ve vrcholech stromu. Nakonec zjistíme, zda po prohození
+nevznikly nové průsečíky a případně přidáme průsečíkové události.
+
+Když celý cyklus doběhne, přidáme funkcí \verb|addDirectToMap| do seznamu cest
+nově vzniklé spojky a jsme hotovi.
+
+
 \section{Zkratky přes průchozí prostranství}
 
 \section{Vytvoření vyhledávacího grafu}
