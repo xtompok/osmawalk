@@ -421,6 +421,21 @@ nově vzniklé spojky a jsme hotovi.
 
 
 \section{Zkratky přes průchozí prostranství}
+Abychom mohli vytvářet zkratky přes průchozí prostranství, potřebujeme nejprve
+zjistit, které všechny uzly se vyskytují v tomto prostranství. Pro samotné
+vytváření zkratek jsme pak použili obdobný způsob jako při hledání spojek mezi
+cestami. 
+
+Nejprve vytvoříme pole všech průchozích prostranství.  K tomuto účelu
+slouží funkce \verb|findWalkAreas|. Procházíme postupně všechny cesty a u každé
+kontrolujeme, jestli se jedná o průchozí prostranství. Pokud ano, pak vytvoříme
+strukturu \verb|walk_area_t| obsahující data o této ploše. Poté zjistíme, do
+kterých čtverců mřížky plocha zasahuje a z těchto čtverců vybereme ty body,
+které jsou uvnitř plochy. Body přidáme do pole \verb|nodeIdxs| a cesty do pole
+\verb|ways|. Cesty potom rozdělíme na překážky, jejichž indexy uložíme do
+atributu \verb|barIdxs| a vyhledávatelné cesty, které uložíme do atributu
+\verb|wayIdxs|. Během rozdělování také odstraňujeme duplicitní cesty. 
+
 
 \section{Vytvoření vyhledávacího grafu}
 Když již máme všechna data připravená, vytvoříme vyhledávací graf. Nejprve do
