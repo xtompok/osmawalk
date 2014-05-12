@@ -25,7 +25,25 @@
 
 int scale = 10;
 
+projPJ pj_wgs84;
+projPJ pj_utm;
 
+int utm2wgs(double * lon, double * lat){
+	int res;
+	printf("ll: %f %f\n",*lon,*lat);
+	res= pj_transform(pj_utm,pj_wgs84,1,1,lon,lat,NULL);
+	*lon = (*lon * 180)/M_PI;
+	*lat = (*lat * 180)/M_PI;
+	printf("ll: %f %f\n",*lon,*lat);
+	return res;
+}
+int wgs2utm(double * lon, double * lat){
+	printf("ll: %f %f\n",*lon,*lat);
+	*lon = (*lon/180)*M_PI;
+	*lat = (*lat/180)*M_PI;
+	printf("ll: %f %f\n",*lon,*lat);
+	return pj_transform(pj_wgs84,pj_utm,1,1,lon,lat,NULL);
+}
 
 struct config_t {
 	ProtobufCEnumDescriptor desc;
@@ -365,9 +383,15 @@ int findNearestVertex(Graph__Graph * graph, double lon, double lat){
 			minIdx = i;
 		}
 	}
-	printf("Min dist: %f\n",minDist*1000);
+	printf("Min dist: %f\n",sqrt(minDist));
 	printf("Point %d: %f, %f\n",minIdx,graph->vertices[minIdx]->lon,graph->vertices[minIdx]->lat);
 	return minIdx;
+}
+
+void printVertices(Graph__Graph * graph){
+	for (int i=0;i<graph->n_vertices;i++){
+		printf("%f %f\n",graph->vertices[i]->lon,graph->vertices[i]->lat);
+	}
 }
 
 void usage(void){
@@ -401,26 +425,8 @@ void writeGpxFile(Graph__Graph * graph, struct config_t conf, struct dijnode_t *
 	writeGpxFooter(OUT);
 	fclose(OUT);
 }
-projPJ pj_wgs84;
-projPJ pj_utm;
 
 
-int utm2wgs(double * lon, double * lat){
-	int res;
-	printf("ll: %f %f\n",*lon,*lat);
-	res= pj_transform(pj_utm,pj_wgs84,1,1,lon,lat,NULL);
-	*lon = (*lon * 180)/M_PI;
-	*lat = (*lat * 180)/M_PI;
-	printf("ll: %f %f\n",*lon,*lat);
-	return res;
-}
-int wgs2utm(double * lon, double * lat){
-	printf("ll: %f %f\n",*lon,*lat);
-	*lon = (*lon/180)*M_PI;
-	*lat = (*lat/180)*M_PI;
-	printf("ll: %f %f\n",*lon,*lat);
-	return pj_transform(pj_wgs84,pj_utm,1,1,lon,lat,NULL);
-}
 
 int main (int argc, char ** argv){
 	if (argc<5){
@@ -438,6 +444,8 @@ int main (int argc, char ** argv){
 		printf("Error loading map\n");	
 		return 2;
 	}
+//	printVertices(graph);
+//	return 0;
 
 	printf("Graph has %d vertices and %d edges\n",graph->n_vertices,graph->n_edges);
 	double lon;

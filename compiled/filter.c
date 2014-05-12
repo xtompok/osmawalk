@@ -199,10 +199,10 @@ struct col_t calcMixCollision(struct line_t line1, struct line_t line2){
 	int64_t minmax;
 	maxmin = MAX(MIN(lon1,lon2),MIN(lon3,lon4)) + minlon;
 	minmax = MIN(MAX(lon1,lon2),MAX(lon3,lon4)) + minlon;
-	printf("base: %lld, maxmin: %lld, minmax: %lld\n",result.lon.base,maxmin,minmax);
+//	printf("base: %lld, maxmin: %lld, minmax: %lld\n",result.lon.base,maxmin,minmax);
 	if ( (result.lon.base < maxmin) || 
 		(result.lon.base > minmax)){
-		printf("lon out of range\n");
+//		printf("lon out of range\n");
 		result.isCol=0;
 		return result;
 		}
@@ -212,7 +212,7 @@ struct col_t calcMixCollision(struct line_t line1, struct line_t line2){
 	result.lat = makeMix(minlat,cit,jm);
 	maxmin = MAX(MIN(lat1,lat2),MIN(lat3,lat4)) + minlat;
 	minmax = MIN(MAX(lat1,lat2),MAX(lat3,lat4)) + minlat;
-	printf("base: %lld, maxmin: %lld, minmax: %lld\n",result.lat.base,maxmin,minmax);
+//	printf("base: %lld, maxmin: %lld, minmax: %lld\n",result.lat.base,maxmin,minmax);
 	if ( (result.lat.base < maxmin) || 
 		(result.lat.base > minmax)){
 		printf("lat out of range\n");
@@ -383,7 +383,7 @@ int ** makeAreaCandidates(struct map_t map, struct walk_area_t area,  int maxdis
 
 			if (rand()%modulus!=0)
 				continue;
-			printf("Candidates %d %d, distance: %d\n",nidx1,nidx2,distance(map.nodes[nidx1],map.nodes[nidx2]));	
+//			printf("Candidates %d %d, distance: %d\n",nidx1,nidx2,distance(map.nodes[nidx1],map.nodes[nidx2]));	
 			addCandidate(&candidates,nidx1,nidx2);
 
 		}
@@ -556,7 +556,7 @@ int tree_cmp(int idx1, int idx2){
 struct int_event_t makeIntEvent(struct line_t * lines,int l1Idx, int l2Idx, struct mixed_num_t lon){
 	struct int_event_t intevt;
 	struct col_t col;
-	printf("Lon: %lld + %lld/%lld ~ %lld, l1: %d, l2: %d\n",
+/*	printf("Lon: %lld + %lld/%lld ~ %lld, l1: %d, l2: %d\n",
 		lon.base,lon.numer,lon.denom,lon.base+(lon.numer/lon.denom),
 		l1Idx,l2Idx);
 	printf("Line: (%"PF(S_P)",%"PF(S_P)")--(%lld,%lld) %lld/%lld\n",
@@ -569,19 +569,19 @@ struct int_event_t makeIntEvent(struct line_t * lines,int l1Idx, int l2Idx, stru
 			lines[l2Idx].endlon,lines[l2Idx].endlat,
 			lines[l2Idx].endlat-lines[l2Idx].startlat,
 			lines[l2Idx].endlon-lines[l2Idx].startlon);
-	col = calcMixCollision(lines[l1Idx],lines[l2Idx]);					
+*/	col = calcMixCollision(lines[l1Idx],lines[l2Idx]);					
 	if (col.isCol==0){
 		intevt.lineIdx=-1;
 		return intevt;
 	}
 	if (!col.atEndpoint){
-		printf("Col: %lld + %lld/%lld ~ %lld\n",col.lon.base,col.lon.numer,col.lon.denom,col.lon.base+col.lon.numer/col.lon.denom);
+//		printf("Col: %lld + %lld/%lld ~ %lld\n",col.lon.base,col.lon.numer,col.lon.denom,col.lon.base+col.lon.numer/col.lon.denom);
 	}
 	if ((mixedCmp(col.lon,lon)<=0)){
 		intevt.lineIdx=-1;
 		return intevt;
 	}
-	printf("Intersection");
+//	printf("Intersection");
 
 	intevt.type = EVT_INTERSECT;
 	intevt.lon = col.lon;
@@ -672,7 +672,7 @@ int intEventCmp(struct int_event_t evt1,struct int_event_t evt2){
 }
 
 int int_seEventCmp(struct int_event_t evt1,struct event_t evt2){
-	printf("lon1: %lld,lon2:%lld\n",evt1.lon.base,evt2.lon);
+//	printf("lon1: %lld,lon2:%lld\n",evt1.lon.base,evt2.lon);
 	if (evt1.lon.base<evt2.lon)
 		return -1;
 	if (evt1.lon.base>evt2.lon)
@@ -811,9 +811,9 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 	{
 		if ((n_seQueue & 0xFFFF) == 0)
 			printf("Queue: %d, tree: %d\n",n_seQueue,tree->count);
-		printf("Tree has %d nodes\n",tree->count);
-		printf("Heap has %d events\n",n_seQueue);
-		printf("Heap2 has %d events\n",n_intQueue);
+//		printf("Tree has %d nodes\n",tree->count);
+//		printf("Heap has %d events\n",n_seQueue);
+//		printf("Heap2 has %d events\n",n_intQueue);
 
 		int evtcmp;
 		if (n_intQueue==0){
@@ -828,7 +828,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 	//		printf("LineIdx: %d %d\n",evt.lineIdx, evt.type);
 			evt = seQueue[n_seQueue+1];
 			lon = evt.lon;
-			printf("Event: %"PF(S_P)" %"PF(S_P)" %d %d\n",evt.lon,evt.lat,evt.type,(evt.dlon==0)?-1:evt.dlat/evt.dlon);
+//			printf("Event: %"PF(S_P)" %"PF(S_P)" %d %d\n",evt.lon,evt.lat,evt.type,(evt.dlon==0)?-1:evt.dlat/evt.dlon);
 
 			struct line_t line;
 			line = lines[evt.lineIdx];
@@ -843,8 +843,8 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 			switch (evt.type){
 				case EVT_START:
 					anglesign = 1;
-					printf("EVT_START\n");
-					printf("Lon: %lld, lat: %lld\n",evt.lon,evt.lat);
+//					printf("EVT_START\n");
+//					printf("Lon: %lld, lat: %lld\n",evt.lon,evt.lat);
 					struct tree_node_t * node;
 					node = tree_find(tree,evt.lineIdx);
 					if (node){
@@ -852,7 +852,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 						continue;
 					}
 					lines[evt.lineIdx].started=1;
-					printf("Line: F:%d, T:%d (%"PF(S_P)",%"PF(S_P)")--(%"PF(S_P)",%"PF(S_P)")\n",line.startid, line.endid,line.startlon,line.startlat,line.endlon,line.endlat);
+//					printf("Line: F:%d, T:%d (%"PF(S_P)",%"PF(S_P)")--(%"PF(S_P)",%"PF(S_P)")\n",line.startid, line.endid,line.startlon,line.startlat,line.endlon,line.endlat);
 					node = tree_new(tree,evt.lineIdx);
 					lineNodes[evt.lineIdx]=node;
 					prev = tree_adjacent(node,0);
@@ -863,7 +863,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 
 					//printf("Neighs: %p %d %d\n",*tree,prev.lineIdx,next.lineIdx);
 					if (prev){
-						printf("Int after start - prev\n");
+//						printf("Int after start - prev\n");
 						intevt = makeIntEvent(lines,evt.lineIdx,prev->lineIdx,mixlon);
 						if (intevt.lineIdx!=-1){
 							GARY_PUSH(intQueue);
@@ -871,7 +871,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 						}
 					}
 					if (next){
-						printf("Int after start - next\n");
+//						printf("Int after start - next\n");
 						intevt = makeIntEvent(lines,evt.lineIdx,next->lineIdx,mixlon);
 						if (intevt.lineIdx!=-1){
 							GARY_PUSH(intQueue);
@@ -881,10 +881,10 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 					break;
 				case EVT_END:
 					anglesign=-1;
-					printf("EVT_END\n");
+//					printf("EVT_END\n");
 					
 					line = lines[evt.lineIdx];
-					printf("Line: F:%d, T:%d (%"PF(S_P)",%"PF(S_P)")--(%"PF(S_P)",%"PF(S_P)")\n",line.startid, line.endid,line.startlon,line.startlat,line.endlon,line.endlat);
+//					printf("Line: F:%d, T:%d (%"PF(S_P)",%"PF(S_P)")--(%"PF(S_P)",%"PF(S_P)")\n",line.startid, line.endid,line.startlon,line.startlat,line.endlon,line.endlat);
 					if (!line.started){
 						printf("Line not started!\n");
 						break;
@@ -901,7 +901,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 
 					//printf("Neighs: %p %d %d\n",*tree,prev.lineIdx,next.lineIdx);
 					if (prev && next){
-						printf("Int after end\n");
+//						printf("Int after end\n");
 						intevt = makeIntEvent(lines,prev->lineIdx,next->lineIdx,mixlon);
 						if (intevt.lineIdx!=-1){
 							GARY_PUSH(intQueue);
@@ -921,17 +921,17 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 			evt = intQueue[n_intQueue+1];
 
 			anglesign = -1;
-			printf("EVT_INT\n");
+//			printf("EVT_INT\n");
 			if (evt.lineIdx == memevt.lineIdx && evt.line2Idx == memevt.line2Idx){
 				printf("Duplicit event, skipping\n");
 				continue;
 			}
 			memevt.lineIdx = evt.lineIdx;
 			memevt.line2Idx = evt.line2Idx;
-			printf("Event lon: ~ %lld lat: ~ %d l1: %d l2: %d\n",
-				evt.lon.base+evt.lon.numer/evt.lon.denom,
-				evt.lat.base+evt.lon.numer/evt.lon.denom,
-				evt.lineIdx,evt.line2Idx);
+//			printf("Event lon: ~ %lld lat: ~ %d l1: %d l2: %d\n",
+//				evt.lon.base+evt.lon.numer/evt.lon.denom,
+//				evt.lat.base+evt.lon.numer/evt.lon.denom,
+//				evt.lineIdx,evt.line2Idx);
 			lon = evt.lon.base;
 			struct line_t l1;
 			struct line_t l2;
@@ -1366,7 +1366,7 @@ struct vertexedges_t * makeVertexEdges(Graph__Graph * graph){
 
 void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges){
 	uint8_t * seen;
-	GARY_INIT(seen,graph->n_vertices);
+	GARY_INIT_ZERO(seen,graph->n_vertices);
 	int * queue;
 	GARY_INIT_ZERO(queue,graph->n_vertices);
 	int lastIdx;
@@ -1375,21 +1375,18 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 	nodescnt=0;
 	queue[0] = nodesIdx_find(graph->vertices[0]->osmid)->idx;
 
-	while(nodescnt < graph->n_vertices/2){
+	while((nodescnt < graph->n_vertices/2)){
 		lastIdx = 0;
 		nodescnt = 0;
 
 		for (int i =0;i<GARY_SIZE(seen);i++)
-			seen[i]=0;
+			if (seen[i])
+				seen[i]=2;
+		seen[queue[0]]=1;
 		
 		while (lastIdx >= 0){
 			int vIdx;
 			vIdx = queue[lastIdx--];
-			printf("vIdx:%d\n",vIdx);
-			if (vIdx > graph->n_vertices)
-			{
-				return;
-			}
 			for (int i=0;i<vertexEdges[vIdx].n_edges;i++){
 				int neigh;
 				neigh = graph->edges[vertexEdges[vIdx].edges[i]]->vto;
@@ -1397,27 +1394,37 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 					nodescnt++;
 					seen[neigh]=1;
 					queue[++lastIdx]=neigh;
-					printf("Adding %d\n",neigh);
-					break;
 				}
 			}
 		}
 
 		lastIdx = 0;
-		while(seen[lastIdx])
+		while(lastIdx<GARY_SIZE(seen)&&seen[lastIdx]){
+//			printf("%d\n",seen[lastIdx]);
 			lastIdx++;
+		}
+		if (lastIdx==GARY_SIZE(seen))
+			break;
 		queue[0]=lastIdx;
 	}
 
+	printf("Nodes: %d\n",nodescnt);
+
 	Graph__Vertex ** newVertices;
 	newVertices = malloc(sizeof(Graph__Vertex *)*nodescnt);
-
+	
+	int * newVertIdxs;
+	newVertIdxs = malloc(sizeof(int)*graph->n_vertices);
 	int oldIdx;
 	oldIdx = 0;
 	for (int i=0;i<nodescnt;i++){
-		while(!seen[oldIdx])
+		while(!(seen[oldIdx]%2))
 			oldIdx++;
-		newVertices[i]=graph->vertices[i];
+		newVertices[i]=graph->vertices[oldIdx];
+		newVertIdxs[oldIdx]=i;
+		printf("%d -> %d\n",oldIdx,i);
+		oldIdx++;
+
 	}
 	graph->n_vertices = nodescnt;
 	graph->vertices = newVertices;
@@ -1425,10 +1432,12 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 	Graph__Edge ** newEdges;
 	GARY_INIT(newEdges,0);
 	for (int i=0;i<graph->n_edges;i++){
-		if (seen[graph->edges[i]->vfrom]){
+		if (seen[graph->edges[i]->vfrom]==1){
 			Graph__Edge ** ePtr;
 			ePtr = GARY_PUSH(newEdges);
-			ePtr = graph->edges[i];
+			*ePtr = graph->edges[i];
+			(*ePtr)->vfrom=newVertIdxs[(*ePtr)->vfrom];
+			(*ePtr)->vto=newVertIdxs[(*ePtr)->vto];
 		}
 	
 	}
