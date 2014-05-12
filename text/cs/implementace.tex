@@ -15,33 +15,35 @@ tyto knihovny a programy jsou nutné pro spuštění a používání programu.
 \medskip
 \noindent Používáme tyto pomocné programy:
 \begin{itemize}
-	\item Výřez s městem z dat pro republiku vyrábíme pomocí 
-	{\tuc Osmconvert} (GNU AGPL)\footurl{http://wiki.openstreetmap.org/wiki/Osmconvert}.
+	\item Výřez s městem z dat pro republiku vyrábíme pomocí {\tuc Osmconvert}.\\
+	(GNU AGPL) \url{http://wiki.openstreetmap.org/wiki/Osmconvert}
 	\item Pro práci s Protocol Buffery v Pythonu využíváme třídy generované
-	kompilátorem {\tuc protoc} (BSD	New).\footurl{http://code.google.com/p/protobuf/}.
+	kompilátorem {\tuc protoc}.\\
+	(BSD New) \url{http://code.google.com/p/protobuf/}
 	\item Pro práci s Protocol Buffery v C využíváme funkce a struktury
-	generované kompilátorem {\tuc protobuf-c} 
-	(BSD 2-Clause)\footurl{https://github.com/protobuf-c/protobuf-c}.
+	generované kompilátorem {\tuc protobuf-c}.\\
+	(BSD 2-Clause) \url{https://github.com/protobuf-c/protobuf-c}
 \end{itemize}
 
 \noindent V programech napsaných v Pythonu využíváme následující knihovny:
 \begin{itemize}
-	\item Na parsování konfiguračních souborů používáme 
-	{\tuc PyYAML} (MIT)\footurl{http://pyyaml.org/wiki/PyYAML}.
-	\item Na parsování OSM XML používáme {\tuc imposm.parser} 
-	(Apache)\footurl{http://imposm.org/docs/imposm.parser/latest/}.
-	\item Souřadnice konvertujeme pomocí {\tuc pyproj}
-	(MIT)\footurl{http://code.google.com/p/pyproj/}.
-	\item Pro hledání komponent grafu využíváme {\tuc networkx} 
-	(BSD)\footurl{http://networkx.github.io/}.
+	\item Na parsování konfiguračních souborů používáme {\tuc PyYAML}.\\
+	(MIT) \url{http://pyyaml.org/wiki/PyYAML}
+	\item Na parsování OSM XML používáme {\tuc imposm.parser}.\\
+	(Apache) \url{http://imposm.org/docs/imposm.parser/latest/}
+	\item Souřadnice konvertujeme pomocí {\tuc pyproj}.\\
+	(MIT) \url{http://code.google.com/p/pyproj/}.
+	\item Pro hledání komponent grafu využíváme {\tuc networkx}.\\
+	(BSD) \url{http://networkx.github.io/}
 \end{itemize}
 
 \noindent V programech napsaných v C využíváme následující knihovny:
 \begin{itemize}
-	\item Datové struktury, dynamická pole a další potřebné funkce zajišťuje
-	{\tuc LibUCW} (GNU LGPL)\footurl{http://www.ucw.cz/libucw/}.
-	\item Výpočty se zeměpisnými souřadnicemi provádí {\tuc PROJ.4}
-	(MIT)\footurl{http://trac.osgeo.org/proj/}.
+	\item Datové struktury, dynamická pole a další funkce zajišťuje
+	{\tuc LibUCW}.\\
+	(GNU LGPL) \url{http://www.ucw.cz/libucw/}
+	\item Výpočty se zeměpisnými souřadnicemi provádí {\tuc PROJ.4}.\\
+	(MIT) \url{http://trac.osgeo.org/proj/}
 \end{itemize}
 
 Program osmconvert je již zahrnut ve zdrojovém kódu, ostatní knihovny je potřeba
@@ -237,16 +239,63 @@ podle pravidla $\frac{a}{b} < \frac{c}{d} \Leftrightarrow a\cdot d < c\cdot b $.
 Pokud se nám ale stane, že porovnáváme dva zlomky, které mají vysoký čitatel i
 jmenovatel, nemusí nám 64 bitů přesnosti stačit.
 
-%TODO: Výpočet průsečíku
-
-%TODO: přepsat
+Průsečíky počítáme dle vzorce z MathWorldu\cite{lineint}. Pro úsečky $a$ a $b$ s
+krajními body $a=((x_1,y_1),(x_2,y_2))$ a $b=((x_3,y_3),(x_4,y_4))$ najdeme
+průsečík $(P_x,P_y)$  takto:
+$$P_x = \frac{
+	\begin{vmatrix}
+		\begin{vmatrix} x_1 & y_1\\x_2 & y_2\end{vmatrix} &  
+		\begin{vmatrix} x_1 & 1\\x_2 & 1\end{vmatrix} \\\\ 
+		\begin{vmatrix} x_3 & y_3\\x_4 & y_4\end{vmatrix} & 
+		\begin{vmatrix} x_3 & 1\\x_4 & 1\end{vmatrix} 
+	\end{vmatrix}
+}
+{
+	\begin{matrix} 
+		\begin{vmatrix} x_1 & 1\\x_2 & 1\end{vmatrix} & 
+		\begin{vmatrix} y_1 & 1\\y_2 & 1\end{vmatrix} \\\\
+		\begin{vmatrix} x_3 & 1\\x_4 & 1\end{vmatrix} & 
+		\begin{vmatrix} y_3 & 1\\y_4 & 1\end{vmatrix} 
+	\end{matrix}
+}\,\!,\qquad
+P_y = \frac{
+	\begin{vmatrix}
+		\begin{vmatrix} x_1 & y_1\\x_2 & y_2\end{vmatrix} &
+		\begin{vmatrix} y_1 & 1\\y_2 & 1\end{vmatrix} \\\\
+		\begin{vmatrix} x_3 & y_3\\x_4 & y_4\end{vmatrix} &
+		\begin{vmatrix} y_3 & 1\\y_4 & 1\end{vmatrix} 
+	\end{vmatrix} 
+}
+{
+	\begin{vmatrix}
+		\begin{vmatrix} x_1 & 1\\x_2 & 1\end{vmatrix} &
+		\begin{vmatrix} y_1 & 1\\y_2 & 1\end{vmatrix} \\\\
+		\begin{vmatrix} x_3 & 1\\x_4 & 1\end{vmatrix} &
+		\begin{vmatrix} y_3 & 1\\y_4 & 1\end{vmatrix} 
+	\end{vmatrix}
+}\,\!$$
+Pokud si vzorec roznásobíme, získáme pro $x$-ovou souřadnici čitatele:
+$$
+{cit = (x_1 y_2-y_1 x_2)(x_3-x_4)-(x_1-x_2)(x_3 y_4-y_3 x_4)}
+$$ a jmenovatele $$
+{jm = (x_1-x_2)(y_3-y_4)-(y_1-y_2)(x_3-x_4)}$$
 Předpokládejme, že máme město velikosti Prahy, což je přibližně $20 \times
-30$\,km. Používáme přesnost 10\,cm, tudíž potřebujeme rozlišení $\log_2{\frac{30
-000}{0.1}}\doteq18.2$ bitů. 
+30$\,km s přesností na 10\,cm. O úsečkách víme, že žádná nebude delší než 300
+metrů, tudíž rozdíl jejich souřadnic nebude větší než 3000. Pokud budeme
+maximalizovat jmenovatele, ze vzorce vychází, že můžeme dosáhnout nejvýše 9
+milionů, protože jde o součet dvou rozdílů souřadnic a každý bude nejvýše 3000.
 
-O úsečkách víme, že žádná nebude delší než 300 metrů. Potom nám z výše uvedeného
-výpočtu vychází, že jmenovatel bude nejvýše 9 milionů, na jehož reprezentaci nám
-stačí 24 bitů. Maximální čitatel TODO
+Tato situace opravdu může nastat, například pro vodorovnou a svislou úsečku o
+délce 300\,m, dotýkající se v krajním bodě, tzn. $a=((3000,0),(0,0))$,
+$b=((0,3000),(0,0))$. Tyto dvě mají průsečík, tudíž se nám mohou při počítání
+vyskytnout. Pokud nyní vezmeme téměř totožnou situaci, ale úsečky budou posunuty
+směrem k maximu $x$-ové osy, pak bude $x$-ová souřadnice reprezentovat číslo
+30\,km při přesnosti 10\,cm ve zlomku se jmenovatelem 9 milionů. Bude to tedy
+číslo $30\cdot1000\cdot10\cdot9\cdot10^6=2700000000000$. Na reprezentaci tohoto
+čísla budeme potřebovat $\log_2 2700000000000 \doteq 42$ bitů. Pokud tento
+zlomek budeme chtít porovnat s jiným zlomkem s maximálním jmenovatelem, budeme
+potřebovat $42 + \log_2 9000000 \doteq 65$ bitů, na což nám 64bitová proměnná
+nebude stačit.
 
 {\tuc Smíšená čísla} nemají ani jednu z předchozích nevýhod. Jsou to čísla,
 která mají tvar $a+\frac{b}{c}$, kde $\frac{b}{c}<1$. $a$ nazvěme základem, $b$
