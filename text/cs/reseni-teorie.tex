@@ -83,7 +83,51 @@ navíc nepřinášely významné zkrácení trasy, proto jsme u každého uzlu v
 spojky s určitou pravděpodobností tak, aby měl každý uzel průměrný stupeň šest.
 Tyto spojky navíc mohou vést přes nějakou překážku, jako je plot nebo zeď, proto
 potřebujeme zkontrolovat kolize všech nových úseček s překážkami. K tomuto účelu
-jsme využili algoritmus zametání roviny TODO: rozepsat, obrázek.  
+jsme využili algoritmus zametání roviny.
+
+Zametání roviny\cite{zametani} je univerzálním geometrickým algoritmem, při němž
+rovinou posouváme přímku (\uv{zametáme}). Pokud přímka protne pro nás zajímavé
+místo, vyvoláme událost. Během procházení si obvykle navíc pamatujeme seznam
+prošlých bodů nebo aktuálně protnutých úseček.
+
+V našem případě budeme hledat průsečíky úseček v rovině. Spojky již úsečky jsou,
+překážky rozdělíme na jednotlivé úsečky mezi uzly. Budeme zametat podle rostoucí
+zeměpisné délky a zajímat nás budou události začátek a konec úsečky a jejich
+průsečík. Zametací přímku proto budeme posouvat postupně po těchto událostech.
+
+Protože vždy budeme potřebovat znát nejbližší událost, budeme si udržovat
+události v haldě. Dále také potřebujeme znát pořadí, v jakém aktuálně
+zpracovávané úsečky protínají rovinu, tzv. průřez, a umět mezi ně přidat další a
+odebrat tu, která skončí. K tomuto účelu se nám hodí použít vyhledávací strom.
+Nemůžeme si ovšem ve vrcholech pamatovat přímo souřadnice průsečíku úsečky se
+zametací přímkou, protože se tyto souřadnice mění s každým posunutím zametací
+přímky. Místo toho si budeme ve stromě pamatovat jen odkaz na úsečky a průsečíky
+budeme počítat, až to bude potřeba.
+
+Na začátku známe všechny začátky a konce úseček, vytvoříme tedy v haldě události
+začátků a konců úseček. Průsečíkové události zatím žádné neznáme, ale protože
+aby mohl nastat průsečík, musí nejprve úsečka začít, o žádný nepřijdeme. 
+
+Zametání bude probíhat následovně. Z haldy všech událostí vybereme nejbližší
+událost a rozhodneme se podle jejího typu:
+\begin{itemize}
+	\item {\tuc Začátek úsečky.}  Úsečku zařadíme na sprvné místo do
+	průřezu a přidáme případné průsečíkové události se sousedními přímkami.
+	\item {\tuc Konec úsečky.} Úsečku odebereme z průřezu a přidáme
+	případnou průsečíkovou událost, pokud se úsečky sousední s právě
+	končící, protínají.
+	\item {\tuc Průsečík úseček.} Úsečky v průřezu prohodíme a přidáme
+	případné průsečíkové události s novými sousedními úsečkami obou
+	prohazovaných úseček.
+\end{itemize}
+Takto budeme postupovat, dokud budou v haldě nějaké uálosti. Při hledání
+průsečíků nám pro každou úsečku stačí vždy hledat jen se sousedními, protože než
+se nějaké dvě úsečky protnou, musí se nejprve stát sousedními (Uvažujeme
+situaci, kde se tři úsečky neprotínají v jednom bodě.). Pokud vytváříme
+průsečíkovou událost, zkontrolujeme, zda není některá z úseček překážka a
+případně označíme, že se úsečky protínají s překážkou. 
+
+TODO:obrázek
 
 \section{Zkratky přes průchozí prostranství}
 Pokud procházíme ve městě přes větší park nebo náměstí, často nemusíme chodit
