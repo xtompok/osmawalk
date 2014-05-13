@@ -1,64 +1,64 @@
 \chapter{Příprava dat}
-V této kapitole si popíšeme, jak z OSM dat vyrobíme graf pro vyhledávání pěších
-tras. Nejprve z dat vybereme pouze ta, která potřebujeme, a uložíme si je do
-našeho formátu k dalšímu zpracování. Poté zjednodušíme budovy, rozdělíme příliš
+V~této kapitole si popíšeme, jak z~OSM dat vyrobíme graf pro vyhledávání pěších
+tras. Nejprve z~dat vybereme pouze ta, která potřebujeme, a uložíme si je do
+našeho formátu k~dalšímu zpracování. Poté zjednodušíme budovy, rozdělíme příliš
 dlouhé cesty, doplníme spojky mezi cestami, připravíme zkratky pro trasy přes
 průchozí prostranství a nakonec ze všech dat vytvoříme vyhledávací graf.
 
 \section{Klasifikace OSM dat}
-V našem formátu pro přípravu dat jsou cesty a multipolygony rozděleny do
+V~našem formátu pro přípravu dat jsou cesty a multipolygony rozděleny do
 kategorií podle typů objektů, které reprezentují. Kategorie jsou
 následující:
 \begin{itemize}
-	\item \verb|WAY| -- cesta, o které nic nevíme, rezervováno pro speciální
+	\item \verb|WAY| -- cesta, o~které nic nevíme, rezervováno pro speciální
 	případy
 	\item \verb|WATER| -- strouha či přeskočitelný potok
-	\item \verb|PARK| -- plocha s udržovanou zelení, nízkou trávou
-	\item \verb|GREEN| -- plocha s neudržovanou zelení, často jsou v ní
+	\item \verb|PARK| -- plocha s~udržovanou zelení, nízkou trávou
+	\item \verb|GREEN| -- plocha s~neudržovanou zelení, často jsou v~ní
 	prošlapané nezmapované cestičky
-	\item \verb|FOREST| -- les v městském slova smyslu, obvykle bývá pěšky
+	\item \verb|FOREST| -- les v~městském slova smyslu, obvykle bývá pěšky
 	průchozí
 	\item \verb|PAVED| -- zpevněná cesta či plocha
 	\item \verb|UNPAVED| -- nezpevněná cesta či plocha
 	\item \verb|STEPS| -- schody
-	\item \verb|HIGHWAY| -- silnice, silnice s chodníkem
+	\item \verb|HIGHWAY| -- silnice, silnice s~chodníkem
 	\item \verb|BARRIER| -- překážka pro chodce nepřekonatelná, typ se
 	nerozlišuje, například budova, řeka, plot
 	\item \verb|DIRECT| -- spojka mezi cestami
 \end{itemize}
-Rozdělení do kategorií probíhá s pomocí konfiguračního souboru, ve kterém můžeme
+Rozdělení do kategorií probíhá s~pomocí konfiguračního souboru, ve kterém můžeme
 zvolit jaké atributy mají objekty mít, aby patřily do dané kategorie. Protože
-ani informace, zda jde o plochu, není ve specifikaci OSM přesně definována, jsou
-pro určení, zda jde o plochu, použity údaje z konfiguračního souboru. Po
+ani informace, zda jde o~plochu, není ve specifikaci OSM přesně definována, jsou
+pro určení, zda jde o~plochu, použity údaje z~konfiguračního souboru. Po
 rozdělení objektů do kategorií jsou smazány body, které neleží na žádné cestě,
 protože takovéto body dále nikde nepotřebujeme.
 
 \section{Převod multipolygonů na cesty}
 Multipolygony popisují objekty se složitější strukturou. Každý multipolygon se
-skládá z několika cest, přičemž cesty mohou být vnější -- obvodové -- a
+skládá z~několika cest, přičemž cesty mohou být vnější -- obvodové -- a
 vnitřní, pokud má objekt díry. Při správné definici by mělo sjednocení cest
 vypadat jako několik kružnic. Takto je také řešen převod multipolygonů na běžné
-cesty. Dokud má nějaké vnější cesty, pokusíme se z nich složit kružnici.  Pokud
+cesty. Dokud má nějaké vnější cesty, pokusíme se z~nich složit kružnici.  Pokud
 se stane, že některý segment kružnice chybí, je vypsána chyba a multipolygon se
-dále nezpracovává. Stejně tak, pokud kružnice končí v nějakém svém bodě, který
+dále nezpracovává. Stejně tak, pokud kružnice končí v~nějakém svém bodě, který
 ale není počáteční. 
 
 \section{Spojení budov}
-Ve městě jsou velmi časté bloky budov. V OSM datech jsou budovy reprezentovány
-obvykle samostatně, přičemž nám stačí znát obvod celého bloku. Proto cesty v
-jednotlivých blocích nahradíme jednou cestou reprezentující obvod tohoto bloku.
-Nejprve vybereme všechny budovy a vytvoříme si z nich graf sousednosti
-jednotlivých budov. Poté v každé komponentě najdeme bod na obvodu a postupně
+Ve městě jsou velmi časté bloky budov. V~OSM datech jsou budovy reprezentovány
+obvykle samostatně, přičemž nám stačí znát obvod celého bloku. Proto cesty
+v~jednotlivých blocích nahradíme jednou cestou reprezentující obvod tohoto bloku.
+Nejprve vybereme všechny budovy a vytvoříme si z~nich graf sousednosti
+jednotlivých budov. Poté v~každé komponentě najdeme bod na obvodu a postupně
 po obejdeme po obvodu celou budovu a vytváříme při tom novou cestu. Původní
 cesty potom smažeme. Když máme zpracované všechny budovy, smažeme body uvnitř
 budov, které nyní neleží na žádné cestě.
 
 Při zpracování se mohou vyskytnout dva druhy problémů. Jednak se uvnitř bloků
-mohou vyskytovat cesty, v tom případě spojování cest přerušíme, protože bychom
-se mohli připravit o možnost přidání spojek mezi cestami uvnitř bloku. Druhý
-problém souvisí s problémem více bodů na stejných souřadnicích. Může se stát, že
+mohou vyskytovat cesty, v~tom případě spojování cest přerušíme, protože bychom
+se mohli připravit o~možnost přidání spojek mezi cestami uvnitř bloku. Druhý
+problém souvisí s~problémem více bodů na stejných souřadnicích. Může se stát, že
 jsou budovy špatně navázané, potom výsledek může vypadat zvláštně, ale stále se
-bude jednat o korektní cestu. Budovy také mohou mít na obvodu dva sousední body
+bude jednat o~korektní cestu. Budovy také mohou mít na obvodu dva sousední body
 na stejných souřadnicích. Pokud narazíme na tuto situaci, zjednodušování
 ukončíme, protože nedokážeme určit, jestli tento bod leží na cestě tvořící
 obvod, nebo na cestě vedoucí dovnitř budovy. Tento problém se ale nevyskytuje
@@ -67,22 +67,22 @@ příliš často, proto jsme ho speciálně neošetřovali.
 \section{Rozdělení dlouhých úseků}
 Pro další zpracování se nám bude hodit, abychom cesty, po kterých budeme
 plánovat trasy, neměly příliš dlouhé úseky. Proto se na všechny takové cesty
-podíváme a v případě, že obsahují úseky delší než zvolená vzdálenost, tyto úseky
+podíváme a v~případě, že obsahují úseky delší než zvolená vzdálenost, tyto úseky
 rovnoměrně rozdělíme na kratší. 
 
 \section{Spojky mezi cestami}
-Jak již bylo zmíněno, chodníky jsou v OSM zmapovány jen některé a často nejsou
+Jak již bylo zmíněno, chodníky jsou v~OSM zmapovány jen některé a často nejsou
 na sebe správně navázány. Proto jsme se rozhodli prohledat okolí každého uzlu a
-spojit každé dva uzly, které jsou k sobě blíže než 20 m, úsečkou. Při zkoumání
+spojit každé dva uzly, které jsou k~sobě blíže než 20 m, úsečkou. Při zkoumání
 OSM dat jsme zjistili, že mnohé obytné domy kolem sebe nemají značené ploty a
 proto jsme vzdálenost zvolili takto nízkou, protože poté je pravděpodobnost, že
-jde například o dvě ulice oddělené domky se zahrádkami, poměrně malá.  
+jde například o~dvě ulice oddělené domky se zahrádkami, poměrně malá.  
 
 Mezi velmi blízkými uzly ale vznikalo příliš velké množství spojek, které by
-navíc nepřinášely významné zkrácení trasy, proto jsme u každého uzlu vybrali
-spojky s určitou pravděpodobností tak, aby měl každý uzel průměrný stupeň šest.
+navíc nepřinášely významné zkrácení trasy, proto jsme u~každého uzlu vybrali
+spojky s~určitou pravděpodobností tak, aby měl každý uzel průměrný stupeň šest.
 Tyto spojky navíc mohou vést přes nějakou překážku, jako je plot nebo zeď, proto
-potřebujeme zkontrolovat kolize všech nových úseček s překážkami. K tomuto účelu
+potřebujeme zkontrolovat kolize všech nových úseček s~překážkami. K~tomuto účelu
 jsme využili algoritmus zametání roviny.
 
 Zametání roviny\cite{zametani} je univerzálním geometrickým algoritmem, při němž
@@ -90,51 +90,51 @@ rovinou posouváme přímku (\uv{zametáme}). Pokud přímka protne pro nás zaj
 místo, vyvoláme událost. Během procházení si obvykle navíc pamatujeme seznam
 prošlých bodů nebo aktuálně protnutých úseček.
 
-V našem případě budeme hledat průsečíky úseček v rovině. Spojky již úsečky jsou,
+V~našem případě budeme hledat průsečíky úseček v~rovině. Spojky již úsečky jsou,
 překážky rozdělíme na jednotlivé úsečky mezi uzly. Budeme zametat podle rostoucí
 zeměpisné délky a zajímat nás budou události začátek a konec úsečky a jejich
 průsečík. Zametací přímku proto budeme posouvat postupně po těchto událostech.
 
 Protože vždy budeme potřebovat znát nejbližší událost, budeme si udržovat
-události v haldě. Dále také potřebujeme znát pořadí, v jakém aktuálně
+události v~haldě. Dále také potřebujeme znát pořadí, v~jakém aktuálně
 zpracovávané úsečky protínají rovinu, tzv. průřez, a umět mezi ně přidat další a
-odebrat tu, která skončí. K tomuto účelu se nám hodí použít vyhledávací strom.
+odebrat tu, která skončí. K~tomuto účelu se nám hodí použít vyhledávací strom.
 Nemůžeme si ovšem ve vrcholech pamatovat přímo souřadnice průsečíku úsečky se
-zametací přímkou, protože se tyto souřadnice mění s každým posunutím zametací
+zametací přímkou, protože se tyto souřadnice mění s~každým posunutím zametací
 přímky. Místo toho si budeme ve stromě pamatovat jen odkaz na úsečky a průsečíky
 budeme počítat, až to bude potřeba.
 
-Na začátku známe všechny začátky a konce úseček, vytvoříme tedy v haldě události
+Na začátku známe všechny začátky a konce úseček, vytvoříme tedy v~haldě události
 začátků a konců úseček. Průsečíkové události zatím žádné neznáme, ale protože
-aby mohl nastat průsečík, musí nejprve úsečka začít, o žádný nepřijdeme. 
+aby mohl nastat průsečík, musí nejprve úsečka začít, o~žádný nepřijdeme. 
 
-Zametání bude probíhat následovně. Z haldy všech událostí vybereme nejbližší
+Zametání bude probíhat následovně. Z~haldy všech událostí vybereme nejbližší
 událost a rozhodneme se podle jejího typu:
 \begin{itemize}
 	\item {\tuc Začátek úsečky.}  Úsečku zařadíme na sprvné místo do
 	průřezu a přidáme případné průsečíkové události se sousedními přímkami.
-	\item {\tuc Konec úsečky.} Úsečku odebereme z průřezu a přidáme
-	případnou průsečíkovou událost, pokud se úsečky sousední s právě
+	\item {\tuc Konec úsečky.} Úsečku odebereme z~průřezu a přidáme
+	případnou průsečíkovou událost, pokud se úsečky sousední s~právě
 	končící, protínají.
-	\item {\tuc Průsečík úseček.} Úsečky v průřezu prohodíme a přidáme
-	případné průsečíkové události s novými sousedními úsečkami obou
+	\item {\tuc Průsečík úseček.} Úsečky v~průřezu prohodíme a přidáme
+	případné průsečíkové události s~novými sousedními úsečkami obou
 	prohazovaných úseček.
 \end{itemize}
-Takto budeme postupovat, dokud budou v haldě nějaké uálosti. Při hledání
+Takto budeme postupovat, dokud budou v~haldě nějaké uálosti. Při hledání
 průsečíků nám pro každou úsečku stačí vždy hledat jen se sousedními, protože než
 se nějaké dvě úsečky protnou, musí se nejprve stát sousedními (Uvažujeme
-situaci, kde se tři úsečky neprotínají v jednom bodě.). Pokud vytváříme
-průsečíkovou událost, zkontrolujeme, zda není některá z úseček překážka a
-případně označíme, že se úsečky protínají s překážkou. 
+situaci, kde se tři úsečky neprotínají v~jednom bodě.). Pokud vytváříme
+průsečíkovou událost, zkontrolujeme, zda není některá z~úseček překážka a
+případně označíme, že se úsečky protínají s~překážkou. 
 
 TODO:obrázek
 
 \section{Zkratky přes průchozí prostranství}
 Pokud procházíme ve městě přes větší park nebo náměstí, často nemusíme chodit
 jen po chodnících, ale můžeme projít přes prostranství přímo. Přímé cesty přes
-průchozí prostranství proto také chceme zanést do vyhledávacího grafu. K jejich
+průchozí prostranství proto také chceme zanést do vyhledávacího grafu. K~jejich
 vytvoření jsme využili modifikovaný algoritmus vytváření spojek mezi cestami.
-Dvojice bodů v průchozích prostranstvích jsme spojovali úsečkami. Tentokrát jsme
+Dvojice bodů v~průchozích prostranstvích jsme spojovali úsečkami. Tentokrát jsme
 ale hledali dvojice bližší než 300 m, protože parky mohou být poměrně rozlehlé.
 Omezení na průměrný stupeň jsme snížili na dva, protože zvýšením vzdálenosti
 hledání při vyšším stupni vznikalo příliš mnoho úseček, které vedly podobně a
@@ -144,9 +144,9 @@ odstranili všechny úsečky, které procházely přes nějakou překážku.
 
 \section{Vytvoření vyhledávacího grafu}
 Poté, co jsme připravili data, vytvoříme vyhledávací graf. Protože kolize
-přímých cest s překážkami jsme vyřešili již při jejich vytváření, jsou všechny
-cesty korektní. Proto se překážkami již dále nezabýváme a pouze z cest vytvoříme
+přímých cest s~překážkami jsme vyřešili již při jejich vytváření, jsou všechny
+cesty korektní. Proto se překážkami již dále nezabýváme a pouze z~cest vytvoříme
 vyhledávací graf. Mohlo se stát, že vzniklo několik oddělených komponent, proto
-z nich vybereme tu největší. Uložíme seznam všech uzlů, které jsou na cestách
-použity a cesty rozdělíme na jednotlivé hrany grafu mezi dvěma uzly. U hran
-zachováme údaje o typu cesty, protože je budeme využívat při vyhledávání.
+z~nich vybereme tu největší. Uložíme seznam všech uzlů, které jsou na cestách
+použity a cesty rozdělíme na jednotlivé hrany grafu mezi dvěma uzly. U~hran
+zachováme údaje o~typu cesty, protože je budeme využívat při vyhledávání.
