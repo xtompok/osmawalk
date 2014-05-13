@@ -1,6 +1,6 @@
 \chapter{Projekt OpenStreetMap}
-\section{O projektu}
-Projekt OpenStreetMap\cite{osmweb} vznikl v Anglii v roce 2004 a jeho prvotním cílem bylo
+\section{O~projektu}
+Projekt OpenStreetMap\cite{osmweb} vznikl v~Anglii v~roce 2004 a jeho prvotním cílem bylo
 vytvořit volně dostupná geografická data pro Velkou Británii. Iniciativa se
 postupně rozrostla do celého světa a dnes mapu pomáhá tvořit přes milion
 dobrovolníků. Česká republika je dnes poměrně kvalitně pokryta a zvláště velká
@@ -8,41 +8,41 @@ města mají dostatečně detailní pokrytí i pro vyhledávání pěších tras
 
 \section{Datová primitiva} 
 Projekt OpenStreetMap používá tři základní geografická primitiva: uzly, cesty a
-relace. Ke každému z těchto primitiv mohou být přiřazeny atributy, což jsou
+relace. Ke každému z~těchto primitiv mohou být přiřazeny atributy, což jsou
 dvojice klíče a hodnoty. 
-U polohových dat se neukládá výška, výsledná mapa je pouze dvourozměrná.
+U~polohových dat se neukládá výška, výsledná mapa je pouze dvourozměrná.
 Každé primitivum má jedinečné id.
 Nyní popíšeme jednotlivá primitiva
 
-{\tuc Uzly} jsou body s určenými souřadnicemi. Uzly mohou mít atributy, ty pak
+{\tuc Uzly} jsou body s~určenými souřadnicemi. Uzly mohou mít atributy, ty pak
 určují bodový mapový objekt, například rozcestník nebo závora. Existují i uzly
 bez atributů sloužící pouze jako součást cest nebo relací.
 
-{\tuc Cesty} jsou posloupnosti uzlů. Uzly se na cestě nemohou opakovat s
-jedinnou výjimkou, že první a poslední bod mohou být shodné, potom se jedná o
-uzavřenou cestu. Cesty jsou orientované, tzn. na pořadí uzlů záleží. Mohou
+{\tuc Cesty} jsou posloupnosti uzlů. Uzly se na cestě nemohou opakovat
+s~jedinnou výjimkou, že první a poslední bod mohou být shodné, potom se jedná
+o~uzavřenou cestu. Cesty jsou orientované, tzn. na pořadí uzlů záleží. Mohou
 existovat cesty bez atributů jako součásti relace, ale obvykle mají atributy
 učující, jaký objekt je jimi reprezentován.
 
 Cestami jsou reprezentovány linie a plochy. Pokud má být cesta plochou, musí být
 uzavřená, ale ne každá uzavřená cesta je plocha. Tento problém rozebíráme níže.
-Jedna cesta také může reprezentovat více fyzických objektů (například silnici s
-tramvajovou tratí, park s oplocením).
+Jedna cesta také může reprezentovat více fyzických objektů (například silnici
+s~tramvajovou tratí, park s~oplocením).
 
-{\tuc Relace} jsou posloupnosti uzlů a cest opatřená atributy. Každý prvek v
-relaci navíc může mít určenou roli. Relace může obsahovat jako prvek i relaci,
+{\tuc Relace} jsou posloupnosti uzlů a cest opatřená atributy. Každý prvek
+v~relaci navíc může mít určenou roli. Relace může obsahovat jako prvek i relaci,
 ale tato situace není příliš dobře podporována.  Obvykle jsou relacemi
 reprezentovány složitější objekty, které by se cestami a uzly reprezentovaly
 obtížně, jako například trasy linek MHD, cyklotrasy a územní hranice.
 
-Pro nás důležitý typ relace je multipolygon, který se používá k reprezentaci
-složitějších ploch. Multipolygon obsahuje cesty s rolemi \verb|INNER| resp.
+Pro nás důležitý typ relace je multipolygon, který se používá k~reprezentaci
+složitějších ploch. Multipolygon obsahuje cesty s~rolemi \verb|INNER| resp.
 \verb|OUTER| reprezentující vnitřní respektive vnější okraj plochy.
 
 \section{OSM XML}
 Nejobvyklejší způsob ukládání OSM dat je ve formátu XML. Všechna primitiva mají
-jako jeden z atributů \verb|id|, který značí jejich jednoznačný identifikátor.
-Každý typ primitiva má svou vlastní číselnou řadu. V OSM XML\cite{osmxml} je
+jako jeden z~atributů \verb|id|, který značí jejich jednoznačný identifikátor.
+Každý typ primitiva má svou vlastní číselnou řadu. V~OSM XML\cite{osmxml} je
 nejprve hlavička, následně seznam uzlů, seznam cest a seznam relací. Níže je
 příklad takového souboru, za ním následuje popis jednotlivých částí souboru.
 
@@ -90,7 +90,7 @@ příklad takového souboru, za ním následuje popis jednotlivých částí sou
 </osm>
 \end{verbatim}
 
-{\tuc Hlavička souboru.} V XML hlavičce je určeno kódování UTF-8 a následně je
+{\tuc Hlavička souboru.} V~XML hlavičce je určeno kódování UTF-8 a následně je
 otevřen element \verb|osm|, jehož atributem je také použitá verze API. 
 
 {\tuc Uzly.} Zde jsou za sebou postupně vypsány všechny uzly. Uzly jsou
@@ -101,33 +101,33 @@ mít vnořené elementy \verb|tag|. Každý tento element má atribut \verb|k|
 reprezentující klíč a \verb|v| reprezentující hodnotu pro atributy uzlu.
 
 {\tuc Cesty.} Zde jsou za sebou vypsány cesty. Cesty jsou reprezentovány
-elementem \verb|way|, v němž jsou vnořeny elementy \verb|nd|. Každý element
+elementem \verb|way|, v~němž jsou vnořeny elementy \verb|nd|. Každý element
 \verb|nd| reprezentuje jeden uzel na cestě, identifikátor tohoto uzlu je uložen
-v atributu \verb|ref|. Také cesty mohou mít vnořené elementy \verb|tag|.
+v~atributu \verb|ref|. Také cesty mohou mít vnořené elementy \verb|tag|.
 
 {\tuc Relace.} Jako poslední jsou vypsány všechny relace, reprezentované
 elementem \verb|relation|. Prvky relací jsou reprezentovány elementy
-\verb|member|, které obsahují atributy \verb|type| určující, o jaký typ
+\verb|member|, které obsahují atributy \verb|type| určující, o~jaký typ
 primitiva jde, \verb|ref| určující identifikátor tohoto primitiva a \verb|role|
-určující roli daného prvku v relaci. I relace mohou mít vnořené elementy
+určující roli daného prvku v~relaci. I~relace mohou mít vnořené elementy
 \verb|tag|.
 
 
 Toto pořadí umožňuje proudově zpracovávat XML, protože když zpracováváme cesty,
-tak již máme v paměti všechny uzly, na které se cesty mohou odkazovat, obdobně
-s relacemi. 
+tak již máme v~paměti všechny uzly, na které se cesty mohou odkazovat, obdobně
+s~relacemi. 
 
 OSM XML se dá volně stáhnout, většinou jsou tyto soubory pro úsporu místa
 zaarchivované a aktualizují se jednou denně. Protože většina aplikací
-nepotřebuje data z celého světa, jsou k dispozici i data pro jednotlivé
+nepotřebuje data z~celého světa, jsou k~dispozici i data pro jednotlivé
 kontinenty a státy\footnote{\url{http://osm.kyblsoft.cz/archiv/}}. 
 
-\section{Problémy v datech}
-Ačkoli jsou data z OSM poměrně kvalitní a přesné, během jejich zpracování jsme
+\section{Problémy v~datech}
+Ačkoli jsou data z~OSM poměrně kvalitní a přesné, během jejich zpracování jsme
 narazili na některá problematická místa. 
 
-{\tuc Různorodé označování ploch.} Tento problém plyne již z definice geografických
-primitiv a atributů objektů. Protože jak plochy, tak linie jsou označovány v OSM
+{\tuc Různorodé označování ploch.} Tento problém plyne již z~definice geografických
+primitiv a atributů objektů. Protože jak plochy, tak linie jsou označovány v~OSM
 stejným primitivem {\em cesta}, musí se při rozlišování hledět na jejich atributy.
 Bohužel ani zde není jejich používání sjednoceno. Aby mohla být {\em cesta}
 plochou, musí mít první a poslední {\em uzel} stejný. Ale ne každá uzavřená {\em
@@ -136,25 +136,25 @@ nikoli plochu. Aby byla považována za plochu, musí mít nastaven klíč
 \verb|area| hodnotu \verb|yes|. Naopak pokud má {\em cesta} například klíč \verb|landuse|
 nebo \verb|building|, je za plochu považována, i když nemá klíč \verb|area|.
 
-{\tuc Nekorektní objekty.} I přesto, že editory používané pro úpravu OSM se snaží
-hlídat správnost vytvořených objektů, se v mapě vyskytují různé chybně
+{\tuc Nekorektní objekty.} I~přesto, že editory používané pro úpravu OSM se snaží
+hlídat správnost vytvořených objektů, se v~mapě vyskytují různé chybně
 definované objekty. Nalezli jsme například cesty, které samy sebe kříží,
-chybějící elementy v hranicích multipolygonu a jiné. Výhodou OSM je, že jsme je
+chybějící elementy v~hranicích multipolygonu a jiné. Výhodou OSM je, že jsme je
 mohli ihned opravit, ale přesto je musí umět program korektně vyhodnotit.
 
 {\tuc Více bodů na stejných souřadnicích.} Ač by se pro spojování sousedních
-ploch měly využívat společné body na hranicích, v některých oblastech jsme našli
+ploch měly využívat společné body na hranicích, v~některých oblastech jsme našli
 problematická místa, kde polovina ploch používala jeden bod a druhá polovina
 jiný na stejných souřadnicích. Tyto dva body spolu nebyly nijak propojeny a
-pravděpodobně vznikly při některém importu z jiných datových zdrojů. Takovýchto
+pravděpodobně vznikly při některém importu z~jiných datových zdrojů. Takovýchto
 chyb jsme nalezli mnoho a je opět potřeba je korektně zpracovat.
 
 {\tuc Různá sémantika atributů na různých místech.} Při výběru atributů, které
-zahrnout ke zpracování, jsme se setkali s používáním stejných atributů v různých
-významech. Například klíč \verb|landuse| s hodnotou \verb|residential| v
-některých místech označoval velké plochy s obytnými budovami, jinde volně
+zahrnout ke zpracování, jsme se setkali s~používáním stejných atributů v~různých
+významech. Například klíč \verb|landuse| s~hodnotou \verb|residential|
+v~některých místech označoval velké plochy s~obytnými budovami, jinde volně
 přístupná prostranství mezi těmito budovami. Kvůli těmto nejednoznačnostem jsme
-některé atributy nemohli použít, protože by vytvářely v některých částech města
+některé atributy nemohli použít, protože by vytvářely v~některých částech města
 nekorektní výsledky.
 \begin{figure}
 	\centering
@@ -169,10 +169,10 @@ nekorektní výsledky.
 	\label{fig:resident-volno}
 \end{figure}
 
-{\tuc Neúplně navazující cesty.} Kvalita mapovaných cest v OSM je silně závislá na typu
+{\tuc Neúplně navazující cesty.} Kvalita mapovaných cest v~OSM je silně závislá na typu
 cesty. Zatímco silnice, které jsou často využívány pro hledání tras, jsou
-většinou navzájem navázány správně, chodníky často v datech úplně chybí, nebo
-nejsou napojeny na silnice. Rovněž přechody často chybí. Proto v našem programu
+většinou navzájem navázány správně, chodníky často v~datech úplně chybí, nebo
+nejsou napojeny na silnice. Rovněž přechody často chybí. Proto v~našem programu
 zkoumáme i okolí cest a přidáváme možné spojky mezi chodníky a silnicemi.
 \begin{figure}
 	\centering
@@ -181,12 +181,12 @@ zkoumáme i okolí cest a přidáváme možné spojky mezi chodníky a silnicemi
 	\label{fig:chodnik}
 \end{figure}
 
-\section{Využívané informace z OSM}
+\section{Využívané informace z~OSM}
 Protože chceme umět nejen vyhledávat po cestách, ale i vytvářet trasy přes
 průchozí prostranství, potřebujeme mimo cest zpracovávat i budovy, prostranství 
-a další objekty. Zpracováváme cesty, které popisují fyzické objekty v terénu,
+a další objekty. Zpracováváme cesty, které popisují fyzické objekty v~terénu,
 naopak vynecháváme správní hranice, podzemní objekty (např. metro) a cesty
-popisující služby a občanskou vybavenost. Uzly zpracováváme jen jako body s
-danou polohou, jejich atributy nevyužíváme. Z relací používáme pouze
+popisující služby a občanskou vybavenost. Uzly zpracováváme jen jako body
+s~danou polohou, jejich atributy nevyužíváme. Z~relací používáme pouze
 multipolygon, kterým jsou často reprezentovány budovy.
 
