@@ -49,54 +49,40 @@ int main (int argc, char ** argv){
 		usage();
 		return 1;
 	}
-	pj_wgs84 = pj_init_plus("+proj=longlat +datum=WGS84 +no_defs");
-	pj_utm = pj_init_plus("+proj=utm +zone=33 +ellps=WGS84 +units=m +no_defs");
-	struct config_t conf;
-	conf = parseConfigFile("../config/speeds.yaml");
-	
-	Graph__Graph * graph;
-	graph = loadMap("../data/praha-graph.pbf");
-	if (graph==NULL){
-		printf("Error loading map\n");	
-		return 2;
-	}
+	struct search_data_t data;
+	data = prepareData("../config/speeds.yaml","../data/praha-graph.pbf"); 
 //	printVertices(graph);
 //	return 0;
 
-	printf("Graph has %d vertices and %d edges\n",graph->n_vertices,graph->n_edges);
+	printf("Graph has %d vertices and %d edges\n",data.graph->n_vertices,data.graph->n_edges);
 	double lon;
 	double lat;
 	lat = atof(argv[1]);
 	lon = atof(argv[2]);
-	wgs2utm(&lon,&lat);
+	wgs2utm(data,&lon,&lat);
 	int fromIdx;
-	fromIdx = findNearestVertex(graph,lon,lat);
+	fromIdx = findNearestVertex(data.graph,lon,lat);
 
 	lat = atof(argv[3]);
 	lon = atof(argv[4]);
-	wgs2utm(&lon,&lat);
+	wgs2utm(data,&lon,&lat);
 	int toIdx;
-	toIdx = findNearestVertex(graph,lon,lat);
+	toIdx = findNearestVertex(data.graph,lon,lat);
 
-	calcDistances(graph);
-
-	printf("Searching from %lld(%f,%f) to %lld(%f,%f)\n",graph->vertices[fromIdx]->osmid,
-			graph->vertices[fromIdx]->lat,
-			graph->vertices[fromIdx]->lon,
-			graph->vertices[toIdx]->osmid,
-			graph->vertices[toIdx]->lat,
-			graph->vertices[toIdx]->lon
+	printf("Searching from %lld(%f,%f) to %lld(%f,%f)\n",data.graph->vertices[fromIdx]->osmid,
+			data.graph->vertices[fromIdx]->lat,
+			data.graph->vertices[fromIdx]->lon,
+			data.graph->vertices[toIdx]->osmid,
+			data.graph->vertices[toIdx]->lat,
+			data.graph->vertices[toIdx]->lon
 			);
 
 	struct dijnode_t * dijArray;
-	dijArray = prepareDijkstra(graph);
+	dijArray = prepareDijkstra(data.graph);
 
-	struct nodeways_t * nodeWays;
-	nodeWays = makeNodeWays(graph);
-
-	findWay(graph, conf, nodeWays, dijArray,fromIdx, toIdx);
-	printResults(graph, conf, dijArray, fromIdx, toIdx);
-	writeGpxFile(graph, conf, dijArray,"track.gpx", fromIdx, toIdx);
+	findWay(data, dijArray,fromIdx, toIdx);
+	printResults(data.graph, data.conf, dijArray, fromIdx, toIdx);
+	writeGpxFile(data, dijArray,"track.gpx", fromIdx, toIdx);
 
 	return 0;
 }

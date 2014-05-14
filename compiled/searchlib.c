@@ -1,7 +1,4 @@
 #include <ucw/lib.h>
-#include <ucw/fastbuf.h>
-
-#include "searchlib.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,40 +6,31 @@
 #include <float.h>
 #include <inttypes.h>
 
+#include <yaml.h>
 #include <proj_api.h>
-#include <ucw/gary.h>
 #include <ucw/heap.h>
 
 #include "include/graph.pb-c.h"
 
-#include <yaml.h>
-
-#define SWEEP_TYPE int64_t
-#include "types.h"
-#include "raster.h"
-//#include "tree.h"
-//#include "hashes.c"
-#include "utils.h"
+#include "searchlib.h"
 #include "writegpx.h"
 
-
-projPJ pj_wgs84;
-projPJ pj_utm;
-
-int utm2wgs(double * lon, double * lat){
+// Utils
+int utm2wgs(struct search_data_t data,double * lon, double * lat){
 	int res;
-	res= pj_transform(pj_utm,pj_wgs84,1,1,lon,lat,NULL);
+	res= pj_transform(data.pj_utm,data.pj_wgs84,1,1,lon,lat,NULL);
 	*lon = (*lon * 180)/M_PI;
 	*lat = (*lat * 180)/M_PI;
 	return res;
 }
-int wgs2utm(double * lon, double * lat){
+int wgs2utm(struct search_data_t data,double * lon, double * lat){
 	*lon = (*lon/180)*M_PI;
 	*lat = (*lat/180)*M_PI;
-	return pj_transform(pj_wgs84,pj_utm,1,1,lon,lat,NULL);
+	return pj_transform(data.pj_wgs84,data.pj_utm,1,1,lon,lat,NULL);
 }
 
 
+// Loading 
 struct config_t parseConfigFile(char * filename){
 	struct config_t conf;
 	conf.desc = objtype__descriptor;
@@ -162,10 +150,37 @@ struct config_t parseConfigFile(char * filename){
 	//	printf("Item: %d, speed: %f\n",i,conf.speeds[i],conf.ratios[i]);
 	}
 	return conf;
-
-
-
 }
+
+Graph__Graph * loadMap(char * filename){
+	FILE * IN;
+	IN = fopen(filename,"r");
+	if (IN==NULL){
+		printf("File opening error\n");	
+		return NULL;
+	}
+	fseek(IN,0,SEEK_END);
+	long int len;
+	len = ftell(IN);
+	fseek(IN,0,SEEK_SET);
+	uint8_t * buf;
+	buf = (uint8_t *)malloc(len);
+	printf("Allocated %d MB\n",len>>20);
+	size_t read;
+	read = fread(buf,1,len,IN);
+	if (read!=len){
+		printf("Not read all file");
+		return NULL;
+	}
+	fclose(IN);
+	
+	Graph__Graph * graph;
+	graph = graph__graph__unpack(NULL,len,buf);
+
+	return graph;
+}
+
+
 void calcDistances(Graph__Graph * graph){
 	for (int i=0;i<graph->n_edges;i++){
 		Graph__Edge * edge;
@@ -218,6 +233,28 @@ struct nodeways_t * makeNodeWays(Graph__Graph * graph){
 	return nodeways;
 }
 
+int findNearestVertex(Graph__Graph * graph, double lon, double lat){
+	printf("Lat: %f, lon: %f\n",lat,lon);
+	double minDist;
+	int minIdx;
+	minDist = DBL_MAX;
+	for (int i=0;i<graph->n_vertices;i++){
+		double dist;
+		double dlon;
+		double dlat;
+		dlon = graph->vertices[i]->lon-lon;
+		dlat = graph->vertices[i]->lat-lat;
+		dist = dlon*dlon+dlat*dlat;
+		if (dist < minDist){
+			minDist = dist;
+			minIdx = i;
+		}
+	}
+	printf("Min dist: %f\n",sqrt(minDist));
+	printf("Point %d: %f, %f\n",minIdx,graph->vertices[minIdx]->lon,graph->vertices[minIdx]->lat);
+	return minIdx;
+}
+
 
 struct dijnode_t *  prepareDijkstra(Graph__Graph * graph){
 	struct dijnode_t * dijArray;
@@ -233,12 +270,18 @@ struct dijnode_t *  prepareDijkstra(Graph__Graph * graph){
 }
 
 
-void findWay(Graph__Graph * graph, struct config_t conf, struct nodeways_t * nodeways,struct dijnode_t * dijArray,int fromIdx, int toIdx){
+void findWay(struct search_data_t data,struct dijnode_t * dijArray,int fromIdx, int toIdx){
 	
 	int tmp;
 	tmp=fromIdx;
 	fromIdx=toIdx;
 	toIdx=tmp;
+
+	Graph__Graph * graph;
+	graph = data.graph;
+
+	struct nodeways_t * nodeways;
+	nodeways = data.nodeWays;
 
 	int * heap;
 	int n_heap;
@@ -272,7 +315,7 @@ void findWay(Graph__Graph * graph, struct config_t conf, struct nodeways_t * nod
 			Graph__Edge * way;
 			way = graph->edges[nodeways[vIdx].ways[i]];
 			double len;
-			len = calcTime(graph,conf,way);
+			len = calcTime(data.conf,way);
 			if (dijArray[way->vto].dist <= (dijArray[vIdx].dist+len))
 				continue;
 			dijArray[way->vto].dist = dijArray[vIdx].dist+len;
@@ -290,7 +333,7 @@ void findWay(Graph__Graph * graph, struct config_t conf, struct nodeways_t * nod
 	}
 }
 
-struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * dijArray, int fromIdx, int toIdx){
+struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * dijArray, int fromIdx, int toIdx, int * n_points){
 	Graph__Graph * graph;
 	graph = data.graph;
 
@@ -304,80 +347,40 @@ struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * d
 	printf("D1: %f, D2:%f\n",dijArray[fromIdx].dist,dijArray[toIdx].dist);
 	int idx;
 	idx = fromIdx;
-	while (dijArray[idx].fromIdx!=-1){
+	while (idx != toIdx){
 		idx = dijArray[idx].fromIdx;
 		count++;
 	}
+
+	printf("Cnt: %d\n",count);
+	*n_points = count;
 	
 	struct point_t * results;
 	results = malloc(sizeof(struct point_t)*(count+1));
 	count = 0;
-	while (dijArray[idx].fromIdx!=-1){
-		results[count].lat = graph->vertices[idx]->lat;
-		results[count].lon = graph->vertices[idx]->lon;
+	idx = fromIdx;
+	double lat;
+	double lon;
+	while (idx != toIdx){
+		lat = graph->vertices[idx]->lat;
+		lon = graph->vertices[idx]->lon;
+		utm2wgs(data,&lon,&lat);
+		results[count].lat = lat;
+		results[count].lon = lon;
 		results[count].type = graph->edges[dijArray[idx].fromEdgeIdx]->type;
 		idx = dijArray[idx].fromIdx;
 		count++;
 	}
-	results[count].lat=graph->vertices[idx]->lat;
-	results[count].lon=graph->vertices[idx]->lon;
+	lat = graph->vertices[idx]->lat;
+	lon = graph->vertices[idx]->lon;
+	utm2wgs(data,&lon,&lat);
+	results[count].lat = lat;
+	results[count].lon = lon;
 	results[count].type=-1;	
 	return results;
 }
 
-
-
-Graph__Graph * loadMap(char * filename){
-	FILE * IN;
-	IN = fopen(filename,"r");
-	if (IN==NULL){
-		printf("File opening error\n");	
-		return NULL;
-	}
-	fseek(IN,0,SEEK_END);
-	long int len;
-	len = ftell(IN);
-	fseek(IN,0,SEEK_SET);
-	uint8_t * buf;
-	buf = (uint8_t *)malloc(len);
-	printf("Allocated %d MB\n",len>>20);
-	size_t read;
-	read = fread(buf,1,len,IN);
-	if (read!=len){
-		printf("Not read all file");
-		return NULL;
-	}
-	fclose(IN);
-	
-	Graph__Graph * graph;
-	graph = graph__graph__unpack(NULL,len,buf);
-
-	return graph;
-}
-	
-int findNearestVertex(Graph__Graph * graph, double lon, double lat){
-	printf("Lat: %f, lon: %f\n",lat,lon);
-	double minDist;
-	int minIdx;
-	minDist = DBL_MAX;
-	for (int i=0;i<graph->n_vertices;i++){
-		double dist;
-		double dlon;
-		double dlat;
-		dlon = graph->vertices[i]->lon-lon;
-		dlat = graph->vertices[i]->lat-lat;
-		dist = dlon*dlon+dlat*dlat;
-		if (dist < minDist){
-			minDist = dist;
-			minIdx = i;
-		}
-	}
-	printf("Min dist: %f\n",sqrt(minDist));
-	printf("Point %d: %f, %f\n",minIdx,graph->vertices[minIdx]->lon,graph->vertices[minIdx]->lat);
-	return minIdx;
-}
-
-void writeGpxFile(Graph__Graph * graph, struct config_t conf, struct dijnode_t * dijArray,char * filename, int fromIdx, int toIdx){
+void writeGpxFile(struct search_data_t data, struct dijnode_t * dijArray,char * filename, int fromIdx, int toIdx){
 	if (!dijArray[toIdx].completed){
 		return;
 	}
@@ -391,26 +394,40 @@ void writeGpxFile(Graph__Graph * graph, struct config_t conf, struct dijnode_t *
 	double lon;
 	double lat;
 	while (dijArray[idx].fromIdx!=-1){
-		lon = graph->vertices[idx]->lon;
-		lat = graph->vertices[idx]->lat;
-		utm2wgs(&lon,&lat);
+		lon = data.graph->vertices[idx]->lon;
+		lat = data.graph->vertices[idx]->lat;
+		utm2wgs(data,&lon,&lat);
 		writeGpxTrkpt(OUT,lat,lon,0);
 		//printf("%f,%f,%d\n",graph->vertices[idx]->lat,graph->vertices[idx]->lon,graph->edges[dijArray[idx].fromEdgeIdx]->type);
 		idx = dijArray[idx].fromIdx;
 	}
-	printf("%f,%f,\n",graph->vertices[idx]->lat, graph->vertices[idx]->lon);	
 	writeGpxEndTrack(OUT);
 	writeGpxFooter(OUT);
 	fclose(OUT);
 }
 
+struct search_data_t prepareData(char * configName, char * dataName){
+	struct search_data_t data;
+	data.pj_wgs84 = pj_init_plus("+proj=longlat +datum=WGS84 +no_defs");
+	data.pj_utm = pj_init_plus("+proj=utm +zone=33 +ellps=WGS84 +units=m +no_defs");
+	data.conf = parseConfigFile(configName);
+	data.graph = loadMap(dataName);
+	if (data.graph==NULL){
+		printf("Error loading map\n");	
+		return data;
+	}
+	data.nodeWays = makeNodeWays(data.graph);
+	calcDistances(data.graph);
+	return data;
+}
 
-struct point_t * findPath(struct search_data_t data,double fromLat, double fromLon, double toLat, double toLon){
-	wgs2utm(&fromLon,&fromLat);
+
+struct search_result_t findPath(struct search_data_t data,double fromLat, double fromLon, double toLat, double toLon){
+	wgs2utm(data,&fromLon,&fromLat);
 	int fromIdx;
 	fromIdx = findNearestVertex(data.graph,fromLon,fromLat);
 
-	wgs2utm(&toLon,&toLat);
+	wgs2utm(data,&toLon,&toLat);
 	int toIdx;
 	toIdx = findNearestVertex(data.graph,toLon,toLat);
 
@@ -425,24 +442,15 @@ struct point_t * findPath(struct search_data_t data,double fromLat, double fromL
 	struct dijnode_t * dijArray;
 	dijArray = prepareDijkstra(data.graph);
 
-	findWay(data.graph, data.conf, data.nodeWays, dijArray,fromIdx, toIdx);
-	return resultsToArray(data,dijArray,fromIdx,toIdx); 
+	findWay(data, dijArray,fromIdx, toIdx);
+	struct search_result_t result;
+	int n_points;
+	result.points = resultsToArray(data,dijArray,fromIdx,toIdx,&n_points);
+	result.n_points = n_points;
+	result.time = dijArray[fromIdx].dist;
+	return result;	
 
 
-}
-struct search_data_t prepareData(char * configName, char * dataName){
-	struct search_data_t data;
-	data.pj_wgs84 = pj_init_plus("+proj=longlat +datum=WGS84 +no_defs");
-	data.pj_utm = pj_init_plus("+proj=utm +zone=33 +ellps=WGS84 +units=m +no_defs");
-	data.conf = parseConfigFile(configName);
-	data.graph = loadMap(dataName);
-	if (data.graph==NULL){
-		printf("Error loading map\n");	
-		return data;
-	}
-	data.nodeWays = makeNodeWays(data.graph);
-	calcDistances(data.graph);
-	return data;
 }
 
 
