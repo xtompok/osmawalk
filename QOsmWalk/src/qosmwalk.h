@@ -1,5 +1,5 @@
-#ifndef LINESANDPOINTS_H
-#define LINESANDPOINTS_H
+#ifndef QOSMWALK_H
+#define QOSMWALK_H
 
 #include <QtGui>
 #include <mapcontrol.h>
@@ -12,12 +12,13 @@ extern "C" {
     #include "/aux/jethro/bakalarka/compiled/searchlib.h"
 }
 using namespace qmapcontrol;
-class LinesAndPoints : public QWidget
+
+class QOsmWalk : public QWidget
 {
         Q_OBJECT
         public:
-                LinesAndPoints(QWidget *parent = 0);
-                ~LinesAndPoints();
+                QOsmWalk(QWidget *parent = 0);
+                ~QOsmWalk();
 
         private:
                 MapControl* mc;
@@ -26,18 +27,14 @@ class LinesAndPoints : public QWidget
                 QLabel * label;
                 QPointF * firstPoint;
                 QPointF * secondPoint;
-                void addZoomButtons();  
+                void addZoomButtons();
                 void resizeEvent(QResizeEvent * evt);
                 void searchPath(QPointF * first, QPointF * second);
                 struct search_data_t searchData;
 
         public slots:
-            //    void geometryClicked(Geometry* geom, QPoint coord_px);
                 void mouseEventCoordinate(const QMouseEvent * evt, const QPointF point);
-
-        protected:
-           //     void keyPressEvent(QKeyEvent* evnt);
-
 };
 
-#endif
+#endif // QOSMWALK_H
+

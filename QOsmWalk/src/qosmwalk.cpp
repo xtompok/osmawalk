@@ -1,57 +1,57 @@
-#include "linesandpoints.h"
+#include "qosmwalk.h"
 /*!
  * \example linesandpoints.cpp
  * This application demonstrates how to use Geometry objects and how to add them to a layer.
- * 
+ *
  * Here are used three different point types:
  *  - One which displays a image
  *  - One which draws a plain circle
  *  - One which uses a QPen to draw a circle
  *  - One which has no markers
  * Then these Points were added to a LineString
- * 
+ *
  * Also there is a keylistener.
- * 
+ *
  * You can find this example here: MapAPI/Samples/LinesAndPoints
  * \image html sample_linesandpoints.png "screenshot"
  */
-LinesAndPoints::LinesAndPoints(QWidget *parent)
-	: QWidget(parent)
+QOsmWalk::QOsmWalk(QWidget *parent)
+    : QWidget(parent)
 {
-	// the size which the QMapControl should fill
-	QSize size = QSize(480,640);
-	
-	mc = new MapControl(size);
+    // the size which the QMapControl should fill
+    QSize size = QSize(480,640);
+
+    mc = new MapControl(size);
     mc->enableMouseWheelEvents();
 
     label = new QLabel("Click for first point");
     // create layout
     QVBoxLayout* layout = new QVBoxLayout;
-	layout->addWidget(mc);
+    layout->addWidget(mc);
     layout->addWidget(label);
     layout->setStretch(0,1);
     layout->setStretch(1,0);
-	setLayout(layout);
-	
-	// create layer
-	MapAdapter* mapadapter = new OSMMapAdapter();
+    setLayout(layout);
+
+    // create layer
+    MapAdapter* mapadapter = new OSMMapAdapter();
     layer = new MapLayer("Custom Layer", mapadapter);
-	
+
     mc->addLayer(layer);
 
     //Initialize points
     firstPoint = NULL;
     secondPoint = NULL;
-	
-	// Connect click events of the layer to this object
+
+    // Connect click events of the layer to this object
     connect(mc,SIGNAL(mouseEventCoordinate(const QMouseEvent*,const QPointF)),
             this, SLOT(mouseEventCoordinate(const QMouseEvent *,const QPointF)));
-	
-	// Sets the view to the interesting area
-	QList<QPointF> view;
-	view.append(QPointF(8.24764, 50.0319));
-	view.append(QPointF(8.28412, 49.9998));
-	mc->setView(view);
+
+    // Sets the view to the interesting area
+    QList<QPointF> view;
+    view.append(QPointF(8.24764, 50.0319));
+    view.append(QPointF(8.28412, 49.9998));
+    mc->setView(view);
 
     mc->setView(QPointF(14.4511 , 50.0629  ));
     mc->setZoom(13);
@@ -59,33 +59,33 @@ LinesAndPoints::LinesAndPoints(QWidget *parent)
 
     searchData = prepareData("/aux/jethro/bakalarka/config/speeds.yaml","/aux/jethro/bakalarka/data/praha-graph.pbf");
 
-	addZoomButtons();
+    addZoomButtons();
 }
-void LinesAndPoints::resizeEvent(QResizeEvent * evt){
+void QOsmWalk::resizeEvent(QResizeEvent * evt){
     mc->resize(evt->size());
 }
 
-void LinesAndPoints::addZoomButtons()
+void QOsmWalk::addZoomButtons()
 {
-	// create buttons as controls for zoom
-	QPushButton* zoomin = new QPushButton("+");
-	QPushButton* zoomout = new QPushButton("-");
-	zoomin->setMaximumWidth(50);
-	zoomout->setMaximumWidth(50);
-	
-	connect(zoomin, SIGNAL(clicked(bool)),
-			  mc, SLOT(zoomIn()));
-	connect(zoomout, SIGNAL(clicked(bool)),
-			  mc, SLOT(zoomOut()));
-	
-	// add zoom buttons to the layout of the MapControl
-	QVBoxLayout* innerlayout = new QVBoxLayout;
-	innerlayout->addWidget(zoomin);
-	innerlayout->addWidget(zoomout);
-	mc->setLayout(innerlayout);
+    // create buttons as controls for zoom
+    QPushButton* zoomin = new QPushButton("+");
+    QPushButton* zoomout = new QPushButton("-");
+    zoomin->setMaximumWidth(50);
+    zoomout->setMaximumWidth(50);
+
+    connect(zoomin, SIGNAL(clicked(bool)),
+              mc, SLOT(zoomIn()));
+    connect(zoomout, SIGNAL(clicked(bool)),
+              mc, SLOT(zoomOut()));
+
+    // add zoom buttons to the layout of the MapControl
+    QVBoxLayout* innerlayout = new QVBoxLayout;
+    innerlayout->addWidget(zoomin);
+    innerlayout->addWidget(zoomout);
+    mc->setLayout(innerlayout);
 }
 
-void LinesAndPoints::mouseEventCoordinate(const QMouseEvent * evt, const QPointF point){
+void QOsmWalk::mouseEventCoordinate(const QMouseEvent * evt, const QPointF point){
     if (evt->type()==QEvent::MouseButtonPress)
         lastPoint = evt->pos();
     if ((evt->type()==QEvent::MouseButtonRelease)&&(evt->pos()==lastPoint)){
@@ -116,7 +116,7 @@ void LinesAndPoints::mouseEventCoordinate(const QMouseEvent * evt, const QPointF
 
 }
 
-void LinesAndPoints::searchPath(QPointF * first, QPointF * second){
+void QOsmWalk::searchPath(QPointF * first, QPointF * second){
     struct search_result_t result;
     result = findPath(searchData,first->y(),first->x(),second->y(),second->x());
 
@@ -142,6 +142,6 @@ void LinesAndPoints::searchPath(QPointF * first, QPointF * second){
 
 }
 
-LinesAndPoints::~LinesAndPoints()
+QOsmWalk::~QOsmWalk()
 {
 }
