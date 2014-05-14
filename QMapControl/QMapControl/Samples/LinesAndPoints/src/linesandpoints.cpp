@@ -85,12 +85,16 @@ LinesAndPoints::LinesAndPoints(QWidget *parent)
 	view.append(QPointF(8.28412, 49.9998));
 	mc->setView(view);
 
-    mc->setView(QPointF(8.26,50));
+    mc->setView(QPointF(14.4511 , 50.0629  ));
     mc->setZoom(13);
+    mc->setMaximumSize(1000,1000);
+
+    searchData = prepareData("/aux/jethro/bakalarka/config/speeds.yaml","/aux/jethro/bakalarka/data/praha-graph.pbf");
 
 	addZoomButtons();
-    mc->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-
+}
+void LinesAndPoints::resizeEvent(QResizeEvent * evt){
+    mc->resize(evt->size());
 }
 
 void LinesAndPoints::addZoomButtons()
@@ -129,6 +133,7 @@ void LinesAndPoints::mouseEventCoordinate(const QMouseEvent * evt, const QPointF
             qDebug()<<"Setting second point";
             secondPoint = new QPointF(point);
             label->setText("Searching...");
+            searchPath(firstPoint,secondPoint);
         } else{
             qDebug()<<"Setting first point again";
             firstPoint = new QPointF(point);
@@ -145,6 +150,36 @@ void LinesAndPoints::mouseEventCoordinate(const QMouseEvent * evt, const QPointF
     }
 
 }
+
+void LinesAndPoints::searchPath(QPointF * first, QPointF * second){
+    struct search_result_t result;
+    result = findPath(searchData,first->y(),first->x(),second->y(),second->x());
+
+    // create a LineString
+    QList<Point*> qpoints;
+
+
+    for (int i=0;i<result.n_points;i++){
+      //  layer->addGeometry(new CirclePoint(points[i].lon,points[i].lat,5));
+        qpoints.append(new Point(result.points[i].lon,result.points[i].lat));
+      //  qDebug()<<points[i].lat<<" "<<points[i].lon;
+
+    }
+    // A QPen also can use transparency
+    QPen* linepen = new QPen(QColor(0, 0, 255, 100));
+    linepen->setWidth(5);
+    // Add the Points and the QPen to a LineString
+    LineString* ls = new LineString(qpoints, "Peskobus", linepen);
+
+    label->setText(QString("Time: %1").arg(result.dist));
+
+    free(result.points);
+
+    // Add the LineString to the layer
+    layer->addGeometry(ls);
+
+}
+
 void LinesAndPoints::geometryClicked(Geometry* geom, QPoint point)
 {
     qDebug() << "Clicked!" << point.x() << ","<< point.y();

@@ -8,6 +8,9 @@
 #include <imagepoint.h>
 #include <circlepoint.h>
 #include <linestring.h>
+extern "C" {
+    #include "/aux/jethro/bakalarka/compiled/searchlib.h"
+}
 using namespace qmapcontrol;
 class LinesAndPoints : public QWidget
 {
@@ -23,7 +26,10 @@ class LinesAndPoints : public QWidget
                 QLabel * label;
                 QPointF * firstPoint;
                 QPointF * secondPoint;
-                void addZoomButtons();
+                void addZoomButtons();  
+                void resizeEvent(QResizeEvent * evt);
+                void searchPath(QPointF * first, QPointF * second);
+                struct search_data_t searchData;
 
         public slots:
                 void geometryClicked(Geometry* geom, QPoint coord_px);
