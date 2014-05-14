@@ -18,6 +18,11 @@ class LinesAndPoints : public QWidget
 
         private:
                 MapControl* mc;
+                Layer * layer;
+                QPoint lastPoint;
+                QLabel * label;
+                QPointF * firstPoint;
+                QPointF * secondPoint;
                 void addZoomButtons();
 
         public slots:

@@ -23,17 +23,26 @@ LinesAndPoints::LinesAndPoints(QWidget *parent)
 	
 	mc = new MapControl(size);
     mc->enableMouseWheelEvents();
-	// create layout
-	QHBoxLayout* layout = new QHBoxLayout;
+
+    label = new QLabel("Click for first point");
+    // create layout
+    QVBoxLayout* layout = new QVBoxLayout;
 	layout->addWidget(mc);
+    layout->addWidget(label);
+    layout->setStretch(0,1);
+    layout->setStretch(1,0);
 	setLayout(layout);
 	
 	// create layer
 	MapAdapter* mapadapter = new OSMMapAdapter();
-	Layer* l = new MapLayer("Custom Layer", mapadapter);
+    layer = new MapLayer("Custom Layer", mapadapter);
 	
-	mc->addLayer(l);
-	
+    mc->addLayer(layer);
+
+    //Initialize points
+    firstPoint = NULL;
+    secondPoint = NULL;
+
 	// create a LineString
 	QList<Point*> points;
 	// Points with image
@@ -61,10 +70,10 @@ LinesAndPoints::LinesAndPoints(QWidget *parent)
 	LineString* ls = new LineString(points, "Busline 54", linepen);
 	
 	// Add the LineString to the layer
-    l->addGeometry(ls);
+    layer->addGeometry(ls);
 	
 	// Connect click events of the layer to this object
-	connect(l, SIGNAL(geometryClicked(Geometry*, QPoint)),
+    connect(layer, SIGNAL(geometryClicked(Geometry*, QPoint)),
 			  this, SLOT(geometryClicked(Geometry*, QPoint)));
 
     connect(mc,SIGNAL(mouseEventCoordinate(const QMouseEvent*,const QPointF)),
@@ -75,8 +84,13 @@ LinesAndPoints::LinesAndPoints(QWidget *parent)
 	view.append(QPointF(8.24764, 50.0319));
 	view.append(QPointF(8.28412, 49.9998));
 	mc->setView(view);
-	
+
+    mc->setView(QPointF(8.26,50));
+    mc->setZoom(13);
+
 	addZoomButtons();
+    mc->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+
 }
 
 void LinesAndPoints::addZoomButtons()
@@ -100,25 +114,39 @@ void LinesAndPoints::addZoomButtons()
 }
 
 void LinesAndPoints::mouseEventCoordinate(const QMouseEvent * evt, const QPointF point){
-    qDebug() << evt->type();
-    qDebug() << point.x() << "," << point.y();
+    if (evt->type()==QEvent::MouseButtonPress)
+        lastPoint = evt->pos();
+    if ((evt->type()==QEvent::MouseButtonRelease)&&(evt->pos()==lastPoint)){
+        qDebug() << evt->type();
+        qDebug() << point.x() << "," << point.y();
+
+        if (firstPoint==NULL){
+            qDebug()<<"Setting first point";
+            firstPoint = new QPointF(point);
+            label->setText("Click to select second point");
+
+        } else if (secondPoint==NULL){
+            qDebug()<<"Setting second point";
+            secondPoint = new QPointF(point);
+            label->setText("Searching...");
+        } else{
+            qDebug()<<"Setting first point again";
+            firstPoint = new QPointF(point);
+            delete secondPoint;
+            secondPoint = NULL;
+            label->setText("Click to select second point");
+            while (layer->getGeometries().length() > 0)
+                layer->removeGeometry(layer->getGeometries()[0]);
+        }
+
+        layer->addGeometry( new CirclePoint(point.x(),point.y(),15));
+
+        mc->updateRequestNew();
+    }
 
 }
 void LinesAndPoints::geometryClicked(Geometry* geom, QPoint point)
 {
-    if (geom->hasClickedPoints())
-            {
-                    QList<Geometry*> pp = geom->clickedPoints();
-                    for (int i=0; i<pp.size(); i++)
-                    {
-                            QMessageBox::information(this, geom->name(), pp.at(i)->name());
-                    }
-            }
-    //else if (geom->GeometryType == "Point")
-    //        {
-                    QMessageBox::information(this, geom->name(), QString("Position: ").append(QString().setNum(((Point*)geom)->longitude())).append(QString("/")).append(QString().setNum(((Point*)geom)->latitude())));
-    //        }
-
     qDebug() << "Clicked!" << point.x() << ","<< point.y();
     qDebug() << geom->clickedPoints()[0];
     qDebug() << "parent: " << geom->parentGeometry();
