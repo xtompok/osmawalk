@@ -32,11 +32,11 @@ class LinesAndPoints : public QWidget
                 struct search_data_t searchData;
 
         public slots:
-                void geometryClicked(Geometry* geom, QPoint coord_px);
+            //    void geometryClicked(Geometry* geom, QPoint coord_px);
                 void mouseEventCoordinate(const QMouseEvent * evt, const QPointF point);
 
         protected:
-                void keyPressEvent(QKeyEvent* evnt);
+           //     void keyPressEvent(QKeyEvent* evnt);
 
 };
 
