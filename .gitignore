@@ -9,9 +9,12 @@
 # Log files
 *.log
 
-# TeX logs
+# TeX stuff
 *.aux
 *.toc
+*.te~
+*.out
+*-eps-converted-to.pdf
 
 # TeX output
 *.dvi
@@ -26,9 +29,13 @@
 /osm/osmconvert
 /compiled/filter
 /compiled/search
+/QOsmWalk-build-Release
 
 # Generated includes
 /compiled/include
+
+# Generated Qt files
+*.pro.user
 
 # Profiler output
 gmon.out
