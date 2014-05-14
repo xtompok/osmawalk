@@ -1,5 +1,4 @@
 #include <ucw/lib.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -139,7 +138,6 @@ struct config_t parseConfigFile(char * filename){
 		}
 	}
 	for (int i=0;i<(conf.maxvalue+1);i++){
-	//	printf("Item: %d, speed: %f, ratio: %f\n",i,conf.speeds[i],conf.ratios[i]);
 		if (conf.speeds[i]==-1){
 			if (conf.ratios[i]==-1)
 				conf.speeds[i]=conf.speeds[wayIdx];
@@ -147,7 +145,6 @@ struct config_t parseConfigFile(char * filename){
 				conf.speeds[i]=conf.speeds[wayIdx]*conf.ratios[i];
 		}
 		conf.speeds[i]/=3.6;
-	//	printf("Item: %d, speed: %f\n",i,conf.speeds[i],conf.ratios[i]);
 	}
 	return conf;
 }
@@ -210,7 +207,6 @@ struct nodeways_t * makeNodeWays(Graph__Graph * graph){
 	nodeways = malloc(sizeof(struct nodeways_t)*graph->n_vertices);
 	for (int i=0;i<graph->n_vertices;i++){
 		nodeways[i].n_ways=0;
-//		printf("%f %f\n",graph->vertices[i]->lat,graph->vertices[i]->lon);
 	}
 	for (int i=0;i<graph->n_edges;i++){
 		nodeways[graph->edges[i]->vfrom].n_ways++;
@@ -234,7 +230,6 @@ struct nodeways_t * makeNodeWays(Graph__Graph * graph){
 }
 
 int findNearestVertex(Graph__Graph * graph, double lon, double lat){
-	printf("Lat: %f, lon: %f\n",lat,lon);
 	double minDist;
 	int minIdx;
 	minDist = DBL_MAX;
@@ -339,12 +334,13 @@ struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * d
 
 	if (!dijArray[toIdx].completed){
 		printf("Route not found\n");
+		*n_points = 0;
 		return NULL;
 	}
 
 	int count;
 	count = 1;
-	printf("D1: %f, D2:%f\n",dijArray[fromIdx].dist,dijArray[toIdx].dist);
+	printf("Dist: %f\n",dijArray[fromIdx].dist);
 	int idx;
 	idx = fromIdx;
 	while (idx != toIdx){
@@ -398,7 +394,6 @@ void writeGpxFile(struct search_data_t data, struct dijnode_t * dijArray,char * 
 		lat = data.graph->vertices[idx]->lat;
 		utm2wgs(data,&lon,&lat);
 		writeGpxTrkpt(OUT,lat,lon,0);
-		//printf("%f,%f,%d\n",graph->vertices[idx]->lat,graph->vertices[idx]->lon,graph->edges[dijArray[idx].fromEdgeIdx]->type);
 		idx = dijArray[idx].fromIdx;
 	}
 	writeGpxEndTrack(OUT);
@@ -449,8 +444,6 @@ struct search_result_t findPath(struct search_data_t data,double fromLat, double
 	result.n_points = n_points;
 	result.time = dijArray[fromIdx].dist;
 	return result;	
-
-
 }
 
 
