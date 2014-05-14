@@ -6,14 +6,11 @@
 #include <float.h>
 #include <inttypes.h>
 
+#include <yaml.h>
 #include <proj_api.h>
 #include <ucw/heap.h>
 
 #include "include/graph.pb-c.h"
-
-#include <yaml.h>
-
-#define SWEEP_TYPE int64_t
 #include "searchlib.h"
 #include "writegpx.h"
 
@@ -51,8 +48,6 @@ int main (int argc, char ** argv){
 	}
 	struct search_data_t data;
 	data = prepareData("../config/speeds.yaml","../data/praha-graph.pbf"); 
-//	printVertices(graph);
-//	return 0;
 
 	printf("Graph has %d vertices and %d edges\n",data.graph->n_vertices,data.graph->n_edges);
 	double lon;
