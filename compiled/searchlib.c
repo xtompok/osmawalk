@@ -438,12 +438,14 @@ struct search_result_t findPath(struct search_data_t data,double fromLat, double
 	int toIdx;
 	toIdx = findNearestVertex(data.graph,toLon,toLat);
 
-	printf("Searching from %lld(%f,%f) to %lld(%f,%f)\n",data.graph->vertices[fromIdx]->osmid,
+	printf("Searching from %lld(%f,%f,%d) to %lld(%f,%f,%d)\n",data.graph->vertices[fromIdx]->osmid,
 			data.graph->vertices[fromIdx]->lat,
 			data.graph->vertices[fromIdx]->lon,
+			data.graph->vertices[fromIdx]->height,
 			data.graph->vertices[toIdx]->osmid,
 			data.graph->vertices[toIdx]->lat,
 			data.graph->vertices[toIdx]->lon
+			data.graph->vertices[toIdx]->height
 			);
 
 	struct dijnode_t * dijArray;
