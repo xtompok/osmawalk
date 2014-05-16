@@ -37,7 +37,7 @@ double calcTime(Graph__Graph * graph, struct config_t conf,Graph__Edge * edge){
 	int toHeight;
 	fromHeight = graph->vertices[edge->vfrom]->height;
 	toHeight = graph->vertices[edge->vto]->height;
-	return fabs(edge->dist+5*(toHeight-fromHeight))/speed;
+	return fabs(edge->dist+5*(fromHeight-toHeight))/speed;
 }
 
 
