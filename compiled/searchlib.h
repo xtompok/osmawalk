@@ -59,13 +59,7 @@ struct search_data_t{
 
 int utm2wgs(struct search_data_t data, double * lon, double * lat);
 int wgs2utm(struct search_data_t data, double * lon, double * lat);
-static inline  double calcTime(struct config_t conf,Graph__Edge * edge){
-	double speed;
-	speed = conf.speeds[edge->type];
-	if (speed==0)
-		return DBL_MAX;
-	return edge->dist/speed;
-}
+double calcTime(Graph__Graph * graph,struct config_t conf,Graph__Edge * edge);
 
 struct config_t parseConfigFile(char * filename);
 Graph__Graph * loadMap(char * filename);

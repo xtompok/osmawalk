@@ -28,6 +28,18 @@ int wgs2utm(struct search_data_t data,double * lon, double * lat){
 	return pj_transform(data.pj_wgs84,data.pj_utm,1,1,lon,lat,NULL);
 }
 
+double calcTime(Graph__Graph * graph, struct config_t conf,Graph__Edge * edge){
+	double speed;
+	speed = conf.speeds[edge->type];
+	if (speed==0)
+		return DBL_MAX;
+	int fromHeight;
+	int toHeight;
+	fromHeight = graph->vertices[edge->vfrom]->height;
+	toHeight = graph->vertices[edge->vto]->height;
+	return (edge->dist+5*abs(fromHeight-toHeight))/speed;
+}
+
 
 // Loading 
 struct config_t parseConfigFile(char * filename){
@@ -310,7 +322,7 @@ void findWay(struct search_data_t data,struct dijnode_t * dijArray,int fromIdx, 
 			Graph__Edge * way;
 			way = graph->edges[nodeways[vIdx].ways[i]];
 			double len;
-			len = calcTime(data.conf,way);
+			len = calcTime(data.graph,data.conf,way);
 			if (dijArray[way->vto].dist <= (dijArray[vIdx].dist+len))
 				continue;
 			dijArray[way->vto].dist = dijArray[vIdx].dist+len;
