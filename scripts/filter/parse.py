@@ -4,6 +4,7 @@ import sys
 sys.path.append("../imposm-parser")
 
 import time
+import sys
 import yaml
 import pyproj
 import premap_pb2 as pb
@@ -15,13 +16,30 @@ from imposm.parser import OSMParser
 scale = 10
 
 class classifier():
-	def __init__(self,waysConf,areasConf,bridgesConf,tunnelsConf):
-                self.proj = pyproj.Proj(proj='utm', zone=33, ellps='WGS84')
+	def __init__(self,waysConf,areasConf,bridgesConf,tunnelsConf,srtm):
+		self.proj = pyproj.Proj(proj='utm', zone=33, ellps='WGS84')
 		self.Map = Map()
 		self.waysConf = waysConf
 		self.areasConf = areasConf
 		self.bridgesConf = bridgesConf
 		self.tunnelsConf = tunnelsConf
+		self.srtm = srtm
+
+	def calcHeight(self,lon, lat):
+		lon -= self.srtm.minlon
+		lat -= self.srtm.minlat
+		lon *= 1200
+		lat *= 1200
+		intlon = int(lon)
+		intlat = int(lat)
+		ll = self.srtm.raster[intlat][intlon]
+		lr = self.srtm.raster[intlat][intlat+1]
+		ul = self.srtm.raster[intlat+1][intlon]
+		ur = self.srtm.raster[intlat+1][intlon+1]
+		left = (lat-intlat)*ll+(1-lat+intlat)*ul
+		right = (lat-intlat)*lr+(1-lat+intlat)*ur
+		height = (lon-intlon)*left+(1-lon+intlon)*right
+		return int(height)
 
 	def ways_cb(self,ways):
 		for osmid,tags,refs in ways:
@@ -70,8 +88,9 @@ class classifier():
 		for osmid,tags,coords in nodes:
 			pbnode = pb.Node()
 			pbnode.id = int(osmid)
+			pbnode.height = self.calcHeight(coords[0],coords[1])
 			(lon,lat) = self.proj(coords[0],coords[1])
-                        pbnode.lat = int(lat*scale)
+			pbnode.lat = int(lat*scale)
 			pbnode.lon = int(lon*scale)
 			self.Map.nodes.append(pbnode)
 	
@@ -79,8 +98,9 @@ class classifier():
 		for (osmid,lon,lat) in coords:
 			pbnode = pb.Node()
 			pbnode.id = int(osmid)
+			pbnode.height = self.calcHeight(lon,lat)
 			(lon,lat) = self.proj(lon,lat)
-                        pbnode.lat = int(lat*scale)
+			pbnode.lat = int(lat*scale)
 			pbnode.lon = int(lon*scale)
 			self.Map.nodes.append(pbnode)
 
@@ -100,7 +120,22 @@ class classifier():
 				pbpol.refs.extend([int(item[0]) for item in refs])
 				pbpol.roles.extend([pbpol.OUTER if item[2]=="outer" else pbpol.INNER for item in refs])
 				self.Map.multipols.append(pbpol)
+class SRTM:
+    minlon = 0
+    minlat = 0
+    maxlon = 0
+    maxlat = 0
+    raster = [[]] 
 
+def loadSRTM(filename):
+    with open(filename) as srtmfile:
+	srtm = SRTM()
+	(srtm.minlon, srtm.minlat, srtm.maxlon, srtm.maxlat) = [ int(x) for x in srtmfile.readline().split(" ")]
+	srtm.raster=[[int(y) for y in x.split(" ")[:-2]] for x in srtmfile]
+	return srtm
+
+
+    
 
 def loadWaysConf(filename):
 	config = {}
@@ -118,7 +153,7 @@ def loadWaysConf(filename):
 			"unpaved":pbtypes.UNPAVED,
 			"steps":pbtypes.STEPS,
 			"highway":pbtypes.HIGHWAY,
-                        "bridge":pbtypes.BRIDGE
+			"bridge":pbtypes.BRIDGE
 			}
 	for cat in config.keys():
 		catenum = str2pb[cat]
@@ -148,8 +183,8 @@ def loadBoolConf(filename):
 	return boolcfg
 
 
-def parseOSMfile(filename,waysConf,areasConf,bridgesConf,tunnelsConf):	
-	clas = classifier(waysConf,areasConf,bridgesConf,tunnelsConf)
+def parseOSMfile(filename,waysConf,areasConf,bridgesConf,tunnelsConf,srtm):	
+	clas = classifier(waysConf,areasConf,bridgesConf,tunnelsConf,srtm)
 	p = OSMParser(concurrency=4, ways_callback=clas.ways_cb, nodes_callback=clas.nodes_cb, relations_callback=clas.relations_cb, coords_callback=clas.coords_cb)
 	p.parse(filename)
 	clas.Map.nodes.sort(key=lambda node: node.id)
@@ -170,9 +205,12 @@ areasConf=loadBoolConf(configDir+"area.yaml")
 bridgesConf=loadBoolConf(configDir+"bridge.yaml")
 tunnelsConf=loadBoolConf(configDir+"tunnel.yaml")
 
+# Load SRTM file
+srtm = loadSRTM("../../osm/heights.txt")
+
 # Parse file
 start = time.time()
-amap = parseOSMfile("../../osm/praha.osm",waysConf,areasConf,bridgesConf,tunnelsConf)
+amap = parseOSMfile("../../osm/praha.osm",waysConf,areasConf,bridgesConf,tunnelsConf,srtm)
 end = time.time()
 print "Parsing took "+str(end-start)
 
