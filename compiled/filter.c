@@ -940,7 +940,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 			l2 = lines[evt.line2Idx];
 
 			if (l1.ended || l2.ended){
-				printf("Invalid intersection\n");
+			//	printf("Invalid intersection\n");
 				continue;
 			}
 
@@ -985,7 +985,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 			struct int_event_t intevt;
 
 			if (prev){
-				printf("Int after int\n");
+			//	printf("Int after int\n");
 				intevt = makeIntEvent(lines,lowerIdx,prev->lineIdx,evt.lon);
 				if (intevt.lineIdx!=-1){
 					GARY_PUSH(intQueue);
@@ -993,7 +993,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 				}
 			}
 			if (next){
-				printf("Int after int\n");
+			//	printf("Int after int\n");
 				intevt = makeIntEvent(lines,higherIdx,next->lineIdx,evt.lon);
 				if (intevt.lineIdx!=-1){
 					GARY_PUSH(intQueue);
@@ -1408,7 +1408,7 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 		queue[0]=lastIdx;
 	}
 
-	printf("Nodes: %d\n",nodescnt);
+	//printf("Nodes: %d\n",nodescnt);
 
 	Graph__Vertex ** newVertices;
 	newVertices = malloc(sizeof(Graph__Vertex *)*nodescnt);
@@ -1422,7 +1422,7 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 			oldIdx++;
 		newVertices[i]=graph->vertices[oldIdx];
 		newVertIdxs[oldIdx]=i;
-		printf("%d -> %d\n",oldIdx,i);
+	//	printf("%d -> %d\n",oldIdx,i);
 		oldIdx++;
 
 	}
@@ -1478,6 +1478,8 @@ Graph__Graph * makeSearchGraph(struct map_t map){
 		v->osmid = map.nodes[i]->id;
 		v->lat = int2deg(map.nodes[i]->lat);
 		v->lon = int2deg(map.nodes[i]->lon);
+		v->height = map.nodes[i]->height;
+		v->has_height = true;
 		vertices[i]=v;
 	}
 	graph->vertices = vertices;
