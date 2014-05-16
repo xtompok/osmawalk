@@ -393,10 +393,11 @@ def mergeMultipolygons(amap):
 	print "With Inner: ",winner
 	print "Without Inner: ",woinner
 
-def divideEdge(slon,slat,elon,elat,cnt):
+def divideEdge(slon,slat,shgt,elon,elat,ehgt,cnt):
 	dlon = (elon-slon)/cnt;
 	dlat = (elat-slat)/cnt;
-	lonlats = [(slon+i*dlon,slat+i*dlat) for i in range(1,cnt)]
+	dhgt = (ehgt-shgt)/cnt;
+	lonlats = [(slon+i*dlon,slat+i*dlat,shgt+i*dhgt) for i in range(1,cnt)]
 	return lonlats
 
 def divideLongEdges(amap):
@@ -416,12 +417,13 @@ def divideLongEdges(amap):
 			if dist<30:
 				continue
 			replace=True
-			lonlats = divideEdge(ref1.lon,ref1.lat,ref2.lon,ref2.lat,int(dist/20))
-			for lon,lat in lonlats:
+			lonlats = divideEdge(ref1.lon,ref1.lat,ref1.height,ref2.lon,ref2.lat,ref2.height,int(dist/20))
+			for lon,lat,hgt in lonlats:
 				newnode = pb.Node()
 				newnode.id = amap.newNodeid()
 				newnode.lon = lon
 				newnode.lat = lat
+				newnode.height = hgt
 				newnode.inside = ref1.inside and ref2.inside
 				newway.refs.append(newnode.id)
 				amap.nodes.append(newnode)
