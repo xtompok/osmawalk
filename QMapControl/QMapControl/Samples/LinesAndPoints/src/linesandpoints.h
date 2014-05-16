@@ -18,6 +18,7 @@ class LinesAndPoints : public QWidget
 
         private:
                 MapControl* mc;
+                Layer * l;
                 void addZoomButtons();
 
         public slots:

@@ -30,7 +30,7 @@ LinesAndPoints::LinesAndPoints(QWidget *parent)
 	
 	// create layer
 	MapAdapter* mapadapter = new OSMMapAdapter();
-	Layer* l = new MapLayer("Custom Layer", mapadapter);
+    l = new MapLayer("Custom Layer", mapadapter);
 	
 	mc->addLayer(l);
 	
@@ -102,7 +102,10 @@ void LinesAndPoints::addZoomButtons()
 void LinesAndPoints::mouseEventCoordinate(const QMouseEvent * evt, const QPointF point){
     qDebug() << evt->type();
     qDebug() << point.x() << "," << point.y();
-
+    Point * cPoint;
+    cPoint = new CirclePoint(point.x,point.y);
+    l->addGeometry(cPoint);
+    mc->updateView();
 }
 void LinesAndPoints::geometryClicked(Geometry* geom, QPoint point)
 {
