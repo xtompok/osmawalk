@@ -1,3 +1,4 @@
+// Compile with gcc -std=c99 -lm -o merge-srtm merge-srtm.c
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -6,7 +7,7 @@
 int main(int argc, char ** argv){
 	if (argc != 5){
 		printf("Usage: %s minlat minlon maxlat maxlon\n",argv[0]);
-		return 0;
+		return 1;
 	}
 	
 	int minlon;
