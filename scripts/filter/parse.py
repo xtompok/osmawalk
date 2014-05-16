@@ -32,10 +32,12 @@ class classifier():
 		lat *= 1200
 		intlon = int(lon)
 		intlat = int(lat)
+		
 		ll = self.srtm.raster[intlat][intlon]
-		lr = self.srtm.raster[intlat][intlat+1]
+		lr = self.srtm.raster[intlat][intlon+1]
 		ul = self.srtm.raster[intlat+1][intlon]
 		ur = self.srtm.raster[intlat+1][intlon+1]
+
 		left = (lat-intlat)*ll+(1-lat+intlat)*ul
 		right = (lat-intlat)*lr+(1-lat+intlat)*ur
 		height = (lon-intlon)*left+(1-lon+intlon)*right
