@@ -7,8 +7,10 @@ průchozí prostranství a nakonec ze všech dat vytvoříme vyhledávací graf.
 
 \section{Klasifikace OSM dat}
 V~našem formátu pro přípravu dat jsou cesty a multipolygony rozděleny do
-kategorií podle typů objektů, které reprezentují. Kategorie jsou
-následující:
+kategorií podle toho, jaký skutečný objekt je jimi reprezentován. Cesty vzniklé
+jako zkratky přes průchozí prostranství dostanou kategorii plochy, přes kterou
+vedou. Když následně hledáme cestu, můžeme jednotlivým kategoriím přiřadit
+rychlosti, jakými se po nich pohybujeme. Kategorie jsou následující:
 \begin{itemize}
 	\item \verb|WAY| -- cesta, o~které nic nevíme, rezervováno pro speciální
 	případy
@@ -23,8 +25,9 @@ následující:
 	\item \verb|STEPS| -- schody
 	\item \verb|HIGHWAY| -- silnice, silnice s~chodníkem
 	\item \verb|BARRIER| -- překážka pro chodce nepřekonatelná, typ se
-	nerozlišuje, například budova, řeka, plot
-	\item \verb|DIRECT| -- spojka mezi cestami
+	nerozlišuje, například budova, řeka, plot, dálnice
+	\item \verb|DIRECT| -- spojka mezi cestami -- krátké cesty generované
+	pro doplnění chybějících napojení chodníků na silnice apod.
 \end{itemize}
 Rozdělení do kategorií probíhá s~pomocí konfiguračního souboru, ve kterém můžeme
 zvolit jaké atributy mají objekty mít, aby patřily do dané kategorie. Protože
@@ -33,15 +36,17 @@ pro určení, zda jde o~plochu, použity údaje z~konfiguračního souboru. Po
 rozdělení objektů do kategorií jsou smazány body, které neleží na žádné cestě,
 protože takovéto body dále nikde nepotřebujeme.
 
-\section{Převod multipolygonů na cesty}
-Multipolygony popisují objekty se složitější strukturou. Každý multipolygon se
-skládá z~několika cest, přičemž cesty mohou být vnější -- obvodové -- a
-vnitřní, pokud má objekt díry. Při správné definici by mělo sjednocení cest
-vypadat jako několik kružnic. Takto je také řešen převod multipolygonů na běžné
-cesty. Dokud má nějaké vnější cesty, pokusíme se z~nich složit kružnici.  Pokud
-se stane, že některý segment kružnice chybí, je vypsána chyba a multipolygon se
-dále nezpracovává. Stejně tak, pokud kružnice končí v~nějakém svém bodě, který
-ale není počáteční. 
+\section{Převod multipolygonů na obvodové cesty}
+Protože plochy popisované pomocí multipolygonů mají složitou strukturu a obtížně
+by se nám s nimi pracovalo, nahradíme multipolygony cestami reprezentujícími
+vnější obvody jednotlivých komponent multipolygonů.
+
+Abychom vytvořili obvody jednotlivých komponent, potřebujeme vědět, které cesty
+patří do které komponenty.  Dokud nám nějaké cesty zbývají, skládáme z nich
+obvody komponent. Cesty na obvodu smažeme a nahradíme jednou uzavřenou cestou
+reprezentující celý obvod komponenty. Pokud nemůžeme vytvořit ze zbývajících
+cest kružnici -- obvod, pak vypíšeme chybu a multipolygon dále nezpracováváme.
+Stejně se zachováme i v případě, že kružnice končí v jiném než počátečním bodě.
 
 \section{Spojení budov}
 Ve městě jsou velmi časté bloky budov. V~OSM datech jsou budovy reprezentovány
@@ -73,7 +78,7 @@ rovnoměrně rozdělíme na kratší.
 \section{Spojky mezi cestami}
 Jak již bylo zmíněno, chodníky jsou v~OSM zmapovány jen některé a často nejsou
 na sebe správně navázány. Proto jsme se rozhodli prohledat okolí každého uzlu a
-spojit každé dva uzly, které jsou k~sobě blíže než 20 m, úsečkou. Při zkoumání
+spojit každé dva uzly, které jsou k~sobě blíže než 20\,m, úsečkou. Při zkoumání
 OSM dat jsme zjistili, že mnohé obytné domy kolem sebe nemají značené ploty a
 proto jsme vzdálenost zvolili takto nízkou, protože poté je pravděpodobnost, že
 jde například o~dvě ulice oddělené domky se zahrádkami, poměrně malá.  
