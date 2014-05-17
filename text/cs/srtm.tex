@@ -1,5 +1,21 @@
 \chapter{Výšková data}
 Abychom mohli správně odhadnout náročnost pěší trasy, musíme znát i informace
 o~nadmořské výšce jednotlivých bodů. Stejně tak jako většina jiných projektů jsme
-použili data SRTM\cite{srtmweb}, což jsou volně dostupná výšková data pro celý
-svět. % TODO Přepsat!  
+použili data SRTM \cite{srtmweb}, což jsou volně dostupná výšková data pro celý
+svět.
+
+Shuttle Radar Topography Mission byl projekt NASA, kdy při letu raketoplánu
+Enedavour v roce 2000 byla pomocí radarové interferometrie změřena velká část
+Země a zpracovaná data byla následně poskytnuta volně k dispozici.
+\footnote{\url{http://dds.cr.usgs.gov/srtm/version2_1/}}. 
+
+Výšková data byla měřena po třech úhlových vteřinách (v USA po jedné vteřině),
+tudíž v České republice jsou data v mřížce $90\times60$\,m. Data jsou rozdělena
+do tabulek po jednom stupni, přičemž sousední tabulky se vždy jedním sloupcem
+nebo řádkem překrývají. Každá tabulka má tedy 1201 sloupců a 1201 řádků, kde
+řádky odpovídají zeměpisné šířce a sloupce zeměpisné délce.
+
+Nadmořské výšky jsou kódovány celými 16bitovými čísly v big-endian udávajícími
+nadmořskou výšku v metrech. Pokud se v některém místě nepodařilo výšku změřit,
+je udávána jako -32768. Tabulka je kódována jako binární soubor, kde jsou
+jednotlivé řádky zapsány za sebou.
