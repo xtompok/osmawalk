@@ -47,9 +47,9 @@ struct raster_t makeRaster(struct map_t map){
 	raster.steplon = (dlon+raster.lonparts-1)/raster.lonparts;
 	raster.steplat = (dlat+raster.latparts-1)/raster.latparts;
 
-	GARY_INIT(raster.raster,raster.lonparts);
+	raster.raster=malloc(sizeof(raster.raster[0])*raster.lonparts);
 	for (int i=0;i<raster.lonparts;i++){
-		GARY_INIT(raster.raster[i],raster.latparts);
+		raster.raster[i] = malloc(sizeof(raster.raster[0][i])*raster.latparts);
 		for (int j=0;j<raster.latparts;j++){
 			GARY_INIT(raster.raster[i][j],0);	
 		}
