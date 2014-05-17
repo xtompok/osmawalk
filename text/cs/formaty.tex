@@ -93,7 +93,8 @@ a naopak některé údaje, které vytváříme během zpracování, by se v~něm
 reprezntovaly. Základní struktura zůstává zachována. Mapu ukládáme jako zprávu
 \verb|Map|, která obsahuje seznamy zpráv \verb|Node| pro uzly, \verb|Way| pro
 cesty a \verb|Multipolygon| pro multipolygony. Jiné typy relací nejsou
-využívány, proto se do tohoto formátu neukládají.
+využívány, proto se do tohoto formátu neukládají. Tento formát také nazýváme
+premap\label{label:premap}.
 
 Zpráva \verb|Node| pro uzel obsahuje položky:
 \begin{itemize}
@@ -118,7 +119,8 @@ Zpráva \verb|Way| pro cestu obsahuje položky:
 	\item \verb|area| -- logická hodnota určující, jestli jde o plochu
 	%\item \verb|barrier| -- logická hodnota určující, jestli je daná cesta
 	%překážkou
-	\item \verb|type| -- kategorie reprezentovaného objektu TODO: odkaz
+	\item \verb|type| -- kategorie reprezentovaného objektu (viz str. 
+	\pageref{label:kategorie})
 	%\item \verb|bordertype| -- pokud je cesta plocha, jakým způsobem je
 	%ohraničena
 	%\item \verb|crossing| -- jaké kategorie cest cesta kříží
