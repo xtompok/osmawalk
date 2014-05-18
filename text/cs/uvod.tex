@@ -1,21 +1,18 @@
 \chapwithtoc{Úvod}
 
-Problém hledání cesty ve městě je častý pro většinu lidí. Ve městě se vyskytuje
+Hledání cesty ve městě je častou situací většiny lidí. Ve městě se vyskytuje
 mnoho různých překážek jako jsou ploty, zábradlí či frekventované silnice,
-stejně tak jako mnoho průchozích prostranství, jako jsou náměstí, parky či sady.
-Dobrý vyhledávač by se měl umět překážkám vyhnout a měl by také umět využívat
-průchozí prostranství. V~naší práci se snažíme ukázat, jak takovéto věci řešit.
-
-Našim cílem je vytvořit vyhledávač spojení ve městě, který bude umět vhodně
-kombinovat pěší cesty a cesty městskou hromadnou dopravou. Tato práce by měla
-být jedním z~modulů budoucí aplikace a měla by zajišťovat právě vyhledávání
-pěších cest.
+i mnoho průchozích prostranství, například náměstí, parky či sady. V naší práci
+se snažíme z mapových dat vytvořit formát vhodný pro rychlé vyhledávání pěších
+tras využívajících i průchozí prostranství. Tato práce by měla být jedním z~modulů
+budoucí aplikace pro vyhledávání spojení pěšky a MHD po městě. 
 
 %\section{Co chci počítat}
 Abychom mohli rychle vyhledávat pěší trasy, potřebujeme k~tomu mít mapu vhodně
-reprezentovanou. Vstupní mapová data cheme převést do vhodného formátu, který
-bude obsahovat všechny potřebné informace, budeme schopni v~něm rychle
-vyhledávat a nebudeme muset dělat náročné výpočty. 
+reprezentovanou. Vstupní mapová data postupně zpracováváme a vybíráme z nich
+použitelné informace. Na konci tohoto procesu vytvoříme graf popisující možné
+pěší trasy. V tomto grafu již můžeme vyhledávat pomocí grafových algoritmů pro
+hledání cest, v ukázkové aplikaci využíváme Dijkstrův algoritmus. 
 
 %\section{Zdroje dat}
 Abychom mohli vyhledávat trasy, potřebujeme k~tomu vhodné mapové podklady.
@@ -33,3 +30,4 @@ aplikace -- Google Maps a Mapy.cz. Také jsme nalezené trasy porovnávali s~jin
 vyhledávači používajícími data OSM -- OsmAnd a TODO. Nalezené trasy jsme také
 porovnávali s~vlastní znalostí terénu a skutečně používaných cest.
 
+%TODO: obrazek - vstupni data a vystupni data
