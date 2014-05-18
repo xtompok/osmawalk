@@ -37,6 +37,7 @@ struct dijnode_t {
 struct point_t {
 	double lat;
 	double lon;
+	int height;
 	int type;	
 };
 

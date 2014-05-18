@@ -1,0 +1,127 @@
+\chapter{Hledání tras}
+Součástí naší práce bylo i vytvoření jednoduchého vyhledávače nad připravenými
+daty. Vyhledávač má textový i grafický režim a cestu hledá Dijkstrovým
+algoritmem. Rychlosti přesunu po jednotlivých kategoriích (viz str.
+\pageref{label:kategorie}) můžeme nastavit pomocí konfiguračního souboru.
+Program také umožňuje uložit nalezenou trasu jako soubor GPX. \cite{gpxspec}  
+
+\section{Konfigurace}
+Vyhledávač umožňuje konfigurovat rychlosti pohybů po hranách jednotlivých
+kateogrií dvěma způsoby. První je zadáním absolutní rychlosti a druhý je zadáním
+poměru k rychlosti pohybu po obecné cestě. Také je možné konfigurovat penalizaci
+za převýšení.
+
+Konfigurační soubor \verb|speeds.yaml| je ve formátu YAML: \cite{yamlspec} 
+\begin{verbatim}
+speeds:
+        WAY: 6
+        PARK: 4
+        GREEN: 3
+ratios:
+        PAVED: 1.2
+        STEPS: 0.6
+heights:
+        upscale: 1
+        downscale: 1
+\end{verbatim}
+Konfigurační soubor obsahuje mapu se třemi klíči:
+\begin{itemize}
+	\item Klíč \verb|speeds| slouží k nastavení absolutních rychlostí pohybu
+	pro jednotlivé kategorie hran. Obsahuje jako hodnotu mapu, jejímiž klíči jsou
+	názvy kategorií a hodnotami rychlosti pohybu po cestách dané kategorie v
+	kilometrech za hodinu. Vždy je potřeba nastavit rychlost pro kategorii
+	\verb|WAY|, z ní se počítají poměrné rychlosti.
+	\item Klíč \verb|ratios| slouží k nastavení poměrných rychlostí vzhledem
+	k rychlosti kategorie \verb|WAY|. Jeho hodnotou je stejná mapa jako u
+	klíče \verb|speeds|, ale jako hodnoty se udávají poměry k rychlosti
+	kategorie \verb|WAY|. Pokud se nějaká kategorie vyskytne v mapách pro
+	oba klíče \verb|speeds| a \verb|ratios|, má prioritu absolutní rychlost
+	z klíče \verb|speeds|.
+	\item Klíč \verb|heights| umožňuje nastavit penalizaci za převýšení.
+	Jako hodnotu obsahuje mapu s klíči \verb|upscale| a \verb|downscale|,
+	které udávají, za kolik vodorovných metrů se bude počítat jeden metr
+	převýšení při chůzi směrem do kopce a z~kopce. Je možné nastavit kladné,
+	záporné hodnoty i nulu, při které se bude převýšení ignorovat. Pokud by
+	měla cesta mít po započítání převýšení zápornou délku, je délka
+	považována za nulovou.
+\end{itemize}
+
+\section{Dijkstův algoritmus}
+Dijkstrův algoritmus \cite{dijkstra} slouží k nalezení nejkratší cesty mezi dvěma vrcholy grafu.
+Algoritmus postupně prohledává graf a zpracovává vrcholy. Vrcholy mohou mít tři
+stavy: nedosažený, otevřený a zpracovaný. U každého vrcholu $v$ také udržujeme
+nejkratší dosud známou vzdálenost $d(v)$ z výchozího vrcholu do daného vrcholu. 
+Během procházení grafu si udržujeme seznam otevřených vrcholů. Délku hrany
+$(u,v)$ budeme označovat $l(u,v)$
+
+Na začátku jsou všechny vrcholy nedosažené a jejich vzdálenost je nekonečno.
+Označíme výchozí vrchol jako otevřený a přidáme ho do seznamu. Jeho vzdálenost
+změňíme na nulu a následně opakujeme následující postup:
+\begin{enumerate}
+	\item Odebereme ze seznamu vrchol $v$ s nejmenší vzdáleností. 
+	\item Pokud je $v$ vrchol cílový, našli jsme nejkratší cestu a končíme.
+	\item Všem jeho nedosaženým sousedům $u$ nastavíme $d(u)=d(v)+l(v,u)$,
+	označíme je jako otevřené a přidáme je do seznamu oteřených vrcholů.
+	\item Pokud pro nějakého otevřeného souseda $u$ platí $d(u) >
+	d(v)+l(u,v)$, pak upravíme $d(u)$ na $d(u)=d(v)+l(v,u)$.
+	\item Vrchol $v$ označíme za zpracovaný.
+\end{enumerate}
+
+
+\section{Implementace}
+Výkonný kód je uložen v souboru \verb|searchlib.c|, jak textový vyhledávač
+\verb|search|, tak grafický vyhledávač \verb|QOsmWalk| jsou pouze nadstavby
+volající funkce definované v \verb|searchlib.c|. Program vyžaduje knihovny {\tuc libyaml} a
+{\tuc PROJ.4}. Program také používá makra z~{\tuc LibUCW}, ale nepotřebuje být s touto
+knihovnou slinkován. Grafická nadstavba \verb|QOsmWalk| je napsána v prostředí
+Qt.
+
+Soubor \verb|searchlib.c| poskytuje dvě funkce, které pokrývají plně potřeby
+vyhledávače. První z nich je funkce \verb|prepareData|, která načte vyhledávací
+graf a konfigurační soubor s rychlostmi, připraví data pro konverzi WGS-84
+$\leftrightarrow$ UTM, vytvoří pole \verb|nodeWays|, které pro každý vrchol
+obsahuje seznam hran s ním incidentních a spočítá a uloží délky všech hran. Tuto
+funkci stačí zavolat jen jednou při startu programu a uložit si strukturu s
+připravenými daty pro hledání, kterou vrátí.
+
+Druhou z funkcí je \verb|findPath|, která slouží k opakovanému hledání pěších
+tras. Tato funkce dostane data připravená první funkcí a dvojici zeměpisných
+souřadnic a najde cestu mezi vrcholem v grafu nejblíže prvním souřadnicím a
+vrcholem v grafu nejblíže druhým souřadnicím. Funkce vrátí strukturu typu
+\verb|search_result_t| obsahující pole vrcholů popisující trasu a údaje o délce
+trasy.
+
+Při hledání trasy nejprve převedeme zadané zeměpisné souřadnice do formátu UTM,
+ve kterém jsou uloženy souřadnice bodů v grafu, a následně najdeme nejbližší
+vrchol k zadaným souřadnicím. Poté si připravíme struktury pro Dijkstův
+algoritmus a pomocí něj najdeme nejkratší trasu. Nakonec projdeme grafem po
+zpětných hranách a vytvoříme pole obsahující procházené body trasy a vrátíme
+výsledek.
+
+Abychom mohli spustit Dijkstrův algoritmus, potřebujeme si pro každý vrchol
+pamatovat pomocná data. Tato data nemáme uložena přímo v grafu, ale v poli
+\verb|dijArray|, které má za položky struktury typu \verb|dijnode_t|. Tyto
+struktury obsahují následující položky:
+\begin{itemize}
+	\item \verb|fromIdx| -- ze kterého vrcholu jsme přišli 
+	\item \verb|fromEdgeIdx| -- po které hraně jsme přišli
+	\item \verb|reached| -- bylo už vrcholu dosaženo? 
+	\item \verb|completed| -- byl už vrchol zpracován?
+	\item \verb|dist| -- délka nejkratší známé cesty do daného vrcholu
+\end{itemize}
+
+Dijkstrův algoritmus jsme při implementaci mírně upravili. Jednak si při každé
+zněně vzdálenosti do nějakého vrcholu uložíme, z jakého vrcholu jsme do něj
+přišli a po které hraně. Díky tomu pak můžeme projít zpět po těchto uložených
+hranách a získáme tím i vrcholy nejkratší cesty. Další úpravou je obrácení směru
+hledání od cílového vrcholu k výchozímu. Potom je průchod po zpětných hranách
+přímo průchod nejkratší cestou od výchozího bodu k cílovému. Protože ale
+používáme i výšky jednotlivých vrcholů, nejsou hrany v obou směrech stejně
+ohodnocené a proto při hledání od cíle k výchozímu vrcholu musíme počítat s
+výškami, jako bychom šli v opačném směru, než je hrana.
+
+Když je cesta nalezena, jen projdeme po zpětných hranách a uložíme nalezenou
+cestu do pole. Běhm procházení nalezené cesty převádíme souřadnice vrcholů zpět
+z UTM do WGS-84 a v této soustavě je také ukládáme v poli. Každý vrchol má také
+uložen v prvku \verb|type| kategorii hrany, po níž přechází do následujícího
+vrcholu. Poslední vrchol má kategorii nastavenu na -1.

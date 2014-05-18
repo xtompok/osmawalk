@@ -236,6 +236,71 @@ spojku. Projdeme tedy všechny cesty a na každé kontrolujeme délky úseků. P
 najdeme úsek delší než 30 metrů, rozdělíme ho po 20 metrech vytvořením nových
 uzlů vložených mezi stávající.
 
+\section{Výpočet průsečíku úseček}
+V následujících částech budeme čast počítat průsečík úseček. Nyní si odvodíme
+vzorec pro výpočet průsečíku přímek, pro úsečky stačí jen navíc kontrolovat,
+jestli nalezený průsečík leží na obou úsečkách.
+
+
+Mějme dvě přímky $p,q$ a body $A,B,C,D$ takové, že $A,B \in p$ a $C,D \in q$.
+Nechť body mají následující souřadnice: $A=[x_1,y_1], B=[x_2,y_2], C=[x_3,y_3]$
+a $D=[x_4,y_4]$. Hledáme průsečík $P = [x,y]$ přímek $p$ a $q$.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics{../img/prusecik.pdf}
+	\caption{Průsečík dvou přímek}
+	\label{fig:prusecik}
+\end{figure}
+
+Průsečík musí ležet na obou přímkách a proto musí splňovat jejich obecné rovnice
+$ax+by+c=0$.  Vyjádřeme si nyní obecné rovnice obou přímek. To můžeme
+nejjednodušeji udělat pomocí normálových vektorů přímek. Mějme směrové vektory
+přímek $p$: $u = (x_2-x_1,y_2-y_1)$ a $q$: $v=(x_4-x_3,y_4-y_3)$ pak normálové
+vektory získáme jako $m = (-u_y,u_x)$ a $n = (-v_y,v_x)$. Obecná rovnice přímky
+$p$ pak bude $m_xx+m_yy=c$ a přímky $q$ bude $n_xx+n_yy=d$. Koeficienty $c$ a
+$d$ získáme dosazením bodů $A$ a $C$ do rovnic: $c = m_xx_1+m_yy_1$,
+$d=n_xx_3+n_yy_3$ Pro průsečík musí platit obě rovnice, tedy 
+\begin{eqnarray*}
+m_xx+m_yy &=& m_xx_1+m_yy_1\\
+n_xx+n_yy &=& n_xx_3+n_yy_3\\
+\end{eqnarray*}
+Tuto soustavu dvou rovnic o dvou neznámých můžeme řešit například Cramerovým
+pravidlem $x_i = \frac{|A_i|}{|A|}$
+
+$$x = \frac{
+	\begin{vmatrix}
+		c & m_y \\
+		d & n_y
+	\end{vmatrix}
+}
+{
+	\begin{vmatrix} 
+		m_x & m_y \\
+		n_x & n_y 
+	\end{vmatrix}
+}\,\!,\qquad
+y = \frac{
+	\begin{vmatrix}
+		m_x & c \\
+		n_x & d
+	\end{vmatrix}
+}
+{
+	\begin{vmatrix} 
+		m_x & m_y \\
+		n_x & n_y 
+	\end{vmatrix}
+}
+$$
+
+Pokud si vzorec roznásobíme, získáme pro $x$-ovou souřadnici zlomek:
+$$
+x=\frac{(x_1 y_2-y_1 x_2)(x_3-x_4)-(x_1-x_2)(x_3 y_4-y_3 x_4)}
+{(x_1-x_2)(y_3-y_4)-(y_1-y_2)(x_3-x_4)}$$
+Tímto výrazem pak dokážeme jednoduše spočítat průsečík dvou přímek, pokud známe
+souřadnice dvou bodů na každé z nich.
+
 \section{Reprezentace čísel}
 V~průběhu dalšího zpracování budeme potřebovat počítat průsečíky úseček daných
 uzly. Protože průsečíky úseček nebudou mít celočíselné souřadnice, je potřeba
@@ -253,55 +318,16 @@ podle pravidla $\frac{a}{b} < \frac{c}{d} \Leftrightarrow a\cdot d < c\cdot b $.
 Pokud se nám ale stane, že porovnáváme dva zlomky, které mají vysoký čitatel i
 jmenovatel, nemusí nám 64 bitů přesnosti stačit.
 
-Průsečíky počítáme dle vzorce z~MathWorldu\cite{lineint}. Pro úsečky $a$ a $b$
-s~krajními body $a=((x_1,y_1),(x_2,y_2))$ a $b=((x_3,y_3),(x_4,y_4))$ najdeme
-průsečík $(P_x,P_y)$  takto:
-$$P_x = \frac{
-	\begin{vmatrix}
-		\begin{vmatrix} x_1 & y_1\\x_2 & y_2\end{vmatrix} &  
-		\begin{vmatrix} x_1 & 1\\x_2 & 1\end{vmatrix} \\\\ 
-		\begin{vmatrix} x_3 & y_3\\x_4 & y_4\end{vmatrix} & 
-		\begin{vmatrix} x_3 & 1\\x_4 & 1\end{vmatrix} 
-	\end{vmatrix}
-}
-{
-	\begin{matrix} 
-		\begin{vmatrix} x_1 & 1\\x_2 & 1\end{vmatrix} & 
-		\begin{vmatrix} y_1 & 1\\y_2 & 1\end{vmatrix} \\\\
-		\begin{vmatrix} x_3 & 1\\x_4 & 1\end{vmatrix} & 
-		\begin{vmatrix} y_3 & 1\\y_4 & 1\end{vmatrix} 
-	\end{matrix}
-}\,\!,\qquad
-P_y = \frac{
-	\begin{vmatrix}
-		\begin{vmatrix} x_1 & y_1\\x_2 & y_2\end{vmatrix} &
-		\begin{vmatrix} y_1 & 1\\y_2 & 1\end{vmatrix} \\\\
-		\begin{vmatrix} x_3 & y_3\\x_4 & y_4\end{vmatrix} &
-		\begin{vmatrix} y_3 & 1\\y_4 & 1\end{vmatrix} 
-	\end{vmatrix} 
-}
-{
-	\begin{vmatrix}
-		\begin{vmatrix} x_1 & 1\\x_2 & 1\end{vmatrix} &
-		\begin{vmatrix} y_1 & 1\\y_2 & 1\end{vmatrix} \\\\
-		\begin{vmatrix} x_3 & 1\\x_4 & 1\end{vmatrix} &
-		\begin{vmatrix} y_3 & 1\\y_4 & 1\end{vmatrix} 
-	\end{vmatrix}
-}\,\!$$
-Pokud si vzorec roznásobíme, získáme pro $x$-ovou souřadnici čitatele:
-$$
-{cit = (x_1 y_2-y_1 x_2)(x_3-x_4)-(x_1-x_2)(x_3 y_4-y_3 x_4)}
-$$ a jmenovatele $$
-{jm = (x_1-x_2)(y_3-y_4)-(y_1-y_2)(x_3-x_4)}$$
 Předpokládejme, že máme město velikosti Prahy, což je přibližně $20 \times
 30$\,km s~přesností na 10\,cm. O~úsečkách víme, že žádná nebude delší než 300
 metrů, tudíž rozdíl jejich souřadnic nebude větší než 3\,000. Pokud budeme
-maximalizovat jmenovatele, ze vzorce vychází, že můžeme dosáhnout nejvýše 9
-milionů, protože jde o~součet dvou rozdílů souřadnic a každý bude nejvýše 3000.
+maximalizovat jmenovatele, ze vzorce pro výpočet průsečíku vychází, že můžeme
+dosáhnout nejvýše 9 milionů, protože jde o~součet dvou rozdílů souřadnic a každý
+bude nejvýše 3\,000.
 
 Tato situace opravdu může nastat, například pro vodorovnou a svislou úsečku
-o~délce 300\,m, dotýkající se v~krajním bodě, tzn. $a=((3000,0),(0,0))$,
-$b=((0,3000),(0,0))$. Tyto dvě mají průsečík, tudíž se nám mohou při počítání
+o~délce 300\,m, dotýkající se v~krajním bodě, tzn. $A=(3000,0),B=(0,0)$,
+$C=(0,3000),D=(0,0)$. Tyto dvě mají průsečík, tudíž se nám mohou při počítání
 vyskytnout. Pokud nyní vezmeme téměř totožnou situaci, ale úsečky budou posunuty
 směrem k~maximu $x$-ové osy, pak bude $x$-ová souřadnice reprezentovat číslo
 30\,km při přesnosti 10\,cm ve zlomku se jmenovatelem 9 milionů. Bude to tedy

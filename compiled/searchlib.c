@@ -309,10 +309,12 @@ void findWay(struct search_data_t data,struct dijnode_t * dijArray,int fromIdx, 
 	heapIndex[fromIdx]=1;
 	HEAP_INSERT(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,fromIdx);
 
-	while(!dijArray[toIdx].completed){
+	while(true){
 		HEAP_DELETE_MIN(int,heap,n_heap,DIJ_CMP,DIJ_SWAP);
 		int vIdx;
 		vIdx = heap[n_heap+1];
+		if (vIdx == toIdx)
+			break;
 		
 		if (!dijArray[vIdx].reached){
 			printf("Found unreached vertex, exitting\n");
@@ -375,6 +377,7 @@ struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * d
 		utm2wgs(data,&lon,&lat);
 		results[count].lat = lat;
 		results[count].lon = lon;
+		results[count].height = graph->vertices[idx]->height;
 		results[count].type = graph->edges[dijArray[idx].fromEdgeIdx]->type;
 		idx = dijArray[idx].fromIdx;
 		count++;

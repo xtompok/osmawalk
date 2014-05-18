@@ -144,18 +144,18 @@ def loadWaysConf(filename):
 	with open(filename) as conffile:
 		config = yaml.load(conffile.read())
 	ways={}
-	str2pb = {"ignore": pbtypes.IGNORE, 
-			"barrier":pbtypes.BARRIER, 
-			"railway":pbtypes.RAILWAY, 
-			"water": pbtypes.WATER, 
-			"park": pbtypes.PARK, 
-			"green":pbtypes.GREEN, 
-			"forest":pbtypes.FOREST,
-			"paved":pbtypes.PAVED,
-			"unpaved":pbtypes.UNPAVED,
-			"steps":pbtypes.STEPS,
-			"highway":pbtypes.HIGHWAY,
-			"bridge":pbtypes.BRIDGE
+	str2pb = {"IGNORE": pbtypes.IGNORE, 
+			"BARRIER":pbtypes.BARRIER, 
+			"RAILWAY":pbtypes.RAILWAY, 
+			"WATER": pbtypes.WATER, 
+			"PARK": pbtypes.PARK, 
+			"GREEN":pbtypes.GREEN, 
+			"FOREST":pbtypes.FOREST,
+			"PAVED":pbtypes.PAVED,
+			"UNPAVED":pbtypes.UNPAVED,
+			"STEPS":pbtypes.STEPS,
+			"HIGHWAY":pbtypes.HIGHWAY,
+			"BRIDGE":pbtypes.BRIDGE
 			}
 	for cat in config.keys():
 		catenum = str2pb[cat]
