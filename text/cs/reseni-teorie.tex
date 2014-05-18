@@ -83,26 +83,44 @@ OSM dat jsme zjistili, že mnohé obytné domy kolem sebe nemají značené plot
 proto jsme vzdálenost zvolili takto nízkou, protože poté je pravděpodobnost, že
 jde například o~dvě ulice oddělené domky se zahrádkami, poměrně malá.  
 
-Mezi velmi blízkými uzly ale vznikalo příliš velké množství spojek, které by
-navíc nepřinášely významné zkrácení trasy, proto jsme u~každého uzlu vybrali
-spojky s~určitou pravděpodobností tak, aby měl každý uzel průměrný stupeň šest.
-Tyto spojky navíc mohou vést přes nějakou překážku, jako je plot nebo zeď, proto
-potřebujeme zkontrolovat kolize všech nových úseček s~překážkami. K~tomuto účelu
-jsme využili algoritmus zametání roviny.
+V oblastech, kde se nacházelo velké množstí uzlů blízko sebe, například u cest
+reprezentujících kruhové objezdy, vznikalo příliš velké množství spojek. Tyto
+spojky navíc nepřinášely významné zkrácení trasy. U~každého uzlu jsme proto
+vybrali spojky s~určitou pravděpodobností tak, aby měl každý uzel průměrný
+stupeň šest.
 
-Zametání roviny\cite{zametani} je univerzálním geometrickým algoritmem, při němž
-rovinou posouváme přímku (\uv{zametáme}). Pokud přímka protne pro nás zajímavé
-místo, vyvoláme událost. Během procházení si obvykle navíc pamatujeme seznam
-prošlých bodů nebo aktuálně protnutých úseček.
+Spojky navíc mohou vést přes nějakou překážku, jako je plot nebo zeď, proto
+potřebujeme zkontrolovat kolize všech přidaných spojek s~překážkami. K~tomuto
+účelu jsme využili algoritmus využívající zametání roviny.
+
+
+{\tuc Zametání roviny}\cite{zametani} je způsob návrhu geometrického algoritmu,
+při němž rovinou posouváme přímku (\uv{zametáme}). Pokud přímka protne pro nás
+zajímavé místo, vyvoláme událost. Během procházení si obvykle navíc pamatujeme
+seznam prošlých bodů nebo aktuálně protnutých úseček, tzv. {\tuc průřez}.
 
 V~našem případě budeme hledat průsečíky úseček v~rovině. Spojky již úsečky jsou,
-překážky rozdělíme na jednotlivé úsečky mezi uzly. Budeme zametat podle rostoucí
-zeměpisné délky a zajímat nás budou události začátek a konec úsečky a jejich
+překážky rozdělíme na jednotlivé úsečky mezi uzly. Budeme zametat podle od
+západu k východu a zajímat nás budou události začátku a konce úsečky a jejich
 průsečík. Zametací přímku proto budeme posouvat postupně po těchto událostech.
+
+Začátky a konce úseček známe již před spuštěním algoritmu. Průsečíky na začátku
+neznáme, budeme ale předpokládat, že se neprotínají tři úsečky v jednom bodě.
+Potom platí, že pokud se nějaké dvě úsečky mají protnout, pak se předtím musí
+stát sousedními. Proto nám stačí při každé události s úsečkou $u$ stačí
+zkontrolovat sousedy $u$ a pokud se s nějakým protíná a průsečík je před
+zametací přímkou, přidáme ho do seznamu událostí.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics{../img/zametani.pdf}
+	\caption{Zametání roviny}
+	\label{fig:zametani}
+\end{figure}
 
 Protože vždy budeme potřebovat znát nejbližší událost, budeme si udržovat
 události v~haldě. Dále také potřebujeme znát pořadí, v~jakém aktuálně
-zpracovávané úsečky protínají rovinu, tzv. průřez, a umět mezi ně přidat další a
+zpracovávané úsečky protínají rovinu -- průřez, a umět mezi ně přidat další a
 odebrat tu, která skončí. K~tomuto účelu se nám hodí použít vyhledávací strom.
 Nemůžeme si ovšem ve vrcholech pamatovat přímo souřadnice průsečíku úsečky se
 zametací přímkou, protože se tyto souřadnice mění s~každým posunutím zametací
@@ -111,33 +129,39 @@ budeme počítat, až to bude potřeba.
 
 Na začátku známe všechny začátky a konce úseček, vytvoříme tedy v~haldě události
 začátků a konců úseček. Průsečíkové události zatím žádné neznáme, ale protože
-aby mohl nastat průsečík, musí nejprve úsečka začít, o~žádný nepřijdeme. 
+aby mohl nastat průsečík, musí nejprve úsečka začít, o~žádný nepřijdeme.
+
+Zametání ukázkových dat se čtyřmi úsečkami ukazuje obrázek \ref{fig:zametani}.
+Svislé přerušované čáry udávají pozic zametací přímky při vyvolání události,
+události nastávají v pořadí 1 až 9.
 
 Zametání bude probíhat následovně. Z~haldy všech událostí vybereme nejbližší
 událost a rozhodneme se podle jejího typu:
 \begin{itemize}
-	\item {\tuc Začátek úsečky.}  Úsečku zařadíme na sprvné místo do
-	průřezu a přidáme případné průsečíkové události se sousedními přímkami.
+	\item {\tuc Začátek úsečky.}  Úsečku zařadíme na správné místo do
+	průřezu a přidáme případné průsečíkové události se sousedními
+	přímkami.\\
+	V situacích 1 a 4 úsečku pouze přidáme, k průsečíkům nedochází.\\
+	V situacích 2 a 3 se úsečky protínají, přidáme průsečíkové události
+	$P$ a $Q$.
+
 	\item {\tuc Konec úsečky.} Úsečku odebereme z~průřezu a přidáme
 	případnou průsečíkovou událost, pokud se úsečky sousední s~právě
-	končící, protínají.
+	končící protínají.\\
+	V situacích 7, 9 a 10 pouze úsečky odebereme z průřezu.\\
+	V situaci 6 se po skončení úsečky $s$ stanou úsečky $p$ a $q$ sousedními
+	a navíc se protínají, proto přidáme průsečíkovou událost $P$.
 	\item {\tuc Průsečík úseček.} Úsečky v~průřezu prohodíme a přidáme
-	případné průsečíkové události s~novými sousedními úsečkami obou
-	prohazovaných úseček.
+	případné průsečíkové události s~novými sousedy obou prohazovaných 
+	úseček.\\
+	V situaci 8 nemají prohozené úsečky žádné nové sousedy.\\
+	V situaci 5 se nově stala úsečka $s$ sousedem prohozené přímky $p$, ale
+	nemají společný průsečík, událost tedy nepřidáváme.
 \end{itemize}
-Takto budeme postupovat, dokud budou v~haldě nějaké uálosti. Při hledání
-průsečíků nám pro každou úsečku stačí vždy hledat jen se sousedními, protože než
-se nějaké dvě úsečky protnou, musí se nejprve stát sousedními (Uvažujeme
-situaci, kde se tři úsečky neprotínají v~jednom bodě.). Pokud vytváříme
-průsečíkovou událost, zkontrolujeme, zda není některá z~úseček překážka a
-případně označíme, že se úsečky protínají s~překážkou. 
+Takto budeme postupovat, dokud jsou v haldě nějaké události. Pokud zpracováváme 
+průsečíkovou událost, zkontrolujeme, zda není některá z~úseček překážka a 
+případně úsečky označíme, že se protnuly s~překážkou. 
 
-\begin{figure}[t]
-	\centering
-	\includegraphics{../img/zametani.pdf}
-	\caption{Zametání roviny}
-	\label{fig:zametani}
-\end{figure}
 
 \section{Zkratky přes průchozí prostranství}
 Pokud procházíme ve městě přes větší park nebo náměstí, často nemusíme chodit
@@ -156,7 +180,10 @@ odstranili všechny úsečky, které procházely přes nějakou překážku.
 Poté, co jsme připravili data, vytvoříme vyhledávací graf. Protože kolize
 přímých cest s~překážkami jsme vyřešili již při jejich vytváření, jsou všechny
 cesty korektní. Proto se překážkami již dále nezabýváme a pouze z~cest vytvoříme
-vyhledávací graf. Mohlo se stát, že vzniklo několik oddělených komponent, proto
-z~nich vybereme tu největší. Uložíme seznam všech uzlů, které jsou na cestách
-použity a cesty rozdělíme na jednotlivé hrany grafu mezi dvěma uzly. U~hran
-zachováme údaje o~typu cesty, protože je budeme využívat při vyhledávání.
+vyhledávací graf. Pokud byly v datech přítomny cesty nepřipojené ke zbytku a ani 
+přidání spojek a zkratek je nepřipojilo, měl by tento graf více komponent. Tyto
+převážně malé komponenty nás nezajímají, protože do nich neumíme najít cestu a
+proto použijeme jen největší komponentu. Uložíme seznam všech uzlů, které jsou
+na jejích cestách použity a cesty rozdělíme na jednotlivé hrany grafu mezi dvěma
+uzly.  U~hran zachováme údaje o~typu cesty, protože je budeme využívat při
+vyhledávání.
