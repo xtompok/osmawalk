@@ -1,10 +1,10 @@
-ignore: 
+IGNORE: 
     boundary : "*"
     natural:
         - tree_row
     railway:
         - subway
-barrier: 
+BARRIER: 
     barrier : "*"
     waterway:
         - river
@@ -33,18 +33,18 @@ barrier:
         - motorway-link
         - trunk-link
 
-railway:
+RAILWAY:
     railway:
         - funicular
         - light_rail
         - rail
     landuse:
         - railway
-water:
+WATER:
     waterway:
         - riverbank
         - stream
-park:
+PARK:
     leisure:
         - park
         - playground
@@ -55,7 +55,7 @@ park:
     natural:
         - grassland
 
-green:
+GREEN:
     leisure:
         - common
         - nature_reserve
@@ -70,10 +70,10 @@ green:
         - heath
         - sand
 
-forest:
+FOREST:
     landuse:
         - forest
-paved:
+PAVED:
     landuse:
         - residential
         - industrial
@@ -92,15 +92,15 @@ paved:
         - pedestrian
     cycleway:
         - track
-steps:
+STEPS:
     highway:
         - steps
-unpaved:
+UNPAVED:
     highway:
         - track
         - path
         - bridleway
-highway:
+HIGHWAY:
     highway:
         - primary
         - secondary
