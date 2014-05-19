@@ -46,13 +46,13 @@ Konfigurační soubor obsahuje mapu se třemi klíči:
 	považována za nulovou.
 \end{itemize}
 
-\section{Dijkstův algoritmus}
+\section{Dijkstrův algoritmus}
 Dijkstrův algoritmus \cite{dijkstra} slouží k nalezení nejkratší cesty mezi dvěma vrcholy grafu.
 Algoritmus postupně prohledává graf a zpracovává vrcholy. Vrcholy mohou mít tři
 stavy: nedosažený, otevřený a zpracovaný. U každého vrcholu $v$ také udržujeme
 nejkratší dosud známou vzdálenost $d(v)$ z výchozího vrcholu do daného vrcholu. 
 Během procházení grafu si udržujeme seznam otevřených vrcholů. Délku hrany
-$(u,v)$ budeme označovat $l(u,v)$
+$(u,v)$ budeme označovat $l(u,v)$.
 
 Na začátku jsou všechny vrcholy nedosažené a jejich vzdálenost je nekonečno.
 Označíme výchozí vrchol jako otevřený a přidáme ho do seznamu. Jeho vzdálenost
@@ -63,9 +63,16 @@ změňíme na nulu a následně opakujeme následující postup:
 	\item Všem jeho nedosaženým sousedům $u$ nastavíme $d(u)=d(v)+l(v,u)$,
 	označíme je jako otevřené a přidáme je do seznamu oteřených vrcholů.
 	\item Pokud pro nějakého otevřeného souseda $u$ platí $d(u) >
-	d(v)+l(u,v)$, pak upravíme $d(u)$ na $d(u)=d(v)+l(v,u)$.
+	d(v)+l(u,v)$, pak upravíme $d(u)$ na $d(v)+l(v,u)$.
 	\item Vrchol $v$ označíme za zpracovaný.
 \end{enumerate}
+Pro reprezentaci seznamu otevřených vrcholů můžeme výhodně použít haldu, protože
+do seznamu pouz přidáváme prvky, snižujeme jejich hodnotu a odebíráme z něj
+minimum.
+
+Bylo by možné použít i jiné algoritmy pro hledání nejkratší cesty, ale Dijkstrův
+algortmus je pro hledání ve městě velikosti Prahy dostatečně rychlý a je možno
+jej bez problémů použít.
 
 
 \section{Implementace}
@@ -124,4 +131,4 @@ Když je cesta nalezena, jen projdeme po zpětných hranách a uložíme nalezen
 cestu do pole. Běhm procházení nalezené cesty převádíme souřadnice vrcholů zpět
 z UTM do WGS-84 a v této soustavě je také ukládáme v poli. Každý vrchol má také
 uložen v prvku \verb|type| kategorii hrany, po níž přechází do následujícího
-vrcholu. Poslední vrchol má kategorii nastavenu na -1.
+vrcholu. Poslední vrchol má kategorii nastavenu na $-1$.
