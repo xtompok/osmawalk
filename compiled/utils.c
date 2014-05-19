@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-unsigned int isDirectable(Premap__Way * way){
+unsigned int isDirectableWay(Premap__Way * way){
 	unsigned int t;
 	t = way->type;
 	if ((t==OBJTYPE__WAY || 
@@ -17,6 +17,14 @@ unsigned int isDirectable(Premap__Way * way){
 		)&& (
 		way->tunnel==0 &&
 		way->bridge==0))
+	return 1;
+	
+	return 0;
+}
+
+unsigned int isDirectableNode(Premap__Node * node){
+	if (node->intunnel==0 &&
+		node->onbridge==0)
 	return 1;
 	
 	return 0;

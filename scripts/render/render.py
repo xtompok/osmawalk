@@ -74,10 +74,18 @@ def drawWays(pbMap,d, node_ids,minlon,minlat):
 		stylestr = ";".join([key+":"+value for key,value in style.iteritems()])
 		d.add(svgwrite.shapes.Polyline(coord,style=stylestr))
 	for node in pbMap.nodes:
-		if not node.inside:
-			#style={"stroke" : "black", "stroke-width" : "5", "fill" : "black"}
-			#stylestr = ";".join([key+":"+value for key,value in style.iteritems()])
-			d.add(svgwrite.shapes.Circle((node.lon-shiftlon,-(node.lat-shiftlat)),10))
+	#	style={"stroke" : "blue", "stroke-width" : "5", "fill" : "black"}
+	#	stylestr = ";".join([key+":"+value for key,value in style.iteritems()])
+	#	d.add(svgwrite.shapes.Circle((node.lon-minlon,-(node.lat-minlat)),10))
+
+		if node.onBridge:
+			style={"stroke" : "blue", "stroke-width" : "5", "fill" : "black"}
+			stylestr = ";".join([key+":"+value for key,value in style.iteritems()])
+			d.add(svgwrite.shapes.Circle((node.lon-minlon,-(node.lat-minlat)),10,style=stylestr))
+		if node.inTunnel:
+			style={"stroke" : "black", "stroke-width" : "5", "fill" : "black"}
+			stylestr = ";".join([key+":"+value for key,value in style.iteritems()])
+			d.add(svgwrite.shapes.Circle((node.lon-minlon,-(node.lat-minlat)),10,style=stylestr))
 
 datadir="../../data/"
 

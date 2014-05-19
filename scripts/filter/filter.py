@@ -425,6 +425,8 @@ def divideLongEdges(amap):
 				newnode.lat = lat
 				newnode.height = hgt
 				newnode.inside = ref1.inside and ref2.inside
+				newnode.onBridge = ref1.onBridge and ref2.onBridge
+				newnode.inTunnel = ref1.inTunnel and ref2.inTunnel
 				newway.refs.append(newnode.id)
 				amap.nodes.append(newnode)
 		if not replace:

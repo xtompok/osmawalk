@@ -4,6 +4,8 @@ IGNORE:
         - tree_row
     railway:
         - subway
+    landuse:
+        -residential
 BARRIER: 
     barrier : "*"
     waterway:
@@ -32,12 +34,14 @@ BARRIER:
         - trunk
         - motorway-link
         - trunk-link
-
-RAILWAY:
+        - primary
+        - primary-link
     railway:
         - funicular
         - light_rail
         - rail
+
+RAILWAY:
     landuse:
         - railway
 WATER:
@@ -102,7 +106,6 @@ UNPAVED:
         - bridleway
 HIGHWAY:
     highway:
-        - primary
         - secondary
         - tertiary
 

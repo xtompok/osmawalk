@@ -20,7 +20,8 @@ static inline unsigned int sameStart(struct line_t l1, struct line_t l2){
 static inline unsigned int sameEnd(struct line_t l1, struct line_t l2){
 	return ((l1.endlon==l2.endlon) && (l1.endlat==l2.endlat)) ;
 }
-unsigned int isDirectable(Premap__Way * way);
+unsigned int isDirectableWay(Premap__Way * way);
+unsigned int isDirectableNode(Premap__Node * node);
 unsigned int isBarrier(Premap__Way * way);
 unsigned int isWay(Premap__Way * way);
 int isWalkArea(Premap__Way * way);

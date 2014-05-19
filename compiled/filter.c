@@ -215,7 +215,7 @@ struct col_t calcMixCollision(struct line_t line1, struct line_t line2){
 //	printf("base: %lld, maxmin: %lld, minmax: %lld\n",result.lat.base,maxmin,minmax);
 	if ( (result.lat.base < maxmin) || 
 		(result.lat.base > minmax)){
-		printf("lat out of range\n");
+//		printf("lat out of range\n");
 		result.isCol=0;
 		return result;
 		}
@@ -246,7 +246,7 @@ struct graph_t makeGraph(struct map_t map)
 	for (int i=0;i < map.n_ways;i++){
 		Premap__Way * way;
 		way = map.ways[i];
-		if (isDirectable(map.ways[i])){ 
+		if (isDirectableWay(map.ways[i])){ 
 			for (int j=0;j<way->n_refs-1;j++){
 				int n1idx = nodesIdx_find(way->refs[j])->idx;
 				int n2idx = nodesIdx_find(way->refs[j+1])->idx;
@@ -357,7 +357,10 @@ int ** makeAreaCandidates(struct map_t map, struct walk_area_t area,  int maxdis
 			node1 = map.nodes[nidx1];
 			node2 = map.nodes[nidx2];
 			
-			if (onSameWay(node1->id,node2->id)||distance(node1,node2)>maxdist)
+			if (onSameWay(node1->id,node2->id)||
+					distance(node1,node2)>maxdist||
+					!isDirectableNode(node1)||
+					!isDirectableNode(node2))
 				continue;
 			/*if (memline.startid==-1){
 				memline = makeLine(node1->lon,node1->lat,node2->lon,node2->lat,0,0);
@@ -413,7 +416,7 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 				int64_t nid2;
 				nidx1 = raster.raster[lonidx][latidx][i];
 				nid1 = map.nodes[nidx1]->id;
-				if (!wayGraph[nidx1]){
+				if ((!wayGraph[nidx1])||(!isDirectableNode(map.nodes[nidx1]))){
 					continue;
 				}
 
@@ -424,7 +427,9 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 						continue;
 					nidx2 = raster.raster[lonidx][latidx][j];
 					nid2 = map.nodes[nidx2]->id;
-					if (wayGraph[nidx2]&& !onSameWay(nid1,nid2)){
+					if (wayGraph[nidx2]&& 
+							!onSameWay(nid1,nid2)&&
+							isDirectableNode(map.nodes[nidx2])){
 						addCandidate(&candidates,nidx1,nidx2);
 					}
 				}
@@ -436,7 +441,9 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 						continue;
 					nidx2 = raster.raster[lonidx+1][latidx-1][j];
 					nid2 = map.nodes[nidx2]->id;
-					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)&& !onSameWay(nid1,nid2)){
+					if (wayGraph[nidx2]&& 
+							!onSameWay(nid1,nid2)&&
+							isDirectableNode(map.nodes[nidx2])){
 						addCandidate(&candidates,nidx1,nidx2);
 					}
 				}
@@ -447,7 +454,9 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 						continue;
 					nidx2 = raster.raster[lonidx+1][latidx][j];
 					nid2 = map.nodes[nidx2]->id;
-					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)&& !onSameWay(nid1,nid2)){
+					if (wayGraph[nidx2]&& 
+							!onSameWay(nid1,nid2)&&
+							isDirectableNode(map.nodes[nidx2])){
 						addCandidate(&candidates,nidx1,nidx2);
 					}
 				}
@@ -458,7 +467,9 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 						continue;
 					nidx2 = raster.raster[lonidx+1][latidx+1][j];
 					nid2 = map.nodes[nidx2]->id;
-					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)&& !onSameWay(nid1,nid2)){
+					if (wayGraph[nidx2]&& 
+							!onSameWay(nid1,nid2)&&
+							isDirectableNode(map.nodes[nidx2])){
 						addCandidate(&candidates,nidx1,nidx2);
 					}
 				}
@@ -469,7 +480,9 @@ int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** way
 						continue;
 					nidx2 = raster.raster[lonidx][latidx+1][j];
 					nid2 = map.nodes[nidx2]->id;
-					if (wayGraph[nidx2]&&(distance(map.nodes[nidx1],map.nodes[nidx2])<=maxdist)&& !onSameWay(nid1,nid2)){
+					if (wayGraph[nidx2]&& 
+							!onSameWay(nid1,nid2)&&
+							isDirectableNode(map.nodes[nidx2])){
 						addCandidate(&candidates,nidx1,nidx2);
 					}
 				}
@@ -923,7 +936,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 			anglesign = -1;
 //			printf("EVT_INT\n");
 			if (evt.lineIdx == memevt.lineIdx && evt.line2Idx == memevt.line2Idx){
-				printf("Duplicit event, skipping\n");
+//				printf("Duplicit event, skipping\n");
 				continue;
 			}
 			memevt.lineIdx = evt.lineIdx;

@@ -143,20 +143,11 @@ def loadWaysConf(filename):
 	config = {}
 	with open(filename) as conffile:
 		config = yaml.load(conffile.read())
+	desc = pbtypes._OBJTYPE # depends on implementation detail, but no other way
+	str2pb = {}
+	for i in desc.values:
+		str2pb[i.name] = i.number
 	ways={}
-	str2pb = {"IGNORE": pbtypes.IGNORE, 
-			"BARRIER":pbtypes.BARRIER, 
-			"RAILWAY":pbtypes.RAILWAY, 
-			"WATER": pbtypes.WATER, 
-			"PARK": pbtypes.PARK, 
-			"GREEN":pbtypes.GREEN, 
-			"FOREST":pbtypes.FOREST,
-			"PAVED":pbtypes.PAVED,
-			"UNPAVED":pbtypes.UNPAVED,
-			"STEPS":pbtypes.STEPS,
-			"HIGHWAY":pbtypes.HIGHWAY,
-			"BRIDGE":pbtypes.BRIDGE
-			}
 	for cat in config.keys():
 		catenum = str2pb[cat]
 		for key in config[cat]:
@@ -183,6 +174,15 @@ def loadBoolConf(filename):
 		for value in config[False][key]:
 			boolcfg[key][value]=False
 	return boolcfg
+
+def markNonPlanarNodes(amap):
+	for way in amap.ways:
+		if way.bridge:
+			for nid in way.refs:
+				amap.nodes[amap.nodesIdx[nid]].onBridge=True
+		if way.tunnel:
+			for nid in way.refs:
+				amap.nodes[amap.nodesIdx[nid]].inTunnel=True
 
 
 def parseOSMfile(filename,waysConf,areasConf,bridgesConf,tunnelsConf,srtm):	
@@ -222,6 +222,10 @@ nodeways=nodeWays(amap)
 amap = deleteAloneNodes(amap,nodeways)
 end = time.time()
 print "Deleting alone nodes took "+str(end-start)
+
+# Mark nodes in tunnels and on bridges
+amap.updateNodesIdx()
+markNonPlanarNodes(amap)
 
 # Write map to file
 start = time.time()

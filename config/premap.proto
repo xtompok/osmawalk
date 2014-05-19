@@ -9,6 +9,8 @@ message Node {
 	optional sint32	height = 4;
 	optional objtype objtype = 5;
 	optional bool inside = 6 [default=false];
+	optional bool inTunnel = 7;
+	optional bool onBridge = 8;
 	optional int64 nodeidx = 200;
 }
 
