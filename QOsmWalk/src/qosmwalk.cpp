@@ -69,20 +69,33 @@ void QOsmWalk::addZoomButtons()
 {
     // create buttons as controls for zoom
     QPushButton* zoomin = new QPushButton("+");
+    QPushButton* gpxbut = new QPushButton("GPX");
     QPushButton* zoomout = new QPushButton("-");
     zoomin->setMaximumWidth(50);
     zoomout->setMaximumWidth(50);
+    gpxbut->setMaximumWidth(50);
 
     connect(zoomin, SIGNAL(clicked(bool)),
               mc, SLOT(zoomIn()));
     connect(zoomout, SIGNAL(clicked(bool)),
               mc, SLOT(zoomOut()));
+    connect(gpxbut,SIGNAL(clicked()),
+            this,SLOT(GPXExportClicked()));
 
     // add zoom buttons to the layout of the MapControl
     QVBoxLayout* innerlayout = new QVBoxLayout;
     innerlayout->addWidget(zoomin);
+    innerlayout->addWidget(gpxbut);
     innerlayout->addWidget(zoomout);
     mc->setLayout(innerlayout);
+}
+
+void QOsmWalk::GPXExportClicked(){
+    QString filename;
+    filename = QFileDialog::getSaveFileName(this,"Ulozit GPX...","./");
+    writeGpxFile(this->searchResult,filename.toLocal8Bit().data());
+    qDebug() << "Clicked";
+
 }
 
 void QOsmWalk::mouseEventCoordinate(const QMouseEvent * evt, const QPointF point){
@@ -117,15 +130,16 @@ void QOsmWalk::mouseEventCoordinate(const QMouseEvent * evt, const QPointF point
 }
 
 void QOsmWalk::searchPath(QPointF * first, QPointF * second){
-    struct search_result_t result;
-    result = findPath(searchData,first->y(),first->x(),second->y(),second->x());
+    free(this->searchResult.points);
+
+    this->searchResult = findPath(searchData,first->y(),first->x(),second->y(),second->x());
 
     // create a LineString
     QList<Point*> qpoints;
 
 
-    for (int i=0;i<result.n_points;i++){
-        qpoints.append(new Point(result.points[i].lon,result.points[i].lat));
+    for (int i=0;i<this->searchResult.n_points;i++){
+        qpoints.append(new Point(this->searchResult.points[i].lon,this->searchResult.points[i].lat));
     }
 
     QPen* linepen = new QPen(QColor(0, 0, 255, 100));
@@ -133,13 +147,12 @@ void QOsmWalk::searchPath(QPointF * first, QPointF * second){
     // Add the Points and the QPen to a LineString
     LineString* ls = new LineString(qpoints, "Peskobus", linepen);
 
-    label->setText(QString("Cas: %1 min").arg(result.time/60,0,'f',1));
-
-    free(result.points);
+    QString str;
+    str = QString("Vzdalenost: %1 km, cas: %2 min").arg(this->searchResult.dist/1000,0,'f',1).arg(this->searchResult.time/60,0,'f',1);
+    label->setText(str);
 
     // Add the LineString to the layer
     layer->addGeometry(ls);
-
 }
 
 QOsmWalk::~QOsmWalk()

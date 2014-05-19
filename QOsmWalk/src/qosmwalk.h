@@ -31,9 +31,11 @@ class QOsmWalk : public QWidget
                 void resizeEvent(QResizeEvent * evt);
                 void searchPath(QPointF * first, QPointF * second);
                 struct search_data_t searchData;
+                struct search_result_t searchResult;
 
         public slots:
                 void mouseEventCoordinate(const QMouseEvent * evt, const QPointF point);
+                void GPXExportClicked();
 };
 
 #endif // QOSMWALK_H

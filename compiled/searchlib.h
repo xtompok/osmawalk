@@ -78,10 +78,7 @@ void findWay(struct search_data_t data,
 struct point_t *  resultsToArray(struct search_data_t data, 
 		struct dijnode_t * dijArray, 
 		int fromIdx, int toIdx, int * n_points);
-void writeGpxFile(struct search_data_t data,
-		struct dijnode_t * dijArray,
-		char * filename, 
-		int fromIdx, int toIdx);
+void writeGpxFile(struct search_result_t result,char * filename);
 
 struct search_data_t prepareData(char * configName, char * dataName);
 struct search_result_t findPath(struct search_data_t data,

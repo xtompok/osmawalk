@@ -15,19 +15,17 @@
 #include "writegpx.h"
 
 
-void printResults(Graph__Graph * graph, struct config_t conf, struct dijnode_t * dijArray, int fromIdx, int toIdx){
-	if (!dijArray[toIdx].completed){
+void printResults(struct search_result_t result){
+	if (result.n_points==0){
 		printf("Route not found\n");
 		return;
 	}
-	printf("D1: %f, D2:%f\n",dijArray[fromIdx].dist,dijArray[toIdx].dist);
-	int idx;
-	idx = fromIdx;
-	while (dijArray[idx].fromIdx!=-1){
-		printf("%f,%f,%d\n",graph->vertices[idx]->lat,graph->vertices[idx]->lon,graph->edges[dijArray[idx].fromEdgeIdx]->type);
-		idx = dijArray[idx].fromIdx;
+	printf("Lenght: %1fm, Time: %1fmin\n",result.dist/1000, result.time/60);
+	for (int i=0;i<result.n_points;i++){
+		struct point_t p;
+		p = result.points[i];
+		printf("%f,%f,%d,%d\n",p.lat,p.lon,p.height,p.type);
 	}
-	printf("%f,%f,\n",graph->vertices[idx]->lat, graph->vertices[idx]->lon);	
 }
 
 
@@ -50,36 +48,11 @@ int main (int argc, char ** argv){
 	data = prepareData("../config/speeds.yaml","../data/praha-graph.pbf"); 
 
 	printf("Graph has %d vertices and %d edges\n",data.graph->n_vertices,data.graph->n_edges);
-	double lon;
-	double lat;
-	lat = atof(argv[1]);
-	lon = atof(argv[2]);
-	wgs2utm(data,&lon,&lat);
-	int fromIdx;
-	fromIdx = findNearestVertex(data.graph,lon,lat);
 
-	lat = atof(argv[3]);
-	lon = atof(argv[4]);
-	wgs2utm(data,&lon,&lat);
-	int toIdx;
-	toIdx = findNearestVertex(data.graph,lon,lat);
-
-	printf("Searching from %lld(%f,%f,%d) to %lld(%f,%f,%d)\n",data.graph->vertices[fromIdx]->osmid,
-			data.graph->vertices[fromIdx]->lat,
-			data.graph->vertices[fromIdx]->lon,
-			data.graph->vertices[fromIdx]->height,
-			data.graph->vertices[toIdx]->osmid,
-			data.graph->vertices[toIdx]->lat,
-			data.graph->vertices[toIdx]->lon,
-			data.graph->vertices[toIdx]->height
-			);
-
-	struct dijnode_t * dijArray;
-	dijArray = prepareDijkstra(data.graph);
-
-	findWay(data, dijArray,fromIdx, toIdx);
-	printResults(data.graph, data.conf, dijArray, fromIdx, toIdx);
-	writeGpxFile(data, dijArray,"track.gpx", fromIdx, toIdx);
+	struct search_result_t result;
+	result = findPath(data,atof(argv[1]),atof(argv[2]),atof(argv[3]),atof(argv[4]));
+	printResults(result);
+	writeGpxFile(result,"track.gpx");
 
 	return 0;
 }

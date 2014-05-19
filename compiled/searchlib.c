@@ -371,6 +371,8 @@ struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * d
 	idx = fromIdx;
 	double lat;
 	double lon;
+	double dist;
+	dist = 0;
 	while (idx != toIdx){
 		lat = graph->vertices[idx]->lat;
 		lon = graph->vertices[idx]->lon;
@@ -387,12 +389,13 @@ struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * d
 	utm2wgs(data,&lon,&lat);
 	results[count].lat = lat;
 	results[count].lon = lon;
+	results[count].height = graph->vertices[idx]->height;
 	results[count].type=-1;	
 	return results;
 }
 
-void writeGpxFile(struct search_data_t data, struct dijnode_t * dijArray,char * filename, int fromIdx, int toIdx){
-	if (!dijArray[toIdx].completed){
+void writeGpxFile(struct search_result_t result,char * filename){
+	if (result.n_points==0){
 		return;
 	}
 	printf("Writing results to file %s\n",filename);
@@ -400,16 +403,10 @@ void writeGpxFile(struct search_data_t data, struct dijnode_t * dijArray,char * 
 	OUT = fopen(filename,"w");
 	writeGpxHeader(OUT);
 	writeGpxStartTrack(OUT);
-	int idx;
-	idx = fromIdx;
-	double lon;
-	double lat;
-	while (dijArray[idx].fromIdx!=-1){
-		lon = data.graph->vertices[idx]->lon;
-		lat = data.graph->vertices[idx]->lat;
-		utm2wgs(data,&lon,&lat);
-		writeGpxTrkpt(OUT,lat,lon,0);
-		idx = dijArray[idx].fromIdx;
+	for (int i=0;i<result.n_points;i++){
+		struct point_t p;
+		p = result.points[i];
+		writeGpxTrkpt(OUT,p.lat,p.lon,p.height);
 	}
 	writeGpxEndTrack(OUT);
 	writeGpxFooter(OUT);
@@ -459,6 +456,13 @@ struct search_result_t findPath(struct search_data_t data,double fromLat, double
 	int n_points;
 	result.points = resultsToArray(data,dijArray,fromIdx,toIdx,&n_points);
 	result.n_points = n_points;
+	result.dist = 0;
+	int idx;
+	idx = fromIdx;
+	while(idx != toIdx){
+		result.dist+=data.graph->edges[dijArray[idx].fromEdgeIdx]->dist;
+		idx = dijArray[idx].fromIdx;
+	}
 	result.time = dijArray[fromIdx].dist;
 	return result;	
 }
