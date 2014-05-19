@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gpx creator="mapy.cz" version="1.1" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+<trk><name>Start -&gt; End</name>
+<trkseg>
+<trkpt lat="50.116587" lon="14.443054"><name>001 Start</name></trkpt>
+<trkpt lat="50.116587" lon="14.443054"></trkpt>
+<trkpt lat="50.116647" lon="14.444410"></trkpt>
+<trkpt lat="50.116639" lon="14.444550"></trkpt>
+<trkpt lat="50.116604" lon="14.444676"></trkpt>
+<trkpt lat="50.116532" lon="14.444719"></trkpt>
+<trkpt lat="50.116460" lon="14.444706"></trkpt>
+<trkpt lat="50.116225" lon="14.444526"></trkpt>
+<trkpt lat="50.116135" lon="14.444472"></trkpt>
+<trkpt lat="50.116036" lon="14.444431"></trkpt>
+<trkpt lat="50.115919" lon="14.444390"><name>002 Na Kindlovce/Patkova</name></trkpt>
+<trkpt lat="50.115910" lon="14.444544"></trkpt>
+<trkpt lat="50.115876" lon="14.444838"></trkpt>
+<trkpt lat="50.115805" lon="14.445105"></trkpt>
+<trkpt lat="50.115761" lon="14.445217"></trkpt>
+<trkpt lat="50.115494" lon="14.445864"></trkpt>
+<trkpt lat="50.115459" lon="14.445962"></trkpt>
+<trkpt lat="50.115414" lon="14.446060"></trkpt>
+<trkpt lat="50.115334" lon="14.446327"></trkpt>
+<trkpt lat="50.115308" lon="14.446453"></trkpt>
+<trkpt lat="50.115291" lon="14.446607"></trkpt>
+<trkpt lat="50.115283" lon="14.446859"></trkpt>
+<trkpt lat="50.115284" lon="14.446985"></trkpt>
+<trkpt lat="50.115267" lon="14.447363"></trkpt>
+<trkpt lat="50.115233" lon="14.447643"></trkpt>
+<trkpt lat="50.115215" lon="14.447769"></trkpt>
+<trkpt lat="50.115180" lon="14.447881"></trkpt>
+<trkpt lat="50.115162" lon="14.447966"></trkpt>
+<trkpt lat="50.115154" lon="14.448078"></trkpt>
+<trkpt lat="50.114948" lon="14.448276"></trkpt>
+<trkpt lat="50.114894" lon="14.448332"><name>003 Praha 8</name></trkpt>
+<trkpt lat="50.114785" lon="14.448082"></trkpt>
+<trkpt lat="50.114595" lon="14.447902"></trkpt>
+<trkpt lat="50.114460" lon="14.447820"></trkpt>
+<trkpt lat="50.114370" lon="14.447723"></trkpt>
+<trkpt lat="50.114306" lon="14.447654"></trkpt>
+<trkpt lat="50.114234" lon="14.447599"></trkpt>
+<trkpt lat="50.114162" lon="14.447571"></trkpt>
+<trkpt lat="50.114126" lon="14.447558"><name>004 Praha 8</name></trkpt>
+<trkpt lat="50.114187" lon="14.447194"><name>005 Praha 7</name></trkpt>
+<trkpt lat="50.114409" lon="14.446464"></trkpt>
+<trkpt lat="50.114444" lon="14.446323"></trkpt>
+<trkpt lat="50.114452" lon="14.446183"></trkpt>
+<trkpt lat="50.114443" lon="14.446044"></trkpt>
+<trkpt lat="50.114406" lon="14.445918"></trkpt>
+<trkpt lat="50.114361" lon="14.445807"></trkpt>
+<trkpt lat="50.114288" lon="14.445724"></trkpt>
+<trkpt lat="50.114225" lon="14.445655"></trkpt>
+<trkpt lat="50.114144" lon="14.445614"></trkpt>
+<trkpt lat="50.114027" lon="14.445587"></trkpt>
+<trkpt lat="50.113352" lon="14.445497"></trkpt>
+<trkpt lat="50.112704" lon="14.445448"></trkpt>
+<trkpt lat="50.112326" lon="14.445439"></trkpt>
+<trkpt lat="50.112308" lon="14.445439"></trkpt>
+<trkpt lat="50.112218" lon="14.445454"></trkpt>
+<trkpt lat="50.112137" lon="14.445483"></trkpt>
+<trkpt lat="50.112057" lon="14.445498"></trkpt>
+<trkpt lat="50.111904" lon="14.445486"></trkpt>
+<trkpt lat="50.111742" lon="14.445445"></trkpt>
+<trkpt lat="50.111220" lon="14.445396"></trkpt>
+<trkpt lat="50.111130" lon="14.445383"></trkpt>
+<trkpt lat="50.111031" lon="14.445342"></trkpt>
+<trkpt lat="50.110382" lon="14.445070"></trkpt>
+<trkpt lat="50.110301" lon="14.445057"></trkpt>
+<trkpt lat="50.110256" lon="14.445071"><name>006 Praha 7</name></trkpt>
+<trkpt lat="50.110184" lon="14.445016"></trkpt>
+<trkpt lat="50.109940" lon="14.444893"></trkpt>
+<trkpt lat="50.109705" lon="14.444714"></trkpt>
+<trkpt lat="50.109678" lon="14.444700"></trkpt>
+<trkpt lat="50.109047" lon="14.444358"></trkpt>
+<trkpt lat="50.108569" lon="14.444112"></trkpt>
+<trkpt lat="50.108488" lon="14.444071"></trkpt>
+<trkpt lat="50.108407" lon="14.444030"></trkpt>
+<trkpt lat="50.108326" lon="14.444016"></trkpt>
+<trkpt lat="50.108254" lon="14.444031"></trkpt>
+<trkpt lat="50.108163" lon="14.443837"></trkpt>
+<trkpt lat="50.108027" lon="14.443628"><name>007 Praha 7</name></trkpt>
+<trkpt lat="50.108044" lon="14.443418"></trkpt>
+<trkpt lat="50.108100" lon="14.441991"></trkpt>
+<trkpt lat="50.108162" lon="14.441655"></trkpt>
+<trkpt lat="50.108170" lon="14.441529"></trkpt>
+<trkpt lat="50.108177" lon="14.441067"><name>008 Praha 7</name></trkpt>
+<trkpt lat="50.108357" lon="14.441051"></trkpt>
+<trkpt lat="50.108501" lon="14.441022"><name>009 End</name></trkpt>
+</trkseg>
+</trk></gpx>
