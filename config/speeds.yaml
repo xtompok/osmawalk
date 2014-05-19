@@ -1,13 +1,13 @@
 speeds:
-        WAY: 4
+        WAY: 6
         PARK: 4
         GREEN: 3
         FOREST: 3
-        PAVED: 5
+        PAVED: 6
         UNPAVED: 4
         STEPS: 2.5
-        HIGHWAY: 5
-        DIRECT: 3
+        HIGHWAY: 6
+        DIRECT: 4
 
 ratios:
         PARK: 1
@@ -18,3 +18,6 @@ ratios:
         STEPS: 0.6
         HIGHWAY: 1.2
         DIRECT: 0.8
+heights:
+        upscale: 10
+        downscale: 10
