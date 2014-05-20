@@ -1,0 +1,252 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<gpx version="1.1" creator="OsmAndRouter" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+  <trk>
+    <trkseg>
+      <trkpt lat="50.1165193" lon="14.4424725" />
+      <trkpt lat="50.1165468" lon="14.4431162" />
+      <trkpt lat="50.1165606" lon="14.4433951" />
+      <trkpt lat="50.1165674" lon="14.4436741" />
+      <trkpt lat="50.1166018" lon="14.4438672" />
+      <trkpt lat="50.1166225" lon="14.4439745" />
+      <trkpt lat="50.1166431" lon="14.4445539" />
+      <trkpt lat="50.1165606" lon="14.444747" />
+      <trkpt lat="50.1163267" lon="14.4445968" />
+      <trkpt lat="50.116079" lon="14.4444466" />
+      <trkpt lat="50.1159827" lon="14.4444036" />
+      <trkpt lat="50.115962" lon="14.4446397" />
+      <trkpt lat="50.1159414" lon="14.4448328" />
+      <trkpt lat="50.115907" lon="14.444983" />
+      <trkpt lat="50.1157625" lon="14.4453692" />
+      <trkpt lat="50.1155836" lon="14.4457984" />
+      <trkpt lat="50.1154942" lon="14.4460773" />
+      <trkpt lat="50.1154048" lon="14.4460559" />
+      <trkpt lat="50.1152465" lon="14.4459057" />
+      <trkpt lat="50.115219" lon="14.4458628" />
+      <trkpt lat="50.115219" lon="14.445734" />
+      <trkpt lat="50.1152328" lon="14.4456697" />
+      <trkpt lat="50.1152534" lon="14.4456482" />
+      <trkpt lat="50.1152947" lon="14.4456053" />
+      <trkpt lat="50.1153291" lon="14.4456053" />
+      <trkpt lat="50.1153635" lon="14.4456482" />
+      <trkpt lat="50.1153841" lon="14.4457126" />
+      <trkpt lat="50.1153773" lon="14.4457769" />
+      <trkpt lat="50.1153635" lon="14.4458199" />
+      <trkpt lat="50.115336" lon="14.4458628" />
+      <trkpt lat="50.1153016" lon="14.4458628" />
+      <trkpt lat="50.1152672" lon="14.4458413" />
+      <trkpt lat="50.1152672" lon="14.4458413" />
+      <trkpt lat="50.114875" lon="14.4453263" />
+      <trkpt lat="50.1148406" lon="14.4453049" />
+      <trkpt lat="50.1148131" lon="14.4452834" />
+      <trkpt lat="50.1147856" lon="14.4452834" />
+      <trkpt lat="50.1147443" lon="14.4452834" />
+      <trkpt lat="50.1146961" lon="14.4453478" />
+      <trkpt lat="50.1146549" lon="14.4453263" />
+      <trkpt lat="50.1146342" lon="14.4453049" />
+      <trkpt lat="50.1146205" lon="14.445262" />
+      <trkpt lat="50.1146205" lon="14.445219" />
+      <trkpt lat="50.1146342" lon="14.4451761" />
+      <trkpt lat="50.114648" lon="14.4451547" />
+      <trkpt lat="50.1146893" lon="14.4451332" />
+      <trkpt lat="50.1146961" lon="14.4450903" />
+      <trkpt lat="50.1146686" lon="14.4450903" />
+      <trkpt lat="50.1146342" lon="14.4451118" />
+      <trkpt lat="50.1146067" lon="14.4451761" />
+      <trkpt lat="50.1145929" lon="14.4452405" />
+      <trkpt lat="50.1145998" lon="14.4453049" />
+      <trkpt lat="50.1146342" lon="14.4453478" />
+      <trkpt lat="50.1146686" lon="14.4453907" />
+      <trkpt lat="50.1147099" lon="14.4453692" />
+      <trkpt lat="50.1147512" lon="14.4453478" />
+      <trkpt lat="50.1147718" lon="14.4452834" />
+      <trkpt lat="50.1147718" lon="14.445219" />
+      <trkpt lat="50.1147718" lon="14.4451761" />
+      <trkpt lat="50.1147581" lon="14.4451547" />
+      <trkpt lat="50.1147374" lon="14.4451118" />
+      <trkpt lat="50.1147099" lon="14.4450903" />
+      <trkpt lat="50.1146824" lon="14.4450903" />
+      <trkpt lat="50.1146273" lon="14.4451118" />
+      <trkpt lat="50.1145792" lon="14.4451761" />
+      <trkpt lat="50.1145379" lon="14.445219" />
+      <trkpt lat="50.1144554" lon="14.4452834" />
+      <trkpt lat="50.1143246" lon="14.4453049" />
+      <trkpt lat="50.1142834" lon="14.4453049" />
+      <trkpt lat="50.1142558" lon="14.4453049" />
+      <trkpt lat="50.114187" lon="14.445262" />
+      <trkpt lat="50.11396" lon="14.445219" />
+      <trkpt lat="50.113616" lon="14.4451332" />
+      <trkpt lat="50.1131481" lon="14.4450903" />
+      <trkpt lat="50.1121987" lon="14.4450045" />
+      <trkpt lat="50.1117721" lon="14.444983" />
+      <trkpt lat="50.1115657" lon="14.4449186" />
+      <trkpt lat="50.111201" lon="14.4445324" />
+      <trkpt lat="50.1108295" lon="14.4443393" />
+      <trkpt lat="50.1104923" lon="14.4441676" />
+      <trkpt lat="50.1103272" lon="14.4440174" />
+      <trkpt lat="50.1102997" lon="14.4438028" />
+      <trkpt lat="50.1102997" lon="14.4430733" />
+      <trkpt lat="50.1102997" lon="14.4428158" />
+      <trkpt lat="50.1102997" lon="14.4426227" />
+      <trkpt lat="50.1102859" lon="14.442451" />
+      <trkpt lat="50.1102515" lon="14.4423008" />
+      <trkpt lat="50.1102034" lon="14.442215" />
+      <trkpt lat="50.1101414" lon="14.4421506" />
+      <trkpt lat="50.1098181" lon="14.4419575" />
+      <trkpt lat="50.1098043" lon="14.4420433" />
+      <trkpt lat="50.1097561" lon="14.4421506" />
+      <trkpt lat="50.1096804" lon="14.4421721" />
+      <trkpt lat="50.1096048" lon="14.442215" />
+      <trkpt lat="50.109419" lon="14.4412923" />
+      <trkpt lat="50.1093708" lon="14.4410563" />
+      <trkpt lat="50.1091437" lon="14.4407988" />
+      <trkpt lat="50.1091437" lon="14.4408202" />
+      <trkpt lat="50.1091093" lon="14.440906" />
+      <trkpt lat="50.1090268" lon="14.4409919" />
+      <trkpt lat="50.1090061" lon="14.4409919" />
+      <trkpt lat="50.1090061" lon="14.4409275" />
+      <trkpt lat="50.1086208" lon="14.4409704" />
+      <trkpt lat="50.1083249" lon="14.4410348" />
+      <trkpt lat="50.1082217" lon="14.4410563" />
+      <trkpt lat="50.1082217" lon="14.440949" />
+      <trkpt lat="50.1082355" lon="14.4406271" />
+      <trkpt lat="50.1083249" lon="14.4406271" />
+      <trkpt lat="50.1083937" lon="14.4406056" />
+      <trkpt lat="50.1084694" lon="14.4406056" />
+    </trkseg>
+  </trk>
+  <rte>
+    <rtept lat="50.1165193" lon="14.4424725">
+      <desc>Jeďte rovně  166 m</desc>
+      <extensions>
+        <time>116</time>
+        <offset>0</offset>
+      </extensions>
+    </rtept>
+    <rtept lat="50.1165606" lon="14.444747">
+      <desc>Odbočte vpravo a pokračujte  69 m</desc>
+      <extensions>
+        <time>48</time>
+        <turn>TR</turn>
+        <turn-angle>78.693474</turn-angle>
+        <offset>7</offset>
+      </extensions>
+    </rtept>
+    <rtept lat="50.1159827" lon="14.4444036">
+      <desc>Odbočte vlevo a pokračujte  133 m</desc>
+      <extensions>
+        <time>92</time>
+        <turn>TL</turn>
+        <turn-angle>-100.957886</turn-angle>
+        <offset>10</offset>
+      </extensions>
+    </rtept>
+    <rtept lat="50.1154942" lon="14.4460773">
+      <desc>Odbočte vpravo a pokračujte  198 m</desc>
+      <extensions>
+        <time>133</time>
+        <turn>TR</turn>
+        <turn-angle>75.24316</turn-angle>
+        <offset>16</offset>
+      </extensions>
+    </rtept>
+    <rtept lat="50.1146961" lon="14.4450903">
+      <desc>Otočte se a pokračujte  420 m</desc>
+      <extensions>
+        <time>292</time>
+        <turn>TU</turn>
+        <turn-angle>-155.47545</turn-angle>
+        <offset>46</offset>
+      </extensions>
+    </rtept>
+    <rtept lat="50.1115657" lon="14.4449186">
+      <desc>Odbočte mírně vpravo a pokračujte  132 m</desc>
+      <extensions>
+        <time>94</time>
+        <turn>TSLR</turn>
+        <turn-angle>27.70494</turn-angle>
+        <offset>76</offset>
+      </extensions>
+    </rtept>
+    <rtept lat="50.1104923" lon="14.4441676">
+      <desc>Odbočte mírně vpravo a pokračujte Pod dráhou 21 m</desc>
+      <extensions>
+        <time>15</time>
+        <turn>TSLR</turn>
+        <turn-angle>12.97168</turn-angle>
+        <offset>79</offset>
+      </extensions>
+    </rtept>
+    <rtept lat="50.1103272" lon="14.4440174">
+      <desc>Odbočte mírně vpravo a pokračujte  178 m</desc>
+      <extensions>
+        <time>125</time>
+        <turn>TSLR</turn>
+        <turn-angle>49.144257</turn-angle>
+        <offset>80</offset>
+      </extensions>
+    </rtept>
+    <rtept lat="50.1098181" lon="14.4419575">
+      <desc>Odbočte vlevo a pokračujte  6 m</desc>
+      <extensions>
+        <time>4</time>
+        <turn>TL</turn>
+        <turn-angle>-96.18861</turn-angle>
+        <offset>89</offset>
+      </extensions>
+    </rtept>
+    <rtept lat="50.1098043" lon="14.4420433">
+      <desc>Odbočte mírně vpravo a pokračujte  27 m</desc>
+      <extensions>
+        <time>18</time>
+        <turn>TSLR</turn>
+        <turn-angle>20.3441</turn-angle>
+        <offset>90</offset>
+      </extensions>
+    </rtept>
+    <rtept lat="50.1096048" lon="14.442215">
+      <desc>Odbočte vpravo a pokračujte  87 m</desc>
+      <extensions>
+        <time>61</time>
+        <turn>TR</turn>
+        <turn-angle>89.91755</turn-angle>
+        <offset>93</offset>
+      </extensions>
+    </rtept>
+    <rtept lat="50.1093708" lon="14.4410563">
+      <desc>Odbočte mírně vlevo a pokračujte  31 m</desc>
+      <extensions>
+        <time>22</time>
+        <turn>TSLL</turn>
+        <turn-angle>-40.16758</turn-angle>
+        <offset>95</offset>
+      </extensions>
+    </rtept>
+    <rtept lat="50.1091437" lon="14.4407988">
+      <desc>Otočte se a pokračujte  114 m</desc>
+      <extensions>
+        <time>79</time>
+        <turn>TU</turn>
+        <turn-angle>0.0</turn-angle>
+        <offset>96</offset>
+      </extensions>
+    </rtept>
+    <rtept lat="50.1082217" lon="14.4410563">
+      <desc>Otočte se a pokračujte  57 m</desc>
+      <extensions>
+        <time>38</time>
+        <turn>TRU</turn>
+        <turn-angle>0.0</turn-angle>
+        <offset>104</offset>
+      </extensions>
+    </rtept>
+    <rtept lat="50.1084694" lon="14.4406056">
+      <desc></desc>
+      <extensions>
+        <time>0</time>
+        <turn>KR</turn>
+        <turn-angle>0.0</turn-angle>
+        <offset>109</offset>
+      </extensions>
+    </rtept>
+  </rte>
+</gpx>
