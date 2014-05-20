@@ -257,20 +257,23 @@
     <trkpt lat="50.109415" lon="14.441295">
         <ele>188.000000</ele>
     </trkpt>
-    <trkpt lat="50.109315" lon="14.441316">
+    <trkpt lat="50.109370" lon="14.441047">
         <ele>188.000000</ele>
     </trkpt>
-    <trkpt lat="50.109129" lon="14.441350">
-        <ele>187.000000</ele>
+    <trkpt lat="50.109145" lon="14.440800">
+        <ele>189.000000</ele>
     </trkpt>
-    <trkpt lat="50.108905" lon="14.441032">
-        <ele>188.000000</ele>
-    </trkpt>
-    <trkpt lat="50.108827" lon="14.440878">
+    <trkpt lat="50.109052" lon="14.440903">
         <ele>190.000000</ele>
     </trkpt>
-    <trkpt lat="50.108817" lon="14.440710">
-        <ele>189.000000</ele>
+    <trkpt lat="50.109006" lon="14.440937">
+        <ele>190.000000</ele>
+    </trkpt>
+    <trkpt lat="50.108813" lon="14.440959">
+        <ele>190.000000</ele>
+    </trkpt>
+    <trkpt lat="50.108690" lon="14.440902">
+        <ele>190.000000</ele>
     </trkpt>
 </trkseg>
 </trk>
