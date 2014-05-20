@@ -376,10 +376,16 @@ všechny čtverce, možné spojky doleva a nahoru již známe ze zpracování
 předchozích čtverců. 
 
 Jednotlivé počáteční a koncové body spojek získáme ze všech bodů v~daném čtverci
-vytříděním těch, které mají nějaké sousedy v~poli \verb|wayGraph|. Rovněž
-nepřidáváme každou spojku, ale náhodně jen některé z~nich, čímž si příliš
-nezhoršíme nejkratší trasu a ušetříme místo a čas při hledání.
-%TODO: okecat
+vytříděním těch, které mají nějaké sousedy v~poli \verb|wayGraph|. Nepřidáváme
+ale všechny spojky, protože pak existovalo např. u kruhových cest v parcích
+mnoho spojek, které nepřinášely výrazné zlepšení. Zvolili jsme proto náhodný
+výběr, při němž pro každý bod vybereme z každého čtverce mřížky jen několik
+kandidátů. Zkoumali jsme vliv počtu kandidátů na délku trasy a jako optitmum se
+ukázalo vybírat dva body na kandidáty z každého čtverce mřížky. Při větším
+množství bodů se výslledky zlepšovaly přibližně o procento, ale velikost
+výstupního souboru rostla přibližně o šest procent.
+
+%TODO: obrázek
 
 \subsection{Datové struktury}
 Když máme připravené kandidáty na spojky a seznam všech překážek, můžeme
@@ -535,10 +541,16 @@ atributu \verb|barIdxs| a vyhledávatelné cesty, které uložíme do atributu
 \verb|wayIdxs|. Během rozdělování také odstraňujeme duplicitní cesty. 
 
 Jako další krok připravíme kandidáty na zkratky. Použijeme k tomu funkci
-\verb|makeAreaCandidates|. Procházíme postupně všechny dvojice bodů v~dané ploše
-a pokud jsou k~sobě blíže než 300\,m a zároveň nejsou na společné cestě, přidáme
-je do seznamu kandidátů. Každou dvojici přidáváme s~pravěpodobností takovou, aby
-měl každý uzel průměrný stupeň dva.
+\verb|makeAreaCandidates|. Procházíme postupně dvojice bodů v~dané ploše a
+hledáme bližší než 300\,m, které nejsou na společné cestě. Neuvažujeme ovšem
+všechny dvojice, ale vybíráme pro každý uzel náhodně z ostatních uzlů, protože
+při uvažování všech dvojic vznikalo mnoho cest v podobných místech podobným
+směrem. Nalezené dvojice následně přidáme do seznamu kandidátů. Experimentálně
+jsme zkoumali vliv průměrného počtu sousedů pro jeden vrchol na délku nalezených
+cest přes pražskou Stromovku a Letnou. Jako optimální se ukázalo vybírat pro
+každý vrchol průměrně dva sousedy. K dalšímu výrazném zlepšení totiž došlo až
+pro pět sousedů, což ale při zlepšení o přibližně 10 procent vedlo ke zvýšení
+velikosti grafu o 20 procent, což nám již  přišlo nevýhodné.
 
 Vytvoříme také seznam překážek funkcí \verb|makeAreaBarGraph|. Nejprve přidáme
 všechny překážky ze seznamu \verb|barIdxs|, poté přidáme všechny cesty
@@ -551,7 +563,6 @@ Když máme kandidáty na zkratky i seznam překážek, můžeme použít již p
 kolidujících
 s~překážkami a cestami a k~přidání výlsedných zkratek do mapy. Postup přípravy
 kandidátů až jejich přidání do mapy zopakujeme pro každou průchozí plochu.
-
 
 \section{Vytvoření vyhledávacího grafu}
 Když již máme všechna data připravená, vytvoříme vyhledávací graf. Nejprve do

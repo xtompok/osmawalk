@@ -59,6 +59,7 @@ QOsmWalk::QOsmWalk(QWidget *parent)
 
     searchData = prepareData("/aux/jethro/bakalarka/config/speeds.yaml","/aux/jethro/bakalarka/data/praha-graph.pbf");
 
+    searchResult.points = NULL;
     addZoomButtons();
 }
 void QOsmWalk::resizeEvent(QResizeEvent * evt){
@@ -93,8 +94,9 @@ void QOsmWalk::addZoomButtons()
 void QOsmWalk::GPXExportClicked(){
     QString filename;
     filename = QFileDialog::getSaveFileName(this,"Ulozit GPX...","./");
+    if (filename==NULL)
+        return;
     writeGpxFile(this->searchResult,filename.toLocal8Bit().data());
-    qDebug() << "Clicked";
 
 }
 
@@ -134,6 +136,10 @@ void QOsmWalk::searchPath(QPointF * first, QPointF * second){
 
     this->searchResult = findPath(searchData,first->y(),first->x(),second->y(),second->x());
 
+    if (searchResult.points==NULL){
+        label->setText("Cesta nebyla nalezena");
+        return;
+    }
     // create a LineString
     QList<Point*> qpoints;
 

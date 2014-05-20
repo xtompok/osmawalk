@@ -19,6 +19,11 @@ struct config_t {
 	int maxvalue;
 	double * speeds;
 	double * ratios;
+	double upscale;
+	double downscale;
+	double maxslope;
+	double upslopescale;
+	double downslopescale;
 };
 
 struct nodeways_t{

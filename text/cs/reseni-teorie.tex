@@ -86,8 +86,16 @@ jde například o~dvě ulice oddělené domky se zahrádkami, poměrně malá.
 V oblastech, kde se nacházelo velké množstí uzlů blízko sebe, například u cest
 reprezentujících kruhové objezdy, vznikalo příliš velké množství spojek. Tyto
 spojky navíc nepřinášely významné zkrácení trasy. U~každého uzlu jsme proto
-vybrali spojky s~určitou pravděpodobností tak, aby měl každý uzel průměrný
-stupeň šest.
+náhodně vybrali jen některé spojky.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics{../img/spojky.pdf}
+	\caption{Spojky na malém území. Pokud bychom zde nevybírali náhodně, získali
+	bychom velké množství spojek, které by zkrácení trasy příliš nepomohly.
+	Růžové úsečky značí vytvořené spojky po náhodném výběru.}
+	\label{fig:spojky}
+\end{figure}
 
 Spojky navíc mohou vést přes nějakou překážku, jako je plot nebo zeď, proto
 potřebujeme zkontrolovat kolize všech přidaných spojek s~překážkami. K~tomuto
@@ -170,11 +178,11 @@ průchozí prostranství proto také chceme zanést do vyhledávacího grafu. K~
 vytvoření jsme využili modifikovaný algoritmus vytváření spojek mezi cestami.
 Dvojice bodů v~průchozích prostranstvích jsme spojovali úsečkami. Tentokrát jsme
 ale hledali dvojice bližší než 300 m, protože parky mohou být poměrně rozlehlé.
-Omezení na průměrný stupeň jsme snížili na dva, protože zvýšením vzdálenosti
-hledání při vyšším stupni vznikalo příliš mnoho úseček, které vedly podobně a
-proto nepřinášely významné zlepšení vyhledané trasy. Protože i na průchozích
-prostranstvích se vyskytují překážky, opět jsme pomocí zametání roviny
-odstranili všechny úsečky, které procházely přes nějakou překážku.
+Opět jsme nepoužívali všechny dvojice ale jen některé náhodně vybrané, protože
+jinak vznikalo příliš mnoho úseček, které vedly podobně a proto nepřinášely
+významné zlepšení vyhledané trasy. Protože i na průchozích prostranstvích se
+vyskytují překážky, opět jsme pomocí zametání roviny odstranili všechny úsečky,
+které procházely přes nějakou překážku.
 
 \section{Vytvoření vyhledávacího grafu}
 Poté, co jsme připravili data, vytvoříme vyhledávací graf. Protože kolize

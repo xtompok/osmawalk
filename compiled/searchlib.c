@@ -37,7 +37,8 @@ double calcTime(Graph__Graph * graph, struct config_t conf,Graph__Edge * edge){
 	int toHeight;
 	fromHeight = graph->vertices[edge->vfrom]->height;
 	toHeight = graph->vertices[edge->vto]->height;
-	return fabs(edge->dist+5*(fromHeight-toHeight))/speed;
+	int dh = toHeight-fromHeight;
+	return edge->dist+abs(dh)*((dh>0?conf.upscale:conf.downscale))/speed;
 }
 
 
@@ -127,7 +128,36 @@ struct config_t parseConfigFile(char * filename){
 						}
 					}
 				}
-			} else {
+			} else if (strcmp((char *)key->data.scalar.value,"heights")==0){
+				printf("Parsing heights\n");
+				yaml_node_t * heightsMap;
+				heightsMap = yaml_document_get_node(&document,section->value);
+				if (heightsMap->type != YAML_MAPPING_NODE){
+					printf("Height are not mapping\n");
+					break;
+				}
+				yaml_node_pair_t * pair;
+				for (pair=heightsMap->data.mapping.pairs.start;
+						pair < heightsMap->data.mapping.pairs.top;pair++){
+					yaml_node_t * key;
+					yaml_node_t * value;
+					key = yaml_document_get_node(&document,pair->key);
+					value = yaml_document_get_node(&document,pair->value);
+					if (strcmp((char *)key->data.scalar.value,"upscale")==0){
+						conf.upscale = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"downscale")==0){
+						conf.downscale = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"maxslope")==0){
+						conf.maxslope = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"upslopescale")==0){
+						conf.upslopescale= atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"downslopescale")==0){
+						conf.downslopescale = atof((char *)value->data.scalar.value);	
+					} 
+				}
+				
+			} else
+			{
 				printf("Unsupported section: %s\n",key->data.scalar.value);
 			}
 		}		
@@ -309,12 +339,10 @@ void findWay(struct search_data_t data,struct dijnode_t * dijArray,int fromIdx, 
 	heapIndex[fromIdx]=1;
 	HEAP_INSERT(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,fromIdx);
 
-	while(true){
+	while(n_heap > 0){
 		HEAP_DELETE_MIN(int,heap,n_heap,DIJ_CMP,DIJ_SWAP);
 		int vIdx;
 		vIdx = heap[n_heap+1];
-		if (vIdx == toIdx)
-			break;
 		
 		if (!dijArray[vIdx].reached){
 			printf("Found unreached vertex, exitting\n");
@@ -339,6 +367,8 @@ void findWay(struct search_data_t data,struct dijnode_t * dijArray,int fromIdx, 
 			}
 		}
 		dijArray[vIdx].completed=true;
+		if (vIdx == toIdx)
+			break;
 	}
 }
 
@@ -346,7 +376,7 @@ struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * d
 	Graph__Graph * graph;
 	graph = data.graph;
 
-	if (!dijArray[toIdx].completed){
+	if (!dijArray[fromIdx].completed){
 		printf("Route not found\n");
 		*n_points = 0;
 		return NULL;
@@ -457,6 +487,10 @@ struct search_result_t findPath(struct search_data_t data,double fromLat, double
 	result.points = resultsToArray(data,dijArray,fromIdx,toIdx,&n_points);
 	result.n_points = n_points;
 	result.dist = 0;
+	if (result.n_points == 0){
+		result.time=0;
+		return result;
+	}
 	int idx;
 	idx = fromIdx;
 	while(idx != toIdx){

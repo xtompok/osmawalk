@@ -343,6 +343,8 @@ int ** makeAreaCandidates(struct map_t map, struct walk_area_t area,  int maxdis
 	for (int i=0;i<area.n_nodes;i++){
 
 		for (int j=i+1; j<area.n_nodes;j++){
+			if (rand()%modulus!=0)
+				continue;
 			int nidx1;
 			int64_t nid1;
 			int nidx2;
@@ -384,8 +386,6 @@ int ** makeAreaCandidates(struct map_t map, struct walk_area_t area,  int maxdis
 				continue;
 			}*/
 
-			if (rand()%modulus!=0)
-				continue;
 //			printf("Candidates %d %d, distance: %d\n",nidx1,nidx2,distance(map.nodes[nidx1],map.nodes[nidx2]));	
 			addCandidate(&candidates,nidx1,nidx2);
 

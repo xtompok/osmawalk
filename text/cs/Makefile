@@ -17,3 +17,5 @@ prace.pdf: prace.tex $(wildcard *.tex)
 
 clean:
 	rm -f *.{log,dvi,aux,toc,lof,out} prace.ps prace.pdf
+book: prace.pdf
+	pdfbook --short-edge prace.pdf
