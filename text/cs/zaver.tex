@@ -1,2 +1,57 @@
 \chapter*{Závěr}
 \addcontentsline{toc}{chapter}{Závěr}
+
+\section{Zhodnocení}
+Úlohou práce bylo navrhnout algoritmy a datové struktury pro odhady pěších tras.
+Pro vypracování práce bylo nutné detailně pochpit způsob mapování v projektu
+OpenStreetMap a význam jednotlivých značek. Jako hlavní podklad sloužily wiki
+stránky, ale na některé zvyklosti bylo potřeba se zeptat přímo komunity na
+diskusních fórech. 
+
+Při následném zpracování se objevily problémy v nekonzistentním mapování v
+různých částech mapy a chyby v datech, se kterými jsme se museli vypořádat.
+Výsledné algoritmy se s problémy umí vypořádat a ukázková aplikace na ně pouze
+upozorní a pokračuje ve zpracování. 
+
+Zjednodušování a předzpracování dat se osvědčilo, výsledná data jsou přesnější a
+aplikace běží rychleji. Významným přínosem bylo použití spojek -- krátkých
+spojnic cest --, které suplují chybějící vazby chodníků na silnice i chodníků
+mezi sebou. Díky spojkám můžeme plánovat cesty i přes území, kde jsou chodníky
+zmapovány neúplně a není jich mnoho. 
+
+Zkratky přes průchozí prostranství se v současné implementaci příliš neosvědily.
+V městském prostředí se nevyskytuje mnoho ploch, které by byly průchozí a
+zároveň nebyly v prudkém svahu a zároveň přes ně nevedla alespoň nějaká síť
+zmapovanýh cest a pěšin. Mimo město je většina volných ploch neoznačena, proto o
+nich nemůžeme, že jsou průchozí. Lesy nemusí být obecně průchodné a typy lesů
+nebývají v mapách zaneseny. 
+
+Problémem, který v malé míře přetrvává i v současné verzi, je zametání roviny.
+I když jsme základní problémy vyřešili, stále v některých situacích nejsou
+průsečíky korektně detekovány a vyskytují se spojky vedoucí skrz budovy.  
+
+Vytvořili jsme jednoduchou aplikaci pro hledání v připravených datech. Tato
+aplikace byla určena pro demostraci hledání ve vytvořených datech, proto má jen
+základní funkce. Vyhledávání tras i přes použití jednoduchého Dijkstrova
+algoritmu je dostatečně rychlé, aby nezdržovalo práci s aplikací. 
+
+\section{Výsledky}
+Naše aplikace dává dobré výsledky pro vyhledávání pěších tras. Výsledky jsou
+lepší než dávají známé mapové servery a srovnatelné s aplikací OsmAnd
+využívající data OSM. Stále ovšem vyžadují kontrolu kvůli vyskytujícím se chybám
+ve spojkách a zkratkách. Odhadovaná vzdálenost a čas odpovídají skutečnosti. 
+
+
+\section{Náměty na zlepšení}
+Pro další rozvoj aplikace by bylo nutné odstranit nedostatky implementace
+zametání roviny, abychom mohli důvěřovat nalezeným cestám. Poté je možné
+zlepšovat aplikaci mnoha způsoby. Jednou možností je zjednodušování grafu pro
+úsporu paměti pro uložení a času pro prohledání. Bylo by možné zkusit jiné
+alogritmy pro vytváření spojek a zkratek a zkoumat, zda se jejich výsledky
+zlepší a zkratky budou použitelné.  
+
+Náměty pro rozšíření máme i pro vyhledávací část. Pokud bychom ukládali při
+tvorbě dat informace o zmapovaných přechodech, mohli bychom při vyhledávání
+preferovat přecházení silnice po přechodu. Bylo by také možné zvětšit možnosti
+konfigurace sklonů. 
+

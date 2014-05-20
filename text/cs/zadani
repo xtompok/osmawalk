@@ -1,0 +1,7 @@
+Cílem práce je navrhnout algoritmy a datové struktury pro aproximaci pěších
+vzdáleností v terénu na základě mapových podkladů z projektu OpenStreetMap. Pěší
+trasy by měly kombinovat chůzi po cestách s průchodem volnými prostranstvími.
+
+Součástí práce má být i referenční aplikace umožňující konstrukci datových
+struktur a vyhledávání v nich. Aplikace by měla brát v úvahu i nekompletní data
+(například chybějící chodníky podél silnic). 

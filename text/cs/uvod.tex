@@ -1,5 +1,12 @@
 \chapwithtoc{Úvod}
 
+chceme hledat cestu
+chceme chodit pěšky
+existují různé služby
+většina určena primárně pro auta -> nereflektuje pěší potřeby
+ - kros průchozích prostranství
+
+
 Hledání cesty ve městě je častou situací většiny lidí. Ve městě se vyskytuje
 mnoho různých překážek jako jsou ploty, zábradlí či frekventované silnice,
 i mnoho průchozích prostranství, například náměstí, parky či sady. V naší práci
@@ -31,3 +38,31 @@ vyhledávači používajícími data OSM -- OsmAnd a TODO. Nalezené trasy jsme 
 porovnávali s~vlastní znalostí terénu a skutečně používaných cest.
 
 %TODO: obrazek - vstupni data a vystupni data
+
+V první kapitole se zabýváme zdrojovými geografickými daty. Popíšeme, jakým
+způsobem OpenStreetMap popisuje objekty reálného světa a jaké to přináší
+problémy při zpracování. Ukážeme jeden ze způsobů, kterým jsou data ukládána -
+OSM XML. Popíšeme, které informace z dat OSM využíváme a s jakými problémy jsme
+se při jejich zpracování museli vypořádat. Na konci se zmíníme o používaných
+výškových datech z projektu SRTM.
+
+Ve druhé kapitole popíšeme používané formáty. Popíšeme souřadný systém UTM a
+důvody, proč jsme ho zvolili jako interní reprezentaci souřadnic. Popíšeme
+ProtocolBuffery používané jako binární reprezentace našich datových struktur.
+Popíšeme datovou strukturu používanou při zpracovávání mapových dat a strukturu
+vyhledávacího grafu z dat vzniklého.
+
+Ve třetí kapitole popíšeme použité algoritmy
+
+Ve čtvrté kapitole poíšeme detaily implementace jednotlivých fází zpracování,
+popíšeme problémy, které při implmentaci nastaly a jakým způsobem jsme je
+řešili. 
+
+V páté kapitule se budeme zabývat hledáním ve vygenerovaných datech. Popíšeme
+Dijkstrův algoritmus pro vyhledávání v grafu a popíšeme ukázkovou vyhledávací
+aplikaci. 
+
+V šesté kapitole porovnáme výsledky naší aplikace s výsledky jiných vyhledávačů
+a vlastními zkušenostmi. 
+
+
