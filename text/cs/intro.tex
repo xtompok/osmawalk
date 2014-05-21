@@ -3,18 +3,18 @@
 \section{Motivace}
 
 \section{Cíl práce}
-Hledání pěších tras v terénu je velmi rozsáhlé téma. My jsme si zvolili za
-hlavní záměr zkoumat hledání tras ve městě, protože města jsou dostatečně dobře
-zmapovaná a zároveň pěší trasy z různých vyhledávačů nebývají optimální. Navíc
-máme v plánu práci dále rozšiřovat a vytvořit vyhledávač spojení po městě
-využívající pěších tras a MHD.
-Cílem práce je specifikace vhodného formátu dat pro vyhledávání pěších tras ve
-městě a algoritmů pro přípravu mapových dat do tohoto formátu. 
+Hledání pěších tras v terénu je velmi rozsáhlé téma s mnoha specifickými
+podoblastmi. My jsme si zvolili za hlavní záměr zkoumat hledání tras ve městě,
+protože města jsou dostatečně dobře zmapovaná a zároveň pěší trasy z různých
+současných vyhledávačů nebývají optimální. Navíc máme v plánu práci dále
+rozšiřovat a vytvořit vyhledávač spojení po městě využívající kombinaci pěších
+tras a MHD.  Cílem práce je specifikace vhodného formátu dat pro vyhledávání
+pěších tras ve městě a algoritmů pro přípravu mapových dat do tohoto formátu. 
 
 Cílem práce není vytvořit data pro obecný vyhledávač tras, zaměřili jsme se
 pouze na pěší trasy a jejich specifika. Cílem také nebylo vytvořit komplexní
-vyhledávací aplikaci, vyhledávací aplikace je pouze ukázkou, že jsou námi
-vytvářená data přímo použitelná pro vyhledávání a to dosahuje dobrých výsledků.
+vyhledávací aplikaci; vyhledávací aplikace je pouze ukázkou, že jsou námi
+vytvářená data přímo použitelná pro vyhledávání dosahující dobrých výsledků.
 
 \section{Zdroje dat}
 Našim cílem bylo, aby bylo možné aplikaci i data volně šířit, proto jsme hledali
@@ -25,12 +25,12 @@ importuje jiná volně dostupná data. Jedná se o nejkvalitnější volně dost
 mapová data pro celý svět, proto jsme tento projekt zvolili jako zdroj mapových
 dat.
 
-Pro kvalitní hledání potřebujeme i výšková data. Ta používáme ze SRTM, protože
+Pro kvalitní hledání potřebujeme i výšková data. Ta používáme z projektu SRTM, protože
 jsou také volně šiřitená a používaná v mnoha jiných mapových projektech.
 
 
-\section{Programovací jazyky}
-Pro implementaci algoritmů v naší práci jsme zvolili Python a C. První část
+\section{Implementační prostředky}
+Pro implementaci algoritmů v naší práci jsme zvolili jazyky Python a C. První část
 aplikace připravující z mapy data pro vyhledávání jsme napsali v Pythonu. Tento
 objektový skriptovací jazyk jsme zvolili z důvodu předchozích zkušeností a
 rychlé tvorby kódu. Jazyk již v základu poskytuje pokročilé datové struktury a
