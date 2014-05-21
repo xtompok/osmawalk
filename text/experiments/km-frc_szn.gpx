@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gpx creator="mapy.cz" version="1.1" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+<trk><name>Start -&gt; End</name>
+<trkseg>
+<trkpt lat="50.091260" lon="14.439251"><name>001 Start</name></trkpt>
+<trkpt lat="50.091260" lon="14.439251"></trkpt>
+<trkpt lat="50.091250" lon="14.439195"></trkpt>
+<trkpt lat="50.091058" lon="14.438512"><name>002 Praha 8</name></trkpt>
+<trkpt lat="50.091148" lon="14.438469"></trkpt>
+<trkpt lat="50.091220" lon="14.438413"></trkpt>
+<trkpt lat="50.091182" lon="14.438189"><name>003 Praha 8</name></trkpt>
+<trkpt lat="50.091191" lon="14.438147"></trkpt>
+<trkpt lat="50.091280" lon="14.437923"></trkpt>
+<trkpt lat="50.091298" lon="14.437811"></trkpt>
+<trkpt lat="50.091306" lon="14.437685"></trkpt>
+<trkpt lat="50.091305" lon="14.437559"></trkpt>
+<trkpt lat="50.091314" lon="14.437447"></trkpt>
+<trkpt lat="50.091376" lon="14.437293"></trkpt>
+<trkpt lat="50.091679" lon="14.436744"></trkpt>
+<trkpt lat="50.091831" lon="14.436602"></trkpt>
+<trkpt lat="50.091885" lon="14.436532"><name>004 Praha 1</name></trkpt>
+<trkpt lat="50.091884" lon="14.436392"></trkpt>
+<trkpt lat="50.091847" lon="14.436141"></trkpt>
+<trkpt lat="50.091800" lon="14.435778"></trkpt>
+<trkpt lat="50.091642" lon="14.434717"></trkpt>
+<trkpt lat="50.091605" lon="14.434480"></trkpt>
+<trkpt lat="50.091587" lon="14.434354"></trkpt>
+<trkpt lat="50.091412" lon="14.433657"></trkpt>
+<trkpt lat="50.091282" lon="14.432862"></trkpt>
+<trkpt lat="50.091235" lon="14.432317"></trkpt>
+<trkpt lat="50.091170" lon="14.431983"><name>005 Petrske namesti</name></trkpt>
+<trkpt lat="50.091529" lon="14.431797"><name>006 Petrske namesti/Soukenicka</name></trkpt>
+<trkpt lat="50.090950" lon="14.429301"></trkpt>
+<trkpt lat="50.090839" lon="14.428673"></trkpt>
+<trkpt lat="50.090736" lon="14.427766"><name>007 Soukenicka/Dlouha</name></trkpt>
+<trkpt lat="50.090716" lon="14.427347"></trkpt>
+<trkpt lat="50.090715" lon="14.427193"></trkpt>
+<trkpt lat="50.090703" lon="14.426676"></trkpt>
+<trkpt lat="50.090694" lon="14.426550"></trkpt>
+<trkpt lat="50.090666" lon="14.426299"></trkpt>
+<trkpt lat="50.090583" lon="14.425922"></trkpt>
+<trkpt lat="50.090546" lon="14.425797"></trkpt>
+<trkpt lat="50.090034" lon="14.424125"></trkpt>
+<trkpt lat="50.089542" lon="14.422817"></trkpt>
+<trkpt lat="50.089523" lon="14.422678"></trkpt>
+<trkpt lat="50.089558" lon="14.422412"></trkpt>
+<trkpt lat="50.089893" lon="14.421024"><name>008 V Kolkovne/Siroka</name></trkpt>
+<trkpt lat="50.089866" lon="14.420996"></trkpt>
+<trkpt lat="50.089838" lon="14.420871"></trkpt>
+<trkpt lat="50.089856" lon="14.420772"></trkpt>
+<trkpt lat="50.089918" lon="14.420716"></trkpt>
+<trkpt lat="50.089736" lon="14.420215"></trkpt>
+<trkpt lat="50.089435" lon="14.419408"></trkpt>
+<trkpt lat="50.089187" lon="14.418432"></trkpt>
+<trkpt lat="50.089004" lon="14.417693"></trkpt>
+<trkpt lat="50.089002" lon="14.417400"></trkpt>
+<trkpt lat="50.089090" lon="14.416909"></trkpt>
+<trkpt lat="50.089336" lon="14.415830"><name>009 Praha 1</name></trkpt>
+<trkpt lat="50.089326" lon="14.415564"></trkpt>
+<trkpt lat="50.089456" lon="14.414682"><name>010 Praha 1</name></trkpt>
+<trkpt lat="50.089105" lon="14.414519"><name>011 Alsovo nabrezi/Manesuv most</name></trkpt>
+<trkpt lat="50.089185" lon="14.414378"></trkpt>
+<trkpt lat="50.089229" lon="14.414266"></trkpt>
+<trkpt lat="50.089291" lon="14.414027"></trkpt>
+<trkpt lat="50.089817" lon="14.411309"></trkpt>
+<trkpt lat="50.089949" lon="14.410678"></trkpt>
+<trkpt lat="50.090054" lon="14.410173"><name>012 Manesuv most/U Luzickeho seminare</name></trkpt>
+<trkpt lat="50.089937" lon="14.410035"></trkpt>
+<trkpt lat="50.089199" lon="14.410002"></trkpt>
+<trkpt lat="50.088242" lon="14.409301"></trkpt>
+<trkpt lat="50.087636" lon="14.408610"></trkpt>
+<trkpt lat="50.087274" lon="14.408125"><name>013 U Luzickeho seminare/Na Kampe</name></trkpt>
+<trkpt lat="50.087059" lon="14.408281"><name>014 End</name></trkpt>
+</trkseg>
+</trk></gpx>
