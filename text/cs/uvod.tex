@@ -5,6 +5,25 @@ chceme chodit pěšky
 existují různé služby
 většina určena primárně pro auta -> nereflektuje pěší potřeby
  - kros průchozích prostranství
+může to být modul pro MHD
+
+
+Děláme to takto:
+
+
+Přikládáme:
+
+%DONE
+V první kapitole zmiňujeme motivaci k naší práci a stanovujeme cíl práce.
+Podrobnější informace o zdrojích dat a popis jejich formátu uvádíme ve druhé
+kapitole. Ve třetí kapitole popisujeme používané formáty a datové struktury.
+Použité algoritmy a postup při přípravě dat pro vyhledávání je obsahem čtvrté
+kapitoly. Popis implementace celého procesu přípravy vyhledávacích dat a
+problémů, které se při implementaci vyskytly uvádíme v páté kapitole. V šesté
+kapitole navrhujeme algoritmy na ukázku hledání v datech a popisujeme jejich
+implementaci. Zhodnocení nalezených tras a jejich porovnání s trasami jiných
+vyhledávačů je předmětem sedmé kapitoly. V závěru zhodnocujeme celou práci a
+uvádíme možnosti dalšího rozšíření.
 
 
 Hledání cesty ve městě je častou situací většiny lidí. Ve městě se vyskytuje
@@ -38,31 +57,4 @@ vyhledávači používajícími data OSM -- OsmAnd a TODO. Nalezené trasy jsme 
 porovnávali s~vlastní znalostí terénu a skutečně používaných cest.
 
 %TODO: obrazek - vstupni data a vystupni data
-
-V první kapitole se zabýváme zdrojovými geografickými daty. Popíšeme, jakým
-způsobem OpenStreetMap popisuje objekty reálného světa a jaké to přináší
-problémy při zpracování. Ukážeme jeden ze způsobů, kterým jsou data ukládána -
-OSM XML. Popíšeme, které informace z dat OSM využíváme a s jakými problémy jsme
-se při jejich zpracování museli vypořádat. Na konci se zmíníme o používaných
-výškových datech z projektu SRTM.
-
-Ve druhé kapitole popíšeme používané formáty. Popíšeme souřadný systém UTM a
-důvody, proč jsme ho zvolili jako interní reprezentaci souřadnic. Popíšeme
-ProtocolBuffery používané jako binární reprezentace našich datových struktur.
-Popíšeme datovou strukturu používanou při zpracovávání mapových dat a strukturu
-vyhledávacího grafu z dat vzniklého.
-
-Ve třetí kapitole popíšeme použité algoritmy
-
-Ve čtvrté kapitole poíšeme detaily implementace jednotlivých fází zpracování,
-popíšeme problémy, které při implmentaci nastaly a jakým způsobem jsme je
-řešili. 
-
-V páté kapitule se budeme zabývat hledáním ve vygenerovaných datech. Popíšeme
-Dijkstrův algoritmus pro vyhledávání v grafu a popíšeme ukázkovou vyhledávací
-aplikaci. 
-
-V šesté kapitole porovnáme výsledky naší aplikace s výsledky jiných vyhledávačů
-a vlastními zkušenostmi. 
-
 

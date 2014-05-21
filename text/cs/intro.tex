@@ -1,0 +1,46 @@
+\chapter{Intro}
+
+\section{Cíl práce}
+Cílem práce je specifikace vhodného formátu dat pro vyhledávání pěších tras ve
+městě a algoritmů pro přípravu mapových dat do tohoto formátu.  
+
+Cílem práce není vytvořit data pro obecný vyhledávač tras, zaměřili jsme se
+pouze na pěší trasy a jejich specifika. Cílem také nebylo vytvořit komplexní
+vyhledávací aplikaci, vyhledávací aplikace je pouze ukázkou, jak se dá ve
+vytvořených datech hledat.
+
+\section{Zdroje dat}
+Našim cílem bylo, aby bylo možné aplikaci i data volně šířit, proto jsme hledali
+zdroj mapových dat, který umožňuje jejich volné užití. Nejznámějším a zároveň
+nejkvalitnějším projektem, který mapová data poskytuje, je projekt
+OpenStreetMap. Tento projekt vytváří mapu světa za pomoci dobrovolníků a také
+importuje jiná volně dostupná data. Jedná se o nejkvalitnější volně dostupná
+mapová data pro celý svět, proto jsme tento projekt zvolili jako zdroj mapových
+dat.
+
+Pro kvalitní hledání potřebujeme i výšková data. Ta používáme ze SRTM, protože
+jsou také volně šiřitená a používaná v mnoha jiných mapových projektech.
+
+
+\section{Programovací jazyky}
+Pro implementaci algoritmů v naší práci jsme zvolili Python a C. První část
+aplikace připravující z mapy data pro vyhledávání jsme napsali v Pythonu. Tento
+objektový skriptovací jazyk jsme zvolili z důvodu předchozích zkušeností a
+rychlé tvorby kódu. Jazyk již v základu poskytuje pokročilé datové struktury a
+má širokou databázi knihoven usnadňujících vývoj. 
+
+První implementace druhé části přípravné aplikace používaly Python, ale programy
+běžely příliš pomalu a byly velmi náročné na paměť. Proto jsme se rozhodli na
+druhou část použít jazyk C, který má minimální paměťovou režii a je také velmi
+rychlý. Jako doplnění tohoto jazyka jsme užili knihovnu LibUCW, která poskytuje
+rychlé implementace složitějších datových struktur (stromy, haldy) a algoritmů
+(třídění). 
+
+Pro implementaci aplikace pro vyhledávání trasy jsme také zvolili jazyk C pro
+paměťovou nenáročnost a rychlost. Při implementaci jsme se snažili využívat
+minimum externích knihoven, aby byla aplikace snadno přenostitelná na jiné
+platformy. Grafická nadstavba je napsána v C++ v prostředí Qt, protože toto
+prostředí umožňuje snadné vytvoření grafického rozhraní a již pro něj existují
+komponenty pro zobrazování mapy. Samotná grafická nadstavba pak používá fukce z
+vyhledávače v C.
+
