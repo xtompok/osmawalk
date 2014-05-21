@@ -46,7 +46,7 @@ se chybám ve spojkách a zkratkách.  Odhadovaná vzdálenost a čas dle zkuše
 autora odpovídají skutečnosti. 
 
 
-\section{Náměty na zlepšení}
+\section{Náměty pro další rozvoj}
 Pro další rozvoj aplikace by bylo nutné odstranit nedostatky implementace
 zametání roviny, abychom mohli více důvěřovat nalezeným cestám. Poté je možné
 zlepšovat aplikaci mnoha způsoby. Jednou možností je zjednodušování grafu pro
@@ -54,9 +54,16 @@ zlepšovat aplikaci mnoha způsoby. Jednou možností je zjednodušování grafu
 algoritmy pro vytváření spojek a zkratek a zkoumat vliv na nalezené spojky a
 použitelnost zkratek.
 
-
 Náměty pro rozšíření máme i pro vyhledávací část. Pokud bychom ukládali při
 tvorbě dat informace o zmapovaných přechodech, mohli bychom například při
 vyhledávání preferovat přecházení silnice po přechodu. Bylo by také možné
 zvětšit možnosti konfigurace sklonů. 
 
+Specifickým tématem je rozšíření vyhledávání mimo město. Námi použité algoritmy
+je možné použít i v mimoměstském prostředí, ovšem problém nastává se zdrojovými
+daty. Abychom mohli dobře odhadovat zkratky například přes les, potřebovali
+bychom mít mnohem podrobnější data, než OSM poskytuje, například z důvodu
+rozdílné průchodnosti rozdílných typů lesního porostu. Venkov také bývá hůře
+zmapovaný, například pole nebývají nijak označená a v mapách chybějí údaje o
+oplocení pozemků. Proto by pravděpodobně existovalo mnoho tras korektních v
+mapě, avšak neprůchozích ve skutečnosti.
