@@ -47,6 +47,7 @@ obvody komponent. Cesty na obvodu smažeme a nahradíme jednou uzavřenou cestou
 reprezentující celý obvod komponenty. Pokud nemůžeme vytvořit ze zbývajících
 cest kružnici -- obvod, pak vypíšeme chybu a multipolygon dále nezpracováváme.
 Stejně se zachováme i v případě, že kružnice končí v jiném než počátečním bodě.
+Obě tyto situace vznikají kvůli chybám ve zdrojových datech.
 
 \section{Spojení budov}
 Ve městě jsou velmi časté bloky budov. V~OSM datech jsou budovy reprezentovány
@@ -54,16 +55,16 @@ obvykle samostatně, přičemž nám stačí znát obvod celého bloku. Proto ce
 v~jednotlivých blocích nahradíme jednou cestou reprezentující obvod tohoto bloku.
 Nejprve vybereme všechny budovy a vytvoříme si z~nich graf sousednosti
 jednotlivých budov. Poté v~každé komponentě najdeme bod na obvodu a postupně
-po obejdeme po obvodu celou budovu a vytváříme při tom novou cestu. Původní
-cesty potom smažeme. Když máme zpracované všechny budovy, smažeme body uvnitř
-budov, které nyní neleží na žádné cestě.
+obejdeme po obvodu celou budovu a vytváříme při tom novou cestu. Původní
+cesty budov potom smažeme. Když máme zpracované všechny budovy, smažeme body uvnitř
+bloku, které nyní neleží na žádné cestě.
 
 Při zpracování se mohou vyskytnout dva druhy problémů. Jednak se uvnitř bloků
 mohou vyskytovat cesty, v~tom případě spojování cest přerušíme, protože bychom
 se mohli připravit o~možnost přidání spojek mezi cestami uvnitř bloku. Druhý
-problém souvisí s~problémem více bodů na stejných souřadnicích. Může se stát, že
-jsou budovy špatně navázané, potom výsledek může vypadat zvláštně, ale stále se
-bude jednat o~korektní cestu. Budovy také mohou mít na obvodu dva sousední body
+problém souvisí s~problémem více bodů na stejných souřadnicích. V případě, že
+budovy nejsou zcela korektně navázané, vytvoříme z nich korektní cestu, která
+ale může obsahovat některé hrany navíc. Budovy také mohou mít na obvodu dva sousední body
 na stejných souřadnicích. Pokud narazíme na tuto situaci, zjednodušování
 ukončíme, protože nedokážeme určit, jestli tento bod leží na cestě tvořící
 obvod, nebo na cestě vedoucí dovnitř budovy. Tento problém se ale nevyskytuje

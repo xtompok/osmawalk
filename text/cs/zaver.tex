@@ -3,31 +3,31 @@
 
 \section{Zhodnocení}
 Úlohou práce bylo navrhnout algoritmy a datové struktury pro odhady pěších tras.
-Pro vypracování práce bylo nutné detailně pochpit způsob mapování v projektu
+Pro vypracování práce bylo nutné detailně pochopit způsob mapování v projektu
 OpenStreetMap a význam jednotlivých značek. Jako hlavní podklad sloužily wiki
-stránky, ale na některé zvyklosti bylo potřeba se zeptat přímo komunity na
+stránky projektu, ale na některé zvyklosti bylo potřeba se zeptat přímo komunity na
 diskusních fórech. 
 
 Při následném zpracování se objevily problémy v nekonzistentním mapování v
-různých částech mapy a chyby v datech, se kterými jsme se museli vypořádat.
+různých částech mapy a chyby v datech, které jsme museli korektně ošetřit.
 Výsledné algoritmy se s problémy umí vypořádat a ukázková aplikace na ně pouze
 upozorní a pokračuje ve zpracování. 
 
-Zjednodušování a předzpracování dat se osvědčilo, výsledná data jsou přesnější a
-aplikace běží rychleji. Významným přínosem bylo použití spojek -- krátkých
-spojnic cest --, které suplují chybějící vazby chodníků na silnice i chodníků
-mezi sebou. Díky spojkám můžeme plánovat cesty i přes území, kde jsou chodníky
-zmapovány neúplně a není jich mnoho. 
+Zjednodušování a předzpracování dat se osvědčilo, výsledná data zachovávají
+přesnost a aplikace běží rychleji. Významným přínosem bylo použití spojek, které
+suplují chybějící vazby chodníků na silnice i chodníků mezi sebou. Díky spojkám
+můžeme plánovat cesty i přes území, kde jsou chodníky zmapovány neúplně a není
+jich mnoho. 
 
 Zkratky přes průchozí prostranství se v současné implementaci příliš neosvědily.
 V městském prostředí se nevyskytuje mnoho ploch, které by byly průchozí a
 zároveň nebyly v prudkém svahu a zároveň přes ně nevedla alespoň nějaká síť
 zmapovanýh cest a pěšin. Mimo město je většina volných ploch neoznačena, proto o
-nich nemůžeme, že jsou průchozí. Lesy nemusí být obecně průchodné a typy lesů
+nich nemůžeme, že jsou průchozí. Též lesy nemusí být obecně průchozí a typy lesů
 nebývají v mapách zaneseny. 
 
-Problémem, který v malé míře přetrvává i v současné verzi, je zametání roviny.
-I když jsme základní problémy vyřešili, stále v některých situacích nejsou
+Problémem, který v malé míře přetrvává i v současné verzi, je ošetření
+okrajových případů při zametání roviny. V některých situacích nejsou
 průsečíky korektně detekovány a vyskytují se spojky vedoucí skrz budovy.  
 
 Vytvořili jsme jednoduchou aplikaci pro hledání v připravených datech. Tato
@@ -36,22 +36,27 @@ základní funkce. Vyhledávání tras i přes použití jednoduchého Dijkstrov
 algoritmu je dostatečně rychlé, aby nezdržovalo práci s aplikací. 
 
 \section{Výsledky}
-Naše aplikace dává dobré výsledky pro vyhledávání pěších tras. Výsledky jsou
-lepší než dávají známé mapové servery a srovnatelné s aplikací OsmAnd
-využívající data OSM. Stále ovšem vyžadují kontrolu kvůli vyskytujícím se chybám
-ve spojkách a zkratkách. Odhadovaná vzdálenost a čas odpovídají skutečnosti. 
+Naše aplikace dává dobré výsledky pro vyhledávání pěších tras i přesto, že data
+OSM nejsou na vyhledávání pěších tras vytvářena. Dosažené výsledky jsou lepší
+než dávají známé mapové servery a v dobře zmapovaných oblastech srovnatelné s
+aplikací OsmAnd využívající data OSM. V oblastech, které nejsou dostatečně
+kvalitně zmapovány umí naše aplikace oproti aplikaci OsmAnd využívat i přímo
+neuvedené cesty.  Nalezené trasy však stále vyžadují kontrolu kvůli vyskytujícím
+se chybám ve spojkách a zkratkách.  Odhadovaná vzdálenost a čas dle zkušeností
+autora odpovídají skutečnosti. 
 
 
 \section{Náměty na zlepšení}
 Pro další rozvoj aplikace by bylo nutné odstranit nedostatky implementace
-zametání roviny, abychom mohli důvěřovat nalezeným cestám. Poté je možné
+zametání roviny, abychom mohli více důvěřovat nalezeným cestám. Poté je možné
 zlepšovat aplikaci mnoha způsoby. Jednou možností je zjednodušování grafu pro
-úsporu paměti pro uložení a času pro prohledání. Bylo by možné zkusit jiné
-alogritmy pro vytváření spojek a zkratek a zkoumat, zda se jejich výsledky
-zlepší a zkratky budou použitelné.  
+úsporu paměti a zkrácení času prohledávání. Jinou možností je zkusit jiné
+algoritmy pro vytváření spojek a zkratek a zkoumat vliv na nalezené spojky a
+použitelnost zkratek.
+
 
 Náměty pro rozšíření máme i pro vyhledávací část. Pokud bychom ukládali při
-tvorbě dat informace o zmapovaných přechodech, mohli bychom při vyhledávání
-preferovat přecházení silnice po přechodu. Bylo by také možné zvětšit možnosti
-konfigurace sklonů. 
+tvorbě dat informace o zmapovaných přechodech, mohli bychom například při
+vyhledávání preferovat přecházení silnice po přechodu. Bylo by také možné
+zvětšit možnosti konfigurace sklonů. 
 
