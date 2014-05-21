@@ -7,7 +7,14 @@ dostupné vyhledávače cest.
 Každá porovnávaná trasa obsahuje popis, obrázek ukazující nalezené cesty
 jednotlivých vyhledávačů a srovnání parametrů nalezených cest. Položka {\it
 Vlastní měření} je naměřený čas a vzdálenost při chůzi po trase nalezené naším
-vyhledávačem. 
+vyhledávačem. Na obrázku jsou jednotlivým vyhledávačům přiřazeny následující
+barvy:
+\begin{itemize}
+\item zelená -- náš vyhledávač OsmWalk
+\item modrá -- Mapy.cz
+\item červená -- Google Maps
+\item fialová -- OsmAnd
+\end{itemize}
 
 \section{Trasa středem města}
 Trasa vedoucí od Čertovky na Florenc. Trasa prochází středem města, což je hustá
@@ -74,3 +81,15 @@ trasy vede přes petřínský park, tudíž je zde potenciál pro využití zkra
 	\item OsmAnd: 2.4\,km, 28\,min
 	\item Vlastní měření: 1.8\,km, 21\,min
 \end{itemize}
+
+Nalezené trasy se lišily využívanými cestami v Petřínském parku. Náš vyhledávač
+využil na cestě několik zkratek, díky čemuž nalezl výrazně kratší trasu. Při
+ověřování nalezené trasy jsme zjistili, že by bylo vhodné do vyhledávače přidat
+penalizaci za sklon svahu, protože některé zkratky byly téměř neschůdné
+pro sklon svahu. I přes tutuo skutečnost byl čas odhadnutý naším vyhledávačem
+mírně nadhodnocený, avšak nejpřesnější. Délka byla odhadnuta přesně.
+
+Experimenty prokázaly, že náš vyhledávač poskytuje z porovnávaných nejpřesnější
+odhady skutečné délky a času nalezených tras. Trasy nalezené vyhledávačem jsou
+prakticky použitelné, na místech s prudkými svahy je potřeba nepoužívat zkratky
+nebo upravit vyhledávač, aby uvažoval sklon svahu. 
