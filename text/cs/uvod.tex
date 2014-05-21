@@ -1,32 +1,21 @@
 \chapwithtoc{Úvod}
 
-%chceme hledat cestu
-%chceme chodit pěšky
-%existují různé služby
-%většina určena primárně pro auta -> nereflektuje pěší potřeby
-% - kros průchozích prostranství
-%může to být modul pro MHD
-%
-%
-%Děláme to takto:
-
 Hledat trasy ve městě či v přírodě potřebuje každý. Dříve se člověk musel
 spolehnout na mapy a vlastní orientační smysl, dnes je možné tento úkol
 přenechat technice. V současné době existují jak internetové služby, tak
 samostatné aplikace pro hledání tras. Starší a dnes plně použitelné jsou služby a
 aplikace hledající trasy pro automobily. V poslední době jsou k dispozici i
 vyhledávače pro pěší trasy, ale nalezené trasy obvykle nebývají optimální,
-protože kvalita dat je posuzována především z pohledu autonavigace. My jsme se
-rozhodli vyzkoušet, zda můžeme data v současnosti dostupná upravit, abychom
-získali podklady pro kvalitnější hledání pěších tras. Tohoto cíle se nám
-podařilo dosáhnout. 
+protože kvalita dat je posuzována především z pohledu autonavigace. Rozhodli
+jsme se zkusit upravit dostupná data tak, abychom získali podklady pro
+kvalitnější hledání pěších tras. Tohoto cíle se nám podařilo dosáhnout. 
 
 V první kapitole zmiňujeme motivaci k naší práci a stanovujeme cíl práce.
 Podrobnější informace o zdrojích dat a popis jejich formátu uvádíme ve druhé
 kapitole. Ve třetí kapitole popisujeme používané formáty a datové struktury.
-Použité algoritmy a postup při přípravě dat pro vyhledávání je obsahem čtvrté
+Použité algoritmy a postup při přípravě dat pro vyhledávání jsou obsahem čtvrté
 kapitoly. Popis implementace celého procesu přípravy vyhledávacích dat a
-problémů, které se při implementaci vyskytly uvádíme v páté kapitole. V šesté
+problémů, které se při implementaci vyskytly, uvádíme v páté kapitole. V šesté
 kapitole navrhujeme algoritmy na ukázku hledání v datech a popisujeme jejich
 implementaci. Zhodnocení nalezených tras a jejich porovnání s trasami jiných
 vyhledávačů je předmětem sedmé kapitoly. V závěru zhodnocujeme celou práci a
@@ -38,34 +27,3 @@ dat a vyhledávací aplikace. V příloze B popisujeme obsah přiloženého CD.
 %%TODO: obrazek - vstupni data a vystupni data
 
 
-%Hledání cesty ve městě je častou situací většiny lidí. Ve městě se vyskytuje
-%mnoho různých překážek jako jsou ploty, zábradlí či frekventované silnice,
-%i mnoho průchozích prostranství, například náměstí, parky či sady. V naší práci
-%se snažíme z mapových dat vytvořit formát vhodný pro rychlé vyhledávání pěších
-%tras využívajících i průchozí prostranství. Tato práce by měla být jedním z~modulů
-%budoucí aplikace pro vyhledávání spojení pěšky a MHD po městě. 
-%
-%%\section{Co chci počítat}
-%Abychom mohli rychle vyhledávat pěší trasy, potřebujeme k~tomu mít mapu vhodně
-%reprezentovanou. Vstupní mapová data postupně zpracováváme a vybíráme z nich
-%použitelné informace. Na konci tohoto procesu vytvoříme graf popisující možné
-%pěší trasy. V tomto grafu již můžeme vyhledávat pomocí grafových algoritmů pro
-%hledání cest, v ukázkové aplikaci využíváme Dijkstrův algoritmus. 
-%
-%%\section{Zdroje dat}
-%Abychom mohli vyhledávat trasy, potřebujeme k~tomu vhodné mapové podklady.
-%Protože jsme chtěli, aby bylo možné zpracovaná data volně používat a šířit, 
-%potřebovali jsme získat i takové mapové podklady. Proto jsme si vybrali jako
-%zdroj dat OpenStreetMap (OSM), volně dostupné mapové podklady vytvářené komunitou. 
-%Projekt OpenStreetMap využívá k~tvorbě mapy mimo práce dobrovolníků také jiné
-%volně dostupné mapové podklady a poskytuje pravěpodobně nejlepší veřejně
-%dostupná mapová data. Jako zdroj dat o~nadmořské výšce jsme použili data
-%z~projektu SRTM, která jsou také volně dostupná.
-%
-%%\section{Co už kdo napsal}
-%K~porovnání výsledků naší aplikace jsme použili nejznámější webové mapové
-%aplikace -- Google Maps a Mapy.cz. Také jsme nalezené trasy porovnávali s~jinými
-%vyhledávači používajícími data OSM -- OsmAnd a TODO. Nalezené trasy jsme také
-%porovnávali s~vlastní znalostí terénu a skutečně používaných cest.
-%
-%
