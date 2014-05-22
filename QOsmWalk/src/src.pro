@@ -11,7 +11,7 @@ QT       += core
 #CONFIG   -= app_bundle
 
 INCLUDEPATH += ../../QMapControl/src
-unix:LIBS += -L../../QMapControl/bin -lqmapcontrol
+LIBS += -L../../QMapControl/Samples/bin -lqmapcontrol
 
 BASE_DIR = ../../
 
@@ -21,7 +21,7 @@ MOC_DIR = tmp
 OBJECTS_DIR = obj
 DESTDIR = ../bin
 TARGET = QOsmWalk
-INCLUDEPATH += $${BASE_DIR}/compiled/include /aux/jethro/libucw/
+INCLUDEPATH += $${BASE_DIR}/compiled/include
 
 QMAKE_CFLAGS_DEBUG += -std=c99 -O3
 QMAKE_CFLAGS_RELEASE += -std=c99 -O3

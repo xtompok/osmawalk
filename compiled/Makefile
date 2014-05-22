@@ -10,7 +10,7 @@ OBJECTS2=$(SOURCES2:.c=.o)
 EXECUTABLE1=filter
 EXECUTABLE2=search
 
-all: $(SOURCES) $(EXECUTABLE1) $(EXECUTABLE2)
+all: protobuf $(SOURCES) $(EXECUTABLE1) $(EXECUTABLE2)
 
 	
 $(EXECUTABLE1): $(OBJECTS1) $@.c 
@@ -31,6 +31,7 @@ clean:
 	rm *.o include/*.o
 
 protobuf:
+	mkdir -p include
 	protoc-c --proto_path ../config/ ../config/types.proto --c_out include/
 	protoc-c --proto_path ../config/ ../config/premap.proto --c_out include/
 	protoc-c --proto_path ../config/ ../config/graph.proto --c_out include/

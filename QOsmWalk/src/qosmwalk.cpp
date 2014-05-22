@@ -57,7 +57,7 @@ QOsmWalk::QOsmWalk(QWidget *parent)
     mc->setZoom(13);
     mc->setMaximumSize(1000,1000);
 
-    searchData = prepareData("/aux/jethro/bakalarka/config/speeds.yaml","/aux/jethro/bakalarka/data/praha-graph.pbf");
+    searchData = prepareData("../../config/speeds.yaml","../../data/praha-graph.pbf");
 
     searchResult.points = NULL;
     addZoomButtons();

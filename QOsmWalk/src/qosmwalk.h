@@ -9,7 +9,7 @@
 #include <circlepoint.h>
 #include <linestring.h>
 extern "C" {
-    #include "/aux/jethro/bakalarka/compiled/searchlib.h"
+    #include "../../compiled/searchlib.h"
 }
 using namespace qmapcontrol;
 

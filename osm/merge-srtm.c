@@ -37,6 +37,10 @@ int main(int argc, char ** argv){
 		for (int lat=0; lat <= maxlat-minlat; lat++){
 			sprintf(name,"N%02dE%03d.hgt",lat+minlat,lon+minlon);
 			hgt = fopen(name,"r");	
+			if (hgt == NULL){
+				printf("File %s not found, exitting, no output produced\n",name);
+				return 1;
+			}
 			fread(sq,1201*1201,2,hgt);
 			for (int llon = 0; llon < 1200; llon++){
 				for (int llat = 0; llat < 1200; llat++){
