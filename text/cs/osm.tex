@@ -31,18 +31,18 @@ s~tramvajovou tratí, park s~oplocením).
 
 {\tuc Relace} jsou posloupnosti uzlů a cest opatřené atributy. Každý prvek
 v~relaci navíc může mít určenou roli. Relace může obsahovat jako prvek i relaci,
-ale tato situace není příliš dobře podporována programy pracujícími s daty OSM. 
+ale tato situace není příliš dobře podporována programy pracujícími s~daty OSM. 
 Obvykle jsou relacemi reprezentovány složitější objekty, které by se cestami a
 uzly popisovaly obtížně, nebo také \uv{virtuální} objekty jako například
 trasy linek MHD, cyklotrasy a územní hranice.
 
 Pro nás důležitý typ relace je {\tuc multipolygon}, který se používá k~reprezentaci
-složitějších ploch. Plocha reprezentovaná multipolygonem se může skládat z více
+složitějších ploch. Plocha reprezentovaná multipolygonem se může skládat z~více
 nesouvisejících částí nebo obsahovat díry. Multipolygon obsahuje cesty s~rolemi 
 \verb|INNER| resp. \verb|OUTER| indikující, zda je cesta součástí vnější resp.
-vnitřní hranice plochy. Hranice multipolygonu se mohou skládat z více částí, ale
+vnitřní hranice plochy. Hranice multipolygonu se mohou skládat z~více částí, ale
 vždy musí dohromady tvořit jednu nebo několik uzavřených částí tvořících obvody 
-plochy resp. díry v ploše.
+plochy resp. díry v~ploše.
 
 \section{OSM XML}
 Nejobvyklejší způsob ukládání OSM dat je ve formátu XML. Všechna primitiva mají
@@ -161,7 +161,7 @@ chyb jsme nalezli mnoho a je opět potřeba je korektně zpracovat.
 {\tuc Různá sémantika atributů na různých místech.} Při výběru atributů, které
 zahrnout ke zpracování, jsme se setkali s~používáním stejných atributů v~různých
 významech. Například klíč \verb|landuse| s~hodnotou \verb|residential| má dle
-specifikace \cite{osmfeatures} označovat obytnou oblast. V některých místech
+specifikace \cite{osmfeatures} označovat obytnou oblast. V~některých místech
 jsou tímto klíčem a hodnotou označena přístupná prostranství mezi budovami,
 zatímco jinde jsou takto označeny bloky oplocených rodinných domků, viz obrázky
 \ref{fig:resident=nepruch} a \ref{fig:resident-plocha}.
@@ -178,8 +178,8 @@ vytvářely v~některých částech města nekorektní výsledky.
 	\centering
 	\includegraphics[width=80mm]{../img/resident-plocha.pdf}
 	\caption{\texttt{landuse=residential} jako označení průchozí plochy mezi
-	paneláky. Také jde o správné označení dle specifikace (jedná se o
-	obytnou zástavbu), ale navíc by bylo vhodné označit přesněji plochu, aby
+	paneláky. Také jde o~správné označení dle specifikace (jedná se
+o~obytnou zástavbu), ale navíc by bylo vhodné označit přesněji plochu, aby
 	bylo zřejmé, že je průchozí a dají se na ní hledat trasy i mimo cesty.}
 	\label{fig:resident-volno}
 \end{figure}

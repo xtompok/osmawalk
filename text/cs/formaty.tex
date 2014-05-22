@@ -1,5 +1,5 @@
 \chapter{Formáty}
-Našim cílem je vytvořit data ve formátu vhodném k rychlému vyhledávání pěších
+Našim cílem je vytvořit data ve formátu vhodném k~rychlému vyhledávání pěších
 tras. K~tomu potřebujeme jednak definovat samotný formát a jednak určit postup, kterým z~dat 
 OSM a SRTM vytvoříme kvalitní data pro vyhledávání. Při výběru vhodného formátu
 ukládání dat jsme zvolili Protocol Buffery \cite{pbfweb} vyvinuté Googlem. Data
@@ -7,15 +7,15 @@ pro vyhledávání budeme ukládat ve formě grafu -- seznamem vrcholů a seznam
 
 \section{UTM}
 Data OSM i SRTM používají za souřadný systém WGS-84, který umožňuje popsat
-souřadnicemi každé místo na povrchu Země. Protože se ale jedná o souřadnou
-soustavu na povrchu elipsoidu, obtížně se v ní počítají vzdálenosti mezi body.
-Protože pracujeme s malými územními celky, můžeme místo WGS84 použít nějakou
+souřadnicemi každé místo na povrchu Země. Protože se ale jedná o~souřadnou
+soustavu na povrchu elipsoidu, obtížně se v~ní počítají vzdálenosti mezi body.
+Protože pracujeme s~malými územními celky, můžeme místo WGS84 použít nějakou
 projekci do roviny. Vhodným kandidátem je systém UTM \cite{utmnorma}.
 
 UTM je systém, který rozděluje povrch Země na zóny, které jsou následně
 zobrazeny pomocí transverzního Mercatorova zobrazení do roviny. Každá zóna je po
-zobrazení rozdělena čtvercovou mřížkou v metrické soustavě. V rámci zóny pak
-používáme souřadnice $x$ a $y$ v metrech, proto nám k výpočtu vzdáleností stačí
+zobrazení rozdělena čtvercovou mřížkou v~metrické soustavě. V~rámci zóny pak
+používáme souřadnice $x$ a $y$ v~metrech, proto nám k~výpočtu vzdáleností stačí
 Pythagorova věta.
 
 Při zpracovávání dat proto zeměpisné souřadnice převedeme na UTM a zpětný převod
@@ -116,7 +116,7 @@ Zpráva \verb|Way| pro cestu obsahuje položky:
 	\item \verb|id| -- OSM identifikátor cesty
 	\item \verb|refs| -- seznam OSM identifikátorů uzlů, ze kterých se cesta
 	skládá
-	\item \verb|area| -- logická hodnota určující, jestli jde o plochu
+	\item \verb|area| -- logická hodnota určující, jestli jde o~plochu
 	%\item \verb|barrier| -- logická hodnota určující, jestli je daná cesta
 	%překážkou
 	\item \verb|type| -- kategorie reprezentovaného objektu (viz str. 

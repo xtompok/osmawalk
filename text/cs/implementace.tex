@@ -13,7 +13,7 @@ již existujících knihoven a programů pro jednotlivé řešené problémy. V�
 tyto knihovny a programy jsou nutné pro spuštění a používání našeho programu. 
 
 \medskip
-\noindent Používáme tyto pomocné programy, údaj v závorce udává licenci:
+\noindent Používáme tyto pomocné programy, údaj v~závorce udává licenci:
 \begin{itemize}
 	\item Výřez s~městem z~dat pro republiku vyrábíme pomocí {\tuc
 	Osmconvert} (GNU AGPL).\\
@@ -66,7 +66,7 @@ hodnotou index do pole uzlů resp. cest, kde je daný objekt uložen.
 U~každé cesty je v~datech uložen seznam uzlů, přes které prochází. Je ale vhodné
 mít i pro každý uzel uložen seznam cest, na nichž leží. Pro tento účel
 máme seznam \verb|nodeWays|. Je to seznam seznamů, kdy pod indexem $i$ je seznam
-všech identifikátorů cest, které prochází uzlem na pozici $i$ v poli všech uzlů.
+všech identifikátorů cest, které prochází uzlem na pozici $i$ v~poli všech uzlů.
 V~Pythonu jde o~seznam seznamů, v~C je to rostoucí pole rostoucích polí
 z~LibUCW.
 
@@ -108,10 +108,10 @@ připravován pro vyhledávání tras po Praze, proto soubory obvykle obsahují 
 praha.} k~dalšímu zpracování.
 
 \section{Příprava dat SRTM}
-Kromě dat OSM potřebujeme i údaje o výškách z projektu SRTM. Protože tato data
+Kromě dat OSM potřebujeme i údaje o~výškách z~projektu SRTM. Protože tato data
 se, narozdíl od dat OSM, nebudou aktualizovat, není pro jejich stažení skript,
 ale je nutné do složky \verb|osm| nahrát soubory \verb|.hgt|, které pokrývají
-obdélník s městem. Pomocí programu \verb|merge-srtm| se \verb|hgt| soubory spojí
+obdélník s~městem. Pomocí programu \verb|merge-srtm| se \verb|hgt| soubory spojí
 do jedné velké tabulky, která je uložena jako \verb|heights.txt|. Její první
 řádek obsahuje rozsah pokrývaný SRTM tabulkou a další řádky pak obsahují tabulku
 výšek.
@@ -119,8 +119,8 @@ výšek.
 \section{Klasifikace dat}
 Před dalším zpracováním potřebujeme data OSM převést do formátu pro přípravu dat (premap).
 K~tomuto účelu slouží program \verb|parse.py|, který si načte konfigurační soubory
-a podle nich rozdělí jednotlivé uzly a cesty do kategorií. Současně také přidá k
-uzlům údaje o nadmořské výšce a jejich souřadnice převede do UTM. Následně smaže 
+a podle nich rozdělí jednotlivé uzly a cesty do kategorií. Současně také přidá
+k~uzlům údaje o~nadmořské výšce a jejich souřadnice převede do UTM. Následně smaže 
 všechny uzly, které neleží na žádné cestě, a uloží data do souboru ve formátu 
 formátu premap.
 
@@ -213,7 +213,7 @@ postupujeme obdobně jako při převodu multipolygonů na cesty. Vytvoříme si 
 \verb|neighs|, který obsahuje pro každý bod na některé ze spojovaných cest
 všechny jeho sousedy. Tentokrát ale může být sousedů více a je potřeba vybrat
 toho správného. Setřídíme si tedy uzly podle souřadnic lexikograficky a
-nejjižnější z nejzápadnějších vezmeme jako první uzel obvodu.  Protože žádný
+nejjižnější z~nejzápadnějších vezmeme jako první uzel obvodu.  Protože žádný
 západnější ani jižnější bod neexistuje, bude tento uzel zcela jistě na obvodu.
 Nyní najdeme druhý uzel na obvodu. Vybereme mezi sousedy prvního uzlu ten, který
 svírá s~úsečkou vedoucí z~prvního uzlu na jih nejmenší úhel. Žádný uzel přímo na
@@ -239,7 +239,7 @@ najdeme úsek delší než 30 metrů, rozdělíme ho po 20 metrech vytvořením 
 uzlů vložených mezi stávající.
 
 \section{Výpočet průsečíku úseček}
-V následujících částech budeme často počítat průsečík úseček. Nyní odvodíme
+V~následujících částech budeme často počítat průsečík úseček. Nyní odvodíme
 vzorec pro výpočet průsečíku přímek, pro úsečky stačí jen navíc kontrolovat,
 jestli nalezený průsečík leží na obou úsečkách.
 
@@ -267,7 +267,7 @@ $d=n_xx_3+n_yy_3$. Pro průsečík musí platit obě rovnice, tedy
 m_xx+m_yy &=& m_xx_1+m_yy_1\\
 n_xx+n_yy &=& n_xx_3+n_yy_3
 \end{eqnarray*}
-Tuto soustavu dvou rovnic o dvou neznámých můžeme řešit například pomocí
+Tuto soustavu dvou rovnic o~dvou neznámých můžeme řešit například pomocí
 determinantů Cramerovým pravidlem $x_i = \frac{|A_i|}{|A|}$:
 
 $$x = \frac{
@@ -301,7 +301,7 @@ $$
 x=\frac{(x_1 y_2-y_1 x_2)(x_3-x_4)-(x_1-x_2)(x_3 y_4-y_3 x_4)}
 {(x_1-x_2)(y_3-y_4)-(y_1-y_2)(x_3-x_4)}$$
 Tímto výrazem pak dokážeme jednoduše spočítat průsečík dvou přímek, pokud známe
-souřadnice dvou bodů na každé z nich.
+souřadnice dvou bodů na každé z~nich.
 
 \section{Reprezentace čísel}
 V~průběhu dalšího zpracování budeme potřebovat počítat průsečíky úseček daných
@@ -379,13 +379,13 @@ předchozích čtverců.
 
 Jednotlivé počáteční a koncové body spojek získáme ze všech bodů v~daném čtverci
 vytříděním těch, které mají nějaké sousedy v~poli \verb|wayGraph|. Nepřidáváme
-ale všechny spojky, protože pak existovalo např. u kruhových cest v parcích
+ale všechny spojky, protože pak existovalo např. u~kruhových cest v~parcích
 mnoho spojek, které nepřinášely výrazné zlepšení. Zvolili jsme proto náhodný
-výběr, při němž pro každý bod vybereme z každého čtverce mřížky jen několik
+výběr, při němž pro každý bod vybereme z~každého čtverce mřížky jen několik
 kandidátů. Zkoumali jsme vliv počtu kandidátů na délku trasy a jako optitmum se
-ukázalo zvolit dva body jako kandidáty z každého čtverce mřížky. Při větším
-množství bodů se výslledky zlepšovaly přibližně o procento, ale velikost
-výstupního souboru rostla přibližně o šest procent.
+ukázalo zvolit dva body jako kandidáty z~každého čtverce mřížky. Při větším
+množství bodů se výslledky zlepšovaly přibližně o~procento, ale velikost
+výstupního souboru rostla přibližně o~šest procent.
 
 %TODO: obrázek
 
@@ -415,8 +415,8 @@ V~průběhu zametání roviny jsou úsečkám nastavovány následující atribu
 	\item \verb|ended| udává, že byla v~průžezu a již skončila.
 \end{itemize}
 
-Globální pole \verb|lines| s prvky typu \verb|line_t| obsahuje všechny kandidáty
-na spojky, globální pole \verb|bars| s prvky typu \verb|line_t| obsahuje všechny
+Globální pole \verb|lines| s~prvky typu \verb|line_t| obsahuje všechny kandidáty
+na spojky, globální pole \verb|bars| s~prvky typu \verb|line_t| obsahuje všechny
 překážky. 
 
 Pro zametání budeme také potřebovat haldu, ze které budeme vybírat nejbližší
@@ -542,17 +542,17 @@ které jsou uvnitř plochy. Body přidáme do pole \verb|nodeIdxs| a cesty do po
 atributu \verb|barIdxs| a vyhledávatelné cesty, které uložíme do atributu
 \verb|wayIdxs|. Během rozdělování také odstraňujeme duplicitní cesty. 
 
-Jako další krok připravíme kandidáty na zkratky. Použijeme k tomu funkci
+Jako další krok připravíme kandidáty na zkratky. Použijeme k~tomu funkci
 \verb|makeAreaCandidates|. Procházíme postupně dvojice bodů v~dané ploše a
 hledáme bližší než 300\,m, které nejsou na společné cestě. Neuvažujeme ovšem
-všechny dvojice, ale vybíráme pro každý uzel náhodně z ostatních uzlů, protože
-při uvažování všech dvojic vznikalo mnoho cest v podobných místech podobným
+všechny dvojice, ale vybíráme pro každý uzel náhodně z~ostatních uzlů, protože
+při uvažování všech dvojic vznikalo mnoho cest v~podobných místech podobným
 směrem. Nalezené dvojice následně přidáme do seznamu kandidátů. Experimentálně
 jsme zkoumali vliv průměrného počtu sousedů pro jeden vrchol na délku nalezených
 cest přes pražskou Stromovku a Letnou. Jako optimální se ukázalo vybírat pro
-každý vrchol průměrně dva sousedy. K dalšímu výrazném zlepšení totiž došlo až
-pro pět sousedů, což ale při zlepšení o přibližně 10 procent vedlo ke zvýšení
-velikosti grafu o 20 procent, což nám již  přišlo nevýhodné.
+každý vrchol průměrně dva sousedy. K~dalšímu výrazném zlepšení totiž došlo až
+pro pět sousedů, což ale při zlepšení o~přibližně 10 procent vedlo ke zvýšení
+velikosti grafu o~20 procent, což nám již  přišlo nevýhodné.
 
 Vytvoříme také seznam překážek funkcí \verb|makeAreaBarGraph|. Nejprve přidáme
 všechny překážky ze seznamu \verb|barIdxs|, poté přidáme všechny cesty

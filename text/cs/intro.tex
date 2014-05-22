@@ -1,10 +1,10 @@
 \chapter{Intro}
 
 \section{Cíl práce}
-Hledání pěších tras v terénu je velmi rozsáhlé téma s mnoha specifickými
+Hledání pěších tras v~terénu je velmi rozsáhlé téma s~mnoha specifickými
 podoblastmi. Naším hlavním záměrem je hledání tras ve městě,
-protože města jsou dostatečně dobře zmapovaná a zároveň pěší trasy z různých
-současných vyhledávačů nebývají optimální. Navíc máme v plánu práci dále
+protože města jsou dostatečně dobře zmapovaná a zároveň pěší trasy z~různých
+současných vyhledávačů nebývají optimální. Navíc máme v~plánu práci dále
 rozšiřovat a vytvořit vyhledávač spojení po městě využívající kombinaci pěších
 tras a městské hromadné dopravy.  Cílem práce je specifikace vhodného formátu
 dat pro vyhledávání pěších tras ve městě a algoritmů pro přípravu mapových dat
@@ -20,29 +20,29 @@ Chtěli jsme, aby bylo možné aplikaci i data volně šířit, proto jsme hleda
 zdroj mapových dat, který umožňuje jejich volné užití. Nejznámějším projektem,
 který mapová data shromažďuje, je projekt OpenStreetMap. Tento projekt vytváří
 mapu světa za pomoci dobrovolníků a také importuje jiná volně dostupná data.
-Jedná se o nejkvalitnější volně dostupná mapová data pro celý svět, proto jsme
+Jedná se o~nejkvalitnější volně dostupná mapová data pro celý svět, proto jsme
 tento projekt zvolili jako zdroj mapových dat.
 
-Pro kvalitní hledání potřebujeme i výšková data. Ta používáme z projektu SRTM,
-\cite{srtmweb} protože jsou také volně šiřitená a používaná v mnoha jiných
+Pro kvalitní hledání potřebujeme i výšková data. Ta používáme z~projektu SRTM,
+\cite{srtmweb} protože jsou také volně šiřitená a používaná v~mnoha jiných
 mapových projektech.
 
 \section{Postup práce}
-Problém hledání trasy v mapě jsme chtěli převést na problém hledání cesty v
-ohodnoceném grafu. Snažili jsme se proto mapová data postupně zpracovat a
-vytvořit z nich graf s ohodnocenými hranami, ve kterém pak můžeme snadno
-vyhledávat například Dijkstrovým algoritmem. Ohodnocení hran však není v grafu
+Problém hledání trasy v~mapě jsme chtěli převést na problém hledání cesty
+v~ohodnoceném grafu. Snažili jsme se proto mapová data postupně zpracovat a
+vytvořit z~nich graf s~ohodnocenými hranami, ve kterém pak můžeme snadno
+vyhledávat například Dijkstrovým algoritmem. Ohodnocení hran však není v~grafu
 uvedeno přímo, hrany a vrcholy obsahují informace, ze kterých ohodnocení
 vypočítává až při vyhledávání. Toto ohodnocení může být ovlivňováno nastavením
 vyhledávače.
 
 Při přípravě dat nejprve vybereme rozdělíme mapová data do kategorií a společně
-s výškovými daty je uložíme do formátu pro přípravu dat. Data dále zpracováváme,
-převedeme složité objekty na jednodušší, budovy v blocích nahradíme jejich
-obvody, příliš dlouhé úsečky rozdělíme na kratší. V další fázi mezi blízké cesty
-přidáme spojovací hrany, což nám pomůže vypořádat se s problémem nespojených
+s~výškovými daty je uložíme do formátu pro přípravu dat. Data dále zpracováváme,
+převedeme složité objekty na jednodušší, budovy v~blocích nahradíme jejich
+obvody, příliš dlouhé úsečky rozdělíme na kratší. V~další fázi mezi blízké cesty
+přidáme spojovací hrany, což nám pomůže vypořádat se s~problémem nespojených
 cest. Poté přidáme zkratky přes průchozí prostranství a nakonec přípravný formát
-převedeme na vyhledávací graf. V tomto grafu pak vyhledáváme Dijkstrovým
+převedeme na vyhledávací graf. V~tomto grafu pak vyhledáváme Dijkstrovým
 algoritmem.
 
 %%\section{Co už kdo napsal}
@@ -53,10 +53,10 @@ algoritmem.
 %
 
 \section{Implementační prostředky}
-Pro implementaci algoritmů v naší práci jsme zvolili jazyky Python a C. První část
-aplikace připravující z mapy data pro vyhledávání jsme napsali v Pythonu. Tento
-objektový skriptovací jazyk jsme zvolili z důvodu předchozích zkušeností a
-rychlé tvorby kódu. Jazyk již v základu poskytuje pokročilé datové struktury a
+Pro implementaci algoritmů v~naší práci jsme zvolili jazyky Python a C. První část
+aplikace připravující z~mapy data pro vyhledávání jsme napsali v~Pythonu. Tento
+objektový skriptovací jazyk jsme zvolili z~důvodu předchozích zkušeností a
+rychlé tvorby kódu. Jazyk již v~základu poskytuje pokročilé datové struktury a
 má širokou databázi knihoven usnadňujících vývoj. 
 
 První implementace druhé části přípravné aplikace používaly také Python, ale programy
@@ -69,10 +69,10 @@ rychlé implementace složitějších datových struktur (stromy, haldy) a algor
 Pro implementaci aplikace pro vyhledávání trasy jsme také zvolili jazyk C pro
 paměťovou nenáročnost a rychlost. Při implementaci jsme se snažili využívat
 minimum externích knihoven, aby byla aplikace snadno přenostitelná na jiné
-platformy. Grafická nadstavba je napsána v C{\tt++} v prostředí Qt, protože toto
+platformy. Grafická nadstavba je napsána v~C{\tt++} v~prostředí Qt, protože toto
 prostředí umožňuje snadné vytvoření grafického rozhraní a již pro něj existují
-komponenty pro zobrazování mapy. Samotná grafická nadstavba pak používá fukce z
-vyhledávače v C.
+komponenty pro zobrazování mapy. Samotná grafická nadstavba pak používá fukce
+z~vyhledávače v~C.
 
 %%TODO: obrazek - vstupni data a vystupni data
 

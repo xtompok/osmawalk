@@ -38,15 +38,15 @@ protože takovéto body dále nikde nepotřebujeme.
 
 \section{Převod multipolygonů na obvodové cesty}
 Protože plochy popisované pomocí multipolygonů mají složitou strukturu a obtížně
-by se nám s nimi pracovalo, nahradíme multipolygony cestami reprezentujícími
+by se nám s~nimi pracovalo, nahradíme multipolygony cestami reprezentujícími
 vnější obvody jednotlivých komponent multipolygonů.
 
 Abychom vytvořili obvody jednotlivých komponent, potřebujeme vědět, které cesty
-patří do které komponenty.  Dokud nám nějaké cesty zbývají, skládáme z nich
+patří do které komponenty.  Dokud nám nějaké cesty zbývají, skládáme z~nich
 obvody komponent. Cesty na obvodu smažeme a nahradíme jednou uzavřenou cestou
 reprezentující celý obvod komponenty. Pokud nemůžeme vytvořit ze zbývajících
 cest kružnici -- obvod, pak vypíšeme chybu a multipolygon dále nezpracováváme.
-Stejně se zachováme i v případě, že kružnice končí v jiném než počátečním bodě.
+Stejně se zachováme i v~případě, že kružnice končí v~jiném než počátečním bodě.
 Obě tyto situace vznikají kvůli chybám ve zdrojových datech.
 
 \section{Spojení budov}
@@ -62,8 +62,8 @@ bloku, které nyní neleží na žádné cestě.
 Při zpracování se mohou vyskytnout dva druhy problémů. Jednak se uvnitř bloků
 mohou vyskytovat cesty, v~tom případě spojování cest přerušíme, protože bychom
 se mohli připravit o~možnost přidání spojek mezi cestami uvnitř bloku. Druhý
-problém souvisí s~problémem více bodů na stejných souřadnicích. V případě, že
-budovy nejsou zcela korektně navázané, vytvoříme z nich korektní cestu, která
+problém souvisí s~problémem více bodů na stejných souřadnicích. V~případě, že
+budovy nejsou zcela korektně navázané, vytvoříme z~nich korektní cestu, která
 ale může obsahovat některé hrany navíc. Budovy také mohou mít na obvodu dva sousední body
 na stejných souřadnicích. Pokud narazíme na tuto situaci, zjednodušování
 ukončíme, protože nedokážeme určit, jestli tento bod leží na cestě tvořící
@@ -84,7 +84,7 @@ OSM dat jsme zjistili, že mnohé obytné domy kolem sebe nemají značené plot
 proto jsme vzdálenost zvolili takto nízkou, aby pravděpodobnost, že
 jde například o~dvě ulice oddělené domky se zahrádkami, zůstala poměrně malá.  
 
-V oblastech, kde se nacházelo velké množstí uzlů blízko sebe, například u cest
+V~oblastech, kde se nacházelo velké množstí uzlů blízko sebe, například u~cest
 reprezentujících kruhové objezdy, vznikalo příliš velké množství spojek. Tyto
 spojky navíc nepřinášely významné zkrácení trasy. U~každého uzlu jsme proto
 náhodně vybrali jen některé spojky (viz obr. \ref{fig:spojky}.
@@ -110,14 +110,14 @@ seznam prošlých bodů nebo aktuálně protnutých úseček, tzv. {\tuc průře
 
 V~našem případě budeme hledat průsečíky úseček v~rovině. Spojky již úsečky jsou,
 překážky rozdělíme na jednotlivé úsečky mezi uzly. Budeme zametat podle od
-západu k východu a zajímat nás budou události začátku a konce úsečky a jejich
+západu k~východu a zajímat nás budou události začátku a konce úsečky a jejich
 průsečík. Zametací přímku proto budeme posouvat postupně po těchto událostech.
 
 Začátky a konce úseček známe již před spuštěním algoritmu. Průsečíky na začátku
-neznáme, budeme ale předpokládat, že se neprotínají tři úsečky v jednom bodě.
+neznáme, budeme ale předpokládat, že se neprotínají tři úsečky v~jednom bodě.
 Potom platí, že pokud se nějaké dvě úsečky mají protnout, pak se předtím musí
-stát sousedními. Proto nám stačí při každé události s úsečkou $u$ stačí
-zkontrolovat sousedy $u$ a pokud se s nějakým protíná a průsečík je před
+stát sousedními. Proto nám stačí při každé události s~úsečkou $u$ stačí
+zkontrolovat sousedy $u$ a pokud se s~nějakým protíná a průsečík je před
 zametací přímkou, přidáme ho do seznamu událostí.
 
 \begin{figure}[h]
@@ -142,7 +142,7 @@ aby mohl nastat průsečík, musí nejprve úsečka začít, o~žádný nepřijd
 
 Zametání ukázkových dat se čtyřmi úsečkami ukazuje obrázek \ref{fig:zametani}.
 Svislé přerušované čáry udávají pozice zametací přímky při vyvolání události,
-události nastávají v pořadí 1 až 10.
+události nastávají v~pořadí 1 až 10.
 
 Zametání bude probíhat následovně. Z~haldy všech událostí vybereme nejbližší
 událost a rozhodneme se podle jejího typu:
@@ -150,26 +150,26 @@ událost a rozhodneme se podle jejího typu:
 	\item {\tuc Začátek úsečky.}  Úsečku zařadíme na správné místo do
 	průřezu a přidáme případné průsečíkové události se sousedními
 	úsečkami.\\
-	V situacích 1 a 4 úsečku pouze přidáme, k průsečíkům nedochází.\\
-	V situacích 2 a 3 se úsečky protínají, přidáme průsečíkové události
+	V~situacích 1 a 4 úsečku pouze přidáme, k~průsečíkům nedochází.\\
+	V~situacích 2 a 3 se úsečky protínají, přidáme průsečíkové události
 	$P$ a $Q$.
 
 	\item {\tuc Konec úsečky.} Úsečku odebereme z~průřezu a přidáme
 	případnou průsečíkovou událost, pokud se úsečky sousední s~právě
 	končící protínají.\\
-	V situacích 7, 9 a 10 pouze úsečky odebereme z průřezu.\\
-	V situaci 6 se po skončení úsečky $s$ stanou úsečky $p$ a $q$ sousedními
+	V~situacích 7, 9 a 10 pouze úsečky odebereme z~průřezu.\\
+	V~situaci 6 se po skončení úsečky $s$ stanou úsečky $p$ a $q$ sousedními
 	a navíc se protínají, proto přidáme průsečíkovou událost $P$.
 	\item {\tuc Průsečík úseček.} Úsečky v~průřezu prohodíme a přidáme
 	případné průsečíkové události s~novými sousedy obou prohazovaných 
 	úseček. Pokud jsme již průsečík těchto dvou úseček zpracovávali, událost
 	zahodíme, protože úsečky se mohou protnout nejvýše jednou a další události
 	jsou pouze násobným přidáním téže události (jako zde průsečíku $P$).\\
-	V situaci 8 nemají prohozené úsečky žádné nové sousedy.\\
-	V situaci 5 se nově stala úsečka $s$ sousedem prohozené přímky $p$, ale
+	V~situaci 8 nemají prohozené úsečky žádné nové sousedy.\\
+	V~situaci 5 se nově stala úsečka $s$ sousedem prohozené přímky $p$, ale
 	nemají společný průsečík, událost tedy nepřidáváme.
 \end{itemize}
-Takto budeme postupovat, dokud jsou v haldě nějaké události. Pokud zpracováváme 
+Takto budeme postupovat, dokud jsou v~haldě nějaké události. Pokud zpracováváme 
 průsečíkovou událost, zkontrolujeme, zda není některá z~úseček překážka a 
 případně úsečky označíme, že se protnuly s~překážkou. 
 
@@ -191,7 +191,7 @@ které procházely přes nějakou překážku.
 Poté, co jsme připravili data, vytvoříme vyhledávací graf. Protože kolize
 přímých cest s~překážkami jsme vyřešili již při jejich vytváření, jsou všechny
 cesty korektní. Proto se překážkami již dále nezabýváme a pouze z~cest vytvoříme
-vyhledávací graf. Pokud byly v datech přítomny cesty nepřipojené ke zbytku a ani 
+vyhledávací graf. Pokud byly v~datech přítomny cesty nepřipojené ke zbytku a ani 
 přidání spojek a zkratek je nepřipojilo, měl by tento graf více komponent. Tyto
 převážně malé komponenty nás nezajímají, protože do nich neumíme najít cestu, a
 proto použijeme jen největší komponentu. Uložíme seznam všech uzlů, které jsou

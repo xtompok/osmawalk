@@ -4,14 +4,14 @@
 \section*{Zhodnocení}
 \addcontentsline{toc}{section}{Zhodnocení}
 Úlohou práce bylo navrhnout algoritmy a datové struktury pro odhady pěších tras.
-Pro vypracování práce bylo nutné detailně pochopit způsob mapování v projektu
+Pro vypracování práce bylo nutné detailně pochopit způsob mapování v~projektu
 OpenStreetMap a význam jednotlivých značek. Jako hlavní podklad sloužily wiki
 stránky projektu, ale na některé zvyklosti bylo potřeba se zeptat přímo komunity na
 diskusních fórech. 
 
-Při následném zpracování se objevily problémy v nekonzistentním mapování v
-různých částech mapy a chyby v datech, které jsme museli korektně ošetřit.
-Výsledné algoritmy se s problémy umí vypořádat a ukázková aplikace na ně pouze
+Při následném zpracování se objevily problémy v~nekonzistentním mapování
+v~různých částech mapy a chyby v~datech, které jsme museli korektně ošetřit.
+Výsledné algoritmy se s~problémy umí vypořádat a ukázková aplikace na ně pouze
 upozorní a pokračuje ve zpracování. 
 
 Zjednodušování a předzpracování dat se osvědčilo, výsledná data zachovávají
@@ -20,28 +20,28 @@ suplují chybějící vazby chodníků na silnice i chodníků mezi sebou. Díky
 můžeme plánovat cesty i přes území, kde jsou chodníky zmapovány neúplně a není
 jich mnoho. 
 
-Zkratky přes průchozí prostranství se v současné implementaci příliš neosvědčily.
-V městském prostředí se nevyskytuje mnoho ploch, které by byly průchozí a
-zároveň nebyly v prudkém svahu a nevedla přes ně alespoň nějaká síť
-zmapovaných cest a pěšin. Mimo město je většina volných ploch neoznačena, proto o
-nich nemůžeme říci, že jsou průchozí. Též lesy nemusí být obecně průchozí a typy lesů
-nebývají v mapách zaneseny. 
+Zkratky přes průchozí prostranství se v~současné implementaci příliš neosvědčily.
+V~městském prostředí se nevyskytuje mnoho ploch, které by byly průchozí a
+zároveň nebyly v~prudkém svahu a nevedla přes ně alespoň nějaká síť
+zmapovaných cest a pěšin. Mimo město je většina volných ploch neoznačena, proto
+o~nich nemůžeme říci, že jsou průchozí. Též lesy nemusí být obecně průchozí a typy lesů
+nebývají v~mapách zaneseny. 
 
-Problémem, který v malé míře přetrvává i v současné verzi, je ošetření
-okrajových případů při zametání roviny. V některých situacích nejsou
+Problémem, který v~malé míře přetrvává i v~současné verzi, je ošetření
+okrajových případů při zametání roviny. V~některých situacích nejsou
 průsečíky korektně detekovány a vyskytují se spojky vedoucí skrz budovy.  
 
-Vytvořili jsme jednoduchou aplikaci pro hledání v připravených datech. Tato
+Vytvořili jsme jednoduchou aplikaci pro hledání v~připravených datech. Tato
 aplikace byla určena pro demostraci hledání ve vytvořených datech, proto má jen
 základní funkce. Vyhledávání tras i přes použití jednoduchého Dijkstrova
-algoritmu je dostatečně rychlé, aby nezdržovalo práci s aplikací. 
+algoritmu je dostatečně rychlé, aby nezdržovalo práci s~aplikací. 
 
 \section*{Výsledky}
 \addcontentsline{toc}{section}{Výsledky}
 Naše aplikace dává dobré výsledky pro vyhledávání pěších tras i přesto, že data
 OSM nejsou na vyhledávání pěších tras vytvářena. Dosažené výsledky jsou lepší
-než dávají známé mapové servery a v dobře zmapovaných oblastech srovnatelné s
-aplikací OsmAnd využívající data OSM. V oblastech, které nejsou dostatečně
+než dávají známé mapové servery a v~dobře zmapovaných oblastech srovnatelné
+s~aplikací OsmAnd využívající data OSM. V~oblastech, které nejsou dostatečně
 kvalitně zmapovány umí naše aplikace oproti aplikaci OsmAnd využívat i přímo
 neuvedené cesty.  Nalezené trasy však stále vyžadují kontrolu kvůli vyskytujícím
 se chybám ve spojkách a zkratkách.  Odhadovaná vzdálenost a čas dle zkušeností
@@ -58,15 +58,15 @@ algoritmy pro vytváření spojek a zkratek a zkoumat vliv na nalezené spojky a
 použitelnost zkratek.
 
 Náměty pro rozšíření máme i pro vyhledávací část. Pokud bychom ukládali při
-tvorbě dat informace o zmapovaných přechodech, mohli bychom například při
+tvorbě dat informace o~zmapovaných přechodech, mohli bychom například při
 vyhledávání preferovat přecházení silnice po přechodu. Bylo by také možné
 zvětšit možnosti konfigurace sklonů. 
 
 Specifickým tématem je rozšíření vyhledávání mimo město. Námi použité algoritmy
-je možné použít i v mimoměstském prostředí, ovšem problém nastává se zdrojovými
+je možné použít i v~mimoměstském prostředí, ovšem problém nastává se zdrojovými
 daty. Abychom mohli dobře odhadovat zkratky například přes les, potřebovali
-bychom mít mnohem podrobnější data, než OSM poskytuje, například z důvodu
+bychom mít mnohem podrobnější data, než OSM poskytuje, například z~důvodu
 rozdílné průchodnosti rozdílných typů lesního porostu. Venkov také bývá hůře
-zmapovaný, například pole nebývají nijak označená a v mapách často chybějí údaje o
-oplocení pozemků. Proto by pravděpodobně existovalo mnoho tras korektních v
-mapě, avšak nepoužitelných ve skutečnosti.
+zmapovaný, například pole nebývají nijak označená a v~mapách často chybějí údaje
+o~oplocení pozemků. Proto by pravděpodobně existovalo mnoho tras korektních
+v~mapě, avšak nepoužitelných ve skutečnosti.
