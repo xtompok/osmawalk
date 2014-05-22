@@ -10,7 +10,7 @@ města mají dostatečně detailní pokrytí i pro vyhledávání pěších tras
 Projekt OpenStreetMap používá tři základní geografická primitiva: uzly, cesty a
 relace. Ke každému z~těchto primitiv mohou být přiřazeny atributy, což jsou
 dvojice klíče a hodnoty. Každý typ primitiv má svou číselnou řadu, ze které
-dostává každý prvek unikátní číslo v rámci této řady -- id. 
+dostává každý prvek unikátní číslo -- id. 
 U~polohových dat se neukládá výška, výsledná mapa je pouze dvourozměrná.
 Nyní popíšeme jednotlivá primitiva:
 
@@ -53,8 +53,8 @@ příklad takového souboru, za ním následuje popis jednotlivých částí sou
 
 % Pozor na zlom stránky
 \begin{verbatim}
-<!-- Hlavička -->
 <?xml version='1.0' encoding='UTF-8'?>
+<!-- Hlavička -->
 <osm version="0.6" generator="osmconvert 0.7T">
 	<bounds minlat="49.4645" minlon="14.334" maxlat="49.466" 
 	maxlon="14.339"/>
@@ -100,7 +100,7 @@ otevřen element \verb|osm|.
 
 {\tuc Uzly.} Zde jsou za sebou postupně vypsány všechny uzly.  Pro uzly
 používáme element \verb|node|. Každý uzel má atributy \verb|lat| a \verb|lon|
-určující jejich zeměpisnou šířku a délku; používá se souřadný systém
+určující jeho zeměpisnou šířku a délku; používá se souřadný systém
 WGS-84. \cite{wgsnorma} Dále mohou mít vnořené elementy \verb|tag|. Každý tento
 element má atribut \verb|k| a \verb|v| definující pár (klíč,hodnota), který
 popisuje vlastnosti uzlu.
@@ -162,7 +162,9 @@ chyb jsme nalezli mnoho a je opět potřeba je korektně zpracovat.
 zahrnout ke zpracování, jsme se setkali s~používáním stejných atributů v~různých
 významech. Například klíč \verb|landuse| s~hodnotou \verb|residential| má dle
 specifikace \cite{osmfeatures} označovat obytnou oblast. V některých místech
-jsou tímto klíčem a hodnotou označena přístupná prostranství mezi budovami. 
+jsou tímto klíčem a hodnotou označena přístupná prostranství mezi budovami,
+zatímco jinde jsou takto označeny bloky oplocených rodinných domků, viz obrázky
+\ref{fig:resident=nepruch} a \ref{fig:resident-plocha}.
 Kvůli těmto nejednoznačnostem jsme některé atributy nemohli použít, protože by
 vytvářely v~některých částech města nekorektní výsledky.
 \begin{figure}

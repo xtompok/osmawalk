@@ -16,35 +16,35 @@ tyto knihovny a programy jsou nutné pro spuštění a používání našeho pro
 \noindent Používáme tyto pomocné programy, údaj v závorce udává licenci:
 \begin{itemize}
 	\item Výřez s~městem z~dat pro republiku vyrábíme pomocí {\tuc
-	Osmconvert}. (GNU AGPL)\\
+	Osmconvert} (GNU AGPL).\\
 	\url{http://wiki.openstreetmap.org/wiki/Osmconvert}
 	\item Pro práci s~Protocol Buffery v~Pythonu využíváme třídy generované
-	kompilátorem {\tuc protoc}. (BSD New)\\
+	kompilátorem {\tuc protoc} (BSD New).\\
 	\url{http://code.google.com/p/protobuf/}
 	\item Pro práci s~Protocol Buffery v~C využíváme funkce a struktury
-	generované kompilátorem {\tuc protobuf-c}. (BSD 2-Clause)\\
+	generované kompilátorem {\tuc protobuf-c} (BSD 2-Clause).\\
 	\url{https://github.com/protobuf-c/protobuf-c}
 \end{itemize}
 
 \noindent V~programech napsaných v~Pythonu využíváme následující knihovny:
 \begin{itemize}
-	\item Na parsování konfiguračních souborů používáme {\tuc PyYAML}.
-	(MIT)\\
+	\item Na parsování konfiguračních souborů používáme {\tuc PyYAML}
+	(MIT).\\
 	\url{http://pyyaml.org/wiki/PyYAML}
-	\item Na parsování OSM XML používáme {\tuc imposm.parser}. (Apache)\\
+	\item Na parsování OSM XML používáme {\tuc imposm.parser} (Apache).\\
 	\url{http://imposm.org/docs/imposm.parser/latest/}
-	\item Souřadnice konvertujeme pomocí {\tuc pyproj}. (MIT)\\
-	\url{http://code.google.com/p/pyproj/}.
-	\item Pro hledání komponent grafu využíváme {\tuc networkx}. (BSD)\\
+	\item Souřadnice konvertujeme pomocí {\tuc pyproj} (MIT).\\
+	\url{http://code.google.com/p/pyproj/}
+	\item Pro hledání komponent grafu využíváme {\tuc networkx} (BSD).\\
 	\url{http://networkx.github.io/}
 \end{itemize}
 
 \noindent V~programech napsaných v~C využíváme následující knihovny:
 \begin{itemize}
 	\item Datové struktury, dynamická pole a další funkce zajišťuje
-	{\tuc LibUCW}.(GNU LGPL)\\
+	{\tuc LibUCW} (GNU LGPL).\\
 	\url{http://www.ucw.cz/libucw/}
-	\item Výpočty se zeměpisnými souřadnicemi provádí {\tuc PROJ.4}. (MIT)\\
+	\item Výpočty se zeměpisnými souřadnicemi provádí {\tuc PROJ.4} (MIT).\\
 	\url{http://trac.osgeo.org/proj/}
 \end{itemize}
 
@@ -64,16 +64,17 @@ reprezentovány typem slovník, v~C využíváme součást knihovny LibUCW
 hodnotou index do pole uzlů resp. cest, kde je daný objekt uložen.
 
 U~každé cesty je v~datech uložen seznam uzlů, přes které prochází. Je ale vhodné
-mít i pro každý vrchol uložen seznam cest, které jím prochází. Pro tento účel
+mít i pro každý uzel uložen seznam cest, na nichž leží. Pro tento účel
 máme seznam \verb|nodeWays|. Je to seznam seznamů, kdy pod indexem $i$ je seznam
-všech identifikátorů cest, které prochází vrcholem na indexu $i$. V~Pythonu jde
-o~seznam seznamů, v~C je to rostoucí pole rostoucích polí z~LibUCW.
+všech identifikátorů cest, které prochází uzlem na pozici $i$ v poli všech uzlů.
+V~Pythonu jde o~seznam seznamů, v~C je to rostoucí pole rostoucích polí
+z~LibUCW.
 
 Během zpracování hledáme uzly blízké daným uzlům. Abychom pro každé takové
 hledání nemuseli procházet všechny uzly, vytvoříme si na začátku {\tuc mřížku}.
 Tato mřížka dělí plochu mapy na čtverce $20 \times 20$\,m a v~každém čtverci si
 uložíme seznam identifikátorů vrcholů, které v~něm leží. Poté nám při hledání
-sousedů bodu stačí zjistit, do kterého čtverce patří a následně prohledat jen
+sousedů bodu stačí zjistit, do kterého čtverce patří, a následně prohledat jen
 několik okolních čtverců.
 
 Mřížka je vhodnou strukturou pro rozdělení plochy, protože zástavba ve městě je
@@ -116,13 +117,14 @@ do jedné velké tabulky, která je uložena jako \verb|heights.txt|. Její prvn
 výšek.
 
 \section{Klasifikace dat}
-Nejdříve potřebujeme data OSM převést do formátu pro přípravu dat (premap).
+Před dalším zpracováním potřebujeme data OSM převést do formátu pro přípravu dat (premap).
 K~tomuto účelu slouží program \verb|parse.py|, který si načte konfigurační soubory
 a podle nich rozdělí jednotlivé uzly a cesty do kategorií. Současně také přidá k
 uzlům údaje o nadmořské výšce a jejich souřadnice převede do UTM. Následně smaže 
-všechny uzly, které neleží na žádné cestě, a uloží data do formátu premap.
+všechny uzly, které neleží na žádné cestě, a uloží data do souboru ve formátu 
+formátu premap.
 
-Konfigurační soubory jsou soubory ve formátu YAML. \cite{yamlspec} Používají se následující
+Konfigurační soubory jsou soubory ve formátu YAML \cite{yamlspec}. Používají se následující
 konfigurační soubory:
 \begin{itemize}
 	\item \verb|types.yaml| pro rozdělení cest a multipolygonů do
@@ -131,7 +133,7 @@ kategorií
 	\item \verb|tunnel.yaml| pro určení, zda je daný objekt tunelem,
 	průchodem či jinou podobnou stavbou
 	\item \verb|bridge.yaml| pro určení, zda je daný objekt mostem nebo na
-	něm leží
+	nějakém mostě leží
 \end{itemize}
 
 Konfigurační soubory mají následující formát:
@@ -166,11 +168,11 @@ hodnotou \verb|stream|, je klasifikován jako \verb|WATER|.
 Při procházení uzlů jim přiřazujeme ze SRTM výšku a převádíme jejich souřadnice
 do UTM. Pomocí metody \verb|calcHeight| spočítáme nadmořskou výšku daného uzlu a
 následně jeho souřadnice převedeme do UTM. Navíc {\tuc vynásobíme souřadnice UTM
-desíti}, čímž bude jednotkou 10\,cm což nám jako přesnost stačí a můžeme všechny
+desíti}, čímž bude jednotkou 10\,cm. Taková přesnost nám stačí a můžeme všechny
 výpočty provádět v~celých číslech.
 
 Následně vytvoříme hešovací tabulku \verb|nodeWays| a jejím průchodem zjistíme, které
-uzly neleží na žádných cestách a tyto uzly smažeme. Nakonec převedeme data do
+uzly neleží na žádných cestáchi, a tyto uzly smažeme. Nakonec převedeme data do
 formátu premap a uložíme jako soubor \verb|praha-pre.pbf| do složky \verb|data|.
 
 \section{Převod multipolygonů na cesty}
@@ -189,7 +191,7 @@ cesty zbývají. Pokud se vrátíme na vytvářenou cestu mimo první vrchol, sk
 s~chybou.
 
 \section{Spojení budov}
-Při spojování bloků budov do jejich obrysu si nejprve vytvoříme graf sousednosti
+Při spojování bloků budov do jejich obrysu nejprve vytvoříme graf sousednosti
 budov. Pro jeho reprezentaci použijeme knihovnu \verb|networkx|. Jednotlivé
 budovy budou vrcholy v~grafu, pokud budovy sousední, bude mezi jejich vrcholy
 hrana. Graf sousednosti vytváříme funkcí \verb|makeNeighGraph|.
@@ -222,7 +224,7 @@ Pokud máme první dva body na obvodu, stačí nám již jen ze sousedů aktuál
 zpracovávaného uzlu vybrat ten uzel, který svírá s~předchozím a aktuálním uzlem
 nejmenší vnější úhel a takto pokračovat, dokud se nevrátíme do prvního uzlu.
 
-Jestliže počet uzlů je méně než tři, nejde o~korektní plochu a je vrácena chyba.
+Jestliže počet uzlů je menší než tři, nejde o~korektní plochu a je vrácena chyba.
 Rovněž pokud během průchodu po obvodu dojdeme podruhé do jiného než prvního bodu
 na obvodu, například pokud se dvě cesty dotýkají rohem, vrátíme chybu.
 % TODO: Obrázky
@@ -237,7 +239,7 @@ najdeme úsek delší než 30 metrů, rozdělíme ho po 20 metrech vytvořením 
 uzlů vložených mezi stávající.
 
 \section{Výpočet průsečíku úseček}
-V následujících částech budeme čast počítat průsečík úseček. Nyní si odvodíme
+V následujících částech budeme často počítat průsečík úseček. Nyní odvodíme
 vzorec pro výpočet průsečíku přímek, pro úsečky stačí jen navíc kontrolovat,
 jestli nalezený průsečík leží na obou úsečkách.
 
@@ -260,13 +262,13 @@ přímek $p$: $u = (x_2-x_1,y_2-y_1)$ a $q$: $v=(x_4-x_3,y_4-y_3)$ pak normálov
 vektory získáme jako $m = (-u_y,u_x)$ a $n = (-v_y,v_x)$. Obecná rovnice přímky
 $p$ pak bude $m_xx+m_yy=c$ a přímky $q$ bude $n_xx+n_yy=d$. Koeficienty $c$ a
 $d$ získáme dosazením bodů $A$ a $C$ do rovnic: $c = m_xx_1+m_yy_1$,
-$d=n_xx_3+n_yy_3$ Pro průsečík musí platit obě rovnice, tedy 
+$d=n_xx_3+n_yy_3$. Pro průsečík musí platit obě rovnice, tedy 
 \begin{eqnarray*}
 m_xx+m_yy &=& m_xx_1+m_yy_1\\
-n_xx+n_yy &=& n_xx_3+n_yy_3\\
+n_xx+n_yy &=& n_xx_3+n_yy_3
 \end{eqnarray*}
-Tuto soustavu dvou rovnic o dvou neznámých můžeme řešit například Cramerovým
-pravidlem $x_i = \frac{|A_i|}{|A|}$
+Tuto soustavu dvou rovnic o dvou neznámých můžeme řešit například pomocí
+determinantů Cramerovým pravidlem $x_i = \frac{|A_i|}{|A|}$:
 
 $$x = \frac{
 	\begin{vmatrix}
@@ -294,7 +296,7 @@ y = \frac{
 }
 $$
 
-Pokud si vzorec roznásobíme, získáme pro $x$-ovou souřadnici zlomek:
+Pokud vzorec roznásobíme, získáme pro $x$-ovou souřadnici zlomek:
 $$
 x=\frac{(x_1 y_2-y_1 x_2)(x_3-x_4)-(x_1-x_2)(x_3 y_4-y_3 x_4)}
 {(x_1-x_2)(y_3-y_4)-(y_1-y_2)(x_3-x_4)}$$
@@ -312,7 +314,7 @@ zapříčinit špatné pořadí blízkých průsečíků v~uspořádání. Potř
 přesnou reprezentaci.
 
 {\tuc Zlomky} jsou pro reprezentaci desetinných čísel vhodnější. Dokážeme pomocí
-nich přesně reprezentovat desetinná čísla.  porovnávání. Zlomky můžeme vždy
+nich přesně reprezentovat desetinná čísla. Zlomky můžeme vždy
 upravit tak, aby jejich jmenovatel byl kladný.  Takové zlomky můžeme porovnávat
 podle pravidla $\frac{a}{b} < \frac{c}{d} \Leftrightarrow a\cdot d < c\cdot b $. 
 Pokud se nám ale stane, že porovnáváme dva zlomky, které mají vysoký čitatel i
@@ -322,19 +324,19 @@ Předpokládejme, že máme město velikosti Prahy, což je přibližně $20 \ti
 30$\,km s~přesností na 10\,cm. O~úsečkách víme, že žádná nebude delší než 300
 metrů, tudíž rozdíl jejich souřadnic nebude větší než 3\,000. Pokud budeme
 maximalizovat jmenovatele, ze vzorce pro výpočet průsečíku vychází, že můžeme
-dosáhnout nejvýše 9 milionů, protože jde o~součet dvou rozdílů souřadnic a každý
+dosáhnout nejvýše 9 milionů, protože jde o~součin dvou rozdílů souřadnic a každý
 bude nejvýše 3\,000.
 
 Tato situace opravdu může nastat, například pro vodorovnou a svislou úsečku
-o~délce 300\,m, dotýkající se v~krajním bodě, tzn. $A=(3000,0),B=(0,0)$,
+o~délce 300\,m, dotýkající se v~krajním bodě, tzn. $A=(3\,000,0),B=(0,0)$,
 $C=(0,3000),D=(0,0)$. Tyto dvě mají průsečík, tudíž se nám mohou při počítání
 vyskytnout. Pokud nyní vezmeme téměř totožnou situaci, ale úsečky budou posunuty
 směrem k~maximu $x$-ové osy, pak bude $x$-ová souřadnice reprezentovat číslo
 30\,km při přesnosti 10\,cm ve zlomku se jmenovatelem 9 milionů. Bude to tedy
-číslo $30\cdot1000\cdot10\cdot9\cdot10^6=27 \cdot 10^{11}$. Na reprezentaci tohoto
+číslo $30\cdot1\,000\cdot10\cdot9\cdot10^6=27 \cdot 10^{11}$. Na reprezentaci tohoto
 čísla budeme potřebovat $\log_2 27\cdot 10^{11} \doteq 42$ bitů. Pokud tento
 zlomek budeme chtít porovnat s~jiným zlomkem s~maximálním jmenovatelem, budeme
-potřebovat $42 + \log_2 9\cdot 10^{6} \doteq 65$ bitů, na což nám 64bitová proměnná
+potřebovat $42 + \log_2 (9\cdot 10^{6}) \doteq 65$ bitů, na což nám 64bitová proměnná
 nebude stačit.
 
 {\tuc Smíšená čísla} nemají ani jednu z~předchozích nevýhod. Jsou to čísla,
@@ -363,7 +365,7 @@ Pole \verb|wayGraph| obsahuje pro každý uzel pole všech jeho sousedů po cest
 po kterých se bude vyhledávat. Pole \verb|barGraph| obsahuje ty dvojice indexů
 uzlů, které spolu sousedí na některé cestě označené jako překážka. Obě pole
 reprezentují graf, první pomocí seznamu sousedů, druhé pomocí seznamu hran.
-Každé pole budeme využívat jiným způsobem a proto se nám hodí různá
+Každé pole budeme využívat jiným způsobem, a proto se nám hodí různá
 reprezentace.
 
 Jako druhý krok nalezneme všechny kandidáty na spojky. Zde využijeme mřížky.
@@ -381,7 +383,7 @@ ale všechny spojky, protože pak existovalo např. u kruhových cest v parcích
 mnoho spojek, které nepřinášely výrazné zlepšení. Zvolili jsme proto náhodný
 výběr, při němž pro každý bod vybereme z každého čtverce mřížky jen několik
 kandidátů. Zkoumali jsme vliv počtu kandidátů na délku trasy a jako optitmum se
-ukázalo vybírat dva body na kandidáty z každého čtverce mřížky. Při větším
+ukázalo zvolit dva body jako kandidáty z každého čtverce mřížky. Při větším
 množství bodů se výslledky zlepšovaly přibližně o procento, ale velikost
 výstupního souboru rostla přibližně o šest procent.
 
@@ -399,7 +401,7 @@ nastavují tyto atributy:
 	úsečky. Začátek úsečky má vždy nejvýš tak velkou souřadnici $x$, jako
 	konec.
 	\item \verb|endlon| a \verb|endlat| udávají souřadnice konce úsečky.
-	Souřednice začátků a konců jsou vždy celočíselné, proto je
+	Souřadnice začátků a konců jsou vždy celočíselné, proto je
 	reprezentujeme 64bitovými celými čísly.
 	\item \verb|startid| a \verb|endid| udávají identifikátor začátku a
 	konce úsečky v~OSM.
@@ -476,7 +478,7 @@ událostech konec úsečky, protože ji nemusíme hledat, ale stačí si při vy
 úseček prohodit patřičné ukazatele. Při mazání se pak jen podíváme podle indexu
 úsečky do správného místa v~poli a patřičný vrchol smažeme. Je to výhodou i
 v~situaci, kdy nastal při zametání nějaký problém a neproběhla nějaká událost
-křížení a tudíž bychom standardní cestou vrchol nenašli.
+křížení, a tudíž bychom standardní cestou vrchol nenašli.
 
 Při vkládání nového vrcholu do stromu také potřebujeme zjistit sousedy nově
 vloženého vrcholu, abychom přidali případné události křížení. Tuto funkci stromy
@@ -487,8 +489,8 @@ hledáme při křížení, protože překřížením úseček se sousedství zm�
 \subsection{Zametání}
 Události procházíme seřazené nejprve podle délky, pak podle šířky. Pokud jsou
 dvě události na stejném místě, nejprve se zpracují události konce úsečky, poté
-průsečíky a nakonec události začítku úsečky. Pokud je více událostí stejného
-typu na stejném místě, zpracovávají se podle úhlu úseček, viz pořadí ve stromě. 
+průsečíky a nakonec události začátku úsečky. Pokud nastane více událostí téhož
+typu na stejném místě, zpracovávají se podle úhlu úseček, viz rozbor pořadí ve stromě. 
 
 Dokud máme v~haldě nějaké události, vybereme vždy tu nejbližší a zpracujeme ji.
 Pokud se jedná o~začátek úsečky, zkontrolujeme, jestli ve stromě již není, či
@@ -516,7 +518,7 @@ Dále zkontrolujeme, jestli některá z~úseček již neskončila. Pokud se dvě
 potkávají v~koncovém bodě, pak je zbytečné řešit jejich průsečík. Proto nejprve
 vyřešíme konce úseček a pokud máme řešit průsečík s~již skončenou úsečkou,
 můžeme ho ignorovat. Následně zjistíme, která z~úseček je nyní horní a která
-dolní a prohodíme odkazy na vrcholy stromu v~poli \verb|lineNodes| a rovněž
+dolní, a prohodíme odkazy na vrcholy stromu v~poli \verb|lineNodes| a rovněž
 prohodíme indexy úseček ve vrcholech stromu. Nakonec zjistíme, zda po prohození
 nevznikly nové průsečíky, a případně přidáme průsečíkové události.
 
@@ -561,12 +563,12 @@ Takto vzniknou pouz zkratky přes volná prostranství a nebudou křížit cesty
 Když máme kandidáty na zkratky i seznam překážek, můžeme použít již popsané funkce
 \verb|findDirectWays| a \verb|addDirectToMap| k~odstranění kandidátů
 kolidujících
-s~překážkami a cestami a k~přidání výlsedných zkratek do mapy. Postup přípravy
-kandidátů až jejich přidání do mapy zopakujeme pro každou průchozí plochu.
+s~překážkami a cestami a k~přidání výsledných zkratek do mapy. Postup od přípravy
+kandidátů až po jejich přidání do mapy zopakujeme pro každou průchozí plochu.
 
 \section{Vytvoření vyhledávacího grafu}
 Když již máme všechna data připravená, vytvoříme vyhledávací graf. Nejprve do
 něj přidáme všechny vrcholy a hrany. Následně graf projdeme do hloubky a
 vybereme tu komponentu, která je největší. Poté v~grafu necháme jen vrcholy a
-hrany co do této komponenty patří a graf uložíme do souboru
+hrany, které do této komponenty patří, a graf uložíme do souboru
 \verb|praha-graph.pbf|. 

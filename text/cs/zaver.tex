@@ -1,7 +1,8 @@
 \chapter*{Závěr}
 \addcontentsline{toc}{chapter}{Závěr}
 
-\section{Zhodnocení}
+\section*{Zhodnocení}
+\addcontentsline{toc}{section}{Zhodnocení}
 Úlohou práce bylo navrhnout algoritmy a datové struktury pro odhady pěších tras.
 Pro vypracování práce bylo nutné detailně pochopit způsob mapování v projektu
 OpenStreetMap a význam jednotlivých značek. Jako hlavní podklad sloužily wiki
@@ -19,11 +20,11 @@ suplují chybějící vazby chodníků na silnice i chodníků mezi sebou. Díky
 můžeme plánovat cesty i přes území, kde jsou chodníky zmapovány neúplně a není
 jich mnoho. 
 
-Zkratky přes průchozí prostranství se v současné implementaci příliš neosvědily.
+Zkratky přes průchozí prostranství se v současné implementaci příliš neosvědčily.
 V městském prostředí se nevyskytuje mnoho ploch, které by byly průchozí a
-zároveň nebyly v prudkém svahu a zároveň přes ně nevedla alespoň nějaká síť
-zmapovanýh cest a pěšin. Mimo město je většina volných ploch neoznačena, proto o
-nich nemůžeme, že jsou průchozí. Též lesy nemusí být obecně průchozí a typy lesů
+zároveň nebyly v prudkém svahu a nevedla přes ně alespoň nějaká síť
+zmapovaných cest a pěšin. Mimo město je většina volných ploch neoznačena, proto o
+nich nemůžeme říci, že jsou průchozí. Též lesy nemusí být obecně průchozí a typy lesů
 nebývají v mapách zaneseny. 
 
 Problémem, který v malé míře přetrvává i v současné verzi, je ošetření
@@ -35,7 +36,8 @@ aplikace byla určena pro demostraci hledání ve vytvořených datech, proto m�
 základní funkce. Vyhledávání tras i přes použití jednoduchého Dijkstrova
 algoritmu je dostatečně rychlé, aby nezdržovalo práci s aplikací. 
 
-\section{Výsledky}
+\section*{Výsledky}
+\addcontentsline{toc}{section}{Výsledky}
 Naše aplikace dává dobré výsledky pro vyhledávání pěších tras i přesto, že data
 OSM nejsou na vyhledávání pěších tras vytvářena. Dosažené výsledky jsou lepší
 než dávají známé mapové servery a v dobře zmapovaných oblastech srovnatelné s
@@ -46,7 +48,8 @@ se chybám ve spojkách a zkratkách.  Odhadovaná vzdálenost a čas dle zkuše
 autora odpovídají skutečnosti. 
 
 
-\section{Náměty pro další rozvoj}
+\section*{Náměty pro další rozvoj}
+\addcontentsline{toc}{section}{Náměty pro další rozvoj}
 Pro další rozvoj aplikace by bylo nutné odstranit nedostatky implementace
 zametání roviny, abychom mohli více důvěřovat nalezeným cestám. Poté je možné
 zlepšovat aplikaci mnoha způsoby. Jednou možností je zjednodušování grafu pro
@@ -64,6 +67,6 @@ je možné použít i v mimoměstském prostředí, ovšem problém nastává se
 daty. Abychom mohli dobře odhadovat zkratky například přes les, potřebovali
 bychom mít mnohem podrobnější data, než OSM poskytuje, například z důvodu
 rozdílné průchodnosti rozdílných typů lesního porostu. Venkov také bývá hůře
-zmapovaný, například pole nebývají nijak označená a v mapách chybějí údaje o
+zmapovaný, například pole nebývají nijak označená a v mapách často chybějí údaje o
 oplocení pozemků. Proto by pravděpodobně existovalo mnoho tras korektních v
-mapě, avšak neprůchozích ve skutečnosti.
+mapě, avšak nepoužitelných ve skutečnosti.
