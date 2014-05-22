@@ -10,7 +10,8 @@ Data OSM i SRTM používají za souřadný systém WGS-84, který umožňuje pop
 souřadnicemi každé místo na povrchu Země. Protože se ale jedná o~souřadnou
 soustavu na povrchu elipsoidu, obtížně se v~ní počítají vzdálenosti mezi body.
 Protože pracujeme s~malými územními celky, můžeme místo WGS84 použít nějakou
-projekci do roviny. Vhodným kandidátem je systém UTM \cite{utmnorma}.
+projekci do roviny. Vhodným kandidátem je systém Universal Transverse Mercator 
+(UTM) \cite{utmnorma}.
 
 UTM je systém, který rozděluje povrch Země na zóny, které jsou následně
 zobrazeny pomocí transverzního Mercatorova zobrazení do roviny. Každá zóna je po
@@ -20,9 +21,9 @@ Pythagorova věta.
 
 Při zpracovávání dat proto zeměpisné souřadnice převedeme na UTM a zpětný převod
 provádíme až při výpisu nalezené cesty. Zkreslení způsobené použitím rovinného
-zobrazení činí na 20\,km méně než 1\%. Protože souřadnice $x$ roste po
+zobrazení činí na 20\,km méně než 1\%~\cite{utmnorma}. Protože souřadnice $x$ roste po
 polednících a souřadnice $y$ roste po rovnoběžkách, používáme dále názvy
-\verb|lon| a \verb|lat| pro označení souřadnic $x$ a $y$.
+\verb|lon| a \verb|lat| i pro označení souřadnic $x$ a $y$.
 
 \section{Protocol Buffer}
 Protocol Buffer je způsob, jak vytvořit jednoduchý a rychlý formát pro ukládání

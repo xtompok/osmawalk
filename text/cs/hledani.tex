@@ -11,7 +11,7 @@ kategorií dvěma způsoby. První je zadáním absolutní rychlosti a druhý je
 poměru k~rychlosti pohybu po obecné cestě. Také je možné konfigurovat penalizaci
 za převýšení.
 
-Konfigurační soubor \verb|speeds.yaml| je ve formátu YAML: \cite{yamlspec} 
+Konfigurační soubor \verb|speeds.yaml| je ve formátu YAML \cite{yamlspec}: 
 \begin{verbatim}
 speeds:
         WAY: 6
@@ -24,21 +24,21 @@ heights:
         upscale: 1
         downscale: 1
 \end{verbatim}
-Konfigurační soubor obsahuje mapu se třemi klíči:
+Konfigurační soubor obsahuje slovník se třemi klíči:
 \begin{itemize}
 	\item Klíč \verb|speeds| slouží k~nastavení absolutních rychlostí pohybu
-	pro jednotlivé kategorie hran. Obsahuje jako hodnotu mapu, jejímiž klíči jsou
+	pro jednotlivé kategorie hran. Obsahuje jako hodnotu slovník, jejímiž klíči jsou
 	názvy kategorií a hodnotami rychlosti pohybu po cestách dané kategorie
 v~kilometrech za hodinu. Vždy je potřeba nastavit rychlost pro kategorii
 	\verb|WAY|, z~ní se počítají poměrné rychlosti.
 	\item Klíč \verb|ratios| slouží k~nastavení poměrných rychlostí vzhledem
-	k~rychlosti kategorie \verb|WAY|. Jeho hodnotou je stejná mapa jako
+	k~rychlosti kategorie \verb|WAY|. Jeho hodnotou je stejný slovník jako
 u~klíče \verb|speeds|, ale jako hodnoty se udávají poměry k~rychlosti
-	kategorie \verb|WAY|. Pokud se nějaká kategorie vyskytne v~mapách pro
+	kategorie \verb|WAY|. Pokud se nějaká kategorie vyskytne ve slovnících pro
 	oba klíče \verb|speeds| a \verb|ratios|, má prioritu absolutní rychlost
 	z~klíče \verb|speeds|.
 	\item Klíč \verb|heights| umožňuje nastavit penalizaci za převýšení.
-	Jako hodnotu obsahuje mapu s~klíči \verb|upscale| a \verb|downscale|,
+	Jako hodnotu obsahuje slovník s~klíči \verb|upscale| a \verb|downscale|,
 	které udávají, za kolik vodorovných metrů se bude počítat jeden metr
 	převýšení při chůzi směrem do kopce a z~kopce. Je možné nastavit kladné,
 	záporné hodnoty i nulu, při které se bude převýšení ignorovat. Pokud by

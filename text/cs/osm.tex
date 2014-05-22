@@ -101,7 +101,7 @@ otevřen element \verb|osm|.
 {\tuc Uzly.} Zde jsou za sebou postupně vypsány všechny uzly.  Pro uzly
 používáme element \verb|node|. Každý uzel má atributy \verb|lat| a \verb|lon|
 určující jeho zeměpisnou šířku a délku; používá se souřadný systém
-WGS-84. \cite{wgsnorma} Dále mohou mít vnořené elementy \verb|tag|. Každý tento
+WGS-84~\cite{wgsnorma}. Dále mohou mít vnořené elementy \verb|tag|. Každý tento
 element má atribut \verb|k| a \verb|v| definující pár (klíč,hodnota), který
 popisuje vlastnosti uzlu.
 
@@ -121,7 +121,7 @@ určující roli daného prvku v~relaci. I~relace mohou mít vnořené elementy
 Toto pořadí umožňuje proudově zpracovávat XML, protože když zpracováváme cesty,
 tak již máme v~paměti všechny uzly, na které se cesty mohou odkazovat, obdobně
 s~relacemi. Problém může nastat, pokud je relace prvkem relace. Pak není
-uspořádání definováno, ale obvykle je dodržováno. 
+uspořádání standardem nařízeno, ale obvykle je dodržováno. 
 
 OSM XML se dá volně stáhnout, většinou jsou tyto soubory pro úsporu místa
 zkomprimované a aktualizují se jednou denně. Protože většina aplikací
@@ -143,8 +143,8 @@ nikoli za plochu. Aby byla považována za plochu, musí mít nastaven klíč
 nebo \verb|building|, je za plochu považována, i když nemá klíč \verb|area|.
 
 \smallskip
-{\tuc Nekorektní objekty.} I~přesto, že editory používané pro úpravu OSM se snaží
-hlídat správnost vytvořených objektů, se v~mapě vyskytují různé chybně
+{\tuc Nekorektní objekty.} Editory používané pro úpravu OSM se sice snaží
+hlídat správnost vytvořených objektů, ale i přesto se v~mapě vyskytují různé chybně
 definované objekty. Nalezli jsme například cesty, které samy sebe kříží,
 chybějící elementy v~hranicích multipolygonu a jiné. Výhodou OSM je, že jsme je
 mohli ihned opravit, ale přesto je musí umět program korektně vyhodnotit.
@@ -164,7 +164,7 @@ významech. Například klíč \verb|landuse| s~hodnotou \verb|residential| má 
 specifikace \cite{osmfeatures} označovat obytnou oblast. V~některých místech
 jsou tímto klíčem a hodnotou označena přístupná prostranství mezi budovami,
 zatímco jinde jsou takto označeny bloky oplocených rodinných domků, viz obrázky
-\ref{fig:resident=nepruch} a \ref{fig:resident-plocha}.
+\ref{fig:resident-nepruch} a \ref{fig:resident-volno}.
 Kvůli těmto nejednoznačnostem jsme některé atributy nemohli použít, protože by
 vytvářely v~některých částech města nekorektní výsledky.
 \begin{figure}

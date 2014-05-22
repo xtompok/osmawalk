@@ -148,14 +148,14 @@ WATER:
         - riverbank
         - stream
 \end{verbatim}
-Konfigurační soubor se skládá z~několika mapování, u~každého klíč určuje, jaká
-kategorie resp. hodnota se přiřadí, hodnotou mapování první úrovně jsou mapování
+Konfigurační soubor se skládá z~několika slovníků, u~každého klíč určuje, jaká
+kategorie resp. hodnota se přiřadí. Hodnotou slovníku první úrovně jsou slovníky
 druhé úrovně, které určují, za jakých podmínek se hodnota přiřadí. Přiřazuje se
 vždy, když je splněna alespoň jedna podmínka. 
 
-V~mapování druhé úrovně je klíčem vždy klíč vlastnosti objektu OSM. Hodnota může
+Ve slovnících druhé úrovně je klíčem vždy klíč vlastnosti objektu OSM. Hodnota může
 být dvou druhů. Buď je to \verb|"*"|, pak stačí, že se shoduje klíč vlastnosti
-OSM a na hodnoty se nehledí, nebo je hodnota mapování seznam hodnot objektu OSM.
+OSM a na hodnoty se nehledí, nebo je hodnota slovníku seznam hodnot objektu OSM.
 Pokud má objekt OSM pro daný klíč jednu z~těchto hodnot, je  podmínka splněna. 
 
 V~příkladu rozdělujeme do kategorií \verb|BARRIER| a \verb|WATER|. Pokud má
@@ -172,7 +172,7 @@ desíti}, čímž bude jednotkou 10\,cm. Taková přesnost nám stačí a může
 výpočty provádět v~celých číslech.
 
 Následně vytvoříme hešovací tabulku \verb|nodeWays| a jejím průchodem zjistíme, které
-uzly neleží na žádných cestáchi, a tyto uzly smažeme. Nakonec převedeme data do
+uzly neleží na žádných cestách, a tyto uzly smažeme. Nakonec převedeme data do
 formátu premap a uložíme jako soubor \verb|praha-pre.pbf| do složky \verb|data|.
 
 \section{Převod multipolygonů na cesty}
@@ -268,7 +268,7 @@ m_xx+m_yy &=& m_xx_1+m_yy_1\\
 n_xx+n_yy &=& n_xx_3+n_yy_3
 \end{eqnarray*}
 Tuto soustavu dvou rovnic o~dvou neznámých můžeme řešit například pomocí
-determinantů Cramerovým pravidlem $x_i = \frac{|A_i|}{|A|}$:
+determinantů Cramerovým pravidlem:
 
 $$x = \frac{
 	\begin{vmatrix}
@@ -329,12 +329,12 @@ bude nejvýše 3\,000.
 
 Tato situace opravdu může nastat, například pro vodorovnou a svislou úsečku
 o~délce 300\,m, dotýkající se v~krajním bodě, tzn. $A=(3\,000,0),B=(0,0)$,
-$C=(0,3000),D=(0,0)$. Tyto dvě mají průsečík, tudíž se nám mohou při počítání
+$C=(0,3\,000),D=(0,0)$. Tyto dvě mají průsečík, tudíž se nám mohou při počítání
 vyskytnout. Pokud nyní vezmeme téměř totožnou situaci, ale úsečky budou posunuty
 směrem k~maximu $x$-ové osy, pak bude $x$-ová souřadnice reprezentovat číslo
 30\,km při přesnosti 10\,cm ve zlomku se jmenovatelem 9 milionů. Bude to tedy
 číslo $30\cdot1\,000\cdot10\cdot9\cdot10^6=27 \cdot 10^{11}$. Na reprezentaci tohoto
-čísla budeme potřebovat $\log_2 27\cdot 10^{11} \doteq 42$ bitů. Pokud tento
+čísla budeme potřebovat $\log_2 (27\cdot 10^{11}) \doteq 42$ bitů. Pokud tento
 zlomek budeme chtít porovnat s~jiným zlomkem s~maximálním jmenovatelem, budeme
 potřebovat $42 + \log_2 (9\cdot 10^{6}) \doteq 65$ bitů, na což nám 64bitová proměnná
 nebude stačit.
@@ -495,7 +495,8 @@ typu na stejném místě, zpracovávají se podle úhlu úseček, viz rozbor po�
 Dokud máme v~haldě nějaké události, vybereme vždy tu nejbližší a zpracujeme ji.
 Pokud se jedná o~začátek úsečky, zkontrolujeme, jestli ve stromě již není, či
 zda v~něm není nějaká, se kterou by byla nerozlišitelná. Protože dvě úsečky,
-které leží přesně přes sebe jsou nedefinovaný stav, tak tu, která přijde ke
+které leží přesně přes sebe, se v~korektních datech nemohou vyskytovat, tak tu 
+úsečku, která přijde ke
 zpracování jako druhá, ignorujeme. Úsečku následně vložíme do průřezového stromu
 a zkontrolujeme sousední úsečky, zda se s~nově přidanou nekříží. Pokud ano, tak
 přidáme příslušné průsečíkové události do průsečíkové haldy.

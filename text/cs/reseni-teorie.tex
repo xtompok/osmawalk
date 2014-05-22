@@ -7,7 +7,7 @@ průchozí prostranství a nakonec ze všech dat vytvoříme vyhledávací graf.
 
 \section{Klasifikace OSM dat} \label{label:kategorie}
 V~našem formátu pro přípravu dat jsou cesty a multipolygony rozděleny do
-kategorií podle toho, jaký druh skutečného objekt je jimi reprezentován. Cesty vzniklé
+kategorií podle toho, jaký druh skutečného objektu je jimi reprezentován. Cesty vzniklé
 jako zkratky přes průchozí prostranství dostanou kategorii plochy, přes kterou
 vedou. Když následně hledáme cestu, můžeme jednotlivým kategoriím přiřadit
 rychlosti, jakými se po nich pohybujeme. Kategorie jsou následující:
@@ -87,7 +87,7 @@ jde například o~dvě ulice oddělené domky se zahrádkami, zůstala poměrně
 V~oblastech, kde se nacházelo velké množstí uzlů blízko sebe, například u~cest
 reprezentujících kruhové objezdy, vznikalo příliš velké množství spojek. Tyto
 spojky navíc nepřinášely významné zkrácení trasy. U~každého uzlu jsme proto
-náhodně vybrali jen některé spojky (viz obr. \ref{fig:spojky}.
+náhodně vybrali jen některé spojky (viz obr. \ref{fig:spojky}).
 
 \begin{figure}[h]
 	\centering
@@ -189,7 +189,7 @@ které procházely přes nějakou překážku.
 
 \section{Vytvoření vyhledávacího grafu}
 Poté, co jsme připravili data, vytvoříme vyhledávací graf. Protože kolize
-přímých cest s~překážkami jsme vyřešili již při jejich vytváření, jsou všechny
+přímých cest s~překážkami jsme vyřešili již při vytváření spojek a zkratek, jsou všechny
 cesty korektní. Proto se překážkami již dále nezabýváme a pouze z~cest vytvoříme
 vyhledávací graf. Pokud byly v~datech přítomny cesty nepřipojené ke zbytku a ani 
 přidání spojek a zkratek je nepřipojilo, měl by tento graf více komponent. Tyto
