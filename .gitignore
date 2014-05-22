@@ -20,6 +20,7 @@
 *.dvi
 *.ps
 /text/cs/prace.pdf
+/text/cs/prace-book.pdf
 
 # C extensions
 *.so
@@ -27,9 +28,11 @@
 
 # Binaries
 /osm/osmconvert
+/osm/merge-srtm
 /compiled/filter
 /compiled/search
 /QOsmWalk-build-Release
+/QOsmWalk-build-Debug
 
 # Generated includes
 /compiled/include
@@ -47,25 +50,11 @@ gmon-praha.out
 # Libraries
 /scripts/imposm-parser
 /scripts/svgwrite-1.1.3
+/QMapControl
+
+# SRTM files
+/osm/heights.txt
+*.hgt
+
+# Others
 /text/jakpsat
-/GeographicLib-1.32/
-
-# Packages
-*.egg
-*.egg-info
-dist
-build
-eggs
-parts
-bin
-var
-sdist
-develop-eggs
-.installed.cfg
-lib
-lib64
-__pycache__
-
-# Installer logs
-pip-log.txt
-
