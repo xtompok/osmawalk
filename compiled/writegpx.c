@@ -16,22 +16,18 @@ void writeGpxFooter(FILE * OUT){
 void writeGpxMetadata(FILE * OUT){
 	fprintf(OUT,"\n\
 <metadata>\n\
-<name>GPS Receiver track log</name>\n\
-<desc>Tallinn (car)</desc>\n\
+<name>Osmawalk track</name>\n\
+<desc>Walk track found by Osmawalk</desc>\n\
 <author>\n\
-<name>Michael Collinson</name>\n\
-<email id=\"mikes\" domain=\"ayeltd.biz\" />\n\
-<link href=\"http://www.ayeltd.biz\"><text>AYE Ltd.</text></link>\n\
+<name>Tomas Pokorny</name>\n\
+<email id=\"xtompok\" domain=\"gmail.com\" />\n\
+<link href=\"https://github.com/xtompok/osmawalk\"><text>Osmawalk on Github</text></link>\n\
 </author>\n\
-<time>2007-10-02T09:22:06Z</time>\n\
-<bounds minlat=\"59.4367664166667\" maxlat=\"59.4440920666666\" minlon=\"24.74394385\" maxlon=\"24.7971432\"/>\n\
 </metadata>\n");
 }
 
 void writeGpxStartTrack(FILE * OUT){
 	fprintf(OUT,"<trk>\n\
-<src>Logged by Michael Collinson using EMTAC BTGPS Trine II</src>\n\
-<link href=\"http://www.ayeltd.biz\"><text>AYE Ltd.</text></link>\n\
 <trkseg>\n\
 ");
 }
