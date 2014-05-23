@@ -14,7 +14,7 @@
 #include "searchlib.h"
 #include "writegpx.h"
 
-
+// Print results of searching way
 void printResults(struct search_result_t result){
 	if (result.n_points==0){
 		printf("Route not found\n");
@@ -28,13 +28,14 @@ void printResults(struct search_result_t result){
 	}
 }
 
-
+// Print coordinates of vertices (for debug)
 void printVertices(Graph__Graph * graph){
 	for (int i=0;i<graph->n_vertices;i++){
 		printf("%f %f\n",graph->vertices[i]->lon,graph->vertices[i]->lat);
 	}
 }
 
+// Print usage
 void usage(void){
 	printf("Usage: ./search fromlat fromlon tolat tolon\n");		
 }

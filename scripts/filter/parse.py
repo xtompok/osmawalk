@@ -16,6 +16,7 @@ from imposm.parser import OSMParser
 scale = 10
 
 class classifier():
+	""" Class for parsing OSM XML and classifying elements"""
 	def __init__(self,waysConf,areasConf,bridgesConf,tunnelsConf,srtm):
 		self.proj = pyproj.Proj(proj='utm', zone=33, ellps='WGS84')
 		self.Map = Map()
@@ -26,6 +27,7 @@ class classifier():
 		self.srtm = srtm
 
 	def calcHeight(self,lon, lat):
+		""" Calculate height of given point"""
 		lon -= self.srtm.minlon
 		lat -= self.srtm.minlat
 		lon *= 1200
@@ -44,6 +46,7 @@ class classifier():
 		return int(height)
 
 	def ways_cb(self,ways):
+		""" Way callback"""
 		for osmid,tags,refs in ways:
 			pbway = pb.Way()
 			pbway.id = int(osmid)
@@ -87,6 +90,7 @@ class classifier():
 
 
 	def nodes_cb(self,nodes):
+		""" Nodes callback"""
 		for osmid,tags,coords in nodes:
 			pbnode = pb.Node()
 			pbnode.id = int(osmid)
@@ -97,6 +101,7 @@ class classifier():
 			self.Map.nodes.append(pbnode)
 	
 	def coords_cb(self,coords):
+		""" Callback for nodes with no attributes"""
 		for (osmid,lon,lat) in coords:
 			pbnode = pb.Node()
 			pbnode.id = int(osmid)
@@ -107,6 +112,7 @@ class classifier():
 			self.Map.nodes.append(pbnode)
 
 	def relations_cb(self,relations):
+		""" Relations callback"""
 		for osmid,tags,refs in relations:
 			if not ("type" in tags and tags["type"]=="multipolygon"):
 
@@ -123,23 +129,26 @@ class classifier():
 				pbpol.roles.extend([pbpol.OUTER if item[2]=="outer" else pbpol.INNER for item in refs])
 				self.Map.multipols.append(pbpol)
 class SRTM:
-    minlon = 0
-    minlat = 0
-    maxlon = 0
-    maxlat = 0
-    raster = [[]] 
+	""" Class for SRTM data """
+	minlon = 0
+	minlat = 0
+	maxlon = 0
+	maxlat = 0
+	raster = [[]] 
 
 def loadSRTM(filename):
-    with open(filename) as srtmfile:
-	srtm = SRTM()
-	(srtm.minlon, srtm.minlat, srtm.maxlon, srtm.maxlat) = [ int(x) for x in srtmfile.readline().split(" ")]
-	srtm.raster=[[int(y) for y in x.split(" ")[:-2]] for x in srtmfile]
-	return srtm
+	""" Load SRTM from file"""
+	with open(filename) as srtmfile:
+	    srtm = SRTM()
+	    (srtm.minlon, srtm.minlat, srtm.maxlon, srtm.maxlat) = [ int(x) for x in srtmfile.readline().split(" ")]
+	    srtm.raster=[[int(y) for y in x.split(" ")[:-2]] for x in srtmfile]
+	    return srtm
 
 
-    
+	
 
 def loadWaysConf(filename):
+	""" Load configuration for classifying ways from file"""
 	config = {}
 	with open(filename) as conffile:
 		config = yaml.load(conffile.read())
@@ -159,6 +168,7 @@ def loadWaysConf(filename):
 
 
 def loadBoolConf(filename):
+	""" Load generic configuration from file, which returns for OSM attributes only True of False"""
 	config = {}
 	with open(filename) as conffile:
 		config = yaml.load(conffile.read())
@@ -176,6 +186,7 @@ def loadBoolConf(filename):
 	return boolcfg
 
 def markNonPlanarNodes(amap):
+	""" Mark nodes, which are above or below ground """
 	for way in amap.ways:
 		if way.bridge:
 			for nid in way.refs:
@@ -186,6 +197,7 @@ def markNonPlanarNodes(amap):
 
 
 def parseOSMfile(filename,waysConf,areasConf,bridgesConf,tunnelsConf,srtm):	
+	""" Parse OSM file """
 	clas = classifier(waysConf,areasConf,bridgesConf,tunnelsConf,srtm)
 	p = OSMParser(concurrency=4, ways_callback=clas.ways_cb, nodes_callback=clas.nodes_cb, relations_callback=clas.relations_cb, coords_callback=clas.coords_cb)
 	p.parse(filename)

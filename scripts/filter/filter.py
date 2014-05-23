@@ -20,8 +20,8 @@ from Raster import Raster
 scale = 10
 walkTypes = [pbtypes.PAVED,pbtypes.UNPAVED,pbtypes.STEPS,pbtypes.HIGHWAY]
 
-# Next node on border	
 def onBorder(amap,neighs,nodeid,lastnodeid):
+	""" Find next node on border of an object for given last nodes"""
 	lastnode = amap.nodes[amap.nodesIdx[lastnodeid]]
 	node = amap.nodes[amap.nodesIdx[nodeid]]
 
@@ -43,6 +43,7 @@ def onBorder(amap,neighs,nodeid,lastnodeid):
 
 
 def firstBorder(amap,neighs,node):
+	""" Find first node on border"""
 	vx = 0
 	vy = -1000
 	
@@ -59,6 +60,7 @@ def firstBorder(amap,neighs,node):
 
 
 def mergeWays(amap,wayids):
+	""" Merge given ways into one"""
 	newway = pb.Way()
 	way1 = amap.ways[amap.waysIdx[wayids[0]]]
 	neighs = {}
@@ -117,6 +119,7 @@ def mergeWays(amap,wayids):
 
 
 def makeNeighGraph(amap,nodeways):
+	""" Make neighbourgh graph of buildings"""
 	G = nx.Graph()
 	G.add_nodes_from([way.id for way in amap.ways])
 	broken = {way.id : False for way in amap.ways }
@@ -145,6 +148,7 @@ def makeNeighGraph(amap,nodeways):
 	return (G,broken)
 
 def mergeComponents(amap,G,broken):
+	""" Merge blocks of buildings into one """
 	remove = []
 	for comp in nx.connected_components(G):
 		nbc = [c for c in comp if broken[c]==False]
@@ -157,6 +161,7 @@ def mergeComponents(amap,G,broken):
 	return remove
 
 def removeMerged(amap,remove):
+	""" Remove original ways, which have been merged together"""
 	removeidxs = [amap.waysIdx[r] for r in remove]
 	removeidxs.sort()
 	toidx = 0
@@ -171,6 +176,7 @@ def removeMerged(amap,remove):
 		del amap.ways[i]
 
 def getbbox(amap,wayid):
+	""" Get bounding box of a way"""
 	way = amap.ways[amap.waysIdx[wayid]]
 	nodeids = way.refs
 	minlon = 10**10
@@ -187,6 +193,7 @@ def getbbox(amap,wayid):
 
 
 def isIn(amap,node,way):
+	""" Is node in way?"""
 	if node.id in way.refs:
 		return True
 	elif way.area == False:
@@ -254,6 +261,7 @@ def isIn(amap,node,way):
 	return True
 
 def markInside(amap,raster):
+	""" Mark nodes inside barriers"""
 	incnt = 0
 	for way in amap.ways:
 		if not (way.area and way.type==pbtypes.BARRIER) :
@@ -274,6 +282,7 @@ def markInside(amap,raster):
 	print "Nodes:",len(amap.nodes),"inside",incnt
 
 def unmarkBorderNodes(amap):
+	""" Unmark nodes on the perimeter of a barrier """
 	waycnt = 0
 	for way in amap.ways:
 		if way.area or way.type==pbtypes.BARRIER or way.type == pbtypes.IGNORE:
@@ -300,6 +309,7 @@ def unmarkBorderNodes(amap):
 
 
 def mergeMultipolygon(amap,wayids):
+	""" Merge multipolygon into ways"""
 	newway = pb.Way()
 	way1 = amap.ways[amap.waysIdx[wayids[0]]]
 	neighs = {}
@@ -359,6 +369,7 @@ def mergeMultipolygon(amap,wayids):
 	return (newway,wayids)
 
 def mergeMultipolygons(amap):
+	""" Merge all multipolygons into ways"""
 	print "Multipolygons: ",len(amap.multipols)
 	winner = 0
 	woinner = 0
@@ -394,6 +405,7 @@ def mergeMultipolygons(amap):
 	print "Without Inner: ",woinner
 
 def divideEdge(slon,slat,shgt,elon,elat,ehgt,cnt):
+	""" Make interleaving point for dividing a long edge """
 	dlon = (elon-slon)/cnt;
 	dlat = (elat-slat)/cnt;
 	dhgt = (ehgt-shgt)/cnt;
@@ -401,6 +413,7 @@ def divideEdge(slon,slat,shgt,elon,elat,ehgt,cnt):
 	return lonlats
 
 def divideLongEdges(amap):
+	""" Divide too long edges"""
 	longcnt = 0
 	edgecnt = 0
 	for wayidx in range(len(amap.ways)):

@@ -6,7 +6,7 @@ from utils import int2deg, deg2int
 scale = 10
 
 class Raster:
-	
+	""" Class for representing raster over a map"""	
 	dimension = 20
 	minlon = 0
 	minlat = 0
@@ -15,6 +15,7 @@ class Raster:
 	latparts = 0
 
 	def __init__(self,amap):
+		""" Creates new raster from given map"""
 		self.minlon = 10**10
 		self.minlat = 10**10
 		maxlon = 0
@@ -28,8 +29,8 @@ class Raster:
 		dlon = maxlon-self.minlon
 		dlat = maxlat-self.minlat
 
-                londist = dlon/scale
-                latdist = dlat/scale
+		londist = dlon/scale
+		latdist = dlat/scale
 		
 		print "Lon:",self.minlon," -- ",maxlon
 		print "Lat:",self.minlat," -- ",maxlat
@@ -46,5 +47,6 @@ class Raster:
 			self.raster[(node.lon-self.minlon)/self.steplon][(node.lat-self.minlat)/self.steplat].append(node.id)
 
 	def getBox(self,lon,lat):
+		""" Get coordinates of a raster box in which given coordinates lies"""
 		return ((lon-self.minlon)/self.steplon,(lat-self.minlat)/self.steplat)
 

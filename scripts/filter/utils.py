@@ -3,6 +3,7 @@ import math
 scale = 10
 
 def angle(ux,uy,vx,vy):
+	""" Calculate angle of two vectors """
 	try:
 		cos = 1.0*(ux*vx + uy*vy)/(math.sqrt(ux*ux+uy*uy)*math.sqrt(vx*vx+vy*vy))
 	except ZeroDivisionError:
@@ -21,15 +22,19 @@ def angle(ux,uy,vx,vy):
 	return angle
 
 def int2deg(intdeg):
+	""" Convert internal coordinates to UTM """
 	return 1.0*intdeg/scale
 
 def deg2int(deg):
+	""" Convert UTM to internal coordinates"""
 	return int(deg*scale)
 
 def distance(node1,node2):
-        return math.sqrt((node1.lat-node2.lat)*(node1.lat-node2.lat)+(node1.lon-node2.lon)*(node1.lon-node2.lon))/scale;
+	""" Calculate distance of two points"""
+	return math.sqrt((node1.lat-node2.lat)*(node1.lat-node2.lat)+(node1.lon-node2.lon)*(node1.lon-node2.lon))/scale;
 
 def nodeWays(amap):
+	""" Make a list of ways, on which node lies, for every node"""
 	missingcnt=0
 	nodeways = [ [] for i in amap.nodes]
 	for way in amap.ways:
@@ -47,6 +52,7 @@ def nodeWays(amap):
 	return nodeways	
 
 def deleteAloneNodes(amap,nodeways):
+	""" Delete from map all nodes, which does not belong to any way"""
 	toidx = 0
 	for fromidx in range(len(amap.nodes)):
 		if len(nodeways[fromidx])==0:
