@@ -30,6 +30,7 @@ int scale = 10;
 #define ASORT_KEY_TYPE int64_t
 #include <ucw/sorter/array-simple.h>
 
+// Refresh matching node id -> node index
 void nodesIdx_refresh(int n_nodes, Premap__Node ** nodes){
 	nodesIdx_cleanup();
 	nodesIdx_init();
@@ -40,6 +41,7 @@ void nodesIdx_refresh(int n_nodes, Premap__Node ** nodes){
 	}
 }
 
+// Refresh matching way id -> way index
 void waysIdx_refresh(int n_ways, Premap__Way ** ways){
 	waysIdx_cleanup();
 	waysIdx_init();
@@ -50,6 +52,7 @@ void waysIdx_refresh(int n_ways, Premap__Way ** ways){
 	}
 }
 
+// Refresh hash table node id -> array of ways on which lies
 void nodeWays_refresh(struct map_t map){
 	nodeWays_cleanup();
 	nodeWays_init();
@@ -78,6 +81,7 @@ void nodeWays_refresh(struct map_t map){
 
 }
 
+// Make map struct from Protocol Buffer map representation
 struct map_t  initMap(Premap__Map *pbmap){
 	struct map_t map;
 	map.n_nodes = pbmap->n_nodes;
@@ -103,6 +107,7 @@ struct map_t  initMap(Premap__Map *pbmap){
 	return map;
 }
 
+// Convert map struct to Protocol buffer representation
 void mapToPBF(struct map_t map, Premap__Map * pbmap){
 	pbmap->n_nodes = map.n_nodes;
 	pbmap->nodes = map.nodes;
@@ -115,7 +120,7 @@ void mapToPBF(struct map_t map, Premap__Map * pbmap){
 }
 
 
-
+// Calculate latitude for specified longitude for line in mixed numbers
 struct mixed_num_t  calcMixLatForLon(struct line_t line,SWEEP_TYPE lon){
 	SWEEP_TYPE minlat = MIN(line.startlat,line.endlat);
 	SWEEP_TYPE maxlat = MAX(line.startlat,line.endlat);	
@@ -131,7 +136,7 @@ struct mixed_num_t  calcMixLatForLon(struct line_t line,SWEEP_TYPE lon){
 }
 
 	
-
+// Calculate collision of two lines in mixed numbers
 struct col_t calcMixCollision(struct line_t line1, struct line_t line2){
 	struct col_t result;
 	result.isCol=1;
@@ -223,7 +228,7 @@ struct col_t calcMixCollision(struct line_t line1, struct line_t line2){
 	return result;
 }
 
-
+// Add line between two points to array of candidates
 void addCandidate(int *** candidates,int nidx1,int nidx2){
 	int ** ptr;
 	ptr = GARY_PUSH(*candidates);
@@ -232,10 +237,12 @@ void addCandidate(int *** candidates,int nidx1,int nidx2){
 	(* ptr)[1] = nidx2;
 }
 
+
 struct graph_t {
 	int ** barGraph;
 	int ** wayGraph;
 };
+// Prepare graph of barriers and graph of ways for sweeping
 struct graph_t makeGraph(struct map_t map)
 {
 	int ** barGraph;
@@ -279,6 +286,7 @@ struct graph_t makeGraph(struct map_t map)
 	return graph;
 }
 
+// Have two nodes (by id) any common way?
 int64_t onSameWay(int64_t nid1,int64_t nid2){
 	int64_t * ways1;
 	int64_t * ways2;
@@ -302,6 +310,7 @@ int64_t onSameWay(int64_t nid1,int64_t nid2){
 	}
 	return 0;
 }
+// Make graph of barriers for walk areas
 int ** makeAreaBarGraph(struct map_t map,struct walk_area_t area){
 	Premap__Way * way;
 	int ** barGraph;
@@ -327,6 +336,7 @@ int ** makeAreaBarGraph(struct map_t map,struct walk_area_t area){
 }
 
 
+// Make direct candidates for walk areas
 int ** makeAreaCandidates(struct map_t map, struct walk_area_t area,  int maxdist, int deg){
 
 	int ** candidates;
@@ -398,6 +408,7 @@ int ** makeAreaCandidates(struct map_t map, struct walk_area_t area,  int maxdis
 		
 }
 
+// Make direct candidates for map
 int ** makeDirectCandidates(struct map_t map, struct raster_t raster, int ** wayGraph, int maxdist, int deg){
 
 	int ** candidates;
@@ -512,6 +523,7 @@ unsigned char anglesign;
 
 struct line_t * lines;
 
+// Comparator for a tree
 int tree_cmp(int idx1, int idx2){
 
 	struct line_t line1;
@@ -566,6 +578,7 @@ int tree_cmp(int idx1, int idx2){
 #include <ucw/redblack.h>
 
 
+// Make intersection event of two lines
 struct int_event_t makeIntEvent(struct line_t * lines,int l1Idx, int l2Idx, struct mixed_num_t lon){
 	struct int_event_t intevt;
 	struct col_t col;
@@ -624,6 +637,7 @@ struct int_event_t makeIntEvent(struct line_t * lines,int l1Idx, int l2Idx, stru
 
 
 }
+// Compare two start or end events
 int eventCmp(struct event_t evt1,struct event_t evt2){
 	if (evt1.lon<evt2.lon)
 		return 1;
@@ -647,7 +661,7 @@ int eventCmp(struct event_t evt1,struct event_t evt2){
 		return 0;
 	return 0;
 }
-
+// Compare two intersection events
 int intEventCmp(struct int_event_t evt1,struct int_event_t evt2){
 	if (evt1.lon.base<evt2.lon.base)
 		return 1;
@@ -683,7 +697,7 @@ int intEventCmp(struct int_event_t evt1,struct int_event_t evt2){
 		return 0;
 	return 0;
 }
-
+// Compare intersection and start/end event
 int int_seEventCmp(struct int_event_t evt1,struct event_t evt2){
 //	printf("lon1: %lld,lon2:%lld\n",evt1.lon.base,evt2.lon);
 	if (evt1.lon.base<evt2.lon)
@@ -707,6 +721,7 @@ int int_seEventCmp(struct int_event_t evt1,struct event_t evt2){
 	return 0;
 }
 
+// Sweep the plane!
 struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGraph){
 	int n_cand;
 	n_cand = GARY_SIZE(candidates);
@@ -1037,9 +1052,9 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 			else{ 
 				printf("OK:");
 			}
-			mixedPrint(memlat);
+		//	mixedPrint(memlat);
 			printf(" vs ");
-			mixedPrint(lat);
+		//	mixedPrint(lat);
 			printf(" %d/%d\n",l.endlat-l.startlat,l.endlon-l.startlon);
 			memlat = lat;
 		}
@@ -1050,7 +1065,7 @@ struct line_t * findDirectWays(struct map_t map, int ** candidates, int ** barGr
 	return lines;
 } 
 
-
+// Add found direct ways to map
 struct map_t addDirectToMap(struct line_t * lines, struct map_t map){
 	for (int i=0;i<GARY_SIZE(lines);i++){
 		//if (lines[i].broken){
@@ -1084,7 +1099,7 @@ struct map_t addDirectToMap(struct line_t * lines, struct map_t map){
 	return map;
 }
 
-
+// Add candidates to map (for debugging)
 struct map_t addCandidatesToMap(int ** candidates, struct map_t map){
 	for (int i=0;i<GARY_SIZE(candidates);i++){
 		Premap__Way * way;
@@ -1106,12 +1121,14 @@ struct map_t addCandidatesToMap(int ** candidates, struct map_t map){
 	return map;
 }
 
+// Print types of ways (for debugging)
 void checkWayTypes(Premap__Map * pbmap){
 	for (int i=0;i<pbmap->n_ways;i++){
 		printf("Way: %d, type: %d\n",i,pbmap->ways[i]->type);
 	}	
 
 }
+// Is node in polygon specified by way?
 uint8_t nodeInPolygon(struct map_t map, Premap__Node * node, Premap__Way * way){
 	if (way->refs[0]!=way->refs[way->n_refs-1]){
 //		printf("Way is not closed!\n");
@@ -1145,13 +1162,12 @@ uint8_t nodeInPolygon(struct map_t map, Premap__Node * node, Premap__Way * way){
 			crosses++;
 			continue;
 		}
-		// FIXME special cases
 		crosses++;
 	}
 	return crosses%2;
 }
 
-
+// Find walk areas in map and prepare structs representing them
 struct walk_area_t * findWalkAreas(struct map_t map, struct raster_t raster){
 	struct walk_area_t * walkareas;	
 	GARY_INIT(walkareas,0);
@@ -1262,6 +1278,7 @@ struct walk_area_t * findWalkAreas(struct map_t map, struct raster_t raster){
 	return walkareas;
 } 
 
+// Remove barriers from map
 struct map_t removeBarriers(struct map_t map){
 	Premap__Way ** newways;
 	GARY_INIT(newways,0);
@@ -1298,6 +1315,7 @@ struct map_t removeBarriers(struct map_t map){
 	return map;
 }
 
+// Load map from file
 Premap__Map * loadMap(char * filename){
 	FILE * IN;
 	IN = fopen(filename,"r");
@@ -1324,7 +1342,8 @@ Premap__Map * loadMap(char * filename){
 	pbmap = premap__map__unpack(NULL,len,buf);
 	return pbmap;
 }
-	
+
+// Save map to file
 int saveMap(Premap__Map * pbmap,char * filename){
 	int64_t len;
 	uint8_t * buf;
@@ -1346,7 +1365,7 @@ struct vertexedges_t{
 	int n_edges;
 	int * edges;
 };
-
+// Make for each vertex array of edges on which vertex lies
 struct vertexedges_t * makeVertexEdges(Graph__Graph * graph){
 	struct vertexedges_t * vertexEdges;
 	vertexEdges = malloc(sizeof(struct vertexedges_t)*graph->n_vertices);
@@ -1376,7 +1395,7 @@ struct vertexedges_t * makeVertexEdges(Graph__Graph * graph){
 	return vertexEdges;
 }
 
-
+// Select largest component
 void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges){
 	uint8_t * seen;
 	GARY_INIT_ZERO(seen,graph->n_vertices);
@@ -1459,7 +1478,7 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 	graph->edges = newEdges;
 
 }
-
+// Save search graph to file
 int saveSearchGraph(Graph__Graph * graph,char * filename){
 	int64_t len;
 	uint8_t * buf;
@@ -1477,6 +1496,7 @@ int saveSearchGraph(Graph__Graph * graph,char * filename){
 	return 0;
 }
 
+// Make search graph from map
 Graph__Graph * makeSearchGraph(struct map_t map){
 	Graph__Graph * graph;
 	graph = malloc(sizeof(Graph__Graph));
@@ -1543,6 +1563,7 @@ Graph__Graph * makeSearchGraph(struct map_t map){
 	
 }
 
+// Free growing array of two element arrays
 void freeNX2Array(int ** array){
 	for(int i=0;i<GARY_SIZE(array);i++)
 		free(array[i]);
