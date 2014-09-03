@@ -10,8 +10,8 @@ QT       += core gui
 #CONFIG   += console
 #CONFIG   -= app_bundle
 
-INCLUDEPATH += ../../QMapControl/src
-LIBS += -L../../QMapControl/Samples/bin -lqmapcontrol
+INCLUDEPATH += ../../QMapControl/QMapControl/src ../../../libucw
+LIBS += -L../../QMapControl/QMapControl/Samples/bin -lqmapcontrol
 
 BASE_DIR = ../../
 
