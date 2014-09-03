@@ -148,11 +148,11 @@ struct config_t parseConfigFile(char * filename){
 					} else if (strcmp((char *)key->data.scalar.value,"downscale")==0){
 						conf.downscale = atof((char *)value->data.scalar.value);	
 					} else if (strcmp((char *)key->data.scalar.value,"maxslope")==0){
-						conf.maxslope = atof((char *)value->data.scalar.value);	
+						//conf.maxslope = atof((char *)value->data.scalar.value);	
 					} else if (strcmp((char *)key->data.scalar.value,"upslopescale")==0){
-						conf.upslopescale= atof((char *)value->data.scalar.value);	
+						//conf.upslopescale= atof((char *)value->data.scalar.value);	
 					} else if (strcmp((char *)key->data.scalar.value,"downslopescale")==0){
-						conf.downslopescale = atof((char *)value->data.scalar.value);	
+						//conf.downslopescale = atof((char *)value->data.scalar.value);	
 					} 
 				}
 				
