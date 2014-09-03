@@ -6,7 +6,7 @@ speeds:
         PAVED: 6
         UNPAVED: 4
         STEPS: 2.5
-        HIGHWAY: 6
+        HIGHWAY: 4
         DIRECT: 4
 
 ratios:
@@ -19,5 +19,5 @@ ratios:
         HIGHWAY: 1.2
         DIRECT: 0.8
 heights:
-        upscale: 10
-        downscale: 10
+        upscale: 0
+        downscale: 0

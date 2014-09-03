@@ -1,0 +1,56 @@
+\chapter*{Příloha A}
+\addcontentsline{toc}{chapter}{Příloha A}
+
+V této příloze popíšeme, jak připravit data pro vyhledávání a používat
+vyhledávač. Všechny programy napsané přípravu dat jsou zveřejněny pod licencí
+MIT. Textová vyhledávací aplikace je zveřejněna také pod licencí MIT, grafická
+nadstavba QOsmWalk je licencována pod LGPL, protože jde o odvozené dílo od
+projektu QMapControl.
+
+Programy jsou určeny pro operační systém Linux, testovány
+byly v distribucích Gentoo a Debian Wheezy. Program pro přípravu dat potřebuje 
+alespoň 7\,GB RAM, vyhledávací aplikaci stačí 512\,MB.
+
+\section*{Před prvním spuštěním}
+Před prvním spuštěním je potřeba nainstalovat všechny potřebné knihovny a
+zkompilovat námi napsané programy. Knihovny nainstalujeme do systému a následně
+vstoupíme do adresáře \verb|osm| a zde zadáme \verb|make|. Poté se přesuneme do
+složky \verb|compiled| a zde také zadáme \verb|make|. 
+
+Pro zkompilování grafické nadstavby nejprve stáhneme aktuální verzi QMapControl
+a složku se souborem \verb|QMapControl.pro| vložíme do kořenové složky. Poté 
+otevřeme projekt QOsmWalk v QtDesigneru a sestavíme ho. 
+
+Dále je potřeba nastavit oblast pro generování map a nachystat výšková data. V
+souboru \verb|osm/prepare.sh| nastavíme rozsahy zeměpisných šířek a délek a do
+složky \verb|osm| nakopírujeme SRTM soubory \verb|.hgt|, které pokrývají
+nastavenou oblast.
+
+\section*{Příprava dat}
+Při každé aktualizaci dat z OSM je potřeba vykonat následující kroky. Vstoupíme
+do adresáře \verb|osm| a spustíme skript \verb|prepare.sh|. Tento skript stáhne
+ aktuální mapy, vyřízne z nich používanou oblast a připraví pro ni výšková data.
+
+Následně je potřeba spustit ve složce \verb|scripts/filter/| skripty
+\verb|parse.py|, který vytvoří formát pro přípravu dat a \verb|filter.py|, který
+provede první část přípravy dat. Po skončení tohoto skriptu se přesuneme do
+složky \verb|compiled| a spustíme program \verb|filter|, který dokončí přípravu
+dat a vytvoří soubor \verb|data/praha-graph.pbf| s vytvořeným vyhledávacím
+grafem.
+
+\section*{Hledání tras}
+Výsledky vyhledávacích programů jsou ukládány ve formátu GPX, což je formát pro
+popis tras a bodů zájmu podporovaný většinou mapového softwaru. 
+
+Textový vyhledávač je velmi jednoduchý, jako parametry mu předáme souřadnice
+výchozího a cílového bodu a program vypíše trasu s informacemi na standardní
+výstup a vytvorří soubor \verb|track.gpx| s nalezenou trasou.
+
+Grafický vyhledávač po spuštění umožňuje pohyb v mapě a tlačítky \verb|+| a
+\verb|-| mapu
+přibližovat a oddalovat. Prvním kliknutím do mapy určíme výchozí bod a druhým
+kliknutím určíme cílový bod. Poté je nalezena trasa a zobrazena v mapě. Dalším
+kliknutím do mapy určíme nový výchozí bod a původní nalezená trasa je smazána.
+Pokud je zobrazena nalezená trasa, je možné kliknutím na tlačítko GPX uložit
+nalezenou trasu jako GPX.
+
