@@ -20,7 +20,7 @@ int main(int argc, char ** argv){
 	maxlon = floor(atof(argv[4]));
 	maxlat = floor(atof(argv[3]));
 
-	char name[11];
+	char name[12];
 	FILE * hgt;
 
 	uint16_t * map;
@@ -41,6 +41,7 @@ int main(int argc, char ** argv){
 				printf("File %s not found, exitting, no output produced\n",name);
 				return 1;
 			}
+			printf("Opened %s\n",name);
 			fread(sq,1201*1201,2,hgt);
 			for (int llon = 0; llon < 1200; llon++){
 				for (int llat = 0; llat < 1200; llat++){
