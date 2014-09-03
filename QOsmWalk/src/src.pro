@@ -21,7 +21,7 @@ MOC_DIR = tmp
 OBJECTS_DIR = obj
 DESTDIR = ../bin
 TARGET = QOsmWalk
-INCLUDEPATH += $${BASE_DIR}/compiled/include
+INCLUDEPATH += $${BASE_DIR}/compiled/include /aux/jethro/libucw/
 
 QMAKE_CFLAGS_DEBUG += -std=c99 -O3
 QMAKE_CFLAGS_RELEASE += -std=c99 -O3
