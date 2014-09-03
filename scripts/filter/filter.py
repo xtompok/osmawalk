@@ -477,7 +477,7 @@ print "Multipolygons took "+str(end-start)
 start = time.time()
 
 (G,broken) = makeNeighGraph(amap,nodeways)
-print "Components",len(nx.connected_components(G))
+#print "Components",len(nx.connected_components(G))
 
 end = time.time()
 print "Neighs took "+str(end-start)
@@ -520,6 +520,9 @@ end = time.time()
 print "Long edges took "+str(end-start)
 start = time.time()
 
+del raster
+del nodeways
+del G
 
 print len(amap.nodes)," nodes, ",len(amap.ways)," ways"
 outfile = open(datadir+"praha-union.pbf","w")
