@@ -51,15 +51,22 @@ class classifier():
 			pbway = pb.Way()
 			pbway.id = int(osmid)
 			pbway.refs.extend(map(int,refs))
+                        priority = -1
 			if "boundary" in tags:
 				continue
 			for key in tags.keys():
 				if key in waysConf:
 					if waysConf[key].keys()==["*"] and pbway.type == pbtypes.WAY:
-						pbway.type = waysConf[key]["*"]
+                                                (atype,apriority)=waysConf[key]["*"]
+                                                if priority<apriority:
+                                                    pbway.type = atype
+                                                    priority = apriority
 					val = tags[key]
 					if val in waysConf[key]:
-						pbway.type = waysConf[key][val]
+                                                (atype,apriority)=waysConf[key][val]
+                                                if priority<apriority:
+                                                    pbway.type = atype
+                                                    priority = apriority
 
 				if key in areasConf:
 					if areasConf[key].keys()==["*"]:
@@ -86,6 +93,8 @@ class classifier():
 				pbway.render = False
 			else:
 				pbway.render = True
+                        if pbway.type == pbtypes.IGNORE or pbway.type == pbtypes.WAY:
+                            continue
 			self.Map.ways.append(pbway)
 
 
@@ -117,13 +126,20 @@ class classifier():
 			if not ("type" in tags and tags["type"]=="multipolygon"):
 
 				pbpol = pb.Multipolygon()
+                                priority=-1
 				for key in tags.keys():
 					if key in waysConf:
 						if waysConf[key].keys()==["*"]:
-							pbpol.type = waysConf[key]["*"]
+                                                        (atype,apriority)=waysConf[key]["*"]
+							if priority<apriority:
+                                                            pbpol.type = atype
+                                                            priority = apriority
 						val = tags[key]
 						if val in waysConf[key]:
-							pbpol.type = waysConf[key][val]
+                                                        (atype,apriority)=waysConf[key][val]
+							if priority<apriority:
+                                                            pbpol.type = atype
+                                                            priority = apriority
 				pbpol.id = int(osmid)
 				pbpol.refs.extend([int(item[0]) for item in refs])
 				pbpol.roles.extend([pbpol.OUTER if item[2]=="outer" else pbpol.INNER for item in refs])
@@ -159,11 +175,12 @@ def loadWaysConf(filename):
 	ways={}
 	for cat in config.keys():
 		catenum = str2pb[cat]
-		for key in config[cat]:
-			if key not in ways:
-				ways[key] = {}
-			for value in config[cat][key]:
-				ways[key][value]=catenum
+                for priority in config[cat]:
+                    for key in config[cat][priority]:
+                            if key not in ways:
+                                    ways[key] = {}
+                            for value in config[cat][priority][key]:
+                                    ways[key][value]=(catenum,priority)
 	return ways
 
 
