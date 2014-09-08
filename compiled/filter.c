@@ -1594,7 +1594,7 @@ int main (int argc, char ** argv){
 	freeNX2Array(graph.barGraph);
 	freeNX2Array(candidates);
 	map = addDirectToMap(lines,map);
-	struct walk_area_t * walkareas;
+	/*struct walk_area_t * walkareas;
 	walkareas = findWalkAreas(map,raster);
 	for (int i=0;i<GARY_SIZE(walkareas);i++){
 		candidates = makeAreaCandidates(map,walkareas[i],300,2);
@@ -1604,11 +1604,11 @@ int main (int argc, char ** argv){
 		map = addDirectToMap(lines,map);
 		freeNX2Array(barGraph);
 		freeNX2Array(candidates);
-	}
+	}*/
 	map = removeBarriers(map);
 	nodesIdx_refresh(map.n_nodes,map.nodes);
 	waysIdx_refresh(map.n_ways,map.ways);
-	printf("Found %d walk areas\n",GARY_SIZE(walkareas));
+	//printf("Found %d walk areas\n",GARY_SIZE(walkareas));
 	mapToPBF(map,pbmap);
 	//checkWayTypes(pbmap);
 	if (saveMap(pbmap,"../data/praha-union-c.pbf")!=0)

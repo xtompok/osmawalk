@@ -84,7 +84,7 @@ struct config_t parseConfigFile(char * filename){
 			yaml_node_t * key;
 			key = yaml_document_get_node(&document,section->key);
 			if (strcmp((char *)key->data.scalar.value,"speeds")==0){
-				printf("Parsing speeds\n");
+				//printf("Parsing speeds\n");
 				yaml_node_t * speedsMap;
 				speedsMap = yaml_document_get_node(&document,section->value);
 				if (speedsMap->type != YAML_MAPPING_NODE){
@@ -107,7 +107,7 @@ struct config_t parseConfigFile(char * filename){
 				}
 				
 			} else if (strcmp((char *)key->data.scalar.value,"ratios")==0){
-				printf("Parsing ratios\n");
+				//printf("Parsing ratios\n");
 				yaml_node_t * ratiosMap;
 				ratiosMap = yaml_document_get_node(&document,section->value);
 				if (ratiosMap->type != YAML_MAPPING_NODE){
@@ -129,7 +129,7 @@ struct config_t parseConfigFile(char * filename){
 					}
 				}
 			} else if (strcmp((char *)key->data.scalar.value,"heights")==0){
-				printf("Parsing heights\n");
+				//printf("Parsing heights\n");
 				yaml_node_t * heightsMap;
 				heightsMap = yaml_document_get_node(&document,section->value);
 				if (heightsMap->type != YAML_MAPPING_NODE){
@@ -204,7 +204,7 @@ Graph__Graph * loadMap(char * filename){
 	fseek(IN,0,SEEK_SET);
 	uint8_t * buf;
 	buf = (uint8_t *)malloc(len);
-	printf("Allocated %d MB\n",len>>20);
+	//printf("Allocated %d MB\n",len>>20);
 	size_t read;
 	read = fread(buf,1,len,IN);
 	if (read!=len){
@@ -215,6 +215,7 @@ Graph__Graph * loadMap(char * filename){
 	
 	Graph__Graph * graph;
 	graph = graph__graph__unpack(NULL,len,buf);
+	free(buf);
 
 	return graph;
 }
@@ -287,8 +288,8 @@ int findNearestVertex(Graph__Graph * graph, double lon, double lat){
 			minIdx = i;
 		}
 	}
-	printf("Min dist: %f\n",sqrt(minDist));
-	printf("Point %d: %f, %f\n",minIdx,graph->vertices[minIdx]->lon,graph->vertices[minIdx]->lat);
+	//printf("Min dist: %f\n",sqrt(minDist));
+	//printf("Point %d: %f, %f\n",minIdx,graph->vertices[minIdx]->lon,graph->vertices[minIdx]->lat);
 	return minIdx;
 }
 
@@ -370,6 +371,8 @@ void findWay(struct search_data_t data,struct dijnode_t * dijArray,int fromIdx, 
 		if (vIdx == toIdx)
 			break;
 	}
+	free(heap);
+	free(heapIndex);
 }
 
 struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * dijArray, int fromIdx, int toIdx, int * n_points){
@@ -384,7 +387,7 @@ struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * d
 
 	int count;
 	count = 1;
-	printf("Dist: %f\n",dijArray[fromIdx].dist);
+	//printf("Dist: %f\n",dijArray[fromIdx].dist);
 	int idx;
 	idx = fromIdx;
 	while (idx != toIdx){
@@ -392,7 +395,7 @@ struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * d
 		count++;
 	}
 
-	printf("Cnt: %d\n",count);
+	//printf("Cnt: %d\n",count);
 	*n_points = count;
 	
 	struct point_t * results;
@@ -468,7 +471,7 @@ struct search_result_t findPath(struct search_data_t data,double fromLat, double
 	int toIdx;
 	toIdx = findNearestVertex(data.graph,toLon,toLat);
 
-	printf("Searching from %lld(%f,%f,%d) to %lld(%f,%f,%d)\n",data.graph->vertices[fromIdx]->osmid,
+	/*printf("Searching from %lld(%f,%f,%d) to %lld(%f,%f,%d)\n",data.graph->vertices[fromIdx]->osmid,
 			data.graph->vertices[fromIdx]->lat,
 			data.graph->vertices[fromIdx]->lon,
 			data.graph->vertices[fromIdx]->height,
@@ -477,7 +480,7 @@ struct search_result_t findPath(struct search_data_t data,double fromLat, double
 			data.graph->vertices[toIdx]->lon,
 			data.graph->vertices[toIdx]->height
 			);
-
+*/
 	struct dijnode_t * dijArray;
 	dijArray = prepareDijkstra(data.graph);
 
@@ -498,6 +501,7 @@ struct search_result_t findPath(struct search_data_t data,double fromLat, double
 		idx = dijArray[idx].fromIdx;
 	}
 	result.time = dijArray[fromIdx].dist;
+	free(dijArray);
 	return result;	
 }
 

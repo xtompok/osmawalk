@@ -41,17 +41,35 @@ void usage(void){
 }
 
 int main (int argc, char ** argv){
+	printf("Argc: %d\n",argc);
 	if (argc<5){
 		usage();
 		return 1;
 	}
 	struct search_data_t data;
-	data = prepareData("../config/speeds.yaml","../data/praha-graph.pbf"); 
+	double flon;
+	double flat;
+	double tlon;
+	double tlat;
+
+	if (argc==7){
+		data = prepareData(argv[1],argv[2]);
+		flat = atof(argv[3]);
+		flon = atof(argv[4]);
+		tlat = atof(argv[5]);
+		tlon = atof(argv[6]);
+	}else {
+		data = prepareData("../config/speeds.yaml","../data/praha-graph.pbf"); 
+		flat = atof(argv[1]);
+		flon = atof(argv[2]);
+		tlat = atof(argv[3]);
+		tlon = atof(argv[4]);
+	}
 
 	printf("Graph has %d vertices and %d edges\n",data.graph->n_vertices,data.graph->n_edges);
 
 	struct search_result_t result;
-	result = findPath(data,atof(argv[1]),atof(argv[2]),atof(argv[3]),atof(argv[4]));
+	result = findPath(data,flat,flon,tlat,tlon);
 	printResults(result);
 	writeGpxFile(result,"track.gpx");
 
