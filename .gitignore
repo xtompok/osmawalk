@@ -1,10 +1,13 @@
-*.py[cod]
+# Swap files
 *.sw[a-z]
-*.pbf
+*.bak
+
+# OSM files
 *.osm
 
 # Generated PBF files
 *_pb2.py
+*.pbf
 
 # Log files
 *.log
@@ -22,9 +25,10 @@
 /text/cs/prace.pdf
 /text/cs/prace-book.pdf
 
-# C extensions
+# Libraries
 *.so
 *.o
+*.py[cod]
 
 # Binaries
 /osm/osmconvert
@@ -33,9 +37,12 @@
 /compiled/search
 /QOsmWalk-build-Release
 /QOsmWalk-build-Debug
+/build-QOsmWalk*
+/transfer-finder/search-transfer
 
 # Generated includes
 /compiled/include
+/transfer-finder/include
 
 # Generated Qt files
 *.pro.user
@@ -46,11 +53,14 @@ gmon-praha.out
 
 # Programs output
 /compiled/track.gpx
+/transfer-finder/*.gpx
+/transfer-finder/*json
 
 # Libraries
 /scripts/imposm-parser
 /scripts/svgwrite-1.1.3
 /QMapControl
+/
 
 # SRTM files
 /osm/heights.txt
@@ -58,3 +68,4 @@ gmon-praha.out
 
 # Others
 /text/jakpsat
+/compiled/tree.[ch]
