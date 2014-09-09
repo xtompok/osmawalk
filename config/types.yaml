@@ -7,6 +7,7 @@ IGNORE:
                 - subway
             landuse:
                 - residential
+                - industrial
         1:
             access:
                 - no
@@ -92,9 +93,6 @@ BARRIER:
 #                - forest
 PAVED:
         0:
-            landuse:
-                - residential
-                - industrial
             amenity:
                 - parking
                 - fuel

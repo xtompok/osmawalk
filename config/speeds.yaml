@@ -1,13 +1,13 @@
 speeds:
-        WAY: 6
-        PARK: 4
+        WAY: 4
+        PARK: 3
         GREEN: 3
-        FOREST: 3
-        PAVED: 6
-        UNPAVED: 4
-        STEPS: 2.5
+        FOREST: 2
+        PAVED: 4
+        UNPAVED: 3
+        STEPS: 2
         HIGHWAY: 4
-        DIRECT: 4
+        DIRECT: 3
 
 ratios:
         PARK: 1
