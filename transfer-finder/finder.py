@@ -28,6 +28,7 @@ for k,v in transfers.iteritems():
     search.stdin.write(flat+" "+flon+" "+tlat+" "+tlon+"\n")
     search.stdin.flush()
     line = search.stdout.readline()
+    print line
     (dist,time)=map(float,line.split(" "))
     transfers[k]["owlength"]=dist
     transfers[k]["owtime"]=time
@@ -35,6 +36,12 @@ for k,v in transfers.iteritems():
     while line != "\n": 
         outgpx.fd.write(line)
         line = search.stdout.readline()
+    if dist==0:
+        outgpx.addWpt("FAIL_"+str(i)+"_Z",flat,flon,0)
+        outgpx.addWpt("FAIL_"+str(i)+"_K",tlat,tlon,0)
+    else:
+        outgpx.addWpt("OK_"+str(i)+"_Z",flat,flon,0)
+        outgpx.addWpt("OK_"+str(i)+"_K",tlat,tlon,0)
 
 search.kill()
 outgpx.close()
