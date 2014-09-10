@@ -54,13 +54,9 @@ int main (int argc, char ** argv){
 
 		struct search_result_t result;
 		result = findPath(data,flat,flon,tlat,tlon);
-		fprintf(stderr,"Found\n");
-		fflush(stderr);	
 		printResults(result);
 		printf("\n");
 		fflush(stdout);
-		fprintf(stderr,"Printed\n");
-		fflush(stderr);	
 	}
 
 	return 0;

@@ -32,6 +32,7 @@ for k,v in transfers.iteritems():
     (dist,time)=map(float,line.split(" "))
     transfers[k]["owlength"]=dist
     transfers[k]["owtime"]=time
+    transfers[k]["owid"]=i
     line = search.stdout.readline()
     while line != "\n": 
         outgpx.fd.write(line)
