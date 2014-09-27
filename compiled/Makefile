@@ -3,32 +3,45 @@ PG=
 CFLAGS= -c $(PG)  -ggdb3 -Wall -Wno-format -std=gnu99 -O2 -march=native -I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw -I/aux/jethro/libucw
 PFLAGS= -E -Wall -std=gnu99 -O3 -march=native -I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw
 LDFLAGS= $(PG) -lprotobuf-c -lucw-6.0 -lproj -lyaml -lm -L/mnt/sda1/home/jethro/Programy/libucw/obj/ucw -L/aux/jethro/libucw/obj/ucw 
-SOURCES1=raster.c hashes.c utils.c mixnum.c include/premap.pb-c.c include/types.pb-c.c include/graph.pb-c.c
-SOURCES2= writegpx.c searchlib.c include/types.pb-c.c include/graph.pb-c.c
-OBJECTS1=$(SOURCES1:.c=.o)
-OBJECTS2=$(SOURCES2:.c=.o)
-EXECUTABLE1=filter
-EXECUTABLE2=search
 
-all: protobuf $(SOURCES) $(EXECUTABLE1) $(EXECUTABLE2)
+FILTER_SRC=raster.c hashes.c utils.c mixnum.c include/premap.pb-c.c include/types.pb-c.c include/graph.pb-c.c
+FILTER_OBJ=$(FILTER_SRC:.c=.o)
+FILTER_EXE=filter
+
+LIBSEARCH_SRC=writegpx.c include/types.pb-c.c include/graph.pb-c.c
+LIBSEARCH_OBJ=$(LIBSEARCH_SRC:.c=.o)
+LIBSEARCH_LIB=libsearch.so
+
+SEARCH_SRC=writegpx.c include/graph.pb-c.c
+SEARCH_OBJ=$(SEARCH_SRC:.c=.o)
+SEARCH_LDFLAGS=-lsearch -L.
+SEARCH_EXE=search
+
+
+all: protobuf $(SOURCES) $(FILTER_EXE) $(LIBSEARCH_LIB) $(SEARCH_EXE)
 
 	
-$(EXECUTABLE1): $(OBJECTS1) $@.c 
+$(FILTER_EXE): $(FILTER_OBJ) $@.c 
 	$(CC) $(CFLAGS) $@.c -o $@.o
-	$(CC) $(LDFLAGS) $(OBJECTS1) $@.o -o $@
+	$(CC) $(LDFLAGS) $(FILTER_OBJ) $@.o -o $@
 
-$(EXECUTABLE2): $(OBJECTS2) $@.c
+$(LIBSEARCH_LIB): $(LIBSEARCH_OBJ) searchlib.c
+	$(CC) $(CFLAGS) -fpic searchlib.c -o $@.o
+	$(CC) $(LDFLAGS) -shared  $(LIBSEARCH_OBJ) $@.o -o $@
+
+$(SEARCH_EXE): $(LIBSEARCH_LIB) $(SEARCH_OBJ) $@.c
 	$(CC) $(CFLAGS) $@.c -o $@.o
-	$(CC) $(LDFLAGS) $(OBJECTS2) $@.o -o $@
+	$(CC) $(LDFLAGS) $(SEARCH_LDFLAGS) $(SEARCH_OBJ) $@.o -o $@
+	
 
 .c.o:
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) -fpic $< -o $@
 
 preprocess: filter.c
 	$(CC) $(PFLAGS) $< -o $@
 
 clean:
-	rm *.o include/*.o
+	rm *.o *.so include/*.o
 
 protobuf:
 	mkdir -p include
