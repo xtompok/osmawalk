@@ -1,6 +1,7 @@
 CC=gcc
 PG=
-CFLAGS= -c $(PG)  -ggdb3 -Wall -Wno-format -std=gnu99 -O2 -march=native -I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw -I/aux/jethro/libucw
+INC=-I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw -I/aux/jethro/libucw -I../ext-lib/libosm-0.3
+CFLAGS= -c $(PG)  -ggdb3 -Wall -Wno-format -std=gnu99 -O2 -march=native $(INC)
 PFLAGS= -E -Wall -std=gnu99 -O3 -march=native -I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw
 LDFLAGS= $(PG) -lprotobuf-c -lucw-6.0 -lproj -lyaml -lm -L/mnt/sda1/home/jethro/Programy/libucw/obj/ucw -L/aux/jethro/libucw/obj/ucw 
 
@@ -17,6 +18,10 @@ SEARCH_OBJ=$(SEARCH_SRC:.c=.o)
 SEARCH_LDFLAGS=-lsearch -L.
 SEARCH_EXE=search
 
+PARSE_SRC=include/types.pb-c.c
+PARSE_OBJ=$(PARSE_SRC:.c=.o)
+PARSE_LDFLAGS=-losm -L../ext-lib/libosm-0.3
+PARSE_EXE=parse
 
 all: protobuf $(SOURCES) $(FILTER_EXE) $(LIBSEARCH_LIB) $(SEARCH_EXE)
 
@@ -33,6 +38,9 @@ $(SEARCH_EXE): $(LIBSEARCH_LIB) $(SEARCH_OBJ) $@.c
 	$(CC) $(CFLAGS) $@.c -o $@.o
 	$(CC) $(LDFLAGS) $(SEARCH_LDFLAGS) $(SEARCH_OBJ) $@.o -o $@
 	
+$(PARSE_EXE): $(PARSE_OBJ) $@.c 
+	$(CC) $(CFLAGS) $@.c -o $@.o
+	$(CC) $(LDFLAGS) $(PARSE_LDFLAGS) $(PARSE_OBJ) $@.o -o $@
 
 .c.o:
 	$(CC) $(CFLAGS) -fpic $< -o $@
