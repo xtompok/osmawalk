@@ -11,6 +11,7 @@
 #include <osm.h>
 
 #include "include/types.pb-c.h"
+#include "include/premap.pb-c.h"
 #include "parse.h"
 
 uint64_t wanted_id = 0;
@@ -22,6 +23,11 @@ int use_rel = 0, use_way = 0, use_node = 0;
 int file_type = OSM_FTYPE_UNKNOWN;
 int write_gpx = 0;
 OSM_BBox *bbox = NULL;
+
+struct mapconfig_t conf;
+FILE * wayFile;
+FILE * nodeFile;
+FILE * mpFile;
 
 
 int enumValueForName(ProtobufCEnumDescriptor desc,char * name){
@@ -54,16 +60,15 @@ void addItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
 	strcpy(tag->key,item.key);
 	printf("%s\n",tag->key);
 	GARY_INIT(tag->values,1);
-	struct value_t val;
-	val = tag->values[1];
-	val.prio = item.priority;
-	val.objtype = item.enum_val;
-	val.name = malloc((strlen(item.value)+1)*sizeof(char));
-	strcpy(val.name,item.value);
+	struct value_t * val;
+	val = &tag->values[0];
+	val->prio = item.priority;
+	val->objtype = item.enum_val;
+	val->name = malloc((strlen(item.value)+1)*sizeof(char));
+	strcpy(val->name,item.value);
 	return;
 }
 
-// Loading 
 struct mapconfig_t parseMapConfigFile(char * filename){
 	struct mapconfig_t conf;
 	conf.desc = objtype__descriptor;
@@ -152,130 +157,164 @@ struct mapconfig_t parseMapConfigFile(char * filename){
 	return conf;
 }
 
+int classify(OSM_Tag_List * tags){
+	int priority = -1;
+	int objtype = 0;
+	for (int i=0;i<tags->num;i++){
+		OSM_Tag tag;
+		tag = tags->data[i];
+		for (int k=0;k<GARY_SIZE(conf.tags);k++){
+			if (strcmp(conf.tags[k].key,tag.key))
+				continue;
+			struct tag_t tag;
+			tag = conf.tags[k];
+			for (int v=0;v<GARY_SIZE(tag.values);v++){
+				if ((tag.values[v].name[0]=='*') && 
+				    (tag.values[v].prio>priority)){
+					objtype = tag.values[v].objtype;
+					priority = tag.values[v].prio;
+				}
+				else if (strcmp(tag.values[v].name,tag.key))
+					continue;
+				if (tag.values[v].prio>priority){
+					objtype = tag.values[v].objtype;
+					priority = tag.values[v].prio;
+				}
+				
+			}
+		}	
+	}
+	return objtype;
+}
+
+void dumpMultipol(OSM_Relation *mp, int objtype){
+	Premap__Multipolygon * pbMp;
+	pbMp = malloc(sizeof(Premap__Multipolygon));
+	premap__multipolygon__init(pbMp);
+	pbMp->id = mp->id;
+	pbMp->has_type = true;
+	pbMp->type = objtype;
+
+	// Write refs etc.
+	
+	size_t len;
+	len = premap__multipolygon__get_packed_size(pbMp);
+	uint8_t * buf;
+	buf = malloc(len);
+	premap__multipolygon__pack(pbMp,buf);
+	fwrite(&len,1,sizeof(size_t),mpFile);
+	fwrite(buf,1,len,mpFile);
+	free(buf);
+	free(pbMp);
+
+}
+void dumpWay(OSM_Way * way, int objtype){
+	Premap__Way * pbWay;
+	pbWay = malloc(sizeof(Premap__Way));
+	premap__way__init(pbWay);
+	pbWay->id = way->id;
+	pbWay->has_type = true;
+	pbWay->type = objtype;
+	int n_refs;
+	n_refs = 0;
+	while (way->nodes[n_refs]!=0)
+		n_refs++;
+	pbWay->n_refs=n_refs;
+	pbWay->refs = malloc(sizeof(pbWay->refs[0])*n_refs);
+	for (int i=0;i<n_refs;i++){
+		pbWay->refs[i] = way->nodes[i];
+	}
+	size_t len;
+	len = premap__way__get_packed_size(pbWay);
+	uint8_t * buf = malloc(len);
+	premap__way__pack(pbWay,buf);
+	fwrite(&len,1,sizeof(size_t),wayFile);
+	fwrite(buf,1,len,wayFile);
+	free(buf);
+	free(pbWay);
+
+}
+
+void dumpNode(OSM_Node * node, int objtype){
+	Premap__Node * pbNode;
+	pbNode = malloc(sizeof(Premap__Node));
+	premap__node__init(pbNode);
+	pbNode->id = node->id;
+	pbNode->has_objtype = true;
+	pbNode->objtype = objtype;
+	pbNode->lat = node->lat;
+	pbNode->lon = node->lon;
+	size_t len;
+	len = premap__node__get_packed_size(pbNode);
+	uint8_t * buf;
+	buf = malloc(len);
+	premap__node__pack(pbNode,buf);
+	fwrite(&len,1,sizeof(size_t),nodeFile);
+	fwrite(buf,1,len,nodeFile);
+	free(buf);
+	free(pbNode);
+}
+
 
 int relation(OSM_Relation *r) {
-    printf("Relation: %d\n",r->id);
-    for (int i=0;i<r->tags->num;i++){
-    	printf("	%s: %s\n",r->tags->data[i].key,r->tags->data[i].val);
-    }
-    return 0;
+    	printf("Relation: %d\n",r->id);
+	OSM_Tag * tags;
+	tags = r->tags->data;
+	for (int i=0;i<r->tags->num;i++){
+		if ((strcmp(tags[i].key,"type")==0) &&
+		    (strcmp(tags[i].val,"multipolygon")!=0))
+			return 0;
+		printf("	%s: %s\n",r->tags->data[i].key,r->tags->data[i].val);
+    	}
+	int objtype = classify(r->tags);
+	dumpMultipol(r,objtype);
+    	return 0;
 }
 
 int way(OSM_Way *w) {
-    printf("Way:%d\n",w->id);
-    return 0;
+	int objtype = classify(w->tags);
+//	if (objtype==-1)
+//		return;
+	dumpWay(w,objtype);
+	return 0;
 }
 
 int node(OSM_Node *n) {
-    printf("Node:%d\n",n->id);
-    return 0;
+	int objtype = classify(n->tags);
+//	if (objtype==-1)
+//		return;
+	dumpNode(n,objtype);
+	return 0;
 }
 
 
-int tag_node(OSM_Node *n) {
-    int i;
-    if (n->tags == NULL)
-        return 0;
-    if (tag == NULL)
-        return 1;
-    if (value != NULL) {
-        for (i=0; i<n->tags->num; i++) {
-            char *key = n->tags->data[i].key;
-            char *val = n->tags->data[i].val;
-            if (*key && *val)
-            {
-                if (strcmp(tag, key) == 0 && strcmp(value, val) == 0)
-                    return 1;
-            }
-        }
-    }
-    else {
-        for (i=0; i<n->tags->num; i++) {
-            if (*n->tags->data[i].key) {
-                char *key = n->tags->data[i].key;
-                if (strcmp(tag, key) == 0)
-                    return 1;
-            }
-        }
-    }
-    return 0;
-}
-
-int tag_way(OSM_Way *n) {
-    int i;
-    if (n->tags == NULL)
-        return 0;
-    if (tag == NULL)
-        return 1;
-    if (value != NULL) {
-        for (i=0; i<n->tags->num; i++) {
-            char *key = n->tags->data[i].key;
-            char *val = n->tags->data[i].val;
-            if (*key && *val)
-            {
-                if (strcmp(tag, key) == 0 && strcmp(value, val) == 0)
-                    return 1;
-            }
-        }
-    }
-    else {
-        for (i=0; i<n->tags->num; i++) {
-            if (*n->tags->data[i].key) {
-                char *key = n->tags->data[i].key;
-                if (strcmp(tag, key) == 0)
-                    return 1;
-            }
-        }
-    }
-    return 0;
-}
-
-int tag_rel(OSM_Relation *n) {
-    int i;
-    if (n->tags == NULL)
-        return 0;
-    if (tag == NULL)
-        return 1;
-    if (value != NULL) {
-        for (i=0; i<n->tags->num; i++) {
-            char *key = n->tags->data[i].key;
-            char *val = n->tags->data[i].val;
-            if (*key && *val)
-            {
-                if (strcmp(tag, key) == 0 && strcmp(value, val) == 0)
-                    return 1;
-            }
-        }
-    }
-    else {
-        for (i=0; i<n->tags->num; i++) {
-            if (*n->tags->data[i].key) {
-                char *key = n->tags->data[i].key;
-                if (strcmp(tag, key) == 0)
-                    return 1;
-            }
-        }
-    }
-    return 0;
-}
 
 
 int main(int argc, char **argv) {
-    int i;
-    OSM_File *F;
-    OSM_Data *O;
+	int i;
+	OSM_File *F;
+	OSM_Data *O;
+	
+	file_type = OSM_FTYPE_XML;
 
-    file_type = OSM_FTYPE_XML;
+	conf = parseMapConfigFile(argv[2]);
 
-    parseMapConfigFile(argv[2]);
+	wayFile = fopen("../data/ways-stage1","w");
+	nodeFile = fopen("../data/nodes-stage1","w");
+	mpFile = fopen("../data/mp-stage1","w");
 
-    osm_init();
+	osm_init();
 
-    F = osm_open(argv[1], file_type);
-    if (F == NULL)
-        return 1;
-    
-    O = osm_parse(F, OSMDATA_REL, NULL, node, way, relation);    
-    osm_close(F);
-    return 0;
+	F = osm_open(argv[1], file_type);
+	if (F == NULL)
+		return 1;
+
+	O = osm_parse(F, OSMDATA_REL, NULL, node, way, relation);    
+	osm_close(F);
+	
+	fclose(wayFile);
+	fclose(nodeFile);
+	fclose(mpFile);
+	
+	return 0;
 }

@@ -18,7 +18,7 @@ SEARCH_OBJ=$(SEARCH_SRC:.c=.o)
 SEARCH_LDFLAGS=-lsearch -L.
 SEARCH_EXE=search
 
-PARSE_SRC=include/types.pb-c.c
+PARSE_SRC=include/types.pb-c.c include/premap.pb-c.c
 PARSE_OBJ=$(PARSE_SRC:.c=.o)
 PARSE_LDFLAGS=-losm -L../ext-lib/libosm-0.3
 PARSE_EXE=parse
