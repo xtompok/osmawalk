@@ -35,6 +35,7 @@
 /osm/merge-srtm
 /compiled/filter
 /compiled/search
+/compiled/parse
 /QOsmWalk-build-Release
 /QOsmWalk-build-Debug
 /build-QOsmWalk*
@@ -60,7 +61,7 @@ gmon-praha.out
 /scripts/imposm-parser
 /scripts/svgwrite-1.1.3
 /QMapControl
-/
+/ext-lib
 
 # SRTM files
 /osm/heights.txt
