@@ -1,14 +1,16 @@
 yes:
-    tunnel: "*"
-    indoor:
-        - "yes"
-    layer:
-        - "-1"
-        - "-2"
-        - "-3"
-        - "-4"
-        - "-5"
+        0:
+            tunnel: "*"
+            indoor:
+                - "yes"
+            layer:
+                - "-1"
+                - "-2"
+                - "-3"
+                - "-4"
+                - "-5"
 
 no:
-    tunnel:
-        - "no"
+        0:
+            tunnel:
+                - "no"

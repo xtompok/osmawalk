@@ -1,14 +1,16 @@
 yes:
-    bridge: "*"
-    man_made:
-        - bridge
-    layer:
-        - "1"
-        - "2"
-        - "3"
-        - "4"
-        - "5"
+        0:
+            bridge: "*"
+            man_made:
+                - bridge
+            layer:
+                - "1"
+                - "2"
+                - "3"
+                - "4"
+                - "5"
 
 no:
-    bridge:
-        - "no"
+        0:
+            bridge:
+                - "no"

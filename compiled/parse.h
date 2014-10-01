@@ -12,12 +12,15 @@ struct tag_t {
 
 struct mapconfig_t {
 	ProtobufCEnumDescriptor desc;
-	struct tag_t * tags;
+	struct tag_t * type;
+	struct tag_t * tunnel;
+	struct tag_t * bridge;
+	struct tag_t * area;
 };
 
 struct mapConfItem_t {
 	char * key;
 	char * value;
 	int priority;
-	int enum_val;
+	char * name;
 };

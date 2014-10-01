@@ -14,6 +14,11 @@
 #include "include/premap.pb-c.h"
 #include "parse.h"
 
+// TODO
+// - tunely, mosty, plochy
+// - vysky
+// - zahazovani nepotrebneho
+
 uint64_t wanted_id = 0;
 int debug = 0;
 int type;
@@ -39,23 +44,25 @@ int enumValueForName(ProtobufCEnumDescriptor desc,char * name){
 	return -1;
 };
 
-void addItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
-	printf("%s: %s -> %d (priority %d)\n",item.key,item.value,item.enum_val,item.priority);
-	for (int i=0;i<GARY_SIZE(conf->tags);i++){
-		if (strcmp(conf->tags[i].key,item.key))
+
+
+struct tag_t *  addItemToTagList(struct tag_t * list,struct mapConfItem_t item, int type){
+	printf("%s: %s -> %d (priority %d)\n",item.key,item.value,type,item.priority);
+	for (int i=0;i<GARY_SIZE(list);i++){
+		if (strcmp(list[i].key,item.key))
 			continue;
 		struct value_t * val;
-		val = GARY_PUSH(conf->tags[i].values);
+		val = GARY_PUSH(list[i].values);
 		val->prio = item.priority;
-		val->objtype = item.enum_val;
+		val->objtype = type;
 		val->name = malloc((strlen(item.value)+1)*sizeof(char));
 		strcpy(val->name,item.value);
-		return;
+		return list;
 
 	}
 	printf("Creating new key: ");
 	struct tag_t * tag;
-	tag=GARY_PUSH(conf->tags);
+	tag=GARY_PUSH(list);
 	tag->key = malloc((strlen(item.key)+1)*sizeof(char));
 	strcpy(tag->key,item.key);
 	printf("%s\n",tag->key);
@@ -63,16 +70,60 @@ void addItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
 	struct value_t * val;
 	val = &tag->values[0];
 	val->prio = item.priority;
-	val->objtype = item.enum_val;
+	val->objtype = type;
 	val->name = malloc((strlen(item.value)+1)*sizeof(char));
 	strcpy(val->name,item.value);
+	return list;
+}
+void addAreaItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
+	int type;
+	if (strcmp(item.name,"yes")==0)
+		type = 1;
+	else if (strcmp(item.name,"no")==0)
+		type = 0;
+	else{
+		printf("Wrong value: %s\n",item.name);
+		return;
+	}
+	conf->area = addItemToTagList(conf->area,item,type);
 	return;
 }
 
-struct mapconfig_t parseMapConfigFile(char * filename){
-	struct mapconfig_t conf;
-	conf.desc = objtype__descriptor;
-	GARY_INIT(conf.tags,0);
+void addTunnelItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
+	int type;
+	if (strcmp(item.name,"yes")==0)
+		type = 1;
+	else if (strcmp(item.name,"no")==0)
+		type = 0;
+	else{
+		printf("Wrong value: %s\n",item.name);
+		return;
+	}
+	conf->tunnel = addItemToTagList(conf->tunnel,item,type);
+	return;
+}
+void addBridgeItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
+	int type;
+	if (strcmp(item.name,"yes")==0)
+		type = 1;
+	else if (strcmp(item.name,"no")==0)
+		type = 0;
+	else{
+		printf("Wrong value: %s\n",item.name);
+		return;
+	}
+	conf->bridge = addItemToTagList(conf->bridge,item,type);
+	return;
+}
+
+void addTypeItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
+	int enum_val;
+	enum_val = enumValueForName(conf->desc, item.name);
+	conf->type = addItemToTagList(conf->type,item,enum_val);
+}
+
+int parseMapConfigFile(char * filename, struct mapconfig_t * conf,
+			void (*addItemToMapConf)(struct mapconfig_t * conf,struct mapConfItem_t item )){
 
 	yaml_parser_t parser;
 	yaml_document_t document;
@@ -83,7 +134,7 @@ struct mapconfig_t parseMapConfigFile(char * filename){
 	IN = fopen(filename,"r");
 	if (IN==NULL){
 		printf("Config file opening error\n");	
-		return conf;
+		return 1;
 	}
 	yaml_parser_set_input_file(&parser,IN);
 
@@ -98,19 +149,19 @@ struct mapconfig_t parseMapConfigFile(char * filename){
 
 	if (root->type != YAML_MAPPING_NODE){
 		printf("Wrong syntax of configuration file in objtypes\n");
-		return conf;
+		return 2;
 	}
 	for (yaml_node_pair_t * type=root->data.mapping.pairs.start;
 			type < root->data.mapping.pairs.top; type++){
 		anode = yaml_document_get_node(&document,type->key);
-		mapConfItem.enum_val = enumValueForName(conf.desc,anode->data.scalar.value);
-		printf("%s (%d)\n",anode->data.scalar.value,mapConfItem.enum_val);
+		mapConfItem.name = anode->data.scalar.value;
+		printf("%s\n",mapConfItem.name);
 
 		yaml_node_t * priomap;
 		priomap = yaml_document_get_node(&document,type->value);
 		if (priomap->type != YAML_MAPPING_NODE){
 			printf("Wrong syntax of configuration file in priorities\n");
-			return conf;
+			return 3;
 		}
 		for (yaml_node_pair_t * prio=priomap->data.mapping.pairs.start;
 				prio < priomap->data.mapping.pairs.top; prio++){
@@ -121,7 +172,7 @@ struct mapconfig_t parseMapConfigFile(char * filename){
 			tagmap = yaml_document_get_node(&document,prio->value);
 			if (tagmap->type != YAML_MAPPING_NODE){
 				printf("Wrong syntax of configuration file in tags\n");
-				return conf;
+				return 4;
 			}
 			for (yaml_node_pair_t * atag=tagmap->data.mapping.pairs.start;
 					atag < tagmap->data.mapping.pairs.top; atag++){
@@ -136,16 +187,16 @@ struct mapconfig_t parseMapConfigFile(char * filename){
 						anode = yaml_document_get_node(&document,*val);
 						mapConfItem.value=anode->data.scalar.value;
 						printf("			%s\n",mapConfItem.value);
-						addItemToMapConf(&conf,mapConfItem);
+						addItemToMapConf(conf,mapConfItem);
 					}
 				} else if (vallist->type == YAML_SCALAR_NODE){ 
 					mapConfItem.value=vallist->data.scalar.value;
 					printf("			%s\n",mapConfItem.value);
 					
-					addItemToMapConf(&conf,mapConfItem);
+					addItemToMapConf(conf,mapConfItem);
 				}else {
 					printf("Wrong syntax of configuration file in values\n");
-					return conf;
+					return 5;
 				}
 			}
 		}
@@ -154,7 +205,7 @@ struct mapconfig_t parseMapConfigFile(char * filename){
 	yaml_document_delete(&document);		
 	yaml_parser_delete(&parser);
 
-	return conf;
+	return 0;
 }
 
 int classify(OSM_Tag_List * tags){
@@ -163,11 +214,11 @@ int classify(OSM_Tag_List * tags){
 	for (int i=0;i<tags->num;i++){
 		OSM_Tag tag;
 		tag = tags->data[i];
-		for (int k=0;k<GARY_SIZE(conf.tags);k++){
-			if (strcmp(conf.tags[k].key,tag.key))
+		for (int k=0;k<GARY_SIZE(conf.type);k++){
+			if (strcmp(conf.type[k].key,tag.key))
 				continue;
 			struct tag_t tag;
-			tag = conf.tags[k];
+			tag = conf.type[k];
 			for (int v=0;v<GARY_SIZE(tag.values);v++){
 				if ((tag.values[v].name[0]=='*') && 
 				    (tag.values[v].prio>priority)){
@@ -196,6 +247,34 @@ void dumpMultipol(OSM_Relation *mp, int objtype){
 	pbMp->type = objtype;
 
 	// Write refs etc.
+	pbMp->n_refs = mp->member->num;
+	pbMp->n_roles = mp->member->num;
+	pbMp->refs = malloc(sizeof(pbMp->refs[0])*pbMp->n_refs);
+	pbMp->roles = malloc(sizeof(pbMp->roles[0])*pbMp->n_refs);
+	for (int i=0;i<pbMp->n_refs;i++){
+		OSM_Rel_Member memb;
+		memb = mp->member->data[i];
+		if (memb.type != OSM_REL_MEMBER_TYPE_WAY){
+			fprintf(stderr,"Non-way member in multipolygon %d\n",mp->id);
+			free(pbMp->roles);
+			free(pbMp->refs);
+			free(pbMp);
+			return;
+		}
+		if (strcmp(memb.role,"inner")==0){
+			pbMp->roles[i]=PREMAP__MULTIPOLYGON__ROLE__INNER;
+		}
+		else if (strcmp(memb.role,"outer")==0){
+			pbMp->roles[i]=PREMAP__MULTIPOLYGON__ROLE__OUTER;
+		} else{
+			fprintf(stderr,"Role non inner nor outer in multipolygon %d\n",mp->id);
+			free(pbMp);
+			free(pbMp->roles);
+			free(pbMp->refs);
+			return;
+		}
+		pbMp->refs[i] = memb.ref;
+	}
 	
 	size_t len;
 	len = premap__multipolygon__get_packed_size(pbMp);
@@ -205,6 +284,8 @@ void dumpMultipol(OSM_Relation *mp, int objtype){
 	fwrite(&len,1,sizeof(size_t),mpFile);
 	fwrite(buf,1,len,mpFile);
 	free(buf);
+	free(pbMp->roles);
+	free(pbMp->refs);
 	free(pbMp);
 
 }
@@ -231,6 +312,7 @@ void dumpWay(OSM_Way * way, int objtype){
 	fwrite(&len,1,sizeof(size_t),wayFile);
 	fwrite(buf,1,len,wayFile);
 	free(buf);
+	free(pbWay->refs);
 	free(pbWay);
 
 }
@@ -287,9 +369,6 @@ int node(OSM_Node *n) {
 	return 0;
 }
 
-
-
-
 int main(int argc, char **argv) {
 	int i;
 	OSM_File *F;
@@ -297,7 +376,16 @@ int main(int argc, char **argv) {
 	
 	file_type = OSM_FTYPE_XML;
 
-	conf = parseMapConfigFile(argv[2]);
+	conf.desc = objtype__descriptor;
+	GARY_INIT(conf.type,0);
+	GARY_INIT(conf.area,0);
+	GARY_INIT(conf.bridge,0);
+	GARY_INIT(conf.tunnel,0);
+
+	parseMapConfigFile("../config/types.yaml",&conf,addTypeItemToMapConf);
+	parseMapConfigFile("../config/area.yaml",&conf,addAreaItemToMapConf);
+	parseMapConfigFile("../config/bridge.yaml",&conf,addBridgeItemToMapConf);
+	parseMapConfigFile("../config/tunnel.yaml",&conf,addTunnelItemToMapConf);
 
 	wayFile = fopen("../data/ways-stage1","w");
 	nodeFile = fopen("../data/nodes-stage1","w");

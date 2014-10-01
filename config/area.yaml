@@ -1,17 +1,19 @@
 yes:
-    area: 
-        - "yes"
-    landuse: "*"
-    area:highway: "*"
-    building: "*"
-    leisure: "*"
-    aeroway: "*"
-    natural: "*"
-    waterway: 
-        - riverbank
-    amenity:
-        - parking
-        - fuel
+        0:
+            area: 
+                - "yes"
+            landuse: "*"
+            area:highway: "*"
+            building: "*"
+            leisure: "*"
+            aeroway: "*"
+            natural: "*"
+            waterway: 
+                - riverbank
+            amenity:
+                - parking
+                - fuel
 no:
-    area: 
-        - "no"
+        1:
+            area: 
+                - "no"
