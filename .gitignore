@@ -9,6 +9,9 @@
 *_pb2.py
 *.pbf
 
+# Generated map
+/data
+
 # Log files
 *.log
 
