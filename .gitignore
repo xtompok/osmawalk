@@ -36,6 +36,7 @@
 /compiled/filter
 /compiled/search
 /compiled/parse
+/compiled/order
 /QOsmWalk-build-Release
 /QOsmWalk-build-Debug
 /build-QOsmWalk*

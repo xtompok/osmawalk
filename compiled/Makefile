@@ -18,11 +18,17 @@ SEARCH_OBJ=$(SEARCH_SRC:.c=.o)
 SEARCH_LDFLAGS=-lsearch -L.
 SEARCH_EXE=search
 
-PARSE_SRC=include/types.pb-c.c include/premap.pb-c.c
+PARSE_SRC=yamlconf.c include/types.pb-c.c include/premap.pb-c.c
 PARSE_OBJ=$(PARSE_SRC:.c=.o)
 PARSE_LDFLAGS=-losm -L../ext-lib/libosm-0.3
 PARSE_EXE=parse
 
+ORDER_SRC=include/premap.pb-c.c include/types.pb-c.c
+ORDER_OBJ=$(ORDER_SRC:.c=.o)
+ORDER_LDFLAGS= -L../ext-lib/libosm-0.3
+ORDER_EXE=order
+
+# gcc -R -- runtime hledani knihovny
 all: protobuf $(SOURCES) $(FILTER_EXE) $(LIBSEARCH_LIB) $(SEARCH_EXE)
 
 	
@@ -41,6 +47,10 @@ $(SEARCH_EXE): $(LIBSEARCH_LIB) $(SEARCH_OBJ) $@.c
 $(PARSE_EXE): $(PARSE_OBJ) $@.c 
 	$(CC) $(CFLAGS) $@.c -o $@.o
 	$(CC) $(LDFLAGS) $(PARSE_LDFLAGS) $(PARSE_OBJ) $@.o -o $@
+
+$(ORDER_EXE): $(ORDER_OBJ) $@.c 
+	$(CC) $(CFLAGS) $@.c -o $@.o
+	$(CC) $(LDFLAGS) $(ORDER_LDFLAGS) $(ORDER_OBJ) $@.o -o $@
 
 .c.o:
 	$(CC) $(CFLAGS) -fpic $< -o $@
