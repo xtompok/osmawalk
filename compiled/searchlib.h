@@ -38,6 +38,7 @@ struct config_t {
 	int maxvalue;
 	double * speeds;
 	double * ratios;
+	double * penalties;
 	double upscale;
 	double downscale;
 //	double maxslope;

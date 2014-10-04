@@ -18,6 +18,9 @@ ratios:
         STEPS: 0.6
         HIGHWAY: 1.2
         DIRECT: 0.8
+penalties:
+        HIGHWAY: 1
+        DIRECT: 2
 heights:
         upscale: 0
         downscale: 0

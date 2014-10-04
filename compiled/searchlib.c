@@ -28,6 +28,10 @@ int wgs2utm(struct search_data_t data,double * lon, double * lat){
 	return pj_transform(data.pj_wgs84,data.pj_utm,1,1,lon,lat,NULL);
 }
 
+double calcWeight(Graph__Graph * graph, struct config_t conf, Graph__Edge * edge){
+	return calcTime(graph,conf,edge)*conf.penalties[edge->type];
+}
+
 double calcTime(Graph__Graph * graph, struct config_t conf,Graph__Edge * edge){
 	double speed;
 	speed = conf.speeds[edge->type];
@@ -49,9 +53,11 @@ struct config_t parseConfigFile(char * filename){
 	conf.maxvalue = conf.desc.values[conf.desc.n_values-1].value;
 	conf.speeds = malloc(sizeof(double)*(conf.maxvalue+1));
 	conf.ratios = malloc(sizeof(double)*(conf.maxvalue+1));
+	conf.penalties = malloc(sizeof(double)*(conf.maxvalue+1));
 	for (int i=0;i<conf.maxvalue+1;i++){
 		conf.speeds[i]=-1;
 		conf.ratios[i]=-1;
+		conf.penalties[i]=1;
 	}
 	
 
@@ -128,6 +134,30 @@ struct config_t parseConfigFile(char * filename){
 						}
 					}
 				}
+			
+			} else if (strcmp((char *)key->data.scalar.value,"penalties")==0){
+				//printf("Parsing speeds\n");
+				yaml_node_t * penaltyMap;
+				penaltyMap = yaml_document_get_node(&document,section->value);
+				if (penaltyMap->type != YAML_MAPPING_NODE){
+					printf("Speeds are not mapping\n");
+					break;
+				}
+				yaml_node_pair_t * pair;
+				for (pair=penaltyMap->data.mapping.pairs.start;
+						pair < penaltyMap->data.mapping.pairs.top;pair++){
+					yaml_node_t * key;
+					yaml_node_t * value;
+					key = yaml_document_get_node(&document,pair->key);
+					value = yaml_document_get_node(&document,pair->value);
+					for (int i=0;i<conf.desc.n_values;i++){
+						if (strcmp((char *)key->data.scalar.value,conf.desc.values[i].name)==0){
+							conf.penalties[conf.desc.values[i].value]=atof((char *)value->data.scalar.value);
+							break;
+						}
+					}
+				}
+				
 			} else if (strcmp((char *)key->data.scalar.value,"heights")==0){
 				//printf("Parsing heights\n");
 				yaml_node_t * heightsMap;
@@ -353,7 +383,7 @@ void findWay(struct search_data_t data,struct dijnode_t * dijArray,int fromIdx, 
 			Graph__Edge * way;
 			way = graph->edges[nodeways[vIdx].ways[i]];
 			double len;
-			len = calcTime(data.graph,data.conf,way);
+			len = calcWeight(data.graph,data.conf,way);
 			if (dijArray[way->vto].dist <= (dijArray[vIdx].dist+len))
 				continue;
 			dijArray[way->vto].dist = dijArray[vIdx].dist+len;
@@ -404,8 +434,6 @@ struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * d
 	idx = fromIdx;
 	double lat;
 	double lon;
-	double dist;
-	dist = 0;
 	while (idx != toIdx){
 		lat = graph->vertices[idx]->lat;
 		lon = graph->vertices[idx]->lon;
@@ -490,17 +518,17 @@ struct search_result_t findPath(struct search_data_t data,double fromLat, double
 	result.points = resultsToArray(data,dijArray,fromIdx,toIdx,&n_points);
 	result.n_points = n_points;
 	result.dist = 0;
+	result.time = 0;
 	if (result.n_points == 0){
-		result.time=0;
 		return result;
 	}
 	int idx;
 	idx = fromIdx;
 	while(idx != toIdx){
 		result.dist+=data.graph->edges[dijArray[idx].fromEdgeIdx]->dist;
+		result.time+=calcTime(data.graph,data.conf,data.graph->edges[dijArray[idx].fromEdgeIdx]);
 		idx = dijArray[idx].fromIdx;
 	}
-	result.time = dijArray[fromIdx].dist;
 	free(dijArray);
 	return result;	
 }
