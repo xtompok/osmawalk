@@ -9,6 +9,8 @@
 #include <yaml.h>
 #include <ucw/gary.h>
 #include <osm.h>
+#include <math.h>
+#include <proj_api.h>
 
 #include "include/types.pb-c.h"
 #include "include/premap.pb-c.h"
@@ -34,6 +36,23 @@ struct mapconfig_t conf;
 FILE * wayFile;
 FILE * nodeFile;
 FILE * mpFile;
+
+
+projPJ pj_wgs84;
+projPJ pj_utm;
+
+int utm2wgs(double * lon, double * lat){
+	int res;
+	res= pj_transform(pj_utm,pj_wgs84,1,1,lon,lat,NULL);
+	*lon = (*lon * 180)/M_PI;
+	*lat = (*lat * 180)/M_PI;
+	return res;
+}
+int wgs2utm(double * lon, double * lat){
+	*lon = (*lon/180)*M_PI;
+	*lat = (*lat/180)*M_PI;
+	return pj_transform(pj_wgs84,pj_utm,1,1,lon,lat,NULL);
+}
 
 struct height_map_t heights;
 
@@ -213,8 +232,13 @@ void dumpNode(OSM_Node * node, struct obj_attr attr){
 	pbNode->onbridge = attr.bridge;
 	pbNode->has_height = true;
 	pbNode->height = calcHeight(heights,node->lat,node->lon);
-	pbNode->lat = node->lat;
-	pbNode->lon = node->lon;
+	double lat;
+	double lon;
+	lat = node->lat;
+	lon = node->lon;
+	wgs2utm(&lon,&lat);
+	pbNode->lat = lat;
+	pbNode->lon = lon;
 	size_t len;
 	len = premap__node__get_packed_size(pbNode);
 	uint8_t * buf;
@@ -269,11 +293,18 @@ int node(OSM_Node *n) {
 }
 
 int main(int argc, char **argv) {
+	if (argc<2){
+		printf("Usage: %s file.osm\n",argv[0]);
+		exit(1);
+	}
 	int i;
 	OSM_File *F;
 	OSM_Data *O;
 	
 	file_type = OSM_FTYPE_XML;
+	
+	pj_wgs84 = pj_init_plus("+proj=longlat +datum=WGS84 +no_defs");
+	pj_utm = pj_init_plus("+proj=utm +zone=33 +ellps=WGS84 +units=m +no_defs");
 
 	conf.desc = objtype__descriptor;
 	GARY_INIT(conf.type,0);
