@@ -33,6 +33,7 @@ char *  node_cb(size_t len,char * inbuf, char * outbuf){
 	Premap__Node * node;
 	node = premap__node__unpack(NULL,len,inbuf);
 	printf("Node: %lld\n",node->id);
+	printf("Lat: %lld, lon: %lld\n",node->lat,node->lon);
 	if (tree_find(node_tree,node->id)||(node->objtype!=OBJTYPE__NONE)){
 		printf("Found\n");
 		memcpy(outbuf,&len,sizeof(size_t));
@@ -91,24 +92,15 @@ int loadFile (char * inFilename, char * outFilename,
 		return 1;
 	}
 
-	int fdout;
-	fdout = open(outFilename,O_RDWR|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-	if (fdout < 0){
-		printf("Can't open file %s, exitting\n",outFilename);
-		return 2;
-	}
 
 	struct stat statbuf;
 	fstat (fdin,&statbuf);
-	
-	lseek(fdout, statbuf.st_size - 1, SEEK_SET);
-	write(fdout,"",1);
 
 	char * inbuf;
 	inbuf = mmap(NULL,statbuf.st_size,PROT_READ,MAP_PRIVATE,fdin,0);
 
 	char * outbuf;
-	outbuf = mmap(NULL,statbuf.st_size,PROT_READ|PROT_WRITE,MAP_SHARED,fdout,0);
+	outbuf = malloc(statbuf.st_size);
 
 	char * inbufp;
 	char * outbufp;
@@ -122,6 +114,16 @@ int loadFile (char * inFilename, char * outFilename,
 		outbufp = callback(len,inbufp,outbufp);
 		inbufp+=len;
 	}
+
+	int fdout;
+	fdout = open(outFilename,O_RDWR|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+	if (fdout < 0){
+		printf("Can't open file %s, exitting\n",outFilename);
+		return 2;
+	}
+
+	write(fdout,outbuf,outbufp-outbuf);
+	close(fdout);
 	munmap(inbuf,statbuf.st_size);
 	munmap(outbuf,statbuf.st_size);
 	return 0;
