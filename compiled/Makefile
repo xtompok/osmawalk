@@ -1,6 +1,6 @@
 CC=gcc
 PG=
-INC=-I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw -I/aux/jethro/libucw -I../ext-lib/libosm-0.3
+INC=-I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw -I/aux/jethro/libucw -I../ext-lib/libosm-0.3 
 CFLAGS= -c $(PG)  -ggdb3 -Wall -Wno-format -std=gnu99 -O2 -march=native $(INC)
 PFLAGS= -E -Wall -std=gnu99 -O3 -march=native -I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw
 LDFLAGS= $(PG) -lprotobuf-c -lucw-6.0 -lproj -lyaml -lm -L/mnt/sda1/home/jethro/Programy/libucw/obj/ucw -L/aux/jethro/libucw/obj/ucw 
@@ -28,6 +28,11 @@ ORDER_OBJ=$(ORDER_SRC:.c=.o)
 ORDER_LDFLAGS= -L../ext-lib/libosm-0.3
 ORDER_EXE=order
 
+TODB_SRC=include/premap.pb-c.c include/types.pb-c.c
+TODB_OBJ=$(TODB_SRC:.c=.o)
+TODB_LDFLAGS= -L../ext-lib/libosm-0.3 -lpq
+TODB_EXE=todb
+
 # gcc -R -- runtime hledani knihovny
 all: protobuf $(SOURCES) $(FILTER_EXE) $(LIBSEARCH_LIB) $(SEARCH_EXE)
 
@@ -51,6 +56,10 @@ $(PARSE_EXE): $(PARSE_OBJ) $@.c
 $(ORDER_EXE): $(ORDER_OBJ) $@.c 
 	$(CC) $(CFLAGS) $@.c -o $@.o
 	$(CC) $(LDFLAGS) $(ORDER_LDFLAGS) $(ORDER_OBJ) $@.o -o $@
+
+$(TODB_EXE): $(TODB_OBJ) $@.c 
+	$(CC) $(CFLAGS) $@.c -o $@.o
+	$(CC) $(LDFLAGS) $(TODB_LDFLAGS) $(TODB_OBJ) $@.o -o $@
 
 .c.o:
 	$(CC) $(CFLAGS) -fpic $< -o $@
