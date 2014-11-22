@@ -26,8 +26,8 @@ char node_cb(size_t len,uint8_t * inbuf){
 //	fprintf(stderr,"Lat: %lld, lon: %lld\n",node->lat,node->lon);
 
 //	id,lat,lon,height,objtype,inside,intunnel,onbridge,loc,
-	printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\tSRID=3065;POINT(%d %d %d)\n",
-//		id  lat lon hei typ ins int onb 
+	printf("%lld\t%d\t%d\t%d\t%d\t%d\t%d\t%d\tSRID=3065;POINT(%d %d %d)\n",
+//		id    lat lon hei typ ins int onb 
 		node->id,
 		node->lat,
 		node->lon,
@@ -49,7 +49,7 @@ char way_cb(size_t len,uint8_t * inbuf){
 //	fprintf(stderr,"Way: %lld\n",way->id);
 
 //	id,area,barrier,type,bridge,tunnel,wayidx
-	printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+	printf("%lld\t%d\t%d\t%d\t%d\t%d\t%d\n",
 		way->id,
 		way->area,
 		way->barrier,
@@ -65,9 +65,9 @@ char way_refs_cb(size_t len,uint8_t * inbuf){
 	Premap__Way * way;
 	way = premap__way__unpack(NULL,len,inbuf);
 //	fprintf(stderr,"Way: %lld\n",way->id);
-//	id,ref
+//	id,ref,order
 	for (int i=0;i<way->n_refs;i++){
-		printf("%d\t%d\n",way->id,way->refs[i]);
+		printf("%lld\t%lld\t%d\n",way->id,way->refs[i],i);
 	}
 	premap__way__free_unpacked(way,NULL);
 	return 1;
@@ -78,7 +78,7 @@ char mp_cb(size_t len,uint8_t * inbuf){
 	mp = premap__multipolygon__unpack(NULL,len,inbuf);
 //	fprintf(stderr,"MP: %lld\n",mp->id);
 //	id,type
-	printf("%d\t%d\n",
+	printf("%lld\t%d\n",
 		mp->id,
 		mp->type);
 	premap__multipolygon__free_unpacked(mp,NULL);
@@ -90,7 +90,7 @@ char mp_refs_cb(size_t len,uint8_t * inbuf){
 //	fprintf(stderr,"MP: %lld\n",mp->id);
 //	id,ref,role
 	for (int i=0;i<mp->n_refs;i++){
-		printf("%d\t%d\t%d\n",
+		printf("%lld\t%lld\t%d\n",
 			mp->id,
 			mp->refs[i],
 			mp->roles[i]);
