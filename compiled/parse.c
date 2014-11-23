@@ -109,19 +109,19 @@ int classify(OSM_Tag_List * tags,struct tag_t * classifier){
 		for (int k=0;k<GARY_SIZE(classifier);k++){
 			if (strcmp(classifier[k].key,tag.key))
 				continue;
-			struct tag_t tag;
-			tag = classifier[k];
-			for (int v=0;v<GARY_SIZE(tag.values);v++){
-				if ((tag.values[v].name[0]=='*') && 
-				    (tag.values[v].prio>priority)){
-					objtype = tag.values[v].objtype;
-					priority = tag.values[v].prio;
+			struct tag_t ctag;
+			ctag = classifier[k];
+			for (int v=0;v<GARY_SIZE(ctag.values);v++){
+				if ((ctag.values[v].name[0]=='*') && 
+				    (ctag.values[v].prio>priority)){
+					objtype = ctag.values[v].objtype;
+					priority = ctag.values[v].prio;
 				}
-				else if (strcmp(tag.values[v].name,tag.key))
+				else if (strcmp(ctag.values[v].name,tag.val))
 					continue;
-				if (tag.values[v].prio>priority){
-					objtype = tag.values[v].objtype;
-					priority = tag.values[v].prio;
+				if (ctag.values[v].prio>priority){
+					objtype = ctag.values[v].objtype;
+					priority = ctag.values[v].prio;
 				}
 				
 			}
