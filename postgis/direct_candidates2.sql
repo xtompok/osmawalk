@@ -3,8 +3,12 @@ CREATE OR REPLACE FUNCTION make_candidates(minx int,miny int,maxx int,maxy int)
 RETURNS TABLE (id1 BIGINT,id2 BIGINT,loc1 GEOMETRY,loc2 GEOMETRY) AS '
  SELECT n1.id AS id1, n2.id AS id2, n1.loc AS loc1, n2.loc AS loc2
 	FROM nodes AS n1
+	INNER JOIN walk_nodes AS wn1 ON wn1.id = n1.id
 	CROSS JOIN nodes AS n2
+	INNER JOIN walk_nodes AS wn2 ON wn2.id = n2.id
 	WHERE n1.id != n2.id AND 
+		n1.inside = false AND 
+		n2.inside = false AND
 		(n1.lon BETWEEN minx AND maxx) AND 
 		(n2.lon BETWEEN minx AND maxx) AND
 		(n1.lat BETWEEN miny AND maxy) AND
