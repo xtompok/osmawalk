@@ -14,6 +14,8 @@ RETURNS SETOF ow_bbox AS '
 	dx INT; 
 	dy INT;
 	line ow_bbox ;
+	loopx INT;
+	loopy INT;
   BEGIN
     SELECT INTO minx MIN(lon) FROM nodes;
     SELECT INTO miny MIN(lat) FROM nodes;
@@ -21,17 +23,20 @@ RETURNS SETOF ow_bbox AS '
     SELECT INTO maxy MAX(lat) FROM nodes;
     dx := $1/2;
     dy := $1/2;
+
+    loopx = ((maxx-minx)/dx);
+    loopy = ((maxy-miny)/dy);
       
-    FOR i IN 1..((maxx-minx)/dx) LOOP
-      FOR j IN 1..((maxy-miny)/dx) LOOP
+    FOR i IN 1..loopx LOOP
+      FOR j IN 1..loopy LOOP
 	line.minx = minx;
 	line.maxx = minx+2*dx;
 	line.miny = miny;
 	line.maxy = miny+2*dy;
-	minx := minx + dx;
 	miny := miny + dy;
 	RETURN NEXT line;
       END LOOP;
+      minx := minx + dx;
     END LOOP;
     RETURN;
   END;
