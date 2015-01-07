@@ -44,7 +44,8 @@ CSVGRAPH_LDFLAGS=
 CSVGRAPH_EXE=csvtograph
 
 # gcc -R -- runtime hledani knihovny
-all: protobuf $(SOURCES) $(FILTER_EXE) $(LIBSEARCH_LIB) $(SEARCH_EXE)
+all: protobuf $(FILTER_EXE) $(LIBSEARCH_LIB) $(SEARCH_EXE)
+postgress: $(PARSE_EXE) $(ORDER_EXE) $(TODB_EXE) $(CSVGRAPH_EXE)
 
 	
 $(FILTER_EXE): $(FILTER_OBJ) $@.c 
