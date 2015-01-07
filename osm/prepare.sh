@@ -11,6 +11,13 @@ MAXLON=14.706787
 #MAXLAT=50.12
 #MAXLON=14.457
 
+# Czech Republic
+#MINLAT=48.5
+#MINLON=12.1
+#MAXLAT=51.1
+#MAXLON=18.9
+
+
 if [ $# = 0 ]
 then
 	posledni=`curl "http://osm.kyblsoft.cz/archiv/last_dates.txt" | grep gz | cut -d"	" -f2`
