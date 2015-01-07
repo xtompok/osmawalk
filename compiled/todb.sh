@@ -1,6 +1,8 @@
 #!/bin/sh
 
-psql -c "TRUNCATE TABLE nodes,ways,ways_refs,multipols,multipols_refs" osmwalk-prepare jethro
+psql -c "DROP TABLE IF EXISTS nodes,ways,ways_refs,multipols,multipols_refs" osmwalk-prepare jethro
+psql -f ../postgis/tables.sql osmwalk-prepare jethro
+
 echo Copying nodes...
 COMMAND="COPY nodes (id,lat,lon,height,objtype,inside,intunnel,onbridge,loc) FROM STDIN;"
 ./todb n |  psql -c "$COMMAND" osmwalk-prepare jethro

@@ -162,9 +162,9 @@ PGconn * connectToDb(){
 
 
 int main (int argc, char ** argv){
-	char * mpInFilename = "../data/mp-stage2";
-	char * wayInFilename = "../data/ways-stage2";
-	char * nodeInFilename = "../data/nodes-stage2";
+	char * mpInFilename = "../data/mp-stage1";
+	char * wayInFilename = "../data/ways-stage1";
+	char * nodeInFilename = "../data/nodes-stage1";
 
 //	PGconn * conn;
 //	conn = connectToDb();

@@ -49,7 +49,7 @@ char *  node_cb(size_t len,char * inbuf, char * outbuf){
 char * way_cb(size_t len,char * inbuf, char * outbuf){
 	Premap__Way * way;
 	way = premap__way__unpack(NULL,len,inbuf);
-	printf("Way: %lld\n",way->id);
+	printf("Way: %lld %d\n",way->id,way->type);
 	if (tree_find(way_tree,way->id)||(way->type!=OBJTYPE__NONE))
 	{
 		printf("Found\n");
