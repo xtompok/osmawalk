@@ -1,27 +1,24 @@
 CC=gcc
 CFLAGS= -c -Wall -std=gnu99 -O2 -march=native  
 LDFLAGS= -lz -lm  
-SOURCE1= osmconvert.c 
-SOURCE2= merge-srtm.c
-OBJECT1=$(SOURCE1:.c=.o)
-OBJECT2=$(SOURCE2:.c=.o)
-EXECUTABLE1=osmconvert
-EXECUTABLE2=merge-srtm
 
-all: $(SOURCES) $(EXECUTABLE1) $(EXECUTABLE2)
+CONVERT_SRC=osmconvert.c 
+CONVERT_OBJ=$(CONVERT_SRC:.c=.o)
+CONVERT_EXE=osmconvert
+
+MERGE_SRC=merge-srtm.c
+MERGE_OBJ=$(MERGE_SRC:.c=.o)
+MERGE_EXE=merge-srtm
+
+all: $(CONVERT_EXE) $(MERGE_EXE)
 	
-$(EXECUTABLE1): $(OBJECT1) $@.c
-	$(CC) $(CFLAGS) $@.c -o $@.o
-	$(CC) $(LDFLAGS) $(OBJECTS1) $@.o -o $@
+$(CONVERT_EXE): $(CONVERT_OBJ)
+	$(CC) $(CONVERT_OBJ) -o $@ $(LDFLAGS)
 
-$(EXECUTABLE2): $(OBJECT2) $@.c
-	$(CC) $(CFLAGS) $@.c -o $@.o
-	$(CC) $(LDFLAGS) $(OBJECTS2) $@.o -o $@
-
-.c.o:
-	$(CC) $(CFLAGS) $< -o $@
-
+$(MERGE_EXE): $(MERGE_OBJ)
+	$(CC) $(MERGE_OBJ) -o $@ $(LDFLAGS)
 
 clean:
-	rm *.o
+	rm -f  *.o $(MERGE_EXE) $(CONVERT_EXE)
 
+.PHONY: all clean
