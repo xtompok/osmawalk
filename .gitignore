@@ -1,6 +1,7 @@
 # Swap files
 *.sw[a-z]
 *.bak
+*~
 
 # OSM files
 *.osm
@@ -40,6 +41,8 @@
 /compiled/search
 /compiled/parse
 /compiled/order
+/compiled/todb
+/compiled/csvtograph
 /QOsmWalk-build-Release
 /QOsmWalk-build-Debug
 /build-QOsmWalk*
