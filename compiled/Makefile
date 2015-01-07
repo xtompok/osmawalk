@@ -1,11 +1,16 @@
 CC=gcc
 PG=
-INC=-I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw -I/aux/jethro/libucw -I../ext-lib/libosm-0.3 
+# Hardcoded paths begin
+INC=-I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw -I/aux/jethro/libucw -I../ext-lib/libosm-0.3 -I../ext-lib/libcsv-3.0.3
+LDPATHS=-L/mnt/sda1/home/jethro/Programy/libucw/obj/ucw -L/aux/jethro/libucw/obj/ucw -L../ext-lib/libosm-0.3
+LIBCSV_C=../ext-lib/libcsv-3.0.3/libcsv.c
+#Hardcoded paths end
+
 CFLAGS= -c $(PG)  -ggdb3 -Wall -Wno-format -std=gnu99 -O2 -march=native $(INC)
 PFLAGS= -E -Wall -std=gnu99 -O3 -march=native -I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw
-LDFLAGS= $(PG) -lprotobuf-c -lucw-6.0 -lproj -lyaml -lm -L/mnt/sda1/home/jethro/Programy/libucw/obj/ucw -L/aux/jethro/libucw/obj/ucw 
+LDFLAGS= $(PG) $(LDPATHS) -lprotobuf-c -lucw-6.0 -lproj -lyaml -lm 
 
-FILTER_SRC=raster.c hashes.c utils.c mixnum.c include/premap.pb-c.c include/types.pb-c.c include/graph.pb-c.c
+FILTER_SRC=raster.c hashes.c utils.c mixnum.c include/premap.pb-c.c include/types.pb-c.c include/graph.pb-c.c searchgraph.c
 FILTER_OBJ=$(FILTER_SRC:.c=.o)
 FILTER_EXE=filter
 
@@ -20,18 +25,23 @@ SEARCH_EXE=search
 
 PARSE_SRC=yamlconf.c include/types.pb-c.c include/premap.pb-c.c
 PARSE_OBJ=$(PARSE_SRC:.c=.o)
-PARSE_LDFLAGS=-losm -L../ext-lib/libosm-0.3
+PARSE_LDFLAGS=-losm 
 PARSE_EXE=parse
 
 ORDER_SRC=include/premap.pb-c.c include/types.pb-c.c
 ORDER_OBJ=$(ORDER_SRC:.c=.o)
-ORDER_LDFLAGS= -L../ext-lib/libosm-0.3
+ORDER_LDFLAGS= 
 ORDER_EXE=order
 
 TODB_SRC=include/premap.pb-c.c include/types.pb-c.c
 TODB_OBJ=$(TODB_SRC:.c=.o)
-TODB_LDFLAGS= -L../ext-lib/libosm-0.3 -lpq
+TODB_LDFLAGS=-lpq
 TODB_EXE=todb
+
+CSVGRAPH_SRC=include/graph.pb-c.c include/types.pb-c.c searchgraph.c $(LIBCSV_C)
+CSVGRAPH_OBJ=$(CSVGRAPH_SRC:.c=.o)
+CSVGRAPH_LDFLAGS=
+CSVGRAPH_EXE=csvtograph
 
 # gcc -R -- runtime hledani knihovny
 all: protobuf $(SOURCES) $(FILTER_EXE) $(LIBSEARCH_LIB) $(SEARCH_EXE)
@@ -39,27 +49,31 @@ all: protobuf $(SOURCES) $(FILTER_EXE) $(LIBSEARCH_LIB) $(SEARCH_EXE)
 	
 $(FILTER_EXE): $(FILTER_OBJ) $@.c 
 	$(CC) $(CFLAGS) $@.c -o $@.o
-	$(CC) $(LDFLAGS) $(FILTER_OBJ) $@.o -o $@
+	$(CC) $(FILTER_OBJ) $@.o -o $@ $(LDFLAGS)
 
 $(LIBSEARCH_LIB): $(LIBSEARCH_OBJ) searchlib.c
 	$(CC) $(CFLAGS) -fpic searchlib.c -o $@.o
-	$(CC) $(LDFLAGS) -shared  $(LIBSEARCH_OBJ) $@.o -o $@
+	$(CC) -shared  $(LIBSEARCH_OBJ) $@.o -o $@ $(LDFLAGS)
 
 $(SEARCH_EXE): $(LIBSEARCH_LIB) $(SEARCH_OBJ) $@.c
 	$(CC) $(CFLAGS) $@.c -o $@.o
-	$(CC) $(LDFLAGS) $(SEARCH_LDFLAGS) $(SEARCH_OBJ) $@.o -o $@
+	$(CC) $(SEARCH_OBJ) $@.o -o $@ $(LDFLAGS) $(SEARCH_LDFLAGS) 
 	
 $(PARSE_EXE): $(PARSE_OBJ) $@.c 
 	$(CC) $(CFLAGS) $@.c -o $@.o
-	$(CC) $(LDFLAGS) $(PARSE_LDFLAGS) $(PARSE_OBJ) $@.o -o $@
+	$(CC) $(PARSE_OBJ) $@.o -o $@ $(LDFLAGS) $(PARSE_LDFLAGS)
 
 $(ORDER_EXE): $(ORDER_OBJ) $@.c 
 	$(CC) $(CFLAGS) $@.c -o $@.o
-	$(CC) $(LDFLAGS) $(ORDER_LDFLAGS) $(ORDER_OBJ) $@.o -o $@
+	$(CC) $(ORDER_OBJ) $@.o -o $@ $(LDFLAGS) $(ORDER_LDFLAGS)
 
 $(TODB_EXE): $(TODB_OBJ) $@.c 
 	$(CC) $(CFLAGS) $@.c -o $@.o
-	$(CC) $(LDFLAGS) $(TODB_LDFLAGS) $(TODB_OBJ) $@.o -o $@
+	$(CC) $(TODB_OBJ) $@.o -o $@ $(LDFLAGS) $(TODB_LDFLAGS)
+
+$(CSVGRAPH_EXE): $(CSVGRAPH_OBJ) $@.c 
+	$(CC) $(CFLAGS) $@.c -o $@.o
+	$(CC) $(CSVGRAPH_OBJ) $@.o -o $@ $(LDFLAGS) $(CSVGRAPH_LDFLAGS)
 
 .c.o:
 	$(CC) $(CFLAGS) -fpic $< -o $@
