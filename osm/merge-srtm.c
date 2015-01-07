@@ -81,4 +81,4 @@ int main(int argc, char ** argv){
 	fwrite(map,len,1,OUT);
 	fclose(OUT);
 
-}ac
+}
