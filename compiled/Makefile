@@ -1,8 +1,8 @@
 CC=gcc
 PG=
 # Hardcoded paths begin
-INC=-I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw -I/aux/jethro/libucw -I../ext-lib/libosm-0.3 -I../ext-lib/libcsv-3.0.3
-LDPATHS=-L/mnt/sda1/home/jethro/Programy/libucw/obj/ucw -L/aux/jethro/libucw/obj/ucw -L../ext-lib/libosm-0.3
+INC=-I/usr/include/libucw -I../ext-lib/libucw-6.0 -I../ext-lib/libosm-0.3 -I../ext-lib/libcsv-3.0.3
+LDPATHS=-L../ext-lib/libucw-6.0/obj/ucw -L../ext-lib/libosm-0.3
 LIBCSV_C=../ext-lib/libcsv-3.0.3/libcsv.c
 #Hardcoded paths end
 
