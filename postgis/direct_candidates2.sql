@@ -1,4 +1,9 @@
-﻿DROP FUNCTION make_candidates(integer,integer,integer,integer);
+﻿DROP INDEX IF EXISTS nodes_index_lon;
+DROP INDEX IF EXISTS nodes_index_lat;
+CREATE INDEX nodes_index_lon ON nodes(lon);
+CREATE INDEX nodes_index_lat ON nodes(lat);
+
+DROP FUNCTION make_candidates(integer,integer,integer,integer);
 CREATE OR REPLACE FUNCTION make_candidates(minx int,miny int,maxx int,maxy int)
 RETURNS TABLE (id1 BIGINT,id2 BIGINT,loc1 GEOMETRY,loc2 GEOMETRY) AS '
  SELECT n1.id AS id1, n2.id AS id2, n1.loc AS loc1, n2.loc AS loc2
@@ -26,3 +31,4 @@ CREATE TABLE direct_candidates AS (
  );
 
 --SELECT * FROM make_candidates(444358,5532215,445458,5535Ļ315);
+CREATE INDEX ON direct_candidates USING GIST(geom);

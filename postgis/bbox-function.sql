@@ -14,6 +14,7 @@ RETURNS SETOF ow_bbox AS '
 	dx INT; 
 	dy INT;
 	line ow_bbox ;
+	memminy INT;
 	loopx INT;
 	loopy INT;
   BEGIN
@@ -23,6 +24,7 @@ RETURNS SETOF ow_bbox AS '
     SELECT INTO maxy MAX(lat) FROM nodes;
     dx := $1/2;
     dy := $1/2;
+    memminy := miny;
 
     loopx = ((maxx-minx)/dx);
     loopy = ((maxy-miny)/dy);
@@ -37,6 +39,7 @@ RETURNS SETOF ow_bbox AS '
 	RETURN NEXT line;
       END LOOP;
       minx := minx + dx;
+      miny := memminy;
     END LOOP;
     RETURN;
   END;
