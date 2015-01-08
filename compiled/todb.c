@@ -9,7 +9,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <libpq-fe.h>
+#include <postgresql/libpq-fe.h>
 
 #include <ucw/gary.h>
 #include <osm.h>
