@@ -18,6 +18,4 @@ step bbox-function
 step direct_candidates2
 step ok_candidates2
 step direct_filter
-./export-direct.sh
-./export-nodes.sh
-./export-ways.sh
+./export.sh
