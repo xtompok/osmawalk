@@ -1,7 +1,26 @@
-#!/bin/sh
+#!/bin/bash
 
-USERNAME=jethro
+USERNAME=$USER
 DATABASE=osmwalk-prepare
+
+while [[ $# > 0 ]]
+do
+key="$1"
+
+case $key in
+    -h|--help)
+    echo $'-h|--help \n-u|--username <db_username>'
+    exit 0
+    shift
+    ;;
+    -u|--username)
+    shift
+    USERNAME="$1"
+    shift
+    ;;
+esac
+shift
+done
 
 psql -c "DROP TABLE IF EXISTS nodes,ways,ways_refs,multipols,multipols_refs" $DATABASE $USERNAME
 psql -f ../postgis/tables.sql $DATABASE $USERNAME

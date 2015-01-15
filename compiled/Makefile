@@ -1,7 +1,7 @@
 CC=gcc
 PG=
 # Hardcoded paths begin
-INC=-I/usr/include/libucw -I../ext-lib/libucw-6.0 -I../ext-lib/libosmpbf -I../ext-lib/libcsv-3.0.3
+INC=-I/usr/include/libucw -I../ext-lib/libucw-6.0 -I../ext-lib/libosmpbf -I../ext-lib/libcsv-3.0.3 -I/usr/include/postgresql
 LDPATHS=-L../ext-lib/libucw-6.0/obj/ucw -L../ext-lib/libosmpbf
 LIBCSV_C=../ext-lib/libcsv-3.0.3/libcsv.c
 #Hardcoded paths end
