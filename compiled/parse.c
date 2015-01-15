@@ -304,7 +304,13 @@ int main(int argc, char **argv) {
 	file_type = OSM_FTYPE_XML;
 	
 	pj_wgs84 = pj_init_plus("+proj=longlat +datum=WGS84 +no_defs");
-	pj_utm = pj_init_plus("+proj=utm +zone=33 +ellps=WGS84 +units=m +no_defs");
+	pj_utm = pj_init_plus("+proj=tmerc +zone=33 +ellps=WGS84 +units=m +no_defs");
+
+	double lat = 49;
+	double lon = 15;
+
+	wgs2utm(&lon,&lat);
+	printf("Converted coords: lat: %lf, lon: %lf\n",lat,lon);
 
 	conf.desc = objtype__descriptor;
 	GARY_INIT(conf.type,0);
