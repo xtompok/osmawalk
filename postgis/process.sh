@@ -1,9 +1,12 @@
 #!/bin/sh
 
+USERNAME=jethro
+DATABASE=osmwalk-prepare
+
 step(){
 	echo
 	echo $1
-	(time psql -v VERBOSITY=verbose -e -f "${1}.sql" osmwalk-prepare jethro) 2>&1
+	(time psql -v VERBOSITY=verbose -e -f "${1}.sql" $DATABASE $USERNAME) 2>&1
 }
 
 step duplicate_nodes
