@@ -38,12 +38,12 @@ FILE * nodeFile;
 FILE * mpFile;
 
 
-projPJ pj_wgs84;
-projPJ pj_utm;
+projPJ proj_wgs84;
+projPJ proj_utm;
 
 int utm2wgs(double * lon, double * lat){
 	int res;
-	res= pj_transform(pj_utm,pj_wgs84,1,1,lon,lat,NULL);
+	res= pj_transform(proj_utm,proj_wgs84,1,1,lon,lat,NULL);
 	*lon = (*lon * 180)/M_PI;
 	*lat = (*lat * 180)/M_PI;
 	return res;
@@ -51,7 +51,7 @@ int utm2wgs(double * lon, double * lat){
 int wgs2utm(double * lon, double * lat){
 	*lon = (*lon/180)*M_PI;
 	*lat = (*lat/180)*M_PI;
-	return pj_transform(pj_wgs84,pj_utm,1,1,lon,lat,NULL);
+	return pj_transform(proj_wgs84,proj_utm,1,1,lon,lat,NULL);
 }
 
 struct height_map_t heights;
@@ -303,8 +303,8 @@ int main(int argc, char **argv) {
 	
 	file_type = OSM_FTYPE_XML;
 	
-	pj_wgs84 = pj_init_plus("+proj=longlat +datum=WGS84 +no_defs");
-	pj_utm = pj_init_plus("+proj=tmerc +zone=33 +ellps=WGS84 +units=m +no_defs");
+	proj_wgs84 = pj_init_plus("+proj=longlat +datum=WGS84 +no_defs");
+	proj_utm = pj_init_plus("+proj=utm +zone=33 +ellps=WGS84 +units=m +no_defs");
 
 	double lat = 49;
 	double lon = 15;
