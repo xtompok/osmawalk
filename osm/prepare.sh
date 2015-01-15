@@ -64,6 +64,8 @@ fi
 if [ $CUT = 1 ]
 then
 	./osmconvert czech_republic.osm -b=$MINLON,$MINLAT,$MAXLON,$MAXLAT >praha.osm
+else
+	cp czech_republic.osm praha.osm
 fi
 
 if [ $MERGE = 1 ]
