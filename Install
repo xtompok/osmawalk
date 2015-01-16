@@ -1,0 +1,95 @@
+
+-------some of these packages might be unnecessary ------
+sudo apt-get install build-essential libxml2-dev libgeos++-dev libpq-dev libbz2-dev libtool automake curl zip unzip
+---------------------------------------------------------
+
+sudo apt-get install postgresql postgis postgresql-9.3-postgis-2.1
+sudo apt-get install libprotobuf-c0-dev protobuf-c-compiler libprotobuf-dev protobuf-compiler 
+sudo apt-get install libproj-dev libyaml-dev python-yaml python-pyproj python-protobuf python-imposm-parser python-networkx
+
+-------get ucw -------
+
+    1, download libucw-6.0.tar.gz from http://www.ucw.cz/libucw/download/
+    2, extract into ext-lib folder
+    4, ./configure
+    5, make
+    6, cp obj/ucw/autoconf.h ucw/
+
+-------get OSM-binary-------
+    1, wget http://stuff.krakonos.org/files/osm-binary.tar.gz
+    2, extract to ext-lib folder
+-------get libosm-------
+    1, cd ext-lib
+    2, git clone https://github.com/vetinari/libosmpbf
+    3, cd libosmpbf
+    4, make
+
+-------get libcsv-------
+
+    1, download http://sourceforge.net/projects/libcsv/
+    2, extract into ext-lib folder
+    3, ./configure 
+    4, make && make check
+
+-------get proj-4.0-------
+    1, cd ext-lib
+    2, wget http://download.osgeo.org/proj/proj-4.8.0.tar.gz
+    3, tar -xzvf wget http://download.osgeo.org/proj/proj-4.8.0.tar.gz
+    4, cd proj-4.8.0/src
+    5, vim PJ_tmerc.c
+    6, substitute lines 7 and 8 with 
+        PROJ_HEAD(utm, "Transverse Mercator") "\n\tCyl, Sph&Ell";
+        PROJ_HEAD(tmerc, "Universal Transverse Mercator (UTM)")
+    7, subsitute lines 154-156 with
+        ENTRY1(utm, en)
+        ENDENTRY(setup(P))
+        ENTRY1(tmerc, en)
+    6, make
+
+
+-------Compile the project-------
+    cd compiled
+    make
+    make postgress
+    make parse
+
+-------Get attitude data for Czech Republic-------
+To the osm folder have to be copied hgt files containing attitude info
+
+    cd osm
+    wget --accept-regex "http://dds.cr.usgs.gov/srtm/version2_1/SRTM3/Eurasia/N(48|49|50|51)E01[12345678].hgt.zip" -rl 0 -nH --cut-dirs=20 http://dds.cr.usgs.gov/srtm/version2_1/SRTM3/Eurasia/
+    unzip '*.hgt.zip' && rm *.hgt.zip
+
+    make
+    ./prepare.sh
+
+------Prepare database------
+
+    1, Create database "osmwalk-prepare"
+    2, give your user access <db_username> rights to the "osmwalk-prepare" database
+    3, Also postgis has to be initialize: 
+        CREATE EXTENSION postgis;
+        CREATE EXTENSION postgis_topology;
+        CREATE EXTENSION fuzzystrmatch;
+        CREATE EXTENSION postgis_tiger_geocoder;
+
+
+-------Perform filtering-------
+    cd scripts/filter
+
+    ./protoc.sh
+    ./parse.py
+
+
+cd compiled
+export LD_LIBRARY_PATH=../ext-lib/libucw-6.0/run/lib:../ext-lib/libosmpbf:../ext-lib/proj-4.8.0/src/.libs:.
+./parse ../osm/praha.osm
+./todb.sh -u db_username
+
+cd ../postgis
+./process.sh -u db_username
+./export.sh -u db_username
+
+cd ../compiled
+./csvtograph ../postgis/nodes.csv ../postgis/ways.csv ../postgis/direct.csv
+cp postgis-graph.pbf ../data/praha-graph.pbf
