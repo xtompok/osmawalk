@@ -45,6 +45,37 @@ double calcTime(Graph__Graph * graph, struct config_t conf,Graph__Edge * edge){
 	return (edge->dist+abs(dh)*(dh>0?conf.upscale:conf.downscale))/speed;
 }
 
+void printMapBBox(struct search_data_t data){
+	Graph__Graph * graph;
+	double minlon;
+	double minlat;
+	double maxlon;
+	double maxlat;
+
+	graph = data.graph;
+	
+	minlon = graph->vertices[0]->lon;
+	maxlon = graph->vertices[0]->lon;
+	minlat = graph->vertices[0]->lat;
+	maxlat = graph->vertices[0]->lat;
+	for (int i=0;i<graph->n_vertices;i++){
+		double lon;
+		double lat;
+		lon = graph->vertices[i]->lon;
+		lat = graph->vertices[i]->lat;
+
+		minlon=(lon<minlon)?lon:minlon;
+		minlat=(lat<minlat)?lat:minlat;
+		maxlon=(lon>maxlon)?lon:maxlon;
+		maxlat=(lat>maxlat)?lat:maxlat;
+	}
+
+	printf("Bounding box in UTM: (%lf,%lf), (%lf,%lf)\n",minlat,minlon,maxlat,maxlon);
+	utm2wgs(data,&minlon,&minlat);
+	utm2wgs(data,&maxlon,&maxlat);
+	printf("Bounding box in WGS-84: (%lf,%lf), (%lf,%lf)\n",minlat,minlon,maxlat,maxlon);
+}
+
 
 // Loading 
 struct config_t parseConfigFile(char * filename){

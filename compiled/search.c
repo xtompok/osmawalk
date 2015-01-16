@@ -14,6 +14,9 @@
 #include "searchlib.h"
 #include "writegpx.h"
 
+char dataFileName[] = "../data/praha-graph.pbf";
+char configFileName[] = "../config/speeds.yaml";
+
 // Print results of searching way
 void printResults(struct search_result_t result){
 	if (result.n_points==0){
@@ -59,7 +62,7 @@ int main (int argc, char ** argv){
 		tlat = atof(argv[5]);
 		tlon = atof(argv[6]);
 	}else {
-		data = prepareData("../config/speeds.yaml","../data/praha-graph.pbf"); 
+		data = prepareData(configFileName,dataFileName); 
 		flat = atof(argv[1]);
 		flon = atof(argv[2]);
 		tlat = atof(argv[3]);
@@ -67,6 +70,7 @@ int main (int argc, char ** argv){
 	}
 
 	printf("Graph has %d vertices and %d edges\n",data.graph->n_vertices,data.graph->n_edges);
+	printMapBBox(data);
 
 	struct search_result_t result;
 	result = findPath(data,flat,flon,tlat,tlon);
