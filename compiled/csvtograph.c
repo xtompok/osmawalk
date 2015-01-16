@@ -84,6 +84,7 @@ void way_item_cb(void * item,size_t len,void * data){
 	struct nodesIdxNode * n;
 	switch (p_struct->state) {
 		case 0: //id
+			p_struct->tmpedge->has_osmid = 1;
 			p_struct->tmpedge->osmid = num;
 			break;
 		case 1: //type

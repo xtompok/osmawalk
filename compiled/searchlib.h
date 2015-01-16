@@ -224,4 +224,6 @@ struct search_data_t prepareData(char * configName, char * dataName);
 struct search_result_t findPath(struct search_data_t data,
 		double fromLat, double fromLon, double toLat, double toLon);
 
+void printMapBBox(struct search_data_t data);
+
 #endif

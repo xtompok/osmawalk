@@ -68,17 +68,27 @@ struct height_map_t loadHeights(char * filename){
 	fseek(IN,0,SEEK_END);
 	len = ftell(IN);
 	rewind(IN);
-	fread(&map.minlon,1,sizeof(int),IN);
-	fread(&map.minlat,1,sizeof(int),IN);
-	fread(&map.maxlon,1,sizeof(int),IN);
-	fread(&map.maxlat,1,sizeof(int),IN);
+	if(fread(&map.minlon,1,sizeof(int),IN)!=sizeof(int)){
+		printf("Unsuccessfull read of minlon\n");
+	};
+	if(fread(&map.minlat,1,sizeof(int),IN)!=sizeof(int)){
+		printf("Unsuccessfull read of minlat\n");
+	};
+	if(fread(&map.maxlon,1,sizeof(int),IN)!=sizeof(int)){
+		printf("Unsuccessfull read of maxlon\n");
+	};
+	if(fread(&map.maxlat,1,sizeof(int),IN)!=sizeof(int)){
+		printf("Unsuccessfull read of maxlat\n");
+	};
 	
 	printf("Heights from N %d E %d to N %d E %d\n",map.minlat,map.minlon,map.maxlat,map.maxlon);
 
 	map.map = malloc(sizeof(int)*(len/2));
 	for (int i=0;i<len/2;i++){
 		map.map[i]=0;
-		fread(map.map+i,1,2,IN);
+		if (fread(map.map+i,1,2,IN)!=2){
+			printf("Error loading height\n");
+		};
 	}
 	return map;
 }
@@ -297,9 +307,7 @@ int main(int argc, char **argv) {
 		printf("Usage: %s file.osm\n",argv[0]);
 		exit(1);
 	}
-	int i;
 	OSM_File *F;
-	OSM_Data *O;
 	
 	file_type = OSM_FTYPE_XML;
 	
@@ -337,7 +345,7 @@ int main(int argc, char **argv) {
 	if (F == NULL)
 		return 1;
 
-	O = osm_parse(F, OSMDATA_REL, NULL, node, way, relation);    
+	osm_parse(F, OSMDATA_REL, NULL, node, way, relation);    
 	osm_close(F);
 	
 	fclose(wayFile);

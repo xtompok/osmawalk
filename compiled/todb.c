@@ -128,7 +128,6 @@ int loadFile (char * inFilename,
 //	outbuf = mmap(NULL,statbuf.st_size,PROT_READ|PROT_WRITE,MAP_SHARED,fdout,0);
 
 	uint8_t * inbufp;
-	char status;
 	inbufp = inbuf;
 //	outbufp = outbuf;
 	fprintf(stderr,"File size: %d\n",statbuf.st_size);
@@ -136,7 +135,7 @@ int loadFile (char * inFilename,
 		size_t len;
 		memcpy(&len,inbufp,sizeof(size_t));
 		inbufp += sizeof(size_t);
-		status = callback(len,inbufp);
+		callback(len,inbufp);
 		inbufp+=len;
 	}
 	munmap(inbuf,statbuf.st_size);

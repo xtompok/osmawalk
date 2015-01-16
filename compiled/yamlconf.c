@@ -135,7 +135,7 @@ int parseMapConfigFile(char * filename, struct mapconfig_t * conf,
 	for (yaml_node_pair_t * type=root->data.mapping.pairs.start;
 			type < root->data.mapping.pairs.top; type++){
 		anode = yaml_document_get_node(&document,type->key);
-		mapConfItem.name = anode->data.scalar.value;
+		mapConfItem.name = (char *) anode->data.scalar.value;
 		printf("%s\n",mapConfItem.name);
 
 		yaml_node_t * priomap;
@@ -147,7 +147,7 @@ int parseMapConfigFile(char * filename, struct mapconfig_t * conf,
 		for (yaml_node_pair_t * prio=priomap->data.mapping.pairs.start;
 				prio < priomap->data.mapping.pairs.top; prio++){
 			anode = yaml_document_get_node(&document,prio->key);
-			mapConfItem.priority=atoi(anode->data.scalar.value);
+			mapConfItem.priority=atoi((char *)anode->data.scalar.value);
 			printf("	%d\n",mapConfItem.priority);
 			yaml_node_t * tagmap;
 			tagmap = yaml_document_get_node(&document,prio->value);
@@ -158,7 +158,7 @@ int parseMapConfigFile(char * filename, struct mapconfig_t * conf,
 			for (yaml_node_pair_t * atag=tagmap->data.mapping.pairs.start;
 					atag < tagmap->data.mapping.pairs.top; atag++){
 				anode = yaml_document_get_node(&document,atag->key);
-				mapConfItem.key = anode->data.scalar.value;
+				mapConfItem.key =(char *) anode->data.scalar.value;
 				printf("		%s\n",mapConfItem.key);
 				yaml_node_t * vallist;
 				vallist = yaml_document_get_node(&document,atag->value);
@@ -166,12 +166,12 @@ int parseMapConfigFile(char * filename, struct mapconfig_t * conf,
 					for (yaml_node_item_t *  val=vallist->data.sequence.items.start;
 							val < vallist->data.sequence.items.top; val++){
 						anode = yaml_document_get_node(&document,*val);
-						mapConfItem.value=anode->data.scalar.value;
+						mapConfItem.value=(char *)anode->data.scalar.value;
 						printf("			%s\n",mapConfItem.value);
 						addItemToMapConf(conf,mapConfItem);
 					}
 				} else if (vallist->type == YAML_SCALAR_NODE){ 
-					mapConfItem.value=vallist->data.scalar.value;
+					mapConfItem.value=(char *)vallist->data.scalar.value;
 					printf("			%s\n",mapConfItem.value);
 					
 					addItemToMapConf(conf,mapConfItem);

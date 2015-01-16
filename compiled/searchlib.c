@@ -47,10 +47,10 @@ double calcTime(Graph__Graph * graph, struct config_t conf,Graph__Edge * edge){
 
 void printMapBBox(struct search_data_t data){
 	Graph__Graph * graph;
-	double minlon;
-	double minlat;
-	double maxlon;
-	double maxlat;
+	int64_t minlon;
+	int64_t minlat;
+	int64_t maxlon;
+	int64_t maxlat;
 
 	graph = data.graph;
 	
@@ -59,8 +59,8 @@ void printMapBBox(struct search_data_t data){
 	minlat = graph->vertices[0]->lat;
 	maxlat = graph->vertices[0]->lat;
 	for (int i=0;i<graph->n_vertices;i++){
-		double lon;
-		double lat;
+		int64_t lon;
+		int64_t lat;
 		lon = graph->vertices[i]->lon;
 		lat = graph->vertices[i]->lat;
 
@@ -70,10 +70,14 @@ void printMapBBox(struct search_data_t data){
 		maxlat=(lat>maxlat)?lat:maxlat;
 	}
 
-	printf("Bounding box in UTM: (%lf,%lf), (%lf,%lf)\n",minlat,minlon,maxlat,maxlon);
-	utm2wgs(data,&minlon,&minlat);
-	utm2wgs(data,&maxlon,&maxlat);
-	printf("Bounding box in WGS-84: (%lf,%lf), (%lf,%lf)\n",minlat,minlon,maxlat,maxlon);
+	printf("Bounding box in UTM: (%lld,%lld), (%lld,%lld)\n",minlat,minlon,maxlat,maxlon);
+	double fminlon=minlon;
+	double fminlat=minlat;
+	double fmaxlon=maxlon;
+	double fmaxlat=maxlat;
+	utm2wgs(data,&fminlon,&fminlat);
+	utm2wgs(data,&fmaxlon,&fmaxlat);
+	printf("Bounding box in WGS-84: (%lf,%lf), (%lf,%lf)\n",fminlat,fminlon,fmaxlat,fmaxlon);
 }
 
 
@@ -231,6 +235,7 @@ struct config_t parseConfigFile(char * filename){
 	yaml_parser_delete(&parser);
 
 	int wayIdx;
+	wayIdx = -1;
 	for (int i=0;i<conf.desc.n_values;i++){
 		if (strcmp(conf.desc.values[i].name,"WAY")==0){
 			wayIdx = i;
@@ -337,6 +342,7 @@ int findNearestVertex(Graph__Graph * graph, double lon, double lat){
 	double minDist;
 	int minIdx;
 	minDist = DBL_MAX;
+	minIdx = -1;
 	for (int i=0;i<graph->n_vertices;i++){
 		double dist;
 		double dlon;
