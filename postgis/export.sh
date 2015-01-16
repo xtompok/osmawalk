@@ -1,6 +1,25 @@
-#!/bin/sh
-USER=jethro
+#!/bin/bash
+USERNAME=$USER
 DATABASE=osmwalk-prepare
+
+while [[ $# > 0 ]]
+do
+key="$1"
+
+case $key in
+    -h|--help)
+    echo $'-h|--help \n-u|--username <db_username>'
+    exit 0
+    shift
+    ;;
+    -u|--username)
+    shift
+    USERNAME="$1"
+    shift
+    ;;
+esac
+shift
+done
 
 COMMAND="COPY direct(id1,id2) TO STDOUT DELIMITER ';' CSV HEADER;"
 psql -c "$COMMAND" $DATABASE $USERNAME >direct.csv  
