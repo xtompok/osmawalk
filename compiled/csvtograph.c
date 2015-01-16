@@ -81,6 +81,7 @@ void way_item_cb(void * item,size_t len,void * data){
 		return;
 	int64_t num;
 	num = strtoll((char *)item,NULL,10);
+	struct nodesIdxNode * n;
 	switch (p_struct->state) {
 		case 0: //id
 			p_struct->tmpedge->osmid = num;
@@ -89,10 +90,22 @@ void way_item_cb(void * item,size_t len,void * data){
 			p_struct->tmpedge->type = num;
 			break;
 		case 2: //from
-			p_struct->tmpedge->vfrom = nodesIdx_find(num)->idx;
+			n = nodesIdx_find(num);
+			if (!n){
+				p_struct->ok=0;
+				printf("Wrong from id: %lld",num);
+				break;
+			}
+			p_struct->tmpedge->vfrom = n->idx;
 			break;
 		case 3: //to
-			p_struct->tmpedge->vto = nodesIdx_find(num)->idx;
+			n = nodesIdx_find(num);
+			if (!n){
+				p_struct->ok=0;
+				printf("Wrong to id: %lld",num);
+				break;
+			}
+			p_struct->tmpedge->vto = n->idx;
 			break;
 
 	}
