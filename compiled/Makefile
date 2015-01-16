@@ -6,7 +6,7 @@ LDPATHS=-L../ext-lib/libucw-6.0/obj/ucw -L../ext-lib/libosmpbf
 LIBCSV_C=../ext-lib/libcsv-3.0.3/libcsv.c
 #Hardcoded paths end
 
-CFLAGS= -c $(PG)  -ggdb3 -Wall -Wno-format -std=gnu99 -O2 -march=native $(INC)
+CFLAGS= -c $(PG)  -ggdb3 -Wall -Wno-format -Wno-unused-function -std=gnu99 -O2 -march=native $(INC)
 PFLAGS= -E -Wall -std=gnu99 -O3 -march=native -I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw
 LDFLAGS= $(PG) $(LDPATHS) -lprotobuf-c -lucw-6.0 -lproj -lyaml -lm 
 
@@ -44,8 +44,9 @@ CSVGRAPH_LDFLAGS=
 CSVGRAPH_EXE=csvtograph
 
 # gcc -R -- runtime hledani knihovny
-all: protobuf $(FILTER_EXE) $(LIBSEARCH_LIB) $(SEARCH_EXE)
-postgress: $(PARSE_EXE) $(ORDER_EXE) $(TODB_EXE) $(CSVGRAPH_EXE)
+all: protobuf $(LIBSEARCH_LIB) $(SEARCH_EXE)
+postgress: $(PARSE_EXE) $(TODB_EXE) $(CSVGRAPH_EXE)
+old: $(FILTER_EXE) $(ORDER_EXE)
 
 	
 $(FILTER_EXE): $(FILTER_OBJ) $@.c 
@@ -83,9 +84,9 @@ preprocess: filter.c
 	$(CC) $(PFLAGS) $< -o $@
 
 clean:
-	rm *.o *.so include/*.o
+	rm -f *.o *.so include/*.o
 
-protobuf:
+protobuf: ../config/types.proto ../config/premap.proto ../config/graph.proto 
 	mkdir -p include
 	protoc-c --proto_path ../config/ ../config/types.proto --c_out include/
 	protoc-c --proto_path ../config/ ../config/premap.proto --c_out include/
