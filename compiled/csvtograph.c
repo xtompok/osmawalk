@@ -93,7 +93,7 @@ void way_item_cb(void * item,size_t len,void * data){
 			n = nodesIdx_find(num);
 			if (!n){
 				p_struct->ok=0;
-				printf("Wrong from id: %lld",num);
+				printf("Wrong from id: %lld\n",num);
 				break;
 			}
 			p_struct->tmpedge->vfrom = n->idx;
@@ -102,7 +102,7 @@ void way_item_cb(void * item,size_t len,void * data){
 			n = nodesIdx_find(num);
 			if (!n){
 				p_struct->ok=0;
-				printf("Wrong to id: %lld",num);
+				printf("Wrong to id: %lld\n",num);
 				break;
 			}
 			p_struct->tmpedge->vto = n->idx;
@@ -244,7 +244,7 @@ int main (int argc, char ** argv){
 	struct vertexedges_t * vedges;
 	vedges = makeVertexEdges(graph);
 	largestComponent(graph,vedges);
-	saveSearchGraph(graph,"postgis-graph.pbf");
+	saveSearchGraph(graph,"../data/postgis-graph.pbf");
 
 
 }
