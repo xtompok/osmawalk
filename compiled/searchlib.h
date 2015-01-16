@@ -84,6 +84,7 @@ struct point_t {
 	double lon;
 	int height;
 	int type;	
+	uint64_t wayid;
 };
 
 /* @struct search_result_t

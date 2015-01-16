@@ -473,6 +473,7 @@ struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * d
 		results[count].lon = lon;
 		results[count].height = graph->vertices[idx]->height;
 		results[count].type = graph->edges[dijArray[idx].fromEdgeIdx]->type;
+		results[count].wayid = graph->edges[dijArray[idx].fromEdgeIdx]->osmid;
 		idx = dijArray[idx].fromIdx;
 		count++;
 	}
