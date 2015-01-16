@@ -50,6 +50,7 @@ done
 
 if [ $DOWNLOAD_OSM = 1 ]
 then
+	echo "Downloading OSM data for Czech Republic"
 	posledni=`curl "http://osm.kyblsoft.cz/archiv/last_dates.txt" | grep gz | cut -d"	" -f2`
 	echo "Posledni data z $posledni, stahuji..."
 
@@ -58,11 +59,14 @@ fi
 
 if [ $DOWNLOAD_HGT = 1 ]
 then
-	echo "Downloading SRTM data not yet implemented"
+	echo "Downloading SRTM data for Czech Republic"
+    wget --accept-regex "http://dds.cr.usgs.gov/srtm/version2_1/SRTM3/Eurasia/N(48|49|50|51)E01[12345678].hgt.zip" -rl 0 -nH --cut-dirs=20 http://dds.cr.usgs.gov/srtm/version2_1/SRTM3/Eurasia/
+    unzip '*.hgt.zip' && rm *.hgt.zip
 fi
 
 if [ $CUT = 1 ]
 then
+	echo "Cutting rectangle from OSM data"
 	./osmconvert czech_republic.osm -b=$MINLON,$MINLAT,$MAXLON,$MAXLAT >praha.osm
 else
 	cp czech_republic.osm praha.osm
@@ -70,5 +74,6 @@ fi
 
 if [ $MERGE = 1 ]
 then
+	echo "Merging SRTM files"
 	./merge-srtm $MINLAT $MINLON $MAXLAT $MAXLON
 fi
