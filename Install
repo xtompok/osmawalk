@@ -36,13 +36,8 @@ sudo apt-get install libproj-dev libyaml-dev python-yaml python-pyproj python-pr
     make
     make postgress
 
--------Get altitude data for Czech Republic-------
-To the osm folder have to be copied hgt files containing attitude info
-
+-------Prepare data for Czech Republic-------
     cd osm
-    wget --accept-regex "http://dds.cr.usgs.gov/srtm/version2_1/SRTM3/Eurasia/N(48|49|50|51)E01[12345678].hgt.zip" -rl 0 -nH --cut-dirs=20 http://dds.cr.usgs.gov/srtm/version2_1/SRTM3/Eurasia/
-    unzip '*.hgt.zip' && rm *.hgt.zip
-
     make
     ./prepare.sh
 
