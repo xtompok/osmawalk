@@ -22,7 +22,6 @@ esac
 shift
 done
 
-psql -c "DROP TABLE IF EXISTS nodes,ways,ways_refs,multipols,multipols_refs" $DATABASE $USERNAME
 psql -f ../postgis/tables.sql $DATABASE $USERNAME
 
 echo Copying nodes...
