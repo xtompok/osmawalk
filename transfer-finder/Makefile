@@ -1,8 +1,13 @@
+# Hardcoded paths begin
+INC=-I/usr/include/libucw -I../ext-lib/libucw-6.0 
+LDPATHS=-L../ext-lib/libucw-6.0/obj/ucw
+#Hardcoded paths end
+
 CC=gcc
 PG=
-CFLAGS= -c $(PG)  -ggdb3 -Wall -Wno-format -std=gnu99 -O2 -march=native -I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw -I/aux/jethro/libucw
-PFLAGS= -E -Wall -std=gnu99 -O3 -march=native -I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw
-LDFLAGS= $(PG) -lprotobuf-c -lucw-6.0 -lproj -lyaml -lm -L/mnt/sda1/home/jethro/Programy/libucw/obj/ucw -L/aux/jethro/libucw/obj/ucw 
+CFLAGS= -c $(PG)  -ggdb3 -Wall -Wno-format -std=gnu99 -O2 -march=native $(INC) 
+PFLAGS= -E -Wall -std=gnu99 -O3 -march=native $(INC)
+LDFLAGS= $(PG) -lprotobuf-c -lucw-6.0 -lproj -lyaml -lm $(LDPATHS) 
 C_DIR=../compiled
 SOURCES2= $(C_DIR)/writegpx.c $(C_DIR)/searchlib.c $(C_DIR)/include/types.pb-c.c $(C_DIR)/include/graph.pb-c.c
 OBJECTS2=$(SOURCES2:.c=.o)
@@ -21,9 +26,6 @@ $(EXECUTABLE2): $(OBJECTS2) $@.c
 
 .c.o:
 	$(CC) $(CFLAGS) $< -o $@
-
-preprocess: filter.c
-	$(CC) $(PFLAGS) $< -o $@
 
 clean:
 	rm *.o include/*.o
