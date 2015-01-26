@@ -52,33 +52,44 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 		lastIdx = 0;
 		nodescnt = 0;
 
+		// Set mark to 2 to already done components
 		for (int i =0;i<GARY_SIZE(seen);i++)
 			if (seen[i])
 				seen[i]=2;
+
+		nodescnt++;
 		seen[queue[0]]=1;
 		
+		// BFS over component 
 		while (lastIdx >= 0){
 			int vIdx;
 			vIdx = queue[lastIdx--];
 			for (int i=0;i<vertexEdges[vIdx].n_edges;i++){
 				int neigh;
 				neigh = graph->edges[vertexEdges[vIdx].edges[i]]->vto;
-				if (!seen[neigh]){
-					nodescnt++;
-					seen[neigh]=1;
-					queue[++lastIdx]=neigh;
-				}
+				
+				if (seen[neigh])
+					continue;
+				
+				nodescnt++;
+				seen[neigh]=1;
+				queue[++lastIdx]=neigh;	
 			}
 		}
 
+		// Find next root for BFS
 		lastIdx = 0;
 		while(lastIdx<GARY_SIZE(seen)&&seen[lastIdx]){
 //			printf("%d\n",seen[lastIdx]);
 			lastIdx++;
 		}
-		if (lastIdx==GARY_SIZE(seen))
-			break;
 		queue[0]=lastIdx;
+	
+		// If none component has more than half vertices, return last
+		if (lastIdx==GARY_SIZE(seen)){
+			printf("None component larger then V/2 found, using last\n");
+			break;
+		}
 	}
 
 	//printf("Nodes: %d\n",nodescnt);
@@ -88,6 +99,9 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 	
 	int * newVertIdxs;
 	newVertIdxs = malloc(sizeof(int)*graph->n_vertices);
+	for (int i=0;i<graph->n_vertices;i++){
+		newVertIdxs[i]=-1;
+	}
 	int oldIdx;
 	oldIdx = 0;
 	for (int i=0;i<nodescnt;i++){
@@ -95,13 +109,14 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 			oldIdx++;
 		newVertices[i]=graph->vertices[oldIdx];
 		newVertIdxs[oldIdx]=i;
-	//	printf("%d -> %d\n",oldIdx,i);
 		oldIdx++;
-
 	}
+
+	// Set new vertices
 	graph->n_vertices = nodescnt;
 	graph->vertices = newVertices;
 
+	// Update edges
 	Graph__Edge ** newEdges;
 	GARY_INIT(newEdges,0);
 	for (int i=0;i<graph->n_edges;i++){
@@ -109,6 +124,12 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 			Graph__Edge ** ePtr;
 			ePtr = GARY_PUSH(newEdges);
 			*ePtr = graph->edges[i];
+			if (newVertIdxs[(*ePtr)->vfrom]<0){
+				printf("%d -> -1\n",(*ePtr)->vfrom);
+			}
+			if (newVertIdxs[(*ePtr)->vto]<0){
+				printf("%d -> -1\n",(*ePtr)->vto);
+			}
 			(*ePtr)->vfrom=newVertIdxs[(*ePtr)->vfrom];
 			(*ePtr)->vto=newVertIdxs[(*ePtr)->vto];
 		}
