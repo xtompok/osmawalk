@@ -14,15 +14,10 @@ OBJECTS2=$(SOURCES2:.c=.o)
 EXECUTABLE2=search-transfer
 
 all: protobuf $(SOURCES) $(EXECUTABLE2)
-
 	
-$(EXECUTABLE1): $(OBJECTS1) $@.c 
-	$(CC) $(CFLAGS) $@.c -o $@.o
-	$(CC) $(LDFLAGS) $(OBJECTS1) $@.o -o $@
-
 $(EXECUTABLE2): $(OBJECTS2) $@.c
 	$(CC) $(CFLAGS) $@.c -o $@.o
-	$(CC) $(LDFLAGS) $(OBJECTS2) $@.o -o $@
+	$(CC) $(OBJECTS2) $@.o -o $@ $(LDFLAGS) 
 
 .c.o:
 	$(CC) $(CFLAGS) $< -o $@
