@@ -1,4 +1,4 @@
-﻿DROP TABLE ways,ways_refs,multipols,multipols_refs,nodes;
+﻿DROP TABLE IF EXISTS ways,ways_refs,multipols,multipols_refs,nodes;
 
 CREATE TABLE nodes (
 	id BIGINT PRIMARY KEY,
