@@ -10,42 +10,38 @@ jsonFile = open(sys.argv[1],"r")
 transfers = json.load(jsonFile)
 jsonFile.close()
 
-splitter = re.compile("\((?P<flat>[0-9.]*), (?P<flon>[0-9.]*)\) \((?P<tlat>[0-9.]*), (?P<tlon>[0-9.]*)\)")
-outgpx = gpx.GPX("output.gpx")
+splitter = re.compile("(?P<lat>[0-9.]*) (?P<lon>[0-9.]*)")
 
 search=sp.Popen("./search-transfer",stdin=sp.PIPE,stdout=sp.PIPE)
 print "PID: ",search.pid
 i = 0
 try:
-    for k,v in transfers.iteritems():
+    for transfer in transfers["transfers"]:
         print i
         i += 1
-        coords = splitter.match(k)
-        flat = coords.group("flat")
-        flon = coords.group("flon")
-        tlat = coords.group("tlat")
-        tlon = coords.group("tlon")
-        search.stdin.write(flat+" "+flon+" "+tlat+" "+tlon+"\n")
+        flat = transfer["location1"]["location"]["latitude"]
+        flon = transfer["location1"]["location"]["longitude"]
+        tlat = transfer["location2"]["location"]["latitude"]
+        tlon = transfer["location2"]["location"]["longitude"]
+        search.stdin.write(str(flat)+" "+str(flon)+" "+str(tlat)+" "+str(tlon)+"\n")
         search.stdin.flush()
         line = search.stdout.readline()
         print "Search line: {}".format(line)
         (dist,time)=map(float,line.split(" "))
-        transfers[k]["owlength"]=dist
-        transfers[k]["owtime"]=time
-        transfers[k]["owid"]=i
+        transfer["transfer"]=dict()
+        transfer["transfer"]["distance"]=dist
+        transfer["transfer"]["time"]=time
+        coords = []
         line = search.stdout.readline()
         while line != "\n": 
-            outgpx.fd.write(line)
+            matched = splitter.match(line)
+            lat = float(matched.group("lat"))
+            lon = float(matched.group("lon"))
+            coords.append([lat,lon])
             line = search.stdout.readline()
-        if dist==0:
-            outgpx.addWpt("FAIL_"+str(i)+"_Z",flat,flon,0)
-            outgpx.addWpt("FAIL_"+str(i)+"_K",tlat,tlon,0)
-        else:
-            outgpx.addWpt("OK_"+str(i)+"_Z",flat,flon,0)
-            outgpx.addWpt("OK_"+str(i)+"_K",tlat,tlon,0)
+        transfer["transfer"]["trace"]=coords
 finally:
     search.kill()
-    outgpx.close()
     
 outjson = open("output.json","w")
 json.dump(transfers,outjson,sort_keys=True,indent=4)

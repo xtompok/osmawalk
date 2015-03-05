@@ -30,6 +30,20 @@ void printResults(struct search_result_t result){
 	writeGpxEndTrack(stdout);
 }
 
+// Print simple results
+void printSimpleResults(struct search_result_t result){
+	if (result.n_points<2){
+		printf("0 0\n");
+		return;
+	}
+	printf("%lf %lf\n",result.dist, result.time);
+	for (int i=0;i<result.n_points;i++){
+		struct point_t p;
+		p = result.points[i];
+		printf("%f %f\n",p.lat,p.lon);
+	}
+}
+
 // Print usage
 void usage(void){
 	printf("Usage: ./search fromlat fromlon tolat tolon\n");		
@@ -54,7 +68,7 @@ int main (int argc, char ** argv){
 
 		struct search_result_t result;
 		result = findPath(data,flat,flon,tlat,tlon);
-		printResults(result);
+		printSimpleResults(result);
 		printf("\n");
 		fflush(stdout);
 	}
