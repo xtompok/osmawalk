@@ -1,13 +1,13 @@
 ﻿DROP TABLE IF EXISTS walk_nodes;
 CREATE TABLE walk_nodes AS
-	SELECT n.id
+	SELECT DISTINCT n.id
 	FROM ways AS w
 	INNER JOIN ways_refs AS wr ON wr.id=w.id
 	INNER JOIN nodes AS n ON wr.ref= n.id
 	WHERE w.type != 0 AND w.type != 30
 ;
 CREATE INDEX ON walk_nodes(id);
-
+ALTER TABLE walk_nodes ADD UNIQUE (id);
 --RAISE NOTICE 'Creating indexes';
 
 CREATE INDEX ON nodes USING GIST(loc);
@@ -27,6 +27,7 @@ CREATE TABLE walk_in_nodes AS
 ;
 
 CREATE INDEX ON walk_in_nodes(nid);
+
 
 UPDATE nodes SET inside=true
 FROM walk_in_nodes
