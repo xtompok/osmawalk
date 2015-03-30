@@ -25,7 +25,7 @@ done
 psql -f ../postgis/tables.sql $DATABASE $USERNAME
 
 echo Copying nodes...
-COMMAND="COPY nodes (id,lat,lon,height,objtype,inside,intunnel,onbridge,loc) FROM STDIN;"
+COMMAND="COPY nodes (id,lat,lon,height,objtype,inside,intunnel,onbridge,loc,square1,square2) FROM STDIN;"
 ./todb n |  psql -c "$COMMAND" $DATABASE $USERNAME
 
 echo Copying ways...
@@ -43,3 +43,7 @@ COMMAND="COPY multipols (id,objtype) FROM STDIN;"
 echo Copying multipolygon references...
 COMMAND="COPY multipols_refs (id,ref,role) FROM STDIN;"
 ./todb l | psql -c "$COMMAND" $DATABASE $USERNAME
+
+COMMAND="ANALYZE nodes; ANALYZE ways; ANALYZE ways_refs; ANALYZE multipols; ANALYZE multipols_refs; "
+./todb l | psql -c "$COMMAND" $DATABASE $USERNAME
+

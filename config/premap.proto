@@ -12,6 +12,8 @@ message Node {
 	optional bool inTunnel = 7;
 	optional bool onBridge = 8;
 	optional int64 nodeidx = 200;
+	optional int32 square1 = 210;
+	optional int32 square2 = 211;
 }
 
 message Way {

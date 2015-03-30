@@ -4,6 +4,8 @@ struct obj_attr {
 	int tunnel;
 	int bridge;
 	int height;
+	int square1;
+	int square2;
 
 };
 

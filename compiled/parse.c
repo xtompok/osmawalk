@@ -22,6 +22,8 @@
 // - vysky
 // - zahazovani nepotrebneho
 
+#define SQ_SIZE 100
+
 uint64_t wanted_id = 0;
 int debug = 0;
 int type;
@@ -107,6 +109,29 @@ int calcHeight(struct height_map_t map, double lat, double lon){
 	rowlen = (map.maxlon-map.minlon)*1200;
 	coord = ((int)lat)*rowlen+((int)lon);
 	return map.map[coord];
+}
+
+// Works ok only on norther hemisphere
+int square(int num,double lon, double lat){
+	double maxlat;
+	double minlat;
+	double minlon;
+	maxlat = heights.maxlat+1;
+	minlat = heights.minlat;
+	minlon = heights.minlon;
+	wgs2utm(&minlon,&minlat);
+	minlon = heights.minlon;
+	wgs2utm(&minlon,&maxlat);
+	wgs2utm(&lon,&lat);
+	lon -= heights.minlon;
+	lat -= heights.minlat;
+	int dlat = maxlat-minlat;
+	int row = dlat/SQ_SIZE;
+	if (num==2){
+		lon -= SQ_SIZE/2;
+		lat -= SQ_SIZE/2;
+	}
+	return (lon/SQ_SIZE)*row + lat/SQ_SIZE;
 }
 
 
@@ -242,6 +267,11 @@ void dumpNode(OSM_Node * node, struct obj_attr attr){
 	pbNode->onbridge = attr.bridge;
 	pbNode->has_height = true;
 	pbNode->height = calcHeight(heights,node->lat,node->lon);
+	pbNode->has_square1 = true;
+	pbNode->square1 = attr.square1;
+	pbNode->has_square2 = true;
+	pbNode->square2 = attr.square2;
+
 	double lat;
 	double lon;
 	lat = node->lat;
@@ -296,6 +326,8 @@ int node(OSM_Node *n) {
 	attr.objtype = classify(n->tags,conf.type);
 	attr.tunnel  = classify(n->tags,conf.tunnel);
 	attr.bridge = classify(n->tags,conf.bridge);
+	attr.square1 = square(1,n->lon,n->lat);
+	attr.square2 = square(2,n->lon,n->lat);
 //	if (objtype==-1)
 //		return;
 	dumpNode(n,attr);

@@ -10,7 +10,9 @@ CREATE TABLE nodes (
 	inTunnel BOOLEAN,
 	onBridge BOOLEAN,
 	nodeidx INTEGER,
-	loc GEOMETRY(POINTZ,3065)
+	loc GEOMETRY(POINTZ,3065),
+	square1 INTEGER,
+	square2 INTEGER
 );
 
 CREATE TABLE ways (
@@ -48,6 +50,9 @@ CREATE TABLE multipols_refs (
 CREATE INDEX ON multipols_refs (ref);
 CREATE INDEX ON ways_refs (ref);
 CREATE INDEX ON nodes (lat, lon);
+CREATE INDEX ON nodes(square1);
+CREATE INDEX ON nodes(square2);
+
 
 ALTER TABLE nodes OWNER TO jethro;
 ALTER TABLE ways OWNER TO jethro;

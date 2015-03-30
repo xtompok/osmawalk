@@ -25,8 +25,8 @@ char node_cb(size_t len,uint8_t * inbuf){
 //	fprintf(stderr,"Node: %lld\n",node->id);
 //	fprintf(stderr,"Lat: %lld, lon: %lld\n",node->lat,node->lon);
 
-//	id,lat,lon,height,objtype,inside,intunnel,onbridge,loc,
-	printf("%lld\t%d\t%d\t%d\t%d\t%d\t%d\t%d\tSRID=3065;POINT(%d %d %d)\n",
+//	id,lat,lon,height,objtype,inside,intunnel,onbridge,loc,sq1,sq2
+	printf("%lld\t%d\t%d\t%d\t%d\t%d\t%d\t%d\tSRID=3065;POINT(%d %d %d)\t%d\t%d\n",
 //		id    lat lon hei typ ins int onb 
 		node->id,
 		node->lat,
@@ -38,7 +38,9 @@ char node_cb(size_t len,uint8_t * inbuf){
 		node->onbridge,
 		node->lon,
 		node->lat,
-		node->height);
+		node->height,
+		node->square1,
+		node->square2);
 	premap__node__free_unpacked(node,NULL);
 	return 1;
 }
