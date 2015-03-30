@@ -34,7 +34,7 @@ step mp_geom
 step walk_in_nodes
 step barriers
 step bbox-function
-step direct_candidates2
+step direct_candidates5
 step ok_candidates2
 step direct_filter
 ./export.sh
