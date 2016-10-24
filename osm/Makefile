@@ -12,11 +12,11 @@ all: $(SOURCES) $(EXECUTABLE1) $(EXECUTABLE2)
 	
 $(EXECUTABLE1): $(OBJECT1) $@.c
 	$(CC) $(CFLAGS) $@.c -o $@.o
-	$(CC) $(LDFLAGS) $(OBJECTS1) $@.o -o $@
+	$(CC) $(OBJECTS1) $@.o -o $@ $(LDFLAGS)
 
 $(EXECUTABLE2): $(OBJECT2) $@.c
 	$(CC) $(CFLAGS) $@.c -o $@.o
-	$(CC) $(LDFLAGS) $(OBJECTS2) $@.o -o $@
+	$(CC) $(OBJECTS2) $@.o -o $@ $(LDFLAGS)
 
 .c.o:
 	$(CC) $(CFLAGS) $< -o $@
