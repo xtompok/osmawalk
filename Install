@@ -69,7 +69,7 @@ sudo apt-get install libproj-dev libyaml-dev python-yaml python-pyproj python-pr
 	./export.sh -u db_username
 
 	cd ../compiled
-	./csvtograph ../postgis/nodes.csv ../postgis/ways.csv ../postgis/direct.csv
+	./csvtograph ../data/nodes.csv ../data/ways.csv ../data/direct.csv
 	cd ../data
 	cp postgis-graph.pbf praha-graph.pbf
 

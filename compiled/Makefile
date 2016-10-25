@@ -1,14 +1,14 @@
 CC=gcc
 PG=
 # Hardcoded paths begin
-INC=-I/usr/include/libucw -I../ext-lib/libucw-6.0 -I../ext-lib/libosmpbf -I../ext-lib/libcsv-3.0.3 -I/usr/include/postgresql
-LDPATHS=-L../ext-lib/libucw-6.0/obj/ucw -L../ext-lib/libosmpbf
-LIBCSV_C=../ext-lib/libcsv-3.0.3/libcsv.c
+INC=-I/usr/include/libucw  -I../ext-lib/libosmpbf -I/usr/include/postgresql
+LDPATHS= -L../ext-lib/libosmpbf
+#LIBCSV_C=../ext-lib/libcsv-3.0.3/libcsv.c
 #Hardcoded paths end
 
 CFLAGS= -c $(PG)  -ggdb3 -Wall -Wno-format -Wno-unused-function -std=gnu99 -O2 -march=native $(INC)
 PFLAGS= -E -Wall -std=gnu99 -O3 -march=native -I/usr/include/libucw -I/mnt/sda1/home/jethro/Programy/libucw
-LDFLAGS= $(PG) $(LDPATHS) -lprotobuf-c -lucw-6.0 -lproj -lyaml -lm 
+LDFLAGS= $(PG) $(LDPATHS) -lprotobuf-c -lucw-6.5 -lproj -lyaml -lm -lz 
 
 FILTER_SRC=raster.c hashes.c utils.c mixnum.c include/premap.pb-c.c include/types.pb-c.c include/graph.pb-c.c searchgraph.c
 FILTER_OBJ=$(FILTER_SRC:.c=.o)
@@ -38,9 +38,9 @@ TODB_OBJ=$(TODB_SRC:.c=.o)
 TODB_LDFLAGS=-lpq
 TODB_EXE=todb
 
-CSVGRAPH_SRC=include/graph.pb-c.c include/types.pb-c.c searchgraph.c $(LIBCSV_C)
+CSVGRAPH_SRC=include/graph.pb-c.c include/types.pb-c.c searchgraph.c
 CSVGRAPH_OBJ=$(CSVGRAPH_SRC:.c=.o)
-CSVGRAPH_LDFLAGS=
+CSVGRAPH_LDFLAGS=-lcsv
 CSVGRAPH_EXE=csvtograph
 
 # gcc -R -- runtime hledani knihovny
