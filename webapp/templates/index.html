@@ -22,6 +22,7 @@
 		var stage = 0;
 		var from;
 		var to;
+		var pathLayer;
 		map.on('click', function(e) {
 			if (stage == 0){
 				if (from){
@@ -29,6 +30,9 @@
 				}
 				if (to){
 					map.removeLayer(to)	
+				}
+				if (pathLayer){
+					map.removeLayer(pathLayer)	
 				}
 				from = L.marker(e.latlng,{icon:greenIcon});
 				from.addTo(map);		
@@ -40,7 +44,9 @@
 				to = L.marker(e.latlng,{icon:redIcon});
 				to.addTo(map);
 				stage = 0;	
-				findAndShowWay(from.getLatLng(),to.getLatLng());
+				pathLayer = findPath(from.getLatLng(),to.getLatLng());
+				pathLayer.addTo(map);
+
 			}
 		});
 

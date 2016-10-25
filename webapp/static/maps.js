@@ -30,11 +30,11 @@ function createBaseMap(){
 	return map;
 }
 
-function findAndShowWay(from,to){
-	var arcLayer =new  L.GeoJSON.AJAX("/search?flon="+from.lng+"&flat="+from.lat+"&tlon="+to.lng+"&tlat="+to.lat,{
+function findPath(from,to){
+	var pathLayer =new  L.GeoJSON.AJAX("/search?flon="+from.lng+"&flat="+from.lat+"&tlon="+to.lng+"&tlat="+to.lat,{
 /*		style: arcStyle,
 		onEachFeature: eachArc
 */	});
-	return arcLayer;
+	return pathLayer;
 }
 
