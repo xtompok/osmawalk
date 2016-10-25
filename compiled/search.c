@@ -49,7 +49,7 @@ int main (int argc, char ** argv){
 		usage();
 		return 1;
 	}
-	struct search_data_t data;
+	struct search_data_t * data;
 	double flon;
 	double flat;
 	double tlon;
@@ -69,8 +69,8 @@ int main (int argc, char ** argv){
 		tlon = atof(argv[4]);
 	}
 
-	printf("Graph has %d vertices and %d edges\n",data.graph->n_vertices,data.graph->n_edges);
-	printMapBBox(data);
+	printf("Graph has %d vertices and %d edges\n",data->graph->n_vertices,data->graph->n_edges);
+	printMapBBox(*data);
 
 	struct search_result_t result;
 	result = findPath(data,flat,flon,tlat,tlon);

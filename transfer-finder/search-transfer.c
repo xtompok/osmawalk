@@ -50,7 +50,7 @@ void usage(void){
 }
 
 int main (int argc, char ** argv){
-	struct search_data_t data;
+	struct search_data_t * data;
 	double flon;
 	double flat;
 	double tlon;
