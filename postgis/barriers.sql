@@ -9,7 +9,7 @@ CREATE TABLE barriers AS
 			(ST_DumpRings((ST_Dump(sq.multi)).geom)).geom AS geom --COUNT(*) 
 --		SELECT id,ST_NumInteriorRings(sq.multi),ST_Summary(sq.multi),sq.wc
 		FROM (
-			SELECT mp.id AS id,ST_BuildArea(ST_Collect(ST_Buffer(w.geom,0))) AS multi,COUNT(w.geom) AS wc
+			SELECT mp.id AS id,ST_BuildArea(ST_Collect(w.geom)) AS multi,COUNT(w.geom) AS wc
 			FROM multipols AS mp
 			INNER JOIN multipols_refs AS mpr ON mp.id = mpr.id
 			INNER JOIN ways AS w ON w.id = mpr.ref
