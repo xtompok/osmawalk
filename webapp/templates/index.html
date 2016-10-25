@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8 />
+        <title>Hledání pěších tras v Praze</title>
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+	<script src="/static/leaflet-ajax.js"></script>
+	<script src="/static/maps.js"></script>
+        <style>
+              body { margin:0; padding:0; }
+                #map { position:absolute; top:20px; bottom:0; width:100%; }
+            </style>
+        </head>
+        <body>
+            <div id='map'></div>
+	    <script>
+	    	"use strict";
+		
+		var map = createBaseMap();
+		var stage = 0;
+		var from;
+		var to;
+		var pathLayer;
+		map.on('click', function(e) {
+			if (stage == 0){
+				if (from){
+					map.removeLayer(from)	
+				}
+				if (to){
+					map.removeLayer(to)	
+				}
+				if (pathLayer){
+					map.removeLayer(pathLayer)	
+				}
+				from = L.marker(e.latlng,{icon:greenIcon});
+				from.addTo(map);		
+				stage++;
+			} else if (stage == 1){
+				if (to){
+					map.removeLayer(to)	
+				}
+				to = L.marker(e.latlng,{icon:redIcon});
+				to.addTo(map);
+				stage = 0;	
+				pathLayer = findPath(from.getLatLng(),to.getLatLng());
+				pathLayer.addTo(map);
+
+			}
+		});
+
+
+		// Wait for the page to load first
+		window.onload = function() {
+
+		}
+	    </script>
+
+
+            </body>
+        </html>
+

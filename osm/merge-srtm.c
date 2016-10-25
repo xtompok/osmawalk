@@ -24,7 +24,9 @@ int main(int argc, char ** argv){
 	FILE * hgt;
 
 	uint16_t * map;
-	map = malloc(2*(maxlon-minlon+1)*1200*(maxlat-minlat+1)*1200);
+	size_t len;
+	len = (2*(maxlon-minlon+1)*1200*(maxlat-minlat+1)*1200);
+	map = malloc(len);
 	uint16_t * sq;
 	sq = malloc(2*1201*1201);
 
@@ -69,8 +71,14 @@ int main(int argc, char ** argv){
 		fprintf(OUT,"\n");
 	}
 
+	fclose(OUT);
 
-	
-
+	OUT = fopen("heights.bin","w");
+	fwrite(&minlon,1,sizeof(int),OUT);
+	fwrite(&minlat,1,sizeof(int),OUT);
+	fwrite(&maxlon,1,sizeof(int),OUT);
+	fwrite(&maxlat,1,sizeof(int),OUT);
+	fwrite(map,len,1,OUT);
+	fclose(OUT);
 
 }

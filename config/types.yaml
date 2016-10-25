@@ -1,115 +1,132 @@
 IGNORE: 
-    boundary : "*"
-    natural:
-        - tree_row
-    railway:
-        - subway
-    landuse:
-        -residential
+        0:
+            boundary : "*"
+            natural:
+                - tree_row
+            railway:
+                - subway
+            landuse:
+                - residential
+                - industrial
+        1:
+            access:
+                - no
+                - private
+            foot:
+                - no
+	    barrier:
+	    	- kerb	
 BARRIER: 
-    barrier : "*"
-    waterway:
-        - river
-        - canal
-        - weir
-    building: "*"
-    landuse:
-        - allotments
-        - basin
-        - construction
-        - cemetery
-        - garages
-        - greenhoue_horticulture
-        - landfill
-        - military 
-        - reservoir
-        - vineyard
+        0:
+            barrier : "*"
+            waterway:
+                - river
+                - riverbank
+                - canal
+                - weir
+            building: "*"
+            landuse:
+                - allotments
+                - basin
+                - construction
+                - cemetery
+                - garages
+                - greenhoue_horticulture
+                - landfill
+                - military 
+                - reservoir
+                - vineyard
+                - railway
 
-    leisure:
-        - garden
-        - pitch
-        - stadium
-    highway:
-        - motorway
-        - trunk
-        - motorway-link
-        - trunk-link
-        - primary
-        - primary-link
-    railway:
-        - funicular
-        - light_rail
-        - rail
+            leisure:
+                - garden
+                - pitch
+                - stadium
+            highway:
+                - motorway
+                - trunk
+                - motorway-link
+                - trunk-link
+                - primary
+                - primary-link
+            railway:
+                - funicular
+                - light_rail
+                - rail
+            natural:
+                - cliff
 
-RAILWAY:
-    landuse:
-        - railway
-WATER:
-    waterway:
-        - riverbank
-        - stream
-PARK:
-    leisure:
-        - park
-        - playground
-    landuse:
-        - grass
-        - recreation_ground
-        - village_green
-    natural:
-        - grassland
-
-GREEN:
-    leisure:
-        - common
-        - nature_reserve
-    landuse:
-        - farm
-        - farmland
-        - meadow
-        - orchad
-        - pasture
-    natural:
-        - scrub
-        - heath
-        - sand
-
-FOREST:
-    landuse:
-        - forest
+#RAILWAY:
+#WATER:
+#        0:
+#            waterway:
+#                - riverbank
+#                - stream
+#PARK:
+#        0:
+#            leisure:
+#                - park
+#                - playground
+#            landuse:
+#                - grass
+#                - recreation_ground
+#                - village_green
+#            natural:
+#                - grassland
+#
+#GREEN:
+#        0:
+#            leisure:
+#                - common
+#                - nature_reserve
+#            landuse:
+#                - farm
+#                - farmland
+#                - meadow
+#                - orchad
+#                - pasture
+#            natural:
+#                - scrub
+#                - heath
+#                - sand
+#
+#FOREST:
+#        0:
+#            landuse:
+#                - forest
 PAVED:
-    landuse:
-        - residential
-        - industrial
-    amenity:
-        - parking
-        - fuel
-    highway:
-        - residential
-        - service
-        - living_street
-        - pedestrian
-        - track
-        - footway
-        - cycleway
-    area:highway:
-        - pedestrian
-    cycleway:
-        - track
+        0:
+            amenity:
+                - parking
+                - fuel
+            highway:
+                - residential
+                - service
+                - living_street
+                - pedestrian
+                - track
+                - footway
+                - cycleway
+                - unclassified
+            area:highway:
+                - pedestrian
+            cycleway:
+                - track
+        1:
+            foot:
+                - yes
 STEPS:
-    highway:
-        - steps
+        0:
+            highway:
+                - steps
 UNPAVED:
-    highway:
-        - track
-        - path
-        - bridleway
+        0:
+            highway:
+                - track
+                - path
+                - bridleway
 HIGHWAY:
-    highway:
-        - secondary
-        - tertiary
-
-        
-
-
-
+        0:
+            highway:
+                - secondary
+                - tertiary

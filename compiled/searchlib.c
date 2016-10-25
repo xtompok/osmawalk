@@ -28,6 +28,10 @@ int wgs2utm(struct search_data_t data,double * lon, double * lat){
 	return pj_transform(data.pj_wgs84,data.pj_utm,1,1,lon,lat,NULL);
 }
 
+double calcWeight(Graph__Graph * graph, struct config_t conf, Graph__Edge * edge){
+	return calcTime(graph,conf,edge)*conf.penalties[edge->type];
+}
+
 double calcTime(Graph__Graph * graph, struct config_t conf,Graph__Edge * edge){
 	double speed;
 	speed = conf.speeds[edge->type];
@@ -38,7 +42,42 @@ double calcTime(Graph__Graph * graph, struct config_t conf,Graph__Edge * edge){
 	fromHeight = graph->vertices[edge->vfrom]->height;
 	toHeight = graph->vertices[edge->vto]->height;
 	int dh = toHeight-fromHeight;
-	return edge->dist+abs(dh)*((dh>0?conf.upscale:conf.downscale))/speed;
+	return (edge->dist+abs(dh)*(dh>0?conf.upscale:conf.downscale))/speed;
+}
+
+void printMapBBox(struct search_data_t data){
+	Graph__Graph * graph;
+	int64_t minlon;
+	int64_t minlat;
+	int64_t maxlon;
+	int64_t maxlat;
+
+	graph = data.graph;
+	
+	minlon = graph->vertices[0]->lon;
+	maxlon = graph->vertices[0]->lon;
+	minlat = graph->vertices[0]->lat;
+	maxlat = graph->vertices[0]->lat;
+	for (int i=0;i<graph->n_vertices;i++){
+		int64_t lon;
+		int64_t lat;
+		lon = graph->vertices[i]->lon;
+		lat = graph->vertices[i]->lat;
+
+		minlon=(lon<minlon)?lon:minlon;
+		minlat=(lat<minlat)?lat:minlat;
+		maxlon=(lon>maxlon)?lon:maxlon;
+		maxlat=(lat>maxlat)?lat:maxlat;
+	}
+
+	printf("Bounding box in UTM: (%lld,%lld), (%lld,%lld)\n",minlat,minlon,maxlat,maxlon);
+	double fminlon=minlon;
+	double fminlat=minlat;
+	double fmaxlon=maxlon;
+	double fmaxlat=maxlat;
+	utm2wgs(data,&fminlon,&fminlat);
+	utm2wgs(data,&fmaxlon,&fmaxlat);
+	printf("Bounding box in WGS-84: (%lf,%lf), (%lf,%lf)\n",fminlat,fminlon,fmaxlat,fmaxlon);
 }
 
 
@@ -49,9 +88,11 @@ struct config_t parseConfigFile(char * filename){
 	conf.maxvalue = conf.desc.values[conf.desc.n_values-1].value;
 	conf.speeds = malloc(sizeof(double)*(conf.maxvalue+1));
 	conf.ratios = malloc(sizeof(double)*(conf.maxvalue+1));
+	conf.penalties = malloc(sizeof(double)*(conf.maxvalue+1));
 	for (int i=0;i<conf.maxvalue+1;i++){
 		conf.speeds[i]=-1;
 		conf.ratios[i]=-1;
+		conf.penalties[i]=1;
 	}
 	
 
@@ -84,7 +125,7 @@ struct config_t parseConfigFile(char * filename){
 			yaml_node_t * key;
 			key = yaml_document_get_node(&document,section->key);
 			if (strcmp((char *)key->data.scalar.value,"speeds")==0){
-				printf("Parsing speeds\n");
+				//printf("Parsing speeds\n");
 				yaml_node_t * speedsMap;
 				speedsMap = yaml_document_get_node(&document,section->value);
 				if (speedsMap->type != YAML_MAPPING_NODE){
@@ -107,7 +148,7 @@ struct config_t parseConfigFile(char * filename){
 				}
 				
 			} else if (strcmp((char *)key->data.scalar.value,"ratios")==0){
-				printf("Parsing ratios\n");
+				//printf("Parsing ratios\n");
 				yaml_node_t * ratiosMap;
 				ratiosMap = yaml_document_get_node(&document,section->value);
 				if (ratiosMap->type != YAML_MAPPING_NODE){
@@ -128,8 +169,32 @@ struct config_t parseConfigFile(char * filename){
 						}
 					}
 				}
+			
+			} else if (strcmp((char *)key->data.scalar.value,"penalties")==0){
+				//printf("Parsing speeds\n");
+				yaml_node_t * penaltyMap;
+				penaltyMap = yaml_document_get_node(&document,section->value);
+				if (penaltyMap->type != YAML_MAPPING_NODE){
+					printf("Speeds are not mapping\n");
+					break;
+				}
+				yaml_node_pair_t * pair;
+				for (pair=penaltyMap->data.mapping.pairs.start;
+						pair < penaltyMap->data.mapping.pairs.top;pair++){
+					yaml_node_t * key;
+					yaml_node_t * value;
+					key = yaml_document_get_node(&document,pair->key);
+					value = yaml_document_get_node(&document,pair->value);
+					for (int i=0;i<conf.desc.n_values;i++){
+						if (strcmp((char *)key->data.scalar.value,conf.desc.values[i].name)==0){
+							conf.penalties[conf.desc.values[i].value]=atof((char *)value->data.scalar.value);
+							break;
+						}
+					}
+				}
+				
 			} else if (strcmp((char *)key->data.scalar.value,"heights")==0){
-				printf("Parsing heights\n");
+				//printf("Parsing heights\n");
 				yaml_node_t * heightsMap;
 				heightsMap = yaml_document_get_node(&document,section->value);
 				if (heightsMap->type != YAML_MAPPING_NODE){
@@ -170,6 +235,7 @@ struct config_t parseConfigFile(char * filename){
 	yaml_parser_delete(&parser);
 
 	int wayIdx;
+	wayIdx = -1;
 	for (int i=0;i<conf.desc.n_values;i++){
 		if (strcmp(conf.desc.values[i].name,"WAY")==0){
 			wayIdx = i;
@@ -204,7 +270,7 @@ Graph__Graph * loadMap(char * filename){
 	fseek(IN,0,SEEK_SET);
 	uint8_t * buf;
 	buf = (uint8_t *)malloc(len);
-	printf("Allocated %d MB\n",len>>20);
+	//printf("Allocated %d MB\n",len>>20);
 	size_t read;
 	read = fread(buf,1,len,IN);
 	if (read!=len){
@@ -215,6 +281,7 @@ Graph__Graph * loadMap(char * filename){
 	
 	Graph__Graph * graph;
 	graph = graph__graph__unpack(NULL,len,buf);
+	free(buf);
 
 	return graph;
 }
@@ -275,6 +342,7 @@ int findNearestVertex(Graph__Graph * graph, double lon, double lat){
 	double minDist;
 	int minIdx;
 	minDist = DBL_MAX;
+	minIdx = -1;
 	for (int i=0;i<graph->n_vertices;i++){
 		double dist;
 		double dlon;
@@ -287,8 +355,8 @@ int findNearestVertex(Graph__Graph * graph, double lon, double lat){
 			minIdx = i;
 		}
 	}
-	printf("Min dist: %f\n",sqrt(minDist));
-	printf("Point %d: %f, %f\n",minIdx,graph->vertices[minIdx]->lon,graph->vertices[minIdx]->lat);
+	//printf("Min dist: %f\n",sqrt(minDist));
+	//printf("Point %d: %f, %f\n",minIdx,graph->vertices[minIdx]->lon,graph->vertices[minIdx]->lat);
 	return minIdx;
 }
 
@@ -352,7 +420,7 @@ void findWay(struct search_data_t data,struct dijnode_t * dijArray,int fromIdx, 
 			Graph__Edge * way;
 			way = graph->edges[nodeways[vIdx].ways[i]];
 			double len;
-			len = calcTime(data.graph,data.conf,way);
+			len = calcWeight(data.graph,data.conf,way);
 			if (dijArray[way->vto].dist <= (dijArray[vIdx].dist+len))
 				continue;
 			dijArray[way->vto].dist = dijArray[vIdx].dist+len;
@@ -370,6 +438,8 @@ void findWay(struct search_data_t data,struct dijnode_t * dijArray,int fromIdx, 
 		if (vIdx == toIdx)
 			break;
 	}
+	free(heap);
+	free(heapIndex);
 }
 
 struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * dijArray, int fromIdx, int toIdx, int * n_points){
@@ -384,7 +454,7 @@ struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * d
 
 	int count;
 	count = 1;
-	printf("Dist: %f\n",dijArray[fromIdx].dist);
+	//printf("Dist: %f\n",dijArray[fromIdx].dist);
 	int idx;
 	idx = fromIdx;
 	while (idx != toIdx){
@@ -392,7 +462,7 @@ struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * d
 		count++;
 	}
 
-	printf("Cnt: %d\n",count);
+	//printf("Cnt: %d\n",count);
 	*n_points = count;
 	
 	struct point_t * results;
@@ -401,8 +471,6 @@ struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * d
 	idx = fromIdx;
 	double lat;
 	double lon;
-	double dist;
-	dist = 0;
 	while (idx != toIdx){
 		lat = graph->vertices[idx]->lat;
 		lon = graph->vertices[idx]->lon;
@@ -411,6 +479,7 @@ struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * d
 		results[count].lon = lon;
 		results[count].height = graph->vertices[idx]->height;
 		results[count].type = graph->edges[dijArray[idx].fromEdgeIdx]->type;
+		results[count].wayid = graph->edges[dijArray[idx].fromEdgeIdx]->osmid;
 		idx = dijArray[idx].fromIdx;
 		count++;
 	}
@@ -443,61 +512,63 @@ void writeGpxFile(struct search_result_t result,char * filename){
 	fclose(OUT);
 }
 
-struct search_data_t prepareData(char * configName, char * dataName){
-	struct search_data_t data;
-	data.pj_wgs84 = pj_init_plus("+proj=longlat +datum=WGS84 +no_defs");
-	data.pj_utm = pj_init_plus("+proj=utm +zone=33 +ellps=WGS84 +units=m +no_defs");
-	data.conf = parseConfigFile(configName);
-	data.graph = loadMap(dataName);
-	if (data.graph==NULL){
+struct search_data_t * prepareData(char * configName, char * dataName){
+	struct search_data_t * data;
+	data = malloc(sizeof(struct search_data_t));
+	data->pj_wgs84 = pj_init_plus("+proj=longlat +datum=WGS84 +no_defs");
+	data->pj_utm = pj_init_plus("+proj=utm +zone=33 +ellps=WGS84 +units=m +no_defs");
+	data->conf = parseConfigFile(configName);
+	data->graph = loadMap(dataName);
+	if (data->graph==NULL){
 		printf("Error loading map\n");	
 		return data;
 	}
-	data.nodeWays = makeNodeWays(data.graph);
-	calcDistances(data.graph);
+	data->nodeWays = makeNodeWays(data->graph);
+	calcDistances(data->graph);
 	return data;
 }
 
 
-struct search_result_t findPath(struct search_data_t data,double fromLat, double fromLon, double toLat, double toLon){
-	wgs2utm(data,&fromLon,&fromLat);
+struct search_result_t findPath(struct search_data_t * data,double fromLat, double fromLon, double toLat, double toLon){
+	wgs2utm(*data,&fromLon,&fromLat);
 	int fromIdx;
-	fromIdx = findNearestVertex(data.graph,fromLon,fromLat);
+	fromIdx = findNearestVertex(data->graph,fromLon,fromLat);
 
-	wgs2utm(data,&toLon,&toLat);
+	wgs2utm(*data,&toLon,&toLat);
 	int toIdx;
-	toIdx = findNearestVertex(data.graph,toLon,toLat);
+	toIdx = findNearestVertex(data->graph,toLon,toLat);
 
-	printf("Searching from %lld(%f,%f,%d) to %lld(%f,%f,%d)\n",data.graph->vertices[fromIdx]->osmid,
-			data.graph->vertices[fromIdx]->lat,
-			data.graph->vertices[fromIdx]->lon,
-			data.graph->vertices[fromIdx]->height,
-			data.graph->vertices[toIdx]->osmid,
-			data.graph->vertices[toIdx]->lat,
-			data.graph->vertices[toIdx]->lon,
-			data.graph->vertices[toIdx]->height
+	/*printf("Searching from %lld(%f,%f,%d) to %lld(%f,%f,%d)\n",data->graph->vertices[fromIdx]->osmid,
+			data->graph->vertices[fromIdx]->lat,
+			data->graph->vertices[fromIdx]->lon,
+			data->graph->vertices[fromIdx]->height,
+			data->graph->vertices[toIdx]->osmid,
+			data->graph->vertices[toIdx]->lat,
+			data->graph->vertices[toIdx]->lon,
+			data->graph->vertices[toIdx]->height
 			);
-
+*/
 	struct dijnode_t * dijArray;
-	dijArray = prepareDijkstra(data.graph);
+	dijArray = prepareDijkstra(data->graph);
 
-	findWay(data, dijArray,fromIdx, toIdx);
+	findWay(*data, dijArray,fromIdx, toIdx);
 	struct search_result_t result;
 	int n_points;
-	result.points = resultsToArray(data,dijArray,fromIdx,toIdx,&n_points);
+	result.points = resultsToArray(*data,dijArray,fromIdx,toIdx,&n_points);
 	result.n_points = n_points;
 	result.dist = 0;
+	result.time = 0;
 	if (result.n_points == 0){
-		result.time=0;
 		return result;
 	}
 	int idx;
 	idx = fromIdx;
 	while(idx != toIdx){
-		result.dist+=data.graph->edges[dijArray[idx].fromEdgeIdx]->dist;
+		result.dist+=data->graph->edges[dijArray[idx].fromEdgeIdx]->dist;
+		result.time+=calcTime(data->graph,data->conf,data->graph->edges[dijArray[idx].fromEdgeIdx]);
 		idx = dijArray[idx].fromIdx;
 	}
-	result.time = dijArray[fromIdx].dist;
+	free(dijArray);
 	return result;	
 }
 
