@@ -14,26 +14,36 @@
             </style>
         </head>
         <body>
+	    <div> Délka: <span id="delka">-</span>, čas: <span id="cas">-</span>, <button id="gpxbut">Stáhnout jako GPX</button> </div>
             <div id='map'></div>
 	    <script>
 	    	"use strict";
 		
-		var map = createBaseMap();
-		var stage = 0;
 		var from;
 		var to;
+		var map = createBaseMap();
+		var stage = 0;
 		var pathLayer;
+		var dist = document.getElementById("delka")
+		var time = document.getElementById("cas")
+		var gpxbut = document.getElementById("gpxbut")
+		gpxbut.disabled=true
 		map.on('click', function(e) {
 			if (stage == 0){
 				if (from){
-					map.removeLayer(from)	
+					map.removeLayer(from);
 				}
 				if (to){
-					map.removeLayer(to)	
+					map.removeLayer(to);
 				}
 				if (pathLayer){
-					map.removeLayer(pathLayer)	
+					map.removeLayer(pathLayer);
 				}
+				dist.innerHTML="-";
+				time.innerHTML="-";
+				gpxbut.disabled = true
+
+
 				from = L.marker(e.latlng,{icon:greenIcon});
 				from.addTo(map);		
 				stage++;
@@ -45,6 +55,8 @@
 				to.addTo(map);
 				stage = 0;	
 				pathLayer = findPath(from.getLatLng(),to.getLatLng());
+				gpxbut.disabled = false
+				gpxbut.onclick = function(){downloadGPX(from.getLatLng(),to.getLatLng())}
 				pathLayer.addTo(map);
 
 			}

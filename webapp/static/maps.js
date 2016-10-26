@@ -32,9 +32,53 @@ function createBaseMap(){
 
 function findPath(from,to){
 	var pathLayer =new  L.GeoJSON.AJAX("/search?flon="+from.lng+"&flat="+from.lat+"&tlon="+to.lng+"&tlat="+to.lat,{
-/*		style: arcStyle,
-		onEachFeature: eachArc
-*/	});
+		/*style: arcStyle,*/
+		onEachFeature: function(feature,layer){
+				dist.innerHTML=formatDist(feature.properties.dist.toFixed(0));
+				time.innerHTML=formatTime(feature.properties.time.toFixed(0));
+		}
+	});
 	return pathLayer;
 }
+
+function formatDist(dist){
+	var km;
+	var m;
+	dist = Math.floor(dist);
+	km = Math.floor(dist/1000);
+	dist = dist % 1000;	
+	m = dist;
+	if (km != 0){
+		return km+" km "+m+" m"	
+	}
+	return m+" m"
+}
+function formatTime(time){
+	var h;
+	var m;
+	var s;
+	time = Math.floor(time);
+	h = Math.floor(time/3600);
+	time = time % 3600;
+	m = Math.floor(time/60);
+	time = time % 60;
+	s = time;
+	if (h!=0){
+		return h+" hod "+m+" min "+s+" s"
+	}
+	if (m!=0){
+		return m+" min "+s+" s"
+	
+	}
+	return s+" s"
+		
+}
+
+function downloadGPX(from,to){
+	window.open("/gpx?flon="+from.lng+"&flat="+from.lat+"&tlon="+to.lng+"&tlat="+to.lat)
+		
+}
+
+		
+
 
