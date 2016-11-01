@@ -119,7 +119,10 @@ int parseMapConfigFile(char * filename, struct mapconfig_t * conf,
 	}
 	yaml_parser_set_input_file(&parser,IN);
 
-	yaml_parser_load(&parser,&document);
+	if (!yaml_parser_load(&parser,&document)){
+		printf("Error while parsing config file");
+		return 1;	
+	}
 	fclose(IN);
 
 	yaml_node_t * root;
@@ -127,6 +130,7 @@ int parseMapConfigFile(char * filename, struct mapconfig_t * conf,
 	struct mapConfItem_t mapConfItem;
 
 	root = yaml_document_get_root_node(&document);
+
 
 	if (root->type != YAML_MAPPING_NODE){
 		printf("Wrong syntax of configuration file in objtypes\n");

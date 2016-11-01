@@ -14,8 +14,8 @@ IGNORE:
                 - private
             foot:
                 - no
-	    barrier:
-	    	- kerb	
+            barrier:
+                - kerb
 BARRIER: 
         0:
             barrier : "*"

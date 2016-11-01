@@ -84,7 +84,7 @@ preprocess: filter.c
 	$(CC) $(PFLAGS) $< -o $@
 
 clean:
-	rm -f *.o *.so include/*.o
+	rm -f *.o *.so include/*.o $(CSVGRAPH_EXE) $(TODB_EXE) $(ORDER_EXE) $(PARSE_EXE) $(SEARCH_EXE)
 
 protobuf: ../config/types.proto ../config/premap.proto ../config/graph.proto 
 	mkdir -p include

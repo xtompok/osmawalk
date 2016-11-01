@@ -1,14 +1,14 @@
 ﻿DROP TABLE IF EXISTS ways,ways_refs,multipols,multipols_refs,nodes;
 
 CREATE TABLE nodes (
-	id BIGINT PRIMARY KEY,
+	id BIGSERIAL PRIMARY KEY,
 	lat INTEGER,
 	lon INTEGER,
 	height INTEGER,
-	objtype INTEGER,
+	objtype INTEGER DEFAULT 51,
 	inside BOOLEAN DEFAULT FALSE,
-	inTunnel BOOLEAN,
-	onBridge BOOLEAN,
+	inTunnel BOOLEAN DEFAULT FALSE,
+	onBridge BOOLEAN DEFAULT FALSE,
 	nodeidx INTEGER,
 	loc GEOMETRY(POINTZ,3065),
 	square1 INTEGER,
@@ -16,7 +16,7 @@ CREATE TABLE nodes (
 );
 
 CREATE TABLE ways (
-	id BIGINT PRIMARY KEY,
+	id BIGSERIAL PRIMARY KEY,
 --	refs INTEGER[],
 	area BOOLEAN,
 	barrier BOOLEAN,
@@ -31,20 +31,20 @@ CREATE TABLE ways (
 );
 
 CREATE TABLE ways_refs (
-	id BIGINT REFERENCES ways(id),
-	ref BIGINT, -- REFERENCES nodes(id),
+	id BIGSERIAL REFERENCES ways(id),
+	ref BIGSERIAL, -- REFERENCES nodes(id),
 	ord INTEGER
 );
 
 CREATE TABLE multipols (
-	id BIGINT PRIMARY KEY,
+	id BIGSERIAL PRIMARY KEY,
 	objtype INTEGER,
 	geom GEOMETRY(MULTILINESTRINGZ,3065)
 );
 
 CREATE TABLE multipols_refs (
-	id BIGINT REFERENCES multipols(id),
-	ref BIGINT, -- REFERENCES ways(id),
+	id BIGSERIAL REFERENCES multipols(id),
+	ref BIGSERIAL, -- REFERENCES ways(id),
 	role INTEGER);
 
 CREATE INDEX ON multipols_refs (ref);
