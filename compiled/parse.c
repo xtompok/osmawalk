@@ -268,10 +268,10 @@ void dumpNode(OSM_Node * node, struct obj_attr attr){
 	pbNode->has_height = true;
 	pbNode->height = calcHeight(heights,node->lat,node->lon);
 //	printf("Height: %d\n",pbNode->height);
-	pbNode->has_square1 = true;
-	pbNode->square1 = attr.square1;
-	pbNode->has_square2 = true;
-	pbNode->square2 = attr.square2;
+//	pbNode->has_square1 = true;
+//	pbNode->square1 = attr.square1;
+//	pbNode->has_square2 = true;
+//	pbNode->square2 = attr.square2;
 
 	double lat;
 	double lon;
@@ -327,8 +327,8 @@ int node(OSM_Node *n) {
 	attr.objtype = classify(n->tags,conf.type);
 	attr.tunnel  = classify(n->tags,conf.tunnel);
 	attr.bridge = classify(n->tags,conf.bridge);
-	attr.square1 = square(1,n->lon,n->lat);
-	attr.square2 = square(2,n->lon,n->lat);
+//	attr.square1 = square(1,n->lon,n->lat);
+//	attr.square2 = square(2,n->lon,n->lat);
 //	if (objtype==-1)
 //		return;
 	dumpNode(n,attr);

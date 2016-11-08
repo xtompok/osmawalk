@@ -15,10 +15,10 @@ CREATE TABLE direct_candidates AS (
 		WHERE n1.id != n2.id AND 
 			n1.inside = false AND 
 			n2.inside = false AND 
---			(
---				n1.square1 = n2.square1 OR
---				n1.square2 = n2.square2
---			)AND
+			(
+				n1.square1 = n2.square1 OR
+				n1.square2 = n2.square2
+			)AND
 			ST_Distance(n1.loc,n2.loc) < 30
 
 --  SELECT DISTINCT (make_candidates(minx,miny,maxx,maxy)).* FROM bboxes_100

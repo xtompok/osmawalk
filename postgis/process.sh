@@ -36,7 +36,7 @@ step ways_geom
 step mp_geom
 step barriers
 step walk_in_nodes
-step bbox-function
+step bbox-function2
 step direct_candidates5
 step ok_candidates2
 step direct_filter

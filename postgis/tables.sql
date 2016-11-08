@@ -48,10 +48,16 @@ CREATE TABLE multipols_refs (
 	role INTEGER);
 
 CREATE INDEX ON multipols_refs (ref);
-CREATE INDEX ON ways_refs (ref);
+CREATE INDEX ON ways_refs(ref);
+CREATE INDEX ON ways_refs(id);
+CREATE INDEX ON ways_refs(ord);
 CREATE INDEX ON nodes (lat, lon);
+CREATE INDEX ON nodes (lat);
+CREATE INDEX ON nodes (lon);
 CREATE INDEX ON nodes(square1);
 CREATE INDEX ON nodes(square2);
+CREATE INDEX ON nodes(id);
+CREATE INDEX ON ways(id);
 
 
 ALTER TABLE nodes OWNER TO jethro;
