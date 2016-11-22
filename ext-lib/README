@@ -1,6 +1,18 @@
 Place here required external libraries if you don't want to install them into the system.
 
 Required libraries usually not in system:
-libucw - http://www.ucw.cz/libucw/download/ #after build: cp obj/ucw/autoconf.h ucw/
-libosm - https://github.com/vetinari/libosmpbf
-libcsv - http://sourceforge.net/projects/libcsv/
+libucw - http://www.ucw.cz/libucw/download/ 
+  - after build: cp obj/ucw/autoconf.h ucw/
+libosm - https://github.com/vetinari/libosmpbf 
+  - requires OSM-binary, partially broken...
+libcsv - http://sourceforge.net/projects/libcsv/ 
+  - doesn't need to be compiled 
+
+Required libraries usually packaged in systemi (need also -dev version):
+libprotobuf-c
+libproj - PROJ.4
+libyaml
+libpq - Postgress
+
+Required programs:
+protobuf-c
