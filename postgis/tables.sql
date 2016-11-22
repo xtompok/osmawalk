@@ -1,4 +1,4 @@
-﻿DROP TABLE IF EXISTS ways,ways_refs,multipols,multipols_refs,nodes;
+﻿DROP TABLE IF EXISTS ways,ways_refs,multipols,multipols_refs,nodes CASCADE;
 
 CREATE TABLE nodes (
 	id BIGSERIAL PRIMARY KEY,
@@ -12,7 +12,8 @@ CREATE TABLE nodes (
 	nodeidx INTEGER,
 	loc GEOMETRY(POINTZ,3065),
 	square1 INTEGER,
-	square2 INTEGER
+	square2 INTEGER,
+	walk BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE ways (
@@ -56,7 +57,10 @@ CREATE INDEX ON nodes (lat);
 CREATE INDEX ON nodes (lon);
 CREATE INDEX ON nodes(square1);
 CREATE INDEX ON nodes(square2);
+CREATE INDEX ON nodes(walk);
+CREATE INDEX ON nodes(inside);
 CREATE INDEX ON nodes(id);
+CREATE INDEX ON nodes USING GIST(loc);
 CREATE INDEX ON ways(id);
 
 

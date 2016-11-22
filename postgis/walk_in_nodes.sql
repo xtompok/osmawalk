@@ -6,12 +6,14 @@ CREATE TABLE walk_nodes AS
 	INNER JOIN nodes AS n ON wr.ref= n.id
 	WHERE w.type != 0 AND w.type != 30
 ;
-CREATE INDEX ON walk_nodes(id);
 ALTER TABLE walk_nodes ADD UNIQUE (id);
---RAISE NOTICE 'Creating indexes';
+ALTER TABLE walk_nodes ADD CONSTRAINT walk_nodesfk FOREIGN KEY (id) REFERENCES nodes(id) MATCH FULL;
+CREATE INDEX ON walk_nodes(id);
 
-CREATE INDEX ON nodes USING GIST(loc);
-CREATE INDEX ON barriers USING GIST(geom);
+UPDATE nodes SET walk=true
+FROM walk_nodes
+WHERE nodes.id = walk_nodes.id;
+
 
 --RAISE NOTICE 'Marking inside nodes';
 
@@ -26,6 +28,8 @@ CREATE TABLE walk_in_nodes AS
 		AND NOT ST_Within(n.loc,ST_ExteriorRing(b.geom))
 ;
 
+ALTER TABLE walk_in_nodes ADD UNIQUE (nid);
+ALTER TABLE walk_in_nodes ADD CONSTRAINT walk_in_nodesfk FOREIGN KEY (nid) REFERENCES nodes(id) MATCH FULL;
 CREATE INDEX ON walk_in_nodes(nid);
 
 

@@ -44,6 +44,3 @@ CREATE TABLE barriers AS
 ;
 
 CREATE INDEX ON barriers USING GIST(geom);
-
-
-

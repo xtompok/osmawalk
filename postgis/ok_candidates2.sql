@@ -6,7 +6,7 @@ CREATE TABLE direct_cand_col AS
 	SELECT dc.id1 AS id1, dc.id2 AS id2, dc.geom AS geom, b.geom AS cgeom
 	FROM direct_candidates AS dc
 	CROSS JOIN barriers AS b
-	WHERE (dc.geom && b.geom) AND (ST_Intersects(dc.geom,b.geom))
+	WHERE ST_IsValid(b.geom) AND (dc.geom && b.geom) AND (ST_Intersects(dc.geom,b.geom))
 ;
 
 DROP TABLE IF EXISTS direct_ok;
