@@ -211,7 +211,7 @@ void writeGpxFile(struct search_result_t result,char * filename);
  * @param dataName Name of the file with searching graph
  * @result Search data structure
  */
-struct search_data_t prepareData(char * configName, char * dataName);
+struct search_data_t * prepareData(char * configName, char * dataName);
 
 /*! Find path in graph from coorinates to coordinates
  * @param data Search data
@@ -221,7 +221,7 @@ struct search_data_t prepareData(char * configName, char * dataName);
  * @param toLon End point longitude
  * @result Structure for handli search result
  */
-struct search_result_t findPath(struct search_data_t data,
+struct search_result_t findPath(struct search_data_t * data,
 		double fromLat, double fromLon, double toLat, double toLon);
 
 void printMapBBox(struct search_data_t data);

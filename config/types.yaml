@@ -14,11 +14,14 @@ IGNORE:
                 - private
             foot:
                 - no
+	    barrier:
+	    	- kerb	
 BARRIER: 
         0:
             barrier : "*"
             waterway:
                 - river
+                - riverbank
                 - canal
                 - weir
             building: "*"

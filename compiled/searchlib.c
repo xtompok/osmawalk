@@ -512,48 +512,49 @@ void writeGpxFile(struct search_result_t result,char * filename){
 	fclose(OUT);
 }
 
-struct search_data_t prepareData(char * configName, char * dataName){
-	struct search_data_t data;
-	data.pj_wgs84 = pj_init_plus("+proj=longlat +datum=WGS84 +no_defs");
-	data.pj_utm = pj_init_plus("+proj=utm +zone=33 +ellps=WGS84 +units=m +no_defs");
-	data.conf = parseConfigFile(configName);
-	data.graph = loadMap(dataName);
-	if (data.graph==NULL){
+struct search_data_t * prepareData(char * configName, char * dataName){
+	struct search_data_t * data;
+	data = malloc(sizeof(struct search_data_t));
+	data->pj_wgs84 = pj_init_plus("+proj=longlat +datum=WGS84 +no_defs");
+	data->pj_utm = pj_init_plus("+proj=utm +zone=33 +ellps=WGS84 +units=m +no_defs");
+	data->conf = parseConfigFile(configName);
+	data->graph = loadMap(dataName);
+	if (data->graph==NULL){
 		printf("Error loading map\n");	
 		return data;
 	}
-	data.nodeWays = makeNodeWays(data.graph);
-	calcDistances(data.graph);
+	data->nodeWays = makeNodeWays(data->graph);
+	calcDistances(data->graph);
 	return data;
 }
 
 
-struct search_result_t findPath(struct search_data_t data,double fromLat, double fromLon, double toLat, double toLon){
-	wgs2utm(data,&fromLon,&fromLat);
+struct search_result_t findPath(struct search_data_t * data,double fromLat, double fromLon, double toLat, double toLon){
+	wgs2utm(*data,&fromLon,&fromLat);
 	int fromIdx;
-	fromIdx = findNearestVertex(data.graph,fromLon,fromLat);
+	fromIdx = findNearestVertex(data->graph,fromLon,fromLat);
 
-	wgs2utm(data,&toLon,&toLat);
+	wgs2utm(*data,&toLon,&toLat);
 	int toIdx;
-	toIdx = findNearestVertex(data.graph,toLon,toLat);
+	toIdx = findNearestVertex(data->graph,toLon,toLat);
 
-	/*printf("Searching from %lld(%f,%f,%d) to %lld(%f,%f,%d)\n",data.graph->vertices[fromIdx]->osmid,
-			data.graph->vertices[fromIdx]->lat,
-			data.graph->vertices[fromIdx]->lon,
-			data.graph->vertices[fromIdx]->height,
-			data.graph->vertices[toIdx]->osmid,
-			data.graph->vertices[toIdx]->lat,
-			data.graph->vertices[toIdx]->lon,
-			data.graph->vertices[toIdx]->height
+	/*printf("Searching from %lld(%f,%f,%d) to %lld(%f,%f,%d)\n",data->graph->vertices[fromIdx]->osmid,
+			data->graph->vertices[fromIdx]->lat,
+			data->graph->vertices[fromIdx]->lon,
+			data->graph->vertices[fromIdx]->height,
+			data->graph->vertices[toIdx]->osmid,
+			data->graph->vertices[toIdx]->lat,
+			data->graph->vertices[toIdx]->lon,
+			data->graph->vertices[toIdx]->height
 			);
 */
 	struct dijnode_t * dijArray;
-	dijArray = prepareDijkstra(data.graph);
+	dijArray = prepareDijkstra(data->graph);
 
-	findWay(data, dijArray,fromIdx, toIdx);
+	findWay(*data, dijArray,fromIdx, toIdx);
 	struct search_result_t result;
 	int n_points;
-	result.points = resultsToArray(data,dijArray,fromIdx,toIdx,&n_points);
+	result.points = resultsToArray(*data,dijArray,fromIdx,toIdx,&n_points);
 	result.n_points = n_points;
 	result.dist = 0;
 	result.time = 0;
@@ -563,8 +564,8 @@ struct search_result_t findPath(struct search_data_t data,double fromLat, double
 	int idx;
 	idx = fromIdx;
 	while(idx != toIdx){
-		result.dist+=data.graph->edges[dijArray[idx].fromEdgeIdx]->dist;
-		result.time+=calcTime(data.graph,data.conf,data.graph->edges[dijArray[idx].fromEdgeIdx]);
+		result.dist+=data->graph->edges[dijArray[idx].fromEdgeIdx]->dist;
+		result.time+=calcTime(data->graph,data->conf,data->graph->edges[dijArray[idx].fromEdgeIdx]);
 		idx = dijArray[idx].fromIdx;
 	}
 	free(dijArray);
