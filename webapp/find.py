@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from ctypes import cdll,Structure
-from ctypes import POINTER,c_double,c_int,c_ulonglong,c_void_p
+from ctypes import POINTER,c_double,c_int,c_ulonglong,c_void_p,c_char_p
 
 libsearch = cdll.LoadLibrary("../compiled/libsearch.so")
 class Point(Structure):
@@ -17,12 +17,22 @@ class SearchResult(Structure):
 		("dist",c_double),
 		("time",c_double)]
 
+class BBox(Structure):
+	_fields_ = [("minlon",c_double),
+		("minlat",c_double),
+		("maxlon",c_double),
+		("maxlat",c_double)]
+
 prepareData = libsearch.prepareData
 prepareData.restype = c_void_p
 
 findPath = libsearch.findPath
 findPath.restype = SearchResult
 findPath.argtypes = (c_void_p,c_double,c_double,c_double,c_double) 
+
+getMapBBox = libsearch.getMapBBox
+getMapBBox.restype = BBox
+getMapBBox.argtypes = (c_void_p,)
 
 
 #

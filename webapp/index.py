@@ -2,7 +2,7 @@
 from flask import Flask
 from flask import render_template,Response
 from flask import request
-from find import prepareData, findPath, SearchResult 
+from find import prepareData, findPath, SearchResult, getMapBBox 
 import json
 import re
 from gpx import GPX
@@ -13,6 +13,7 @@ deploy_name = "walk.bezva.org"
 app = Flask(__name__)
 
 data = prepareData("../config/speeds.yaml","../data/praha-graph.pbf")
+bbox = getMapBBox(data)
 
 def get_attribute(request,name,convert=None,default=None):
 	attr = request.args.get(name,None)
@@ -28,7 +29,7 @@ def get_attribute(request,name,convert=None,default=None):
 
 @app.route('/')
 def leaflet_page(name=None):
-	return render_template('index.html',name=local_name)
+	return render_template('index.html',name=local_name,bbox=bbox)
 
 @app.route('/search')
 def do_search():

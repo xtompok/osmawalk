@@ -118,6 +118,20 @@ struct search_data_t{
 	struct nodeways_t * nodeWays;	
 };
 
+/* @struct bbox_t
+ * @abstract Struct for bounding box
+ * @field minlon Minimal longitude
+ * @field minlat Minimal latitude
+ * @field maxlon Maximal longitude
+ * @field maxlat Maximal latitude
+ */
+struct bbox_t{
+	double minlon;
+	double minlat;
+	double maxlon;
+	double maxlat;		
+};
+
 /*!
  * Converts inplace coordinates from UTM to WGS-84
  * @param data Search data (for projections)
@@ -224,6 +238,8 @@ struct search_data_t * prepareData(char * configName, char * dataName);
 struct search_result_t findPath(struct search_data_t * data,
 		double fromLat, double fromLon, double toLat, double toLon);
 
+
+struct bbox_t getMapBBox(struct search_data_t * data);
 void printMapBBox(struct search_data_t data);
 
 #endif

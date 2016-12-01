@@ -45,6 +45,43 @@ double calcTime(Graph__Graph * graph, struct config_t conf,Graph__Edge * edge){
 	return (edge->dist+abs(dh)*(dh>0?conf.upscale:conf.downscale))/speed;
 }
 
+
+struct bbox_t getMapBBox(struct search_data_t * data){
+	Graph__Graph * graph;
+	int64_t minlon;
+	int64_t minlat;
+	int64_t maxlon;
+	int64_t maxlat;
+
+	graph = data->graph;
+	
+	minlon = graph->vertices[0]->lon;
+	maxlon = graph->vertices[0]->lon;
+	minlat = graph->vertices[0]->lat;
+	maxlat = graph->vertices[0]->lat;
+	for (int i=0;i<graph->n_vertices;i++){
+		int64_t lon;
+		int64_t lat;
+		lon = graph->vertices[i]->lon;
+		lat = graph->vertices[i]->lat;
+
+		minlon=(lon<minlon)?lon:minlon;
+		minlat=(lat<minlat)?lat:minlat;
+		maxlon=(lon>maxlon)?lon:maxlon;
+		maxlat=(lat>maxlat)?lat:maxlat;
+	}
+
+	struct bbox_t bbox;
+	bbox.minlon=minlon;
+	bbox.minlat=minlat;
+	bbox.maxlon=maxlon;
+	bbox.maxlat=maxlat;
+	utm2wgs(*data,&bbox.minlon,&bbox.minlat);
+	utm2wgs(*data,&bbox.maxlon,&bbox.maxlat);
+	return bbox;
+}
+
+
 void printMapBBox(struct search_data_t data){
 	Graph__Graph * graph;
 	int64_t minlon;

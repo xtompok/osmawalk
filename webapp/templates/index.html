@@ -28,6 +28,14 @@
 		var time = document.getElementById("cas")
 		var gpxbut = document.getElementById("gpxbut")
 		gpxbut.disabled=true
+		var bbox_rect = L.polygon([
+			L.latLng({{bbox.minlat}},{{bbox.minlon}}),
+			L.latLng({{bbox.minlat}},{{bbox.maxlon}}),
+			L.latLng({{bbox.maxlat}},{{bbox.maxlon}}),
+			L.latLng({{bbox.maxlat}},{{bbox.minlon}}),
+			L.latLng({{bbox.minlat}},{{bbox.minlon}}),
+			],{'fill':false,'stroke':true,'color':'red','weight':2})
+		bbox_rect.addTo(map)
 		map.on('click', function(e) {
 			if (stage == 0){
 				if (from){
