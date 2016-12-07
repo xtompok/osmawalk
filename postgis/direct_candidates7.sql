@@ -48,5 +48,5 @@ $$ LANGUAGE 'plpgsql';
 
 DROP TABLE IF EXISTS direct_precandidates;
 CREATE TABLE direct_precandidates2 AS (
-	SELECT * FROM make_candidates(8063)
+	SELECT (make_candidates(MAX(square1))).* FROM nodes
 );
