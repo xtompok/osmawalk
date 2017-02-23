@@ -1,4 +1,4 @@
-﻿DROP TABLE IF EXISTS ways,ways_refs,multipols,multipols_refs,nodes CASCADE;
+﻿DROP TABLE IF EXISTS ways,ways_refs,multipols,multipols_refs,nodes,gtfs_stops CASCADE;
 
 CREATE TABLE nodes (
 	id BIGSERIAL PRIMARY KEY,
@@ -9,6 +9,8 @@ CREATE TABLE nodes (
 	inside BOOLEAN DEFAULT FALSE,
 	inTunnel BOOLEAN DEFAULT FALSE,
 	onBridge BOOLEAN DEFAULT FALSE,
+	stopPos BOOLEAN DEFAULT FALSE,
+	ref VARCHAR(15),
 	nodeidx INTEGER,
 	loc GEOMETRY(POINTZ,3065),
 	square1 INTEGER,
@@ -46,7 +48,14 @@ CREATE TABLE multipols (
 CREATE TABLE multipols_refs (
 	id BIGSERIAL REFERENCES multipols(id),
 	ref BIGSERIAL, -- REFERENCES ways(id),
-	role INTEGER);
+	role INTEGER
+);
+
+CREATE TABLE gtfs_stops (
+	stop_id	VARCHAR(15),
+	stop_lat DOUBLE PRECISION,
+	stop_lon DOUBLE PRECISION
+);
 
 CREATE INDEX ON multipols_refs (ref);
 CREATE INDEX ON ways_refs(ref);

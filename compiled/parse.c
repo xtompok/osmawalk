@@ -134,6 +134,14 @@ int square(int num,double lon, double lat){
 	return (lon/SQ_SIZE)*row + lat/SQ_SIZE;
 }
 
+char * get_val(OSM_Tag_List * tags,char * key){
+	for (int i=0;i<tags->num;i++){
+		if (strcmp(tags->data[i].key,key)==0){
+			return tags->data[i].val;
+		}
+	}
+	return NULL;
+}
 
 int classify(OSM_Tag_List * tags,struct tag_t * classifier){
 	int priority = -1;
@@ -267,6 +275,10 @@ void dumpNode(OSM_Node * node, struct obj_attr attr){
 	pbNode->onbridge = attr.bridge;
 	pbNode->has_height = true;
 	pbNode->height = calcHeight(heights,node->lat,node->lon);
+	pbNode->has_stop = true;
+	pbNode->stop = attr.stop;
+//	pbNode->has_ref = true;
+	pbNode->ref = attr.ref;
 //	printf("Height: %d\n",pbNode->height);
 //	pbNode->has_square1 = true;
 //	pbNode->square1 = attr.square1;
@@ -327,6 +339,10 @@ int node(OSM_Node *n) {
 	attr.objtype = classify(n->tags,conf.type);
 	attr.tunnel  = classify(n->tags,conf.tunnel);
 	attr.bridge = classify(n->tags,conf.bridge);
+	attr.stop = classify(n->tags,conf.stop_pos);
+	if (attr.stop){
+		attr.ref = get_val(n->tags,"ref");
+	}
 //	attr.square1 = square(1,n->lon,n->lat);
 //	attr.square2 = square(2,n->lon,n->lat);
 //	if (objtype==-1)
@@ -358,11 +374,13 @@ int main(int argc, char **argv) {
 	GARY_INIT(conf.area,0);
 	GARY_INIT(conf.bridge,0);
 	GARY_INIT(conf.tunnel,0);
+	GARY_INIT(conf.stop_pos,0);
 
 	parseMapConfigFile("../config/types.yaml",&conf,addTypeItemToMapConf);
 	parseMapConfigFile("../config/area.yaml",&conf,addAreaItemToMapConf);
 	parseMapConfigFile("../config/bridge.yaml",&conf,addBridgeItemToMapConf);
 	parseMapConfigFile("../config/tunnel.yaml",&conf,addTunnelItemToMapConf);
+	parseMapConfigFile("../config/stop_pos.yaml",&conf,addStopPosItemToMapConf);
 
 	heights = loadHeights("../osm/heights.bin");
 

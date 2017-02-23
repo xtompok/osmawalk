@@ -30,6 +30,7 @@ struct mapconfig_t {
 	struct tag_t * tunnel;
 	struct tag_t * bridge;
 	struct tag_t * area;
+	struct tag_t * stop_pos;
 };
 
 struct mapConfItem_t {
@@ -44,11 +45,13 @@ int enumValueForName(ProtobufCEnumDescriptor desc,char * name);
 
 
 struct tag_t *  addItemToTagList(struct tag_t * list,struct mapConfItem_t item, int type);
-void addAreaItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item);
 
+void addBoolItemToMapConf(struct mapconfig_t * conf, struct mapConfItem_t item,struct tag_t ** confitem); 
+void addAreaItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item);
 void addTunnelItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item);
 void addBridgeItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item);
 void addTypeItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item);
+void addStopPosItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item);
 
 int parseMapConfigFile(char * filename, struct mapconfig_t * conf,
 			void (*addItemToMapConf)(struct mapconfig_t * conf,

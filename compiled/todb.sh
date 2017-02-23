@@ -25,7 +25,7 @@ done
 psql -f ../postgis/tables.sql $DATABASE $USERNAME
 
 echo Copying nodes...
-COMMAND="COPY nodes (id,lat,lon,height,objtype,inside,intunnel,onbridge,loc,square1,square2) FROM STDIN;"
+COMMAND="COPY nodes (id,lat,lon,height,objtype,inside,intunnel,onbridge,stoppos,ref,loc,square1,square2) FROM STDIN;"
 ./todb n |  psql -c "$COMMAND" $DATABASE $USERNAME
 
 echo Copying ways...

@@ -6,6 +6,8 @@ struct obj_attr {
 	int height;
 	int square1;
 	int square2;
+	int stop;
+	char * ref;
 
 };
 

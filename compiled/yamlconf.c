@@ -56,7 +56,7 @@ struct tag_t *  addItemToTagList(struct tag_t * list,struct mapConfItem_t item, 
 	strcpy(val->name,item.value);
 	return list;
 }
-void addAreaItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
+void addBoolItemToMapConf(struct mapconfig_t * conf, struct mapConfItem_t item,struct tag_t ** confitem){
 	int type;
 	if (strcmp(item.name,"yes")==0)
 		type = 1;
@@ -66,35 +66,23 @@ void addAreaItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
 		printf("Wrong value: %s\n",item.name);
 		return;
 	}
-	conf->area = addItemToTagList(conf->area,item,type);
+	*confitem = addItemToTagList(*confitem,item,type);
 	return;
+
+}
+
+void addAreaItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
+	addBoolItemToMapConf(conf,item,&(conf->area));
 }
 
 void addTunnelItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
-	int type;
-	if (strcmp(item.name,"yes")==0)
-		type = 1;
-	else if (strcmp(item.name,"no")==0)
-		type = 0;
-	else{
-		printf("Wrong value: %s\n",item.name);
-		return;
-	}
-	conf->tunnel = addItemToTagList(conf->tunnel,item,type);
-	return;
+	addBoolItemToMapConf(conf,item,&(conf->tunnel));
 }
 void addBridgeItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
-	int type;
-	if (strcmp(item.name,"yes")==0)
-		type = 1;
-	else if (strcmp(item.name,"no")==0)
-		type = 0;
-	else{
-		printf("Wrong value: %s\n",item.name);
-		return;
-	}
-	conf->bridge = addItemToTagList(conf->bridge,item,type);
-	return;
+	addBoolItemToMapConf(conf,item,&(conf->bridge));
+}
+void addStopPosItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
+	addBoolItemToMapConf(conf,item,&(conf->stop_pos));
 }
 
 void addTypeItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
