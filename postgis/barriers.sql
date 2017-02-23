@@ -6,19 +6,16 @@ CREATE TABLE barriers AS
 	FROM (
 		SELECT  id,
 			(ST_DumpRings((ST_Dump(sq.multi)).geom)).path[1] AS ring_num,
-			(ST_DumpRings((ST_Dump(sq.multi)).geom)).geom AS geom --COUNT(*) 
---		SELECT id,ST_NumInteriorRings(sq.multi),ST_Summary(sq.multi),sq.wc
+			(ST_DumpRings((ST_Dump(sq.multi)).geom)).geom AS geom  
 		FROM (
-			SELECT mp.id AS id,ST_BuildArea(ST_Collect(w.geom)) AS multi,COUNT(w.geom) AS wc
+			SELECT mp.id AS id,ST_BuildArea(ST_Collect(w.geom)) AS multi
 			FROM multipols AS mp
 			INNER JOIN multipols_refs AS mpr ON mp.id = mpr.id
 			INNER JOIN ways AS w ON w.id = mpr.ref
 			WHERE mp.objtype = 30 AND
 				ST_IsValid(w.geom)
 			GROUP BY mp.id
---			HAVING NOT ST_IsValid(ST_BuildArea(ST_Collect(w.geom)))
 		) AS sq
---		WHERE ST_NumInteriorRings(sq.multi) > 0
 	) AS pd
 	WHERE pd.ring_num = 0
 
