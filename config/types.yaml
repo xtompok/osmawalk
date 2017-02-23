@@ -16,6 +16,10 @@ IGNORE:
                 - no
             barrier:
                 - kerb
+                - bollard
+        2:
+            route:
+                - ferry
 BARRIER: 
         0:
             barrier : "*"
@@ -45,16 +49,17 @@ BARRIER:
             highway:
                 - motorway
                 - trunk
-                - motorway-link
-                - trunk-link
+                - motorway_link
+                - trunk_link
                 - primary
-                - primary-link
+                - primary_link
             railway:
                 - funicular
                 - light_rail
                 - rail
             natural:
                 - cliff
+                - scrub
 
 #RAILWAY:
 #WATER:
@@ -112,6 +117,8 @@ PAVED:
                 - pedestrian
             cycleway:
                 - track
+            public_transport:
+                - platform
         1:
             foot:
                 - yes
