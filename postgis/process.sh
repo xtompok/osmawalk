@@ -29,6 +29,8 @@ step(){
 	(time psql  -f "${1}.sql" $DATABASE $USERNAME) 2>&1
 }
 
+./stops.sh
+
 step duplicate_nodes
 step linesplit_function2
 step split_ways2
@@ -40,4 +42,5 @@ step bbox-function2
 step direct_candidates6
 step ok_candidates2
 step direct_filter
+step stops
 ./export.sh

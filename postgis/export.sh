@@ -45,3 +45,11 @@ COPY ( \
 	)
 ) TO STDOUT WITH DELIMITER ';' CSV HEADER;"
 psql -c "$COMMAND" $DATABASE $USERNAME >../data/ways.csv  
+
+echo Exporting stops...
+COMMAND="COPY stops(stop_id,lat,lon) TO STDOUT WITH DELIMITER ';' CSV HEADER;"
+psql -c "$COMMAND" $DATABASE $USERNAME >../data/stops.csv
+
+echo Exporting stops ways...
+COMMAND="COPY stops_direct_ok(sid,nid) TO STDOUT DELIMITER ';' CSV HEADER;"
+psql -c "$COMMAND" $DATABASE $USERNAME >../data/stops-direct.csv
