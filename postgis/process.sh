@@ -43,4 +43,7 @@ step direct_candidates6
 step ok_candidates2
 step direct_filter
 step stops
+step stops-bbox
+step stops_direct_cand
+step stops_direct_ok
 ./export.sh

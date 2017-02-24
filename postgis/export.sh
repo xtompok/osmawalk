@@ -47,7 +47,7 @@ COPY ( \
 psql -c "$COMMAND" $DATABASE $USERNAME >../data/ways.csv  
 
 echo Exporting stops...
-COMMAND="COPY stops(stop_id,lat,lon) TO STDOUT WITH DELIMITER ';' CSV HEADER;"
+COMMAND="COPY stops(id,stop_id,lat,lon) TO STDOUT WITH DELIMITER ';' CSV HEADER;"
 psql -c "$COMMAND" $DATABASE $USERNAME >../data/stops.csv
 
 echo Exporting stops ways...
