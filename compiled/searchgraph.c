@@ -5,12 +5,14 @@
 #include "hashes.c"
 #include "utils.h"
 #include "searchgraph.h"
+#include "searchlib.h"
 
 // Make for each vertex array of edges on which vertex lies
 struct vertexedges_t * makeVertexEdges(Graph__Graph * graph){
 	struct vertexedges_t * vertexEdges;
 	vertexEdges = malloc(sizeof(struct vertexedges_t)*graph->n_vertices);
 	printf("Vertices: %d\n",graph->n_vertices);
+	struct nodesIdxNode * n;
 	for (int i=0;i<graph->n_vertices;i++){
 		vertexEdges[i].n_edges=0;
 //		printf("%f %f\n",graph->vertices[i]->lat,graph->vertices[i]->lon);
@@ -21,6 +23,7 @@ struct vertexedges_t * makeVertexEdges(Graph__Graph * graph){
 	}
 	for (int i=0;i<graph->n_vertices;i++){
 		vertexEdges[i].edges = malloc(sizeof(int)*vertexEdges[i].n_edges);
+	//	printf("V: %lld %lld E:%d\n",graph->vertices[i]->osmid,graph->vertices[i]->idx,vertexEdges[i].n_edges);
 		vertexEdges[i].n_edges = 0;
 	}
 	for (int i=0;i<graph->n_edges;i++){
@@ -67,6 +70,9 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 			for (int i=0;i<vertexEdges[vIdx].n_edges;i++){
 				int neigh;
 				neigh = graph->edges[vertexEdges[vIdx].edges[i]]->vto;
+				if (neigh == vIdx){
+					neigh = graph->edges[vertexEdges[vIdx].edges[i]]->vfrom;
+				}
 				
 				if (seen[neigh])
 					continue;
@@ -138,6 +144,22 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 	
 	graph->n_edges = GARY_SIZE(newEdges);
 	graph->edges = newEdges;
+
+	nodesIdx_refresh(graph->n_vertices,graph->vertices);
+
+	// Update stops
+	Graph__Stop ** newStops;
+	GARY_INIT(newStops,0);
+	for (int i=0;i<graph->n_stops;i++){
+		if (nodesIdx_find(graph->stops[i]->id)==NULL){
+			continue;
+		}
+		Graph__Stop ** sPtr;
+		sPtr = GARY_PUSH(newStops);
+		*sPtr = graph->stops[i];
+	}
+	graph->n_stops = GARY_SIZE(newStops);
+	graph->stops = newStops;
 
 }
 // Save search graph to file

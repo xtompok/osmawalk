@@ -157,6 +157,9 @@ int wgs2utm(struct search_data_t data, double * lon, double * lat);
  */
 double calcTime(Graph__Graph * graph,struct config_t conf,Graph__Edge * edge);
 
+void nodesIdx_refresh(int n_nodes, Graph__Vertex ** vertices);
+void stopsIdx_refresh(int n_stops, Graph__Stop ** stops);
+
 /*!
  * Parse config file
  * @param filename Filename of the file
@@ -238,6 +241,8 @@ struct search_data_t * prepareData(char * configName, char * dataName);
 struct search_result_t findPath(struct search_data_t * data,
 		double fromLat, double fromLon, double toLat, double toLon);
 
+struct search_result_t findTransfer(struct search_data_t * data,
+		char * from, char * to);
 
 struct bbox_t getMapBBox(struct search_data_t * data);
 void printMapBBox(struct search_data_t data);

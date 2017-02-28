@@ -35,6 +35,12 @@ struct nodeWaysNode {
 	int64_t * ways;
 };
 
+
+struct stopsIdxNode {
+	char * stop_id;
+	int idx;
+};
+
 /*! @struct mixed_num_t
  * @abstract Struct for representing mixed numbers. numer/denom should be always
  * lower than 1

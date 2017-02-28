@@ -21,7 +21,14 @@ message Edge {
 
 }
 
+message Stop {
+	required sint64 idx = 3;
+	required sint64 id = 1;
+	required string stop_id = 2; 	
+}
+
 message Graph {
 	repeated Vertex vertices = 1;
 	repeated Edge edges = 2;
+	repeated Stop stops = 3;
 }
