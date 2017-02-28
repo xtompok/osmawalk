@@ -14,7 +14,6 @@
 
 struct parse_t {
 	int state;
-	int count;
 	char ok;
 	int type;
 	char first;
@@ -74,8 +73,6 @@ void node_line_cb(int ch, void * data){
 	graph__vertex__init(*v);
 	p_struct->tmpvertex = *v;
 	p_struct->first = 0;
-	p_struct->tmpvertex->idx=p_struct->count-1;
-	p_struct->count++;
 }
 
 void stop_item_cb(void * item,size_t len,void * data){
@@ -121,17 +118,14 @@ void stop_line_cb(int ch, void * data){
 	*v = malloc(sizeof(Graph__Vertex));
 	graph__vertex__init(*v);
 	p_struct->tmpvertex = *v;
-	p_struct->tmpvertex->idx=p_struct->count-1;
 
 	Graph__Stop ** s;
 	s = GARY_PUSH(p_struct->stops);
 	*s = malloc(sizeof(Graph__Stop));
 	graph__stop__init(*s);
 	p_struct->tmpstop = *s;
-	p_struct->tmpstop->idx=p_struct->count-1;
 
 	p_struct->first = 0;
-	p_struct->count++;
 }
 
 void way_item_cb(void * item,size_t len,void * data){
@@ -188,7 +182,6 @@ void way_line_cb(int ch, void * data){
 	graph__edge__init(*e);
 	p_struct->tmpedge = *e;
 	p_struct->first = 0;
-	p_struct->count++;
 }
 
 void direct_item_cb(void * item,size_t len,void * data){
@@ -236,7 +229,6 @@ void direct_line_cb(int ch, void * data){
 	p_struct->tmpedge = *e;
 	p_struct->tmpedge->type = p_struct->type;
 	p_struct->first = 0;
-	p_struct->count++;
 
 }
 
@@ -258,7 +250,6 @@ int parseFile (char * inFilename, struct csv_parser * parser,
 	char * inbuf;
 	inbuf = mmap(NULL,statbuf.st_size,PROT_READ,MAP_PRIVATE,fdin,0);
 
-	//p_struct->count = 0;
 	p_struct->first = 1;
 	csv_parse(parser,inbuf,statbuf.st_size,item_cb,line_cb,p_struct);
 	
@@ -286,7 +277,6 @@ int main (int argc, char ** argv){
 	struct parse_t * p_struct;
 	p_struct = malloc(sizeof(struct parse_t));
 	p_struct->state=0;
-	//p_struct->count=0;
 	p_struct->ok=1;
 
 	GARY_INIT(p_struct->vertices,0);
