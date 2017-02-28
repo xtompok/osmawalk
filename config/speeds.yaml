@@ -8,6 +8,7 @@ speeds:
         STEPS: 2
         HIGHWAY: 4
         DIRECT: 3
+        GENERATED: 3
 
 ratios:
         PARK: 1
@@ -18,6 +19,7 @@ ratios:
         STEPS: 0.6
         HIGHWAY: 1.2
         DIRECT: 0.8
+        GENERATED: 1
 penalties:
         HIGHWAY: 1
         DIRECT: 2
