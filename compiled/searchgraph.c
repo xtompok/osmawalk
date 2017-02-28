@@ -12,7 +12,6 @@ struct vertexedges_t * makeVertexEdges(Graph__Graph * graph){
 	struct vertexedges_t * vertexEdges;
 	vertexEdges = malloc(sizeof(struct vertexedges_t)*graph->n_vertices);
 	printf("Vertices: %d\n",graph->n_vertices);
-	struct nodesIdxNode * n;
 	for (int i=0;i<graph->n_vertices;i++){
 		vertexEdges[i].n_edges=0;
 //		printf("%f %f\n",graph->vertices[i]->lat,graph->vertices[i]->lon);
