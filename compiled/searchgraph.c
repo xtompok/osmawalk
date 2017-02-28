@@ -147,17 +147,28 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 	nodesIdx_refresh(graph->n_vertices,graph->vertices);
 
 	// Update stops
-	Graph__Stop ** newStops;
-	GARY_INIT(newStops,0);
+	int stopscnt;
+	stopscnt = 0;
 	for (int i=0;i<graph->n_stops;i++){
-		if (nodesIdx_find(graph->stops[i]->id)==NULL){
+		if (nodesIdx_find(graph->stops[i]->id)!=NULL){
+			stopscnt++;
+		}
+	}
+
+	Graph__Stop ** newStops;
+	newStops = malloc(sizeof(Graph__Stop *)*stopscnt);
+	int newIdx;
+	newIdx = 0;
+	for (int i=0;i<graph->n_stops;i++){
+		Graph__Stop * stop;
+		stop = graph->stops[i];
+		if (nodesIdx_find(stop->id)==NULL){
 			continue;
 		}
-		Graph__Stop ** sPtr;
-		sPtr = GARY_PUSH(newStops);
-		*sPtr = graph->stops[i];
+		newStops[newIdx]=stop;
+		newIdx++;
 	}
-	graph->n_stops = GARY_SIZE(newStops);
+	graph->n_stops = stopscnt;
 	graph->stops = newStops;
 
 }
