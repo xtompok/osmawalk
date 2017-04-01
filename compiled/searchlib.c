@@ -449,6 +449,7 @@ void prepareMMNode(struct mmdijnode_t * node,int idx,int fromIdx,int fromEdgeIdx
 	node->penalty = penalty;
 	node->reached = 1;
 	node->completed = 0;
+	node->majorized = 0;
 } 
 
 struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,int starttime){
@@ -460,47 +461,39 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 	
 	int * heap;			// Indices to the dijArray
 	int n_heap;
-	heap = malloc(sizeof(int)*(graph->n_vertices+1));
-	int ** heapIndex;		// Map vertex -> dijArray indices
-	heapIndex = calloc(sizeof(int*),graph->n_vertices);
+	GARY_INIT_SPACE(heap,graph->n_vertices/3);
+	int ** vertlut;		// Map vertex -> dijArray indices
+	vertlut = calloc(sizeof(int*),graph->n_vertices);
 	for (int i=0;i<graph->n_vertices;i++){
-		GARY_INIT(heapIndex[i],0);	
+		GARY_INIT(vertlut[i],0);	
 	}
-
-
-	#define DIJ_SWAP(heap,a,b,t) \
-		do { \
-		/* Swap elements in mapping vertices -> dijArray */\
-		int tmp; \
-		tmp = *(dijArray[heap[a]].heapIdxPtr); \
-		*(dijArray[heap[a]].heapIdxPtr) = *(dijArray[heap[b]].heapIdxPtr); \
-		*(dijArray[heap[b]].heapIdxPtr) = tmp; \
-		/* Swap elements in mapping heap -> dijArray */ \
-		t=heap[a];\
-		heap[a]=heap[b];\
-		heap[b]=t; \
-		} while (0)
-		
 
 	#define DIJ_CMP(x,y) (dijArray[x].time < dijArray[y].time)
 
 	#define MMHEAP_INSERT(elem) \
-		HEAP_INSERT(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,(elem))
+		HEAP_INSERT(int,heap,n_heap,DIJ_CMP,HEAP_SWAP,(elem))
 	#define MMHEAP_DELETE_MIN() \
-		HEAP_DELETE_MIN(int,heap,n_heap,DIJ_CMP,DIJ_SWAP)
+		HEAP_DELETE_MIN(int,heap,n_heap,DIJ_CMP,HEAP_SWAP)
 	#define MMHEAP_DECREASE(elem,val) \
-		HEAP_DECREASE(heap,n_heap,DIJ_CMP,DIJ_SWAP,(elem),(val))
+		HEAP_DECREASE(heap,n_heap,DIJ_CMP,HEAP_SWAP,(elem),(val))
 	
 	struct mmdijnode_t * dijArray;	// The current search data are here
 	GARY_INIT_SPACE(dijArray,graph->n_vertices/3);
 
-	struct mmdijnode_t * start;
-	start = GARY_PUSH(dijArray);
-	prepareMMNode(start,fromIdx,-1,-1,starttime,0);
-	int * startHeapIdx;
-	startHeapIdx = GARY_PUSH(heapIndex[fromIdx]);
-	*startHeapIdx = start-dijArray;
-	start->heapIdxPtr = startHeapIdx;
+	struct mmdijnode_t * node;
+	int * vertlutItem;
+//	struct mmdijnode_t * heapItem;
+
+	node = GARY_PUSH(dijArray);
+	prepareMMNode(node,fromIdx,-1,-1,starttime,0);
+
+	vertlutItem = GARY_PUSH(vertlut[fromIdx]);
+	*vertlutItem = node-dijArray;
+	
+	// First element is unused
+	GARY_PUSH(heap);
+	// For first vertex
+	GARY_PUSH(heap);
 
 	n_heap = 0;
 	MMHEAP_INSERT(0);
@@ -510,49 +503,90 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 
 	while(n_heap > 0){
 		MMHEAP_DELETE_MIN();
-		int vIdx;
-		vIdx = heap[n_heap+1];
+		struct mmdijnode_t * vert;
+		vert = dijArray + heap[n_heap+1];
 
-		if (!dijArray[vIdx].reached){
+		bool skip_item;
+		skip_item=0;
+
+		if (vert->majorized){
+			printf("Skiping\n");
+			continue;
+		}
+
+		printf("Vertex: %d, time: %d, penalty: %f\n",vert->idx,vert->time,vert->penalty);
+		printf("DijArray: %d\n",GARY_SIZE(dijArray));
+
+		if (!vert->reached){
 			printf("Found unreached vertex, exitting\n");
 			return NULL;
 		}
 
 		// Process walk connections	
-		for (int i=0;i<nodeways[dijArray[vIdx].idx].n_ways;i++){	
+		for (int i=0;i<nodeways[vert->idx].n_ways;i++){	
 			Graph__Edge * way;
-			way = graph->edges[nodeways[dijArray[vIdx].idx].ways[i]];
+			way = graph->edges[nodeways[vert->idx].ways[i]];
 			int wayend;
-			if (way->vfrom == vIdx){
+			if (way->vfrom == vert->idx){
 				wayend = way->vto;	
 			} else {
 				wayend = way->vfrom;
 			}
-			double len;
-			len = calcWeight(graph,data.conf,way);
+			double penalty;
+			penalty = calcWeight(graph,data.conf,way);
+
+			int time;
+			time = calcTime(graph,data.conf,way);
+
+			for (int j=0;j<GARY_SIZE(vertlut[wayend]);j++){
+				struct mmdijnode_t * anode;
+				anode = dijArray + vertlut[wayend][j];
+				if (((vert->time + time) >= anode->time)&&((vert->penalty + penalty) >= anode->penalty)){
+					printf("Worse than already present, skipping\n");
+					skip_item = 1;
+					break;
+				}
+			}
+			if (skip_item){
+				skip_item=0;
+				continue;	
+			}
+
+			// Add to dijArray
+			int vertIdx;
+			vertIdx = vert-dijArray;
+			node = GARY_PUSH(dijArray);
+			vert = dijArray+vertIdx;
+			prepareMMNode(node,wayend,vert->idx,nodeways[vert->idx].ways[i],vert->time+time,vert->penalty+penalty);
+			// Add to vertlut
+			vertlutItem = GARY_PUSH(vertlut[wayend]);
+			*vertlutItem = node-dijArray;
+			// Add to heap
+			GARY_PUSH(heap);
+			MMHEAP_INSERT(node-dijArray);
 			
-			// Process neighbors
-			for (int j=0;j<GARY_SIZE(heapIndex[wayend]);j++){
-				struct mmdijnode_t * node;
-				node = GARY_PUSH(dijArray);
-				prepareMMNode(node,wayend,vIdx,nodeways[dijArray[vIdx].idx].ways[i],dijArray[vIdx].time+calcTime(graph,data.conf,way),len);
-				int * nodeIdx = GARY_PUSH(heapIndex[wayend]);
-				*nodeIdx = node-dijArray;
-				node->heapIdxPtr = nodeIdx;
-				MMHEAP_INSERT(node-dijArray);
+			printf("Vertex already reached %d times\n",GARY_SIZE(vertlut[vert->idx]));
+
+			for (int j=0;j<GARY_SIZE(vertlut[vert->idx]);j++){
+				struct mmdijnode_t * anode;
+				anode = dijArray + vertlut[vert->idx][j];
+				if ((node->time <= anode->time)&&(node->penalty <= anode->penalty)){
+					//printf("Majorized!\n");
+					anode->majorized=1;
+				}
 			}
 		}
 		// Process public transport connections
 
-		dijArray[vIdx].completed = true;
-		if (best_time == -1 && vIdx == toIdx){
+		vert->completed = true;
+		if (best_time == -1 && vert->idx == toIdx){
 			printf("Found path");
-			best_time = dijArray[vIdx].time-starttime;
+			best_time = vert->time-starttime;
 		}
 
 		// Break if connection is too long
 		if ((best_time != -1) && 
-			((dijArray[vIdx].time-starttime) > 1.5*best_time)){
+			((vert->time-starttime) > 1.5*best_time)){
 			printf("Path too long, exitting.");
 			
 			break;
@@ -565,6 +599,10 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 				
 		
 }
+
+//void processFoundMMRoutes( struct mmdijnode_t * dijArray, int ** vertlut, int fromIdx, int toIdx){
+	
+//}
 
 void findWay(struct search_data_t data,struct dijnode_t * dijArray,int fromIdx, int toIdx){
 	
@@ -635,6 +673,8 @@ void findWay(struct search_data_t data,struct dijnode_t * dijArray,int fromIdx, 
 		if (vIdx == toIdx)
 			break;
 	}
+	#undef DIJ_CMP
+	#undef DIJ_SWAP
 	free(heap);
 	free(heapIndex);
 }

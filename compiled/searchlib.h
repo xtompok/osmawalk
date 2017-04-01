@@ -75,11 +75,11 @@ struct dijnode_t {
 
 struct mmdijnode_t {
 	int idx;
-	int * heapIdxPtr;
 	int fromIdx;
 	int fromEdgeIdx;
 	bool reached;
 	bool completed;
+	bool majorized;
 	int time;
 	double penalty;
 };
