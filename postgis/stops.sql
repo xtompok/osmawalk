@@ -18,7 +18,7 @@ CREATE TABLE stops AS
 	
 	UNION
 	
-	SELECT row_number() OVER () AS id,
+	SELECT row_number() OVER () + sq.max AS id,
 		gs.stop_id,
        		n.lon,
 		n.lat,

@@ -30,6 +30,10 @@ findPath = libsearch.findPath
 findPath.restype = SearchResult
 findPath.argtypes = (c_void_p,c_double,c_double,c_double,c_double) 
 
+findTransfer = libsearch.findTransfer
+findTransfer.restype = SearchResult
+findTransfer.argtypes = (c_void_p,c_char_p,c_char_p)
+
 getMapBBox = libsearch.getMapBBox
 getMapBBox.restype = BBox
 getMapBBox.argtypes = (c_void_p,)

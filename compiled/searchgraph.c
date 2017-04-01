@@ -5,6 +5,7 @@
 #include "hashes.c"
 #include "utils.h"
 #include "searchgraph.h"
+#include "searchlib.h"
 
 // Make for each vertex array of edges on which vertex lies
 struct vertexedges_t * makeVertexEdges(Graph__Graph * graph){
@@ -21,6 +22,7 @@ struct vertexedges_t * makeVertexEdges(Graph__Graph * graph){
 	}
 	for (int i=0;i<graph->n_vertices;i++){
 		vertexEdges[i].edges = malloc(sizeof(int)*vertexEdges[i].n_edges);
+	//	printf("V: %lld %lld E:%d\n",graph->vertices[i]->osmid,graph->vertices[i]->idx,vertexEdges[i].n_edges);
 		vertexEdges[i].n_edges = 0;
 	}
 	for (int i=0;i<graph->n_edges;i++){
@@ -67,6 +69,9 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 			for (int i=0;i<vertexEdges[vIdx].n_edges;i++){
 				int neigh;
 				neigh = graph->edges[vertexEdges[vIdx].edges[i]]->vto;
+				if (neigh == vIdx){
+					neigh = graph->edges[vertexEdges[vIdx].edges[i]]->vfrom;
+				}
 				
 				if (seen[neigh])
 					continue;
@@ -138,6 +143,33 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 	
 	graph->n_edges = GARY_SIZE(newEdges);
 	graph->edges = newEdges;
+
+	nodesIdx_refresh(graph->n_vertices,graph->vertices);
+
+	// Update stops
+	int stopscnt;
+	stopscnt = 0;
+	for (int i=0;i<graph->n_stops;i++){
+		if (nodesIdx_find(graph->stops[i]->id)!=NULL){
+			stopscnt++;
+		}
+	}
+
+	Graph__Stop ** newStops;
+	newStops = malloc(sizeof(Graph__Stop *)*stopscnt);
+	int newIdx;
+	newIdx = 0;
+	for (int i=0;i<graph->n_stops;i++){
+		Graph__Stop * stop;
+		stop = graph->stops[i];
+		if (nodesIdx_find(stop->id)==NULL){
+			continue;
+		}
+		newStops[newIdx]=stop;
+		newIdx++;
+	}
+	graph->n_stops = stopscnt;
+	graph->stops = newStops;
 
 }
 // Save search graph to file

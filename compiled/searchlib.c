@@ -14,6 +14,7 @@
 
 #include "searchlib.h"
 #include "writegpx.h"
+#include "hashes.c"
 
 // Utils
 int utm2wgs(struct search_data_t data,double * lon, double * lat){
@@ -116,6 +117,34 @@ void printMapBBox(struct search_data_t data){
 	utm2wgs(data,&fminlon,&fminlat);
 	utm2wgs(data,&fmaxlon,&fmaxlat);
 	printf("Bounding box in WGS-84: (%lf,%lf), (%lf,%lf)\n",fminlat,fminlon,fmaxlat,fmaxlon);
+}
+
+void nodesIdx_refresh(int n_nodes, Graph__Vertex ** vertices){
+	nodesIdx_cleanup();
+	nodesIdx_init();
+	for (int i=0;i<n_nodes;i++){
+		struct nodesIdxNode * val;
+		val = nodesIdx_new(vertices[i]->osmid);
+		val->idx = i;
+	}
+	printf("%d nodes refreshed\n",n_nodes);
+}
+
+void stopsIdx_refresh(int n_stops, Graph__Stop ** stops){
+	stopsIdx_cleanup();
+	stopsIdx_init();
+	for (int i=0;i<n_stops;i++){
+		struct stopsIdxNode * val;
+		val = stopsIdx_new(stops[i]->stop_id);
+		struct nodesIdxNode * nd;
+		nd = nodesIdx_find(stops[i]->id);
+		if (nd == NULL){
+			printf("No matching node for node id %lld\n",stops[i]->id);
+			continue;
+		}
+		val->idx = nodesIdx_find(stops[i]->id)->idx;
+	}
+	printf("%d stops refreshed\n",n_stops);
 }
 
 
@@ -581,19 +610,25 @@ void findWay(struct search_data_t data,struct dijnode_t * dijArray,int fromIdx, 
 		for (int i=0;i<nodeways[vIdx].n_ways;i++){
 			Graph__Edge * way;
 			way = graph->edges[nodeways[vIdx].ways[i]];
+			int wayend;
+			if (way->vfrom == vIdx){
+				wayend = way->vto;
+			} else {
+				wayend = way->vfrom;
+			}
 			double len;
 			len = calcWeight(data.graph,data.conf,way);
-			if (dijArray[way->vto].dist <= (dijArray[vIdx].dist+len))
+			if (dijArray[wayend].dist <= (dijArray[vIdx].dist+len))
 				continue;
-			dijArray[way->vto].dist = dijArray[vIdx].dist+len;
-			dijArray[way->vto].fromIdx = vIdx;
-			dijArray[way->vto].fromEdgeIdx = nodeways[vIdx].ways[i];
-			if (dijArray[way->vto].reached){
-				HEAP_DECREASE(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,heapIndex[way->vto],way->vto);
+			dijArray[wayend].dist = dijArray[vIdx].dist+len;
+			dijArray[wayend].fromIdx = vIdx;
+			dijArray[wayend].fromEdgeIdx = nodeways[vIdx].ways[i];
+			if (dijArray[wayend].reached){
+				HEAP_DECREASE(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,heapIndex[wayend],wayend);
 			}else {
-				dijArray[way->vto].reached = true;
-				heapIndex[way->vto]=n_heap+1;
-				HEAP_INSERT(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,way->vto);
+				dijArray[wayend].reached = true;
+				heapIndex[wayend]=n_heap+1;
+				HEAP_INSERT(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,wayend);
 			}
 		}
 		dijArray[vIdx].completed=true;
@@ -686,10 +721,66 @@ struct search_data_t * prepareData(char * configName, char * dataName){
 		return data;
 	}
 	data->nodeWays = makeNodeWays(data->graph);
+	nodesIdx_refresh(data->graph->n_vertices,data->graph->vertices);
+	stopsIdx_refresh(data->graph->n_stops,data->graph->stops);
 	calcDistances(data->graph);
 	return data;
 }
 
+struct search_result_t findTransfer(struct search_data_t * data, char * from, char * to){
+	int fromIdx;
+	struct stopsIdxNode * stopsNode;
+	struct search_result_t result;
+	stopsNode = stopsIdx_find(from);
+	if (stopsNode == NULL){
+		printf("Stop %s not found\n",from);
+		result.n_points=0;
+		return result;
+	}
+	fromIdx = stopsNode->idx;
+
+	stopsNode = stopsIdx_find(to);
+	if (stopsNode == NULL){
+		printf("Stop %s not found\n",to);
+		result.n_points=0;
+		return result;
+	}
+	int toIdx;
+	toIdx = stopsNode->idx;
+
+	printf("Searching from %lld(%lld,%lld,%lld) to %lld(%lld,%lld,%lld)\n",data->graph->vertices[fromIdx]->osmid,
+			data->graph->vertices[fromIdx]->lat,
+			data->graph->vertices[fromIdx]->lon,
+			data->graph->vertices[fromIdx]->height,
+			data->graph->vertices[toIdx]->osmid,
+			data->graph->vertices[toIdx]->lat,
+			data->graph->vertices[toIdx]->lon,
+			data->graph->vertices[toIdx]->height
+			);
+
+	struct dijnode_t * dijArray;
+	dijArray = prepareDijkstra(data->graph);
+
+	findWay(*data, dijArray,fromIdx, toIdx);
+	int n_points;
+	result.points = resultsToArray(*data,dijArray,fromIdx,toIdx,&n_points);
+	result.n_points = n_points;
+	result.dist = 0;
+	result.time = 0;
+	if (result.n_points == 0){
+		return result;
+	}
+	int idx;
+	idx = fromIdx;
+	while(idx != toIdx){
+		result.dist+=data->graph->edges[dijArray[idx].fromEdgeIdx]->dist;
+		result.time+=calcTime(data->graph,data->conf,data->graph->edges[dijArray[idx].fromEdgeIdx]);
+		idx = dijArray[idx].fromIdx;
+	}
+	free(dijArray);
+	return result;	
+
+}
 
 struct search_result_t findPath(struct search_data_t * data,double fromLat, double fromLon, double toLat, double toLon){
 	wgs2utm(*data,&fromLon,&fromLat);
