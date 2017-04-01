@@ -252,6 +252,7 @@ struct search_data_t * prepareData(char * configName, char * dataName);
 struct search_result_t findPath(struct search_data_t * data,
 		double fromLat, double fromLon, double toLat, double toLon);
 
+void processFoundMMRoutes(struct search_data_t data, struct mmdijnode_t * dijArray, int ** vertlut, int fromIdx, int toIdx);
 struct search_result_t findTransfer(struct search_data_t * data,
 		char * from, char * to);
 

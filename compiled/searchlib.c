@@ -503,19 +503,20 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 
 	while(n_heap > 0){
 		MMHEAP_DELETE_MIN();
+		int vIdx;
 		struct mmdijnode_t * vert;
-		vert = dijArray + heap[n_heap+1];
+		vIdx = heap[n_heap+1];
+		vert = dijArray + vIdx;
 
 		bool skip_item;
 		skip_item=0;
 
 		if (vert->majorized){
-			printf("Skiping\n");
 			continue;
 		}
 
-		printf("Vertex: %d, time: %d, penalty: %f\n",vert->idx,vert->time,vert->penalty);
-		printf("DijArray: %d\n",GARY_SIZE(dijArray));
+		//printf("Vertex: %d, time: %d, penalty: %f\n",vert->idx,vert->time,vert->penalty);
+		//printf("DijArray: %d\n",GARY_SIZE(dijArray));
 
 		if (!vert->reached){
 			printf("Found unreached vertex, exitting\n");
@@ -542,7 +543,6 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 				struct mmdijnode_t * anode;
 				anode = dijArray + vertlut[wayend][j];
 				if (((vert->time + time) >= anode->time)&&((vert->penalty + penalty) >= anode->penalty)){
-					printf("Worse than already present, skipping\n");
 					skip_item = 1;
 					break;
 				}
@@ -557,7 +557,7 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 			vertIdx = vert-dijArray;
 			node = GARY_PUSH(dijArray);
 			vert = dijArray+vertIdx;
-			prepareMMNode(node,wayend,vert->idx,nodeways[vert->idx].ways[i],vert->time+time,vert->penalty+penalty);
+			prepareMMNode(node,wayend,vIdx,nodeways[vert->idx].ways[i],vert->time+time,vert->penalty+penalty);
 			// Add to vertlut
 			vertlutItem = GARY_PUSH(vertlut[wayend]);
 			*vertlutItem = node-dijArray;
@@ -565,13 +565,12 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 			GARY_PUSH(heap);
 			MMHEAP_INSERT(node-dijArray);
 			
-			printf("Vertex already reached %d times\n",GARY_SIZE(vertlut[vert->idx]));
+			//printf("Vertex already reached %d times\n",GARY_SIZE(vertlut[vert->idx]));
 
 			for (int j=0;j<GARY_SIZE(vertlut[vert->idx]);j++){
 				struct mmdijnode_t * anode;
 				anode = dijArray + vertlut[vert->idx][j];
 				if ((node->time <= anode->time)&&(node->penalty <= anode->penalty)){
-					//printf("Majorized!\n");
 					anode->majorized=1;
 				}
 			}
@@ -593,6 +592,8 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 		}
 	}
 
+	processFoundMMRoutes(data,dijArray,vertlut,fromIdx,toIdx);
+
 #undef DIJ_CMP
 #undef DIJ_SWAP
 	return dijArray;
@@ -600,9 +601,57 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 		
 }
 
-//void processFoundMMRoutes( struct mmdijnode_t * dijArray, int ** vertlut, int fromIdx, int toIdx){
+void processFoundMMRoutes(struct search_data_t data, struct mmdijnode_t * dijArray, int ** vertlut, int fromIdx, int toIdx){
+	int n_routes;
+	n_routes = GARY_SIZE(vertlut[toIdx]);
+	printf("Found %d routes\n",n_routes);	
+	struct search_result_t * routes;
+	routes = calloc(sizeof(struct search_result_t),n_routes);
+	struct mmdijnode_t * node;
+	for (int i=0;i<n_routes;i++){
+		node = dijArray+vertlut[toIdx][i];
+		routes[i].time = node->time;
+		routes[i].dist = node->penalty;
+		printf("Route %d: time: %f, penalty: %f\n",i,routes[i].time,routes[i].dist); 
+		struct point_t * points;
+		GARY_INIT(points,0);
+		do {
+			struct point_t * point;
+			point = GARY_PUSH(points);
+			
+			double lon;
+			double lat;
+
+			lon = data.graph->vertices[node->idx]->lon;
+			lat = data.graph->vertices[node->idx]->lat;
+			utm2wgs(data,&lon,&lat);
+			point->lon = lon;
+			point->lat = lat;
+
+			point->height = data.graph->vertices[node->idx]->height;
+	//		point->type = data.graph->vertices[node->idx]->type;
+
+			node = dijArray + node->fromIdx;
+				
+		} while (node->idx != fromIdx);
+
+		routes[i].n_points = GARY_SIZE(points);
+		routes[i].points = calloc(sizeof(struct point_t),routes[i].n_points);
+		printf("Points: %d\n",routes[i].n_points);
+		for (int j=0;j<routes[i].n_points;j++){
+			routes[i].points[j]=points[routes[i].n_points-1-j];
+		}
+		GARY_FREE(points);
+	}
+
+
+	for (int i=0;i<n_routes;i++){
+		char filename[13];
+		sprintf(filename,"track_%d.gpx",i);
+		writeGpxFile(routes[i],filename);	
+	}
 	
-//}
+}
 
 void findWay(struct search_data_t data,struct dijnode_t * dijArray,int fromIdx, int toIdx){
 	
