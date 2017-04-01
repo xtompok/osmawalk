@@ -63,7 +63,6 @@ void node_item_cb(void * item,size_t len,void * data){
 void node_line_cb(int ch, void * data){
 	struct parse_t * p_struct;
 	p_struct = (struct parse_t *)data;
-	if (p_struct->count!=0)
 	p_struct->state=0;
 	Graph__Vertex ** v;
 	v = GARY_PUSH(p_struct->vertices);

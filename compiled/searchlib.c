@@ -8,6 +8,7 @@
 #include <yaml.h>
 #include <proj_api.h>
 #include <ucw/heap.h>
+#include <ucw/gary.h>
 
 #include "include/graph.pb-c.h"
 
@@ -411,6 +412,130 @@ struct dijnode_t *  prepareDijkstra(Graph__Graph * graph){
 	return dijArray;
 }
 
+void prepareMMNode(struct mmdijnode_t * node,int idx,int fromIdx,int fromEdgeIdx,int time,double penalty){
+	node->idx = idx;
+	node->fromIdx = fromIdx;
+	node->fromEdgeIdx = fromEdgeIdx;
+	node->time = time;
+	node->penalty = penalty;
+	node->reached = 1;
+	node->completed = 0;
+} 
+
+struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,int starttime){
+	Graph__Graph * graph;
+	graph = data.graph;
+	
+	struct nodeways_t * nodeways;
+	nodeways = data.nodeWays;
+	
+	int * heap;			// Indices to the dijArray
+	int n_heap;
+	heap = malloc(sizeof(int)*(graph->n_vertices+1));
+	int ** heapIndex;		// Map vertex -> dijArray indices
+	heapIndex = calloc(sizeof(int*),graph->n_vertices);
+	for (int i=0;i<graph->n_vertices;i++){
+		GARY_INIT(heapIndex[i],0);	
+	}
+
+
+	#define DIJ_SWAP(heap,a,b,t) \
+		do { \
+		/* Swap elements in mapping vertices -> dijArray */\
+		int tmp; \
+		tmp = *(dijArray[heap[a]].heapIdxPtr); \
+		*(dijArray[heap[a]].heapIdxPtr) = *(dijArray[heap[b]].heapIdxPtr); \
+		*(dijArray[heap[b]].heapIdxPtr) = tmp; \
+		/* Swap elements in mapping heap -> dijArray */ \
+		t=heap[a];\
+		heap[a]=heap[b];\
+		heap[b]=t; \
+		} while (0)
+		
+
+	#define DIJ_CMP(x,y) (dijArray[x].time < dijArray[y].time)
+
+	#define MMHEAP_INSERT(elem) \
+		HEAP_INSERT(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,(elem))
+	#define MMHEAP_DELETE_MIN() \
+		HEAP_DELETE_MIN(int,heap,n_heap,DIJ_CMP,DIJ_SWAP)
+	#define MMHEAP_DECREASE(elem,val) \
+		HEAP_DECREASE(heap,n_heap,DIJ_CMP,DIJ_SWAP,(elem),(val))
+	
+	struct mmdijnode_t * dijArray;	// The current search data are here
+	GARY_INIT_SPACE(dijArray,graph->n_vertices/3);
+
+	struct mmdijnode_t * start;
+	start = GARY_PUSH(dijArray);
+	prepareMMNode(start,fromIdx,-1,-1,starttime,0);
+	int * startHeapIdx;
+	startHeapIdx = GARY_PUSH(heapIndex[fromIdx]);
+	*startHeapIdx = start-dijArray;
+	start->heapIdxPtr = startHeapIdx;
+
+	n_heap = 0;
+	MMHEAP_INSERT(0);
+
+	int best_time;
+	best_time = -1;
+
+	while(n_heap > 0){
+		MMHEAP_DELETE_MIN();
+		int vIdx;
+		vIdx = heap[n_heap+1];
+
+		if (!dijArray[vIdx].reached){
+			printf("Found unreached vertex, exitting\n");
+			return NULL;
+		}
+
+		// Process walk connections	
+		for (int i=0;i<nodeways[dijArray[vIdx].idx].n_ways;i++){	
+			Graph__Edge * way;
+			way = graph->edges[nodeways[dijArray[vIdx].idx].ways[i]];
+			int wayend;
+			if (way->vfrom == vIdx){
+				wayend = way->vto;	
+			} else {
+				wayend = way->vfrom;
+			}
+			double len;
+			len = calcWeight(graph,data.conf,way);
+			
+			// Process neighbors
+			for (int j=0;j<GARY_SIZE(heapIndex[wayend]);j++){
+				struct mmdijnode_t * node;
+				node = GARY_PUSH(dijArray);
+				prepareMMNode(node,wayend,vIdx,nodeways[dijArray[vIdx].idx].ways[i],dijArray[vIdx].time+calcTime(graph,data.conf,way),len);
+				int * nodeIdx = GARY_PUSH(heapIndex[wayend]);
+				*nodeIdx = node-dijArray;
+				node->heapIdxPtr = nodeIdx;
+				MMHEAP_INSERT(node-dijArray);
+			}
+		}
+		// Process public transport connections
+
+		dijArray[vIdx].completed = true;
+		if (best_time == -1 && vIdx == toIdx){
+			printf("Found path");
+			best_time = dijArray[vIdx].time-starttime;
+		}
+
+		// Break if connection is too long
+		if ((best_time != -1) && 
+			((dijArray[vIdx].time-starttime) > 1.5*best_time)){
+			printf("Path too long, exitting.");
+			
+			break;
+		}
+	}
+
+#undef DIJ_CMP
+#undef DIJ_SWAP
+	return dijArray;
+				
+		
+}
 
 void findWay(struct search_data_t data,struct dijnode_t * dijArray,int fromIdx, int toIdx){
 	
@@ -588,7 +713,8 @@ struct search_result_t findPath(struct search_data_t * data,double fromLat, doub
 	struct dijnode_t * dijArray;
 	dijArray = prepareDijkstra(data->graph);
 
-	findWay(*data, dijArray,fromIdx, toIdx);
+	//findWay(*data, dijArray,fromIdx, toIdx);
+	findMMWay(*data,fromIdx,toIdx,0);
 	struct search_result_t result;
 	int n_points;
 	result.points = resultsToArray(*data,dijArray,fromIdx,toIdx,&n_points);

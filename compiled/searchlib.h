@@ -72,6 +72,17 @@ struct dijnode_t {
 	bool completed;
 	double dist;
 };
+
+struct mmdijnode_t {
+	int idx;
+	int * heapIdxPtr;
+	int fromIdx;
+	int fromEdgeIdx;
+	bool reached;
+	bool completed;
+	int time;
+	double penalty;
+};
 /*! @struct point_t
  * @abstract Struct for representing point in searched path
  * @field lat Latitude of a point
