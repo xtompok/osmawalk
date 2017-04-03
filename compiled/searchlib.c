@@ -452,7 +452,7 @@ void prepareMMNode(struct mmdijnode_t * node,int idx,int fromIdx,int fromEdgeIdx
 	node->majorized = 0;
 } 
 
-struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,int starttime){
+struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,time_t starttime){
 	Graph__Graph * graph;
 	graph = data.graph;
 	
@@ -482,7 +482,6 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 
 	struct mmdijnode_t * node;
 	int * vertlutItem;
-//	struct mmdijnode_t * heapItem;
 
 	node = GARY_PUSH(dijArray);
 	prepareMMNode(node,fromIdx,-1,-1,starttime,0);

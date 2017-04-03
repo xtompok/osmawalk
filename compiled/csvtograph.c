@@ -91,15 +91,19 @@ void stop_item_cb(void * item,size_t len,void * data){
 			p_struct->tmpstop->stop_id = malloc(strlen(item)+1);
 			strcpy(p_struct->tmpstop->stop_id,item);
 			break;
-		case 2: //lat
+		case 2: //raptor_id
 			num = strtoll((char *)item,NULL,10);
-			p_struct->tmpvertex->lat = num;
-			break;
+			p_struct->tmpstop->raptor_id = num;
+
 		case 3: //lon
 			num = strtoll((char *)item,NULL,10);
 			p_struct->tmpvertex->lon = num;
 			break;
-		case 4: //height
+		case 4: //lat
+			num = strtoll((char *)item,NULL,10);
+			p_struct->tmpvertex->lat = num;
+			break;
+		case 5: //height
 			p_struct->tmpvertex->height = -1;
 			break;
 

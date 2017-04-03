@@ -53,8 +53,10 @@ CREATE TABLE multipols_refs (
 
 CREATE TABLE gtfs_stops (
 	stop_id	VARCHAR(15),
-	stop_lat DOUBLE PRECISION,
-	stop_lon DOUBLE PRECISION
+	raptor_id INTEGER,
+	stop_name VARCHAR(30),
+	stop_lon DOUBLE PRECISION,
+	stop_lat DOUBLE PRECISION
 );
 
 CREATE INDEX ON multipols_refs (ref);

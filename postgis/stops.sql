@@ -4,7 +4,8 @@ CREATE TABLE stops AS
 		SELECT MAX(id) AS max FROM nodes
 	)
 	SELECT 	row_number() OVER () + sq.max AS id,
-		stop_id, 
+		stop_id,
+		raptor_id, 
 		ST_X(ST_Transform(ST_SetSRID(ST_Makepoint(stop_lon,stop_lat),4326),3065))::INTEGER AS lon,
 		ST_Y(ST_Transform(ST_SetSRID(ST_Makepoint(stop_lon,stop_lat),4326),3065))::INTEGER AS lat,
 		ST_Transform(ST_SetSRID(ST_MakePoint(stop_lon, stop_lat),4326),3065) AS loc,
@@ -20,6 +21,7 @@ CREATE TABLE stops AS
 	
 	SELECT row_number() OVER () + sq.max AS id,
 		gs.stop_id,
+		gs.raptor_id,
        		n.lon,
 		n.lat,
 		n.loc,
