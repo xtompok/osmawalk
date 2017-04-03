@@ -17,8 +17,8 @@ int main(int argc, char ** argv){
 	
 	minlon = floor(atof(argv[2]));
 	minlat = floor(atof(argv[1]));
-	maxlon = floor(atof(argv[4]));
-	maxlat = floor(atof(argv[3]));
+	maxlon = ceil(atof(argv[4]));
+	maxlat = ceil(atof(argv[3]));
 
 	char name[12];
 	FILE * hgt;

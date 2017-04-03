@@ -22,6 +22,7 @@ RETURNS SETOF ow_cand AS $$
 		node2 BIGINT;
 		r ow_cand;
 	BEGIN
+		RAISE NOTICE 'Called';
 		squares = $1;
 		FOR s IN 0..squares LOOP
 			FOR r IN SELECT n1.id AS id1, n2.id AS id2, n1.loc AS loc1, n2.loc AS loc2
@@ -48,5 +49,6 @@ $$ LANGUAGE 'plpgsql';
 
 DROP TABLE IF EXISTS direct_precandidates;
 CREATE TABLE direct_precandidates2 AS (
-	SELECT (make_candidates(MAX(square1))).* FROM nodes
+	WITH sq AS (SELECT MAX(square1) AS msq FROM nodes)
+	SELECT (make_candidates(msq)).* FROM sq
 );
