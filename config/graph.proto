@@ -1,3 +1,4 @@
+syntax = "proto2";
 package graph;
 import "types.proto";
 
@@ -24,6 +25,7 @@ message Edge {
 message Stop {
 	required sint64 idx = 3;
 	required sint64 id = 1;
+	required int64 raptor_id = 4;
 	required string stop_id = 2; 	
 }
 

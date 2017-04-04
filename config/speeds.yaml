@@ -21,8 +21,8 @@ ratios:
         DIRECT: 0.8
         GENERATED: 1
 penalties:
-        HIGHWAY: 1
-        DIRECT: 2
+        HIGHWAY: 2
+        DIRECT: 1
 heights:
         upscale: 0
         downscale: 0

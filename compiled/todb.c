@@ -1,6 +1,3 @@
-#include <ucw/lib.h>
-#include <ucw/fastbuf.h>
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -9,14 +6,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <postgresql/libpq-fe.h>
-
-#include <ucw/gary.h>
-#include <osm.h>
-
 #include "include/types.pb-c.h"
 #include "include/premap.pb-c.h"
-#include "order.h"
 
 
 char node_cb(size_t len,uint8_t * inbuf){
@@ -26,7 +17,7 @@ char node_cb(size_t len,uint8_t * inbuf){
 //	fprintf(stderr,"Lat: %lld, lon: %lld\n",node->lat,node->lon);
 
 //	id,lat,lon,height,objtype,inside,intunnel,onbridge,loc,sq1,sq2
-	printf("%lld\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\tSRID=3065;POINT(%d %d %d)\t%d\t%d\n",
+	printf("%lld\t%f\t%f\t%d\t%d\t%d\t%d\t%d\t%d\t%s\tSRID=3065;POINT(%f %f %d)\t%d\t%d\n",
 //		id    lat lon hei typ ins int onb stp ref 
 		node->id,
 		node->lat,
@@ -145,22 +136,6 @@ int loadFile (char * inFilename,
 	munmap(inbuf,statbuf.st_size);
 //	munmap(outbuf,statbuf.st_size);
 	return 0;
-}
-
-PGconn * connectToDb(){
-	const char host[] = "localhost";
-	const char dbname[] = "osmwalk-prepare";
-	const char user[] = "jethro";
-	const char pwd[] = "kokoko";
-	const char * keys [] = {"host","dbname","user","password",NULL};
-	const char * vals [] = {host,dbname,user,pwd,NULL};
-	PGconn * conn;
-	conn = PQconnectdbParams(keys,vals,0);
-	if (PQstatus(conn) == CONNECTION_OK){
-		fprintf(stderr,"Connection OK\n");
-	}
-	return conn;
-
 }
 
 

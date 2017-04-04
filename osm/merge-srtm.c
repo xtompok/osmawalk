@@ -25,18 +25,18 @@ int main(int argc, char ** argv){
 
 	uint16_t * map;
 	size_t len;
-	len = (2*(maxlon-minlon+1)*1200*(maxlat-minlat+1)*1200);
+	len = (2*(maxlon-minlon)*1200*(maxlat-minlat)*1200);
 	map = malloc(len);
 	uint16_t * sq;
 	sq = malloc(2*1201*1201);
 
 	int rowlen;
-	rowlen = 1200*(maxlon-minlon+1);
+	rowlen = 1200*(maxlon-minlon);
 
 	
 	
-	for (int lon=0; lon <= maxlon-minlon; lon++){
-		for (int lat=0; lat <= maxlat-minlat; lat++){
+	for (int lon=0; lon < maxlon-minlon; lon++){
+		for (int lat=0; lat < maxlat-minlat; lat++){
 			sprintf(name,"N%02dE%03d.hgt",lat+minlat,lon+minlon);
 			hgt = fopen(name,"r");	
 			if (hgt == NULL){
@@ -54,25 +54,11 @@ int main(int argc, char ** argv){
 						height=map[rowlen*(1200*lat+llat) + 1200*lon+llon-1]; 
 					map[rowlen*(1200*lat+llat) + 1200*lon+llon] = height;
 				}
-			
 			}
-
 		}
 	}
-	
+
 	FILE * OUT;
-	OUT = fopen("heights.txt","w");
-	fprintf(OUT,"%d %d %d %d\n",minlon, minlat, maxlon, maxlat);
-
-	for (int lat=0; lat<1200*(maxlat-minlat+1);lat++){
-		for (int lon=0; lon < 1200*(maxlon-minlon+1); lon++){
-			fprintf(OUT,"%d ",map[rowlen*lat + lon]);
-		}
-		fprintf(OUT,"\n");
-	}
-
-	fclose(OUT);
-
 	OUT = fopen("heights.bin","w");
 	fwrite(&minlon,1,sizeof(int),OUT);
 	fwrite(&minlat,1,sizeof(int),OUT);

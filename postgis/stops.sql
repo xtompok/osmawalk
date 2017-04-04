@@ -6,8 +6,8 @@ CREATE TABLE stops AS
 	SELECT 	row_number() OVER () + sq.max AS id,
 		stop_id,
 		raptor_id, 
-		ST_X(ST_Transform(ST_SetSRID(ST_Makepoint(stop_lon,stop_lat),4326),3065))::INTEGER AS lon,
-		ST_Y(ST_Transform(ST_SetSRID(ST_Makepoint(stop_lon,stop_lat),4326),3065))::INTEGER AS lat,
+		ST_X(ST_Transform(ST_SetSRID(ST_Makepoint(stop_lon,stop_lat),4326),3065)) AS lon,
+		ST_Y(ST_Transform(ST_SetSRID(ST_Makepoint(stop_lon,stop_lat),4326),3065)) AS lat,
 		ST_Transform(ST_SetSRID(ST_MakePoint(stop_lon, stop_lat),4326),3065) AS loc,
 		-1 AS square1,
 		-1 AS square2

@@ -2,10 +2,10 @@
 
 #50.10694/14.44523
 #50.10161/14.45732
-#MINLAT=50.07
-#MINLON=14.40
-#MAXLAT=50.10
-#MAXLON=14.43
+MINLAT=50.07
+MINLON=14.40
+MAXLAT=50.10
+MAXLON=14.43
 
 # Prague
 MINLAT=49.9416
@@ -68,8 +68,6 @@ if [ $CUT = 1 ]
 then
 	echo "Cutting rectangle from OSM data"
 	./osmconvert czech_republic.osm -b=$MINLON,$MINLAT,$MAXLON,$MAXLAT >praha.osm
-else
-	cp czech_republic.osm praha.osm
 fi
 
 if [ $MERGE = 1 ]

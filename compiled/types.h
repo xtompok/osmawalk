@@ -41,32 +41,6 @@ struct stopsIdxNode {
 	int idx;
 };
 
-/*! @struct mixed_num_t
- * @abstract Struct for representing mixed numbers. numer/denom should be always
- * lower than 1
- * @field base Integral part of a number
- * @field numer Numerator of a rational part
- * @field denom Denominator of a rational part
- */
-struct mixed_num_t {
-	int64_t base;
-	int64_t numer;
-	int64_t denom;
-};
-
-/*! @struct col_t 
- * @abstract Struct for representing collisions
- * @field isCol Is it collision?
- * @field atEndpoint Is the collision at endpoint of both lines?
- * @field lon Longitude of a collision in mixed number
- * @field lat Latitude of a collision in mixed number
- */
-struct col_t {
-	uint8_t isCol;
-	uint8_t atEndpoint;
-	struct mixed_num_t lon;
-	struct mixed_num_t lat;
-};
 
 /*! @struct map_t
  * @abstract Struct for representing map
@@ -108,68 +82,6 @@ struct raster_t {
 	int64_t steplon;
 	int64_t steplat;
 	int *** raster;
-};
-
-enum event_type  {EVT_START=2,EVT_END=0,EVT_INTERSECT=1};
-/*! @struct event_t
- * @abstract Start or end event
- * @field lon Longitude of an event
- * @field lat Latitude of an event
- * @field dlon Delta of longitude of a line
- * @field dlat Delta of latitude of a line
- * @field lineIdx Index of a line in lines array
- */
-struct event_t {
-	enum event_type type;
-	SWEEP_TYPE lon;
-	SWEEP_TYPE lat;
-	SWEEP_TYPE dlon;
-	SWEEP_TYPE dlat;	
-	unsigned int lineIdx;
-};
-/*! @struct int_event_t
- * @abstract Intersecton event
- * @field lon Longitude of an event
- * @field lat Latitude of an event
- * @field dlon Delta of longitude of a lower line
- * @field dlat Delta of latitude of a lower line
- * @field lineIdx Index of a first line in lines array
- * @field line2Idx Index of a second line in lines array
- */
-struct int_event_t {
-	enum event_type type;
-	struct mixed_num_t lon;
-	struct mixed_num_t lat;
-	SWEEP_TYPE dlon;
-	SWEEP_TYPE dlat;	
-	unsigned int lineIdx;
-	unsigned int line2Idx;
-};
-
-/*! @struct line_t
- * @abstract Struct for representing line
- * @field startlon Longitude of a starting point
- * @field startlat Latitude of a starting point
- * @field endlon Longitude of an end point
- * @field endlat Latitude of an end point
- * @field startid Id of a srating point
- * @field endid Id of a end point
- * @field isBar Is it a barrier line?
- * @field broken Is it a barrier or crossed by it?
- * @field started Has the line started?
- * @field ended Hase the line ended?
- */
-struct line_t {
-	SWEEP_TYPE  startlon;
-	SWEEP_TYPE  startlat;
-	SWEEP_TYPE endlon;
-	SWEEP_TYPE endlat;
-	int64_t startid;
-	int64_t endid;
-	bool isBar;
-	bool broken;
-	bool started;
-	bool ended;
 };
 
 /*! @struct tree_node_t

@@ -368,8 +368,8 @@ void calcDistances(Graph__Graph * graph){
 			edge->dist = DBL_MAX;
 			continue;
 		}
-		int64_t dlon;
-		int64_t dlat;
+		double dlon;
+		double dlat;
 		dlon = graph->vertices[edge->vto]->lon-graph->vertices[edge->vfrom]->lon;
 		dlat = graph->vertices[edge->vto]->lat-graph->vertices[edge->vfrom]->lat;
 
@@ -422,8 +422,8 @@ int findNearestVertex(Graph__Graph * graph, double lon, double lat){
 			minIdx = i;
 		}
 	}
-	//printf("Min dist: %f\n",sqrt(minDist));
-	//printf("Point %d: %f, %f\n",minIdx,graph->vertices[minIdx]->lon,graph->vertices[minIdx]->lat);
+	printf("Min dist: %f\n",sqrt(minDist));
+	printf("Point %d: %f, %f\n",minIdx,graph->vertices[minIdx]->lon,graph->vertices[minIdx]->lat);
 	return minIdx;
 }
 
@@ -502,9 +502,13 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 
 	while(n_heap > 0){
 		MMHEAP_DELETE_MIN();
+		if (n_heap%500==0){
+			printf("Heap: %d\n",n_heap);
+		}
 		int vIdx;
 		struct mmdijnode_t * vert;
 		vIdx = heap[n_heap+1];
+		GARY_POP(heap);
 		vert = dijArray + vIdx;
 
 		bool skip_item;
@@ -879,7 +883,7 @@ struct search_result_t findPath(struct search_data_t * data,double fromLat, doub
 	int toIdx;
 	toIdx = findNearestVertex(data->graph,toLon,toLat);
 
-	/*printf("Searching from %lld(%f,%f,%d) to %lld(%f,%f,%d)\n",data->graph->vertices[fromIdx]->osmid,
+	printf("Searching from %lld(%f,%f,%d) to %lld(%f,%f,%d)\n",data->graph->vertices[fromIdx]->osmid,
 			data->graph->vertices[fromIdx]->lat,
 			data->graph->vertices[fromIdx]->lon,
 			data->graph->vertices[fromIdx]->height,
@@ -888,12 +892,13 @@ struct search_result_t findPath(struct search_data_t * data,double fromLat, doub
 			data->graph->vertices[toIdx]->lon,
 			data->graph->vertices[toIdx]->height
 			);
-*/
+
 	struct dijnode_t * dijArray;
 	dijArray = prepareDijkstra(data->graph);
 
-	//findWay(*data, dijArray,fromIdx, toIdx);
-	findMMWay(*data,fromIdx,toIdx,0);
+	findWay(*data, dijArray,fromIdx, toIdx);
+	//findMMWay(*data,fromIdx,toIdx,0);
+	printf("Found\n");
 	struct search_result_t result;
 	int n_points;
 	result.points = resultsToArray(*data,dijArray,fromIdx,toIdx,&n_points);

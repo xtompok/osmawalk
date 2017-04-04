@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <ucw/gary.h>
 #include "hashes.c"
-#include "utils.h"
 #include "searchgraph.h"
 #include "searchlib.h"
 
@@ -189,70 +188,4 @@ int saveSearchGraph(Graph__Graph * graph,char * filename){
 	fclose(OUT);
 	return 0;
 }
-
-// Make search graph from map
-Graph__Graph * makeSearchGraph(struct map_t map){
-	Graph__Graph * graph;
-	graph = malloc(sizeof(Graph__Graph));
-	graph__graph__init(graph);
-	Graph__Vertex ** vertices;
-	vertices = malloc(sizeof(Graph__Vertex *)*map.n_nodes);
-	for (int i=0;i<map.n_nodes;i++){
-		Graph__Vertex * v;
-		v = malloc(sizeof(Graph__Vertex));
-		graph__vertex__init(v);
-		v->idx = i;
-		v->osmid = map.nodes[i]->id;
-		v->lat = int2deg(map.nodes[i]->lat);
-		v->lon = int2deg(map.nodes[i]->lon);
-		v->height = map.nodes[i]->height;
-		v->has_height = true;
-		vertices[i]=v;
-	}
-	graph->vertices = vertices;
-	graph->n_vertices = map.n_nodes;
-
-	Graph__Edge ** edges;
-	GARY_INIT(edges,0);
-	int edgecnt;
-	edgecnt = 0;
-	for (int i=0;i<map.n_ways;i++){
-		Premap__Way * way;
-		way = map.ways[i];
-		for (int j=0;j<(way->n_refs-1);j++){
-			int fromIdx;
-			int toIdx;
-			fromIdx = nodesIdx_find(way->refs[j])->idx;
-			toIdx = nodesIdx_find(way->refs[j+1])->idx;
-			if ((fromIdx > graph->n_vertices)||(toIdx > graph->n_vertices))
-				printf("Wrong index: %d,%d (of %d)\n",fromIdx,toIdx,graph->n_vertices);
-			Graph__Edge * e;
-			e = malloc(sizeof(Graph__Edge));
-			graph__edge__init(e);
-			e->idx = edgecnt++;
-			e->osmid = way->id;
-			e->vfrom = fromIdx;
-			e->vto = toIdx;
-			e->type = way->type;
-			Graph__Edge ** eptr;
-			eptr = GARY_PUSH(edges);
-			*eptr = e;
-
-			e = malloc(sizeof(Graph__Edge));
-			graph__edge__init(e);
-			e->idx = edgecnt++;
-			e->osmid = way->id;
-			e->vfrom = toIdx;
-			e->vto = fromIdx;
-			e->type = way->type;
-			eptr = GARY_PUSH(edges);
-			*eptr = e;
-		}
-			
-	}
-	graph->edges = edges;
-	graph->n_edges = GARY_SIZE(edges);
-	return graph;
 	
-	
-}

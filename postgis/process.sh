@@ -31,19 +31,18 @@ step(){
 
 ./stops.sh
 
-step duplicate_nodes
-step linesplit_function2
-step split_ways2
+step linesplit_function
+step split_ways 
 step ways_geom
 step mp_geom
 step barriers
 step walk_in_nodes
-step bbox-function2
-step direct_candidates6
-step ok_candidates2
+step bbox_function
+step direct_candidates
+step ok_candidates
 step direct_filter
 step stops
-step stops-bbox
+step stops_bbox
 step stops_direct_cand
 step stops_direct_ok
 ./export.sh

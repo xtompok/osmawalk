@@ -85,6 +85,8 @@ struct height_map_t loadHeights(char * filename){
 	
 	printf("Heights from N %d E %d to N %d E %d\n",map.minlat,map.minlon,map.maxlat,map.maxlon);
 
+	len-=4*sizeof(int);
+
 	map.map = malloc(sizeof(int)*(len/2));
 	for (int i=0;i<len/2;i++){
 		map.map[i]=0;
@@ -109,29 +111,6 @@ int calcHeight(struct height_map_t map, double lat, double lon){
 	rowlen = (map.maxlon-map.minlon)*1200;
 	coord = ((int)lat)*rowlen+((int)lon);
 	return map.map[coord];
-}
-
-// Works ok only on norther hemisphere
-int square(int num,double lon, double lat){
-	double maxlat;
-	double minlat;
-	double minlon;
-	maxlat = heights.maxlat+1;
-	minlat = heights.minlat;
-	minlon = heights.minlon;
-	wgs2utm(&minlon,&minlat);
-	minlon = heights.minlon;
-	wgs2utm(&minlon,&maxlat);
-	wgs2utm(&lon,&lat);
-	lon -= heights.minlon;
-	lat -= heights.minlat;
-	int dlat = maxlat-minlat;
-	int row = dlat/SQ_SIZE;
-	if (num==2){
-		lon -= SQ_SIZE/2;
-		lat -= SQ_SIZE/2;
-	}
-	return (lon/SQ_SIZE)*row + lat/SQ_SIZE;
 }
 
 char * get_val(OSM_Tag_List * tags,char * key){
@@ -279,11 +258,9 @@ void dumpNode(OSM_Node * node, struct obj_attr attr){
 	pbNode->stop = attr.stop;
 //	pbNode->has_ref = true;
 	pbNode->ref = attr.ref;
-//	printf("Height: %d\n",pbNode->height);
-//	pbNode->has_square1 = true;
-//	pbNode->square1 = attr.square1;
-//	pbNode->has_square2 = true;
-//	pbNode->square2 = attr.square2;
+	if (pbNode->height == 0){
+		printf("Node %lld has no height\n",pbNode->id);
+	}
 
 	double lat;
 	double lon;
@@ -343,8 +320,6 @@ int node(OSM_Node *n) {
 	if (attr.stop){
 		attr.ref = get_val(n->tags,"ref");
 	}
-//	attr.square1 = square(1,n->lon,n->lat);
-//	attr.square2 = square(2,n->lon,n->lat);
 //	if (objtype==-1)
 //		return;
 	dumpNode(n,attr);
@@ -363,12 +338,6 @@ int main(int argc, char **argv) {
 	proj_wgs84 = pj_init_plus("+proj=longlat +datum=WGS84 +no_defs");
 	proj_utm = pj_init_plus("+proj=utm +zone=33 +ellps=WGS84 +units=m +no_defs");
 
-	double lat = 49;
-	double lon = 15;
-
-	wgs2utm(&lon,&lat);
-	printf("Converted coords: lat: %lf, lon: %lf\n",lat,lon);
-
 	conf.desc = objtype__descriptor;
 	GARY_INIT(conf.type,0);
 	GARY_INIT(conf.area,0);
@@ -383,8 +352,6 @@ int main(int argc, char **argv) {
 	parseMapConfigFile("../config/stop_pos.yaml",&conf,addStopPosItemToMapConf);
 
 	heights = loadHeights("../osm/heights.bin");
-
-
 
 	wayFile = fopen("../data/ways-stage1","w");
 	nodeFile = fopen("../data/nodes-stage1","w");

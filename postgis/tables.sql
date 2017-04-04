@@ -2,8 +2,8 @@
 
 CREATE TABLE nodes (
 	id BIGSERIAL PRIMARY KEY,
-	lat INTEGER,
-	lon INTEGER,
+	lat DOUBLE PRECISION,
+	lon DOUBLE PRECISION,
 	height INTEGER,
 	objtype INTEGER DEFAULT 51,
 	inside BOOLEAN DEFAULT FALSE,
@@ -54,7 +54,7 @@ CREATE TABLE multipols_refs (
 CREATE TABLE gtfs_stops (
 	stop_id	VARCHAR(15),
 	raptor_id INTEGER,
-	stop_name VARCHAR(30),
+	stop_name VARCHAR(100),
 	stop_lon DOUBLE PRECISION,
 	stop_lat DOUBLE PRECISION
 );
@@ -63,14 +63,14 @@ CREATE INDEX ON multipols_refs (ref);
 CREATE INDEX ON ways_refs(ref);
 CREATE INDEX ON ways_refs(id);
 CREATE INDEX ON ways_refs(ord);
-CREATE INDEX ON nodes (lat, lon);
-CREATE INDEX ON nodes (lat);
-CREATE INDEX ON nodes (lon);
+CREATE INDEX ON nodes(id);
+CREATE INDEX ON nodes(inside);
+CREATE INDEX ON nodes(lat);
+CREATE INDEX ON nodes(lat, lon);
+CREATE INDEX ON nodes(lon);
 CREATE INDEX ON nodes(square1);
 CREATE INDEX ON nodes(square2);
 CREATE INDEX ON nodes(walk);
-CREATE INDEX ON nodes(inside);
-CREATE INDEX ON nodes(id);
 CREATE INDEX ON nodes USING GIST(loc);
 CREATE INDEX ON ways(id);
 

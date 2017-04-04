@@ -42,20 +42,24 @@ void node_item_cb(void * item,size_t len,void * data){
 	p_struct = (struct parse_t *)data;
 	if (p_struct->first == 1)
 		return;
-	int64_t num;
-	num = strtoll((char *)item,NULL,10);
+	int64_t aInt;
+	double aDouble;
 	switch (p_struct->state) {
 		case 0: //id
-			p_struct->tmpvertex->osmid = num;
+			aInt = strtoll((char *)item,NULL,10);
+			p_struct->tmpvertex->osmid = aInt;
 			break;
 		case 1: //lat
-			p_struct->tmpvertex->lat = num;
+			aDouble = strtod((char *)item,NULL);
+			p_struct->tmpvertex->lat = aDouble;
 			break;
 		case 2: //lon
-			p_struct->tmpvertex->lon = num;
+			aDouble = strtod((char *)item,NULL);
+			p_struct->tmpvertex->lon = aDouble;
 			break;
 		case 3: //height
-			p_struct->tmpvertex->height = num;
+			aInt = strtoll((char *)item,NULL,10);
+			p_struct->tmpvertex->height = aInt;
 			break;
 
 	}
@@ -80,33 +84,32 @@ void stop_item_cb(void * item,size_t len,void * data){
 	p_struct = (struct parse_t *)data;
 	if (p_struct->first == 1)
 		return;
-	int64_t num;
+	int64_t aInt;
+	double aDouble;
 	switch (p_struct->state) {
 		case 0: //id
-			num = strtoll((char *)item,NULL,10);
-			p_struct->tmpvertex->osmid = num;
-			p_struct->tmpstop->id = num;
+			aInt = strtoll((char *)item,NULL,10);
+			p_struct->tmpvertex->osmid = aInt;
+			p_struct->tmpstop->id = aInt;
 			break;
 		case 1: //stop_id
 			p_struct->tmpstop->stop_id = malloc(strlen(item)+1);
 			strcpy(p_struct->tmpstop->stop_id,item);
 			break;
 		case 2: //raptor_id
-			num = strtoll((char *)item,NULL,10);
-			p_struct->tmpstop->raptor_id = num;
-
+			aInt = strtoll((char *)item,NULL,10);
+			p_struct->tmpstop->raptor_id = aInt;
 		case 3: //lon
-			num = strtoll((char *)item,NULL,10);
-			p_struct->tmpvertex->lon = num;
+			aDouble = strtod((char *)item,NULL);
+			p_struct->tmpvertex->lon = aDouble;
 			break;
 		case 4: //lat
-			num = strtoll((char *)item,NULL,10);
-			p_struct->tmpvertex->lat = num;
+			aDouble = strtod((char *)item,NULL);
+			p_struct->tmpvertex->lat = aDouble;
 			break;
 		case 5: //height
 			p_struct->tmpvertex->height = -1;
 			break;
-
 	}
 
 	p_struct->state++;
@@ -236,17 +239,21 @@ void direct_line_cb(int ch, void * data){
 
 }
 
-int parseFile (char * inFilename, struct csv_parser * parser,
+int parseFile (char * baseDir, char * filename, struct csv_parser * parser,
 		struct parse_t * p_struct,
 		void (item_cb)(void * item, size_t len, void * data),
 		void (line_cb)(int ch,void * data)){
-
+	
+	char * path;
+	path = malloc(strlen(baseDir)+25);
+	sprintf(path,"%s/%s",baseDir,filename);
 	int fdin;
-	fdin = open(inFilename,O_RDONLY);
+	fdin = open(path,O_RDONLY);
 	if (fdin < 0){
-		printf("Can't open file %s, exitting\n",inFilename);
+		printf("Can't open file %s, exitting\n",path);
 		return 1;
 	}
+	free(path);
 
 	struct stat statbuf;
 	fstat (fdin,&statbuf);
@@ -259,20 +266,19 @@ int parseFile (char * inFilename, struct csv_parser * parser,
 	
 	munmap(inbuf,statbuf.st_size);
 	
-	
 	return 0;
 }
 
 int main (int argc, char ** argv){
-	if (argc != 6){
-		printf("Usage: %s nodes.csv ways.csv direct.csv stops.csv stops-direct.csv\n",argv[0]);
+	if (argc != 2){
+		printf("Usage: %s <dir with csv files>\n",argv[0]);
 		return 1;
 	}
-	char * nodescsvname = argv[1];
-	char * wayscsvname = argv[2];
-	char * directcsvname = argv[3];
-	char * stopscsvname = argv[4];
-	char * dirstopscsvname = argv[5];
+	char * basedir;
+	if (argv[1][strlen(argv[1])-1]=='/'){
+		argv[1][strlen(argv[1])-1]='\0';
+	}
+	basedir = argv[1];
 	
 	struct csv_parser parser;
 	csv_init(&parser,CSV_APPEND_NULL);
@@ -287,18 +293,21 @@ int main (int argc, char ** argv){
 	GARY_INIT(p_struct->edges,0);
 	GARY_INIT(p_struct->stops,0);
 
-	parseFile(nodescsvname,&parser,p_struct,node_item_cb,node_line_cb);
+	parseFile(basedir,"nodes.csv",&parser,p_struct,node_item_cb,node_line_cb);
 	printf("Nodes: %d\n",GARY_SIZE(p_struct->vertices));
-	parseFile(stopscsvname,&parser,p_struct,stop_item_cb,stop_line_cb);
+
+	parseFile(basedir,"stops.csv",&parser,p_struct,stop_item_cb,stop_line_cb);
 	printf("Nodes: %d\n",GARY_SIZE(p_struct->vertices));
 
 	nodesIdx_refresh(GARY_SIZE(p_struct->vertices),p_struct->vertices);
 	
-	parseFile(wayscsvname,&parser,p_struct,way_item_cb,way_line_cb);
+	parseFile(basedir,"ways.csv",&parser,p_struct,way_item_cb,way_line_cb);
+
 	p_struct->type=50;
-	parseFile(directcsvname,&parser,p_struct,direct_item_cb,direct_line_cb);
+	parseFile(basedir,"direct.csv",&parser,p_struct,direct_item_cb,direct_line_cb);
+
 	p_struct->type=51;
-	parseFile(dirstopscsvname,&parser,p_struct,direct_item_cb,direct_line_cb);
+	parseFile(basedir,"stops-direct.csv",&parser,p_struct,direct_item_cb,direct_line_cb);
 
 	Graph__Graph * graph;
 	graph = malloc(sizeof(Graph__Graph));

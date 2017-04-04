@@ -1,8 +1,15 @@
-DROP TABLE IF EXISTS splitted_ways;
-CREATE TABLE splitted_ways AS
-	SELECT st_geometrytype(ls.geom),w.*,ls.partid,ls.geom AS splitgeom, ls.posfrom, ls.posto
-	FROM ways AS w, linesplit(30,w.geom) AS ls 
-	WHERE type NOT IN (0,30) and tunnel = false and bridge = false AND ST_Length(w.geom) > 60 
-;
+DROP TABLE IF EXISTS ways_refs_new;
+CREATE TABLE ways_refs_new AS
+	SELECT id,linesplit as ref,row_number() OVER (PARTITION BY id) AS ord 
+	FROM ways,linesplit(30,ways.id)
+	WHERE type != 30 AND type != 0; 
 
---CREATE TABLE split_nodes AS
+DELETE FROM ways_refs WHERE id IN 
+(
+	SELECT id FROM ways_refs_new
+);
+
+INSERT INTO ways_refs(id,ref,ord)
+(
+	SELECT id,ref,ord FROM ways_refs_new
+)
