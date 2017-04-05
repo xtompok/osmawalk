@@ -2,12 +2,13 @@ CC=gcc
 PG=
 # Hardcoded paths begin
 LIBOSMPBFPATH=../ext-lib/libosmpbf
+RAPTORPATH=/home/jethro/Programy/mmpf/raptor/
 #Hardcoded paths end
 
-INC=-I/usr/include/libucw  -I$(LIBOSMPBFPATH) -I/usr/include/postgresql
+INC=-I/usr/include/libucw  -I$(LIBOSMPBFPATH) -I$(RAPTORPATH) -I/usr/include/postgresql
 CFLAGS= -c $(PG)  -ggdb3 -Wall -Wno-format -Wno-unused-function -std=gnu99 -O2 -march=native $(INC)
 PFLAGS= -E -Wall -std=gnu99 -O3 -march=native -I/usr/include/libucw 
-LDFLAGS= $(PG) -L$(LIBOSMPBFPATH) -lprotobuf-c -lucw-6.5 -lproj -lyaml -lm -lz 
+LDFLAGS= $(PG) -L$(LIBOSMPBFPATH) -L$(RAPTORPATH) -lraptor -lprotobuf-c -lucw-6.5 -lproj -lyaml -lm -lz 
 
 LIBSEARCH_SRC=writegpx.c include/types.pb-c.c include/graph.pb-c.c
 LIBSEARCH_OBJ=$(LIBSEARCH_SRC:.c=.o)
@@ -15,7 +16,7 @@ LIBSEARCH_LIB=libsearch.so
 
 SEARCH_SRC=writegpx.c include/graph.pb-c.c
 SEARCH_OBJ=$(SEARCH_SRC:.c=.o)
-SEARCH_LDFLAGS=-lsearch -L. -Wl,-rpath,'$$ORIGIN'
+SEARCH_LDFLAGS=-lsearch -L. -Wl,-rpath,'$$ORIGIN' -Wl,-rpath,'$$ORIGIN/$(RAPTORPATH)'
 SEARCH_EXE=search
 
 PARSE_SRC=yamlconf.c include/types.pb-c.c include/premap.pb-c.c

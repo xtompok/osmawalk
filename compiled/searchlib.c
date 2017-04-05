@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <float.h>
 #include <inttypes.h>
+#include <time.h>
 
 #include <yaml.h>
 #include <proj_api.h>
@@ -15,6 +16,8 @@
 #include "searchlib.h"
 #include "writegpx.h"
 #include "hashes.c"
+
+#include "libraptor.h"
 
 // Utils
 int utm2wgs(struct search_data_t data,double * lon, double * lat){
@@ -473,9 +476,15 @@ void prepareMMNode(struct mmdijnode_t * node,int idx,int fromIdx,int fromEdgeIdx
 	node->majorized = 0;
 } 
 
-struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,time_t starttime){
+struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,time_t starttime,
+		Timetable * tt){
 	Graph__Graph * graph;
 	graph = data.graph;
+
+
+	struct mem_data * md;
+	md = create_mem_data(tt);
+	clear_mem_data(md,tt->n_stops);
 	
 	struct nodeways_t * nodeways;
 	nodeways = data.nodeWays;
@@ -553,6 +562,8 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 		stopsNode = stopsIdx_find(osmid);
 		if (stopsNode != NULL){
 			printf("Stop %d found\n",stopsNode->idx);
+			struct stop_conns * conns;
+			conns = search_stop_conns(tt,graph->stops[stopsNode->idx]->raptor_id,vert->time);
 		}
 
 		// Process walk connections	
@@ -930,7 +941,14 @@ struct search_result_t findPath(struct search_data_t * data,double fromLat, doub
 	dijArray = prepareDijkstra(data->graph);
 
 	//findWay(*data, dijArray,fromIdx, toIdx);
-	findMMWay(*data,fromIdx,toIdx,0);
+	
+
+	Timetable * timetable;
+	timetable = load_timetable("/home/jethro/Programy/mmpf/raptor/tt.bin");
+
+
+
+	findMMWay(*data,fromIdx,toIdx,time(NULL),timetable);
 	printf("Found\n");
 	struct search_result_t result;
 	int n_points;
