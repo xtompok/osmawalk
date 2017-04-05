@@ -37,14 +37,20 @@ double calcWeight(Graph__Graph * graph, struct config_t conf, Graph__Edge * edge
 double calcTime(Graph__Graph * graph, struct config_t conf,Graph__Edge * edge){
 	double speed;
 	speed = conf.speeds[edge->type];
-	if (speed==0)
+	if (speed==0){
+		printf("Speed not defined for %lld (type %d)\n",edge->osmid,edge->type);
 		return DBL_MAX;
+	}
 	int fromHeight;
 	int toHeight;
 	fromHeight = graph->vertices[edge->vfrom]->height;
 	toHeight = graph->vertices[edge->vto]->height;
 	int dh = toHeight-fromHeight;
-	return (edge->dist+abs(dh)*(dh>0?conf.upscale:conf.downscale))/speed;
+	//return (edge->dist+abs(dh)*(dh>0?conf.upscale:conf.downscale))/speed;
+	if (edge->dist > 100){
+		printf("Dist too big");
+	}
+	return (edge->dist)/speed;
 }
 
 
@@ -130,19 +136,31 @@ void nodesIdx_refresh(int n_nodes, Graph__Vertex ** vertices){
 	printf("%d nodes refreshed\n",n_nodes);
 }
 
+void stop_idsIdx_refresh(int n_stops, Graph__Stop ** stops){
+	stop_idsIdx_cleanup();
+	stop_idsIdx_init();
+	for (int i=0;i<n_stops;i++){
+		struct stop_idsIdxNode * val;
+		val = stop_idsIdx_new(stops[i]->stop_id);
+		struct nodesIdxNode * nd;
+		nd = nodesIdx_find(stops[i]->osmid);
+		if (nd == NULL){
+			printf("No matching node for node id %lld\n",stops[i]->osmid);
+			continue;
+		}
+		val->idx = nodesIdx_find(stops[i]->osmid)->idx;
+	}
+	printf("%d stops refreshed\n",n_stops);
+}
+
 void stopsIdx_refresh(int n_stops, Graph__Stop ** stops){
 	stopsIdx_cleanup();
 	stopsIdx_init();
 	for (int i=0;i<n_stops;i++){
 		struct stopsIdxNode * val;
-		val = stopsIdx_new(stops[i]->stop_id);
-		struct nodesIdxNode * nd;
-		nd = nodesIdx_find(stops[i]->id);
-		if (nd == NULL){
-			printf("No matching node for node id %lld\n",stops[i]->id);
-			continue;
-		}
-		val->idx = nodesIdx_find(stops[i]->id)->idx;
+		val = stopsIdx_new(stops[i]->osmid);
+		val->idx = i;
+		printf("Stop: osmid: %lld,gtfs_id: %s\n",stops[i]->osmid,stops[i]->stop_id);
 	}
 	printf("%d stops refreshed\n",n_stops);
 }
@@ -374,6 +392,9 @@ void calcDistances(Graph__Graph * graph){
 		dlat = graph->vertices[edge->vto]->lat-graph->vertices[edge->vfrom]->lat;
 
 		edge->dist = sqrt(dlon*dlon+dlat*dlat);
+		if (edge->dist > 100){
+			printf("Dist too long: dlat: %f, dlon: %f\n",dlat,dlon);
+		}
 	}
 }
 
@@ -525,6 +546,14 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 			printf("Found unreached vertex, exitting\n");
 			return NULL;
 		}
+		// Process public transport connections
+		struct stopsIdxNode * stopsNode;
+		int64_t osmid;
+		osmid = graph->vertices[vert->idx]->osmid;
+		stopsNode = stopsIdx_find(osmid);
+		if (stopsNode != NULL){
+			printf("Stop %d found\n",stopsNode->idx);
+		}
 
 		// Process walk connections	
 		for (int i=0;i<nodeways[vert->idx].n_ways;i++){	
@@ -536,11 +565,14 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 			} else {
 				wayend = way->vfrom;
 			}
+
 			double penalty;
 			penalty = calcWeight(graph,data.conf,way);
 
 			int time;
 			time = calcTime(graph,data.conf,way);
+			
+			//printf("Type:%d, from:%lld, to:%lld, curr:%lld pen: %f, time:%d\n",way->type,fosmid,tosmid,currosmid,penalty,time);
 
 			for (int j=0;j<GARY_SIZE(vertlut[wayend]);j++){
 				struct mmdijnode_t * anode;
@@ -578,7 +610,7 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 				}
 			}
 		}
-		// Process public transport connections
+
 
 		vert->completed = true;
 		if (best_time == -1 && vert->idx == toIdx){
@@ -814,6 +846,7 @@ struct search_data_t * prepareData(char * configName, char * dataName){
 	}
 	data->nodeWays = makeNodeWays(data->graph);
 	nodesIdx_refresh(data->graph->n_vertices,data->graph->vertices);
+	stop_idsIdx_refresh(data->graph->n_stops,data->graph->stops);
 	stopsIdx_refresh(data->graph->n_stops,data->graph->stops);
 	calcDistances(data->graph);
 	return data;
@@ -821,9 +854,9 @@ struct search_data_t * prepareData(char * configName, char * dataName){
 
 struct search_result_t findTransfer(struct search_data_t * data, char * from, char * to){
 	int fromIdx;
-	struct stopsIdxNode * stopsNode;
+	struct stop_idsIdxNode * stopsNode;
 	struct search_result_t result;
-	stopsNode = stopsIdx_find(from);
+	stopsNode = stop_idsIdx_find(from);
 	if (stopsNode == NULL){
 		printf("Stop %s not found\n",from);
 		result.n_points=0;
@@ -831,7 +864,7 @@ struct search_result_t findTransfer(struct search_data_t * data, char * from, ch
 	}
 	fromIdx = stopsNode->idx;
 
-	stopsNode = stopsIdx_find(to);
+	stopsNode = stop_idsIdx_find(to);
 	if (stopsNode == NULL){
 		printf("Stop %s not found\n",to);
 		result.n_points=0;
@@ -896,8 +929,8 @@ struct search_result_t findPath(struct search_data_t * data,double fromLat, doub
 	struct dijnode_t * dijArray;
 	dijArray = prepareDijkstra(data->graph);
 
-	findWay(*data, dijArray,fromIdx, toIdx);
-	//findMMWay(*data,fromIdx,toIdx,0);
+	//findWay(*data, dijArray,fromIdx, toIdx);
+	findMMWay(*data,fromIdx,toIdx,0);
 	printf("Found\n");
 	struct search_result_t result;
 	int n_points;

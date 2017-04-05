@@ -49,9 +49,23 @@
  * @abstract Hash table stop id -> index in array for nodes
  */
 
+#define HASH_NODE struct stop_idsIdxNode
+#define HASH_PREFIX(name) stop_idsIdx_##name
+#define HASH_KEY_STRING stop_id
+#define HASH_DEFAULT_SIZE 6000
+#define HASH_WANT_CLEANUP
+#define HASH_WANT_FIND
+#define HASH_WANT_NEW
+#include <ucw/hashtable.h>
+
+/*!
+ * @abstract Hash table vertex index -> index in array of stops
+ */
+
 #define HASH_NODE struct stopsIdxNode
 #define HASH_PREFIX(name) stopsIdx_##name
-#define HASH_KEY_STRING stop_id
+#define HASH_KEY_ATOMIC key 
+#define HASH_ATOMIC_TYPE int64_t
 #define HASH_DEFAULT_SIZE 6000
 #define HASH_WANT_CLEANUP
 #define HASH_WANT_FIND

@@ -90,7 +90,7 @@ void stop_item_cb(void * item,size_t len,void * data){
 		case 0: //id
 			aInt = strtoll((char *)item,NULL,10);
 			p_struct->tmpvertex->osmid = aInt;
-			p_struct->tmpstop->id = aInt;
+			p_struct->tmpstop->osmid = aInt;
 			break;
 		case 1: //stop_id
 			p_struct->tmpstop->stop_id = malloc(strlen(item)+1);
@@ -99,13 +99,13 @@ void stop_item_cb(void * item,size_t len,void * data){
 		case 2: //raptor_id
 			aInt = strtoll((char *)item,NULL,10);
 			p_struct->tmpstop->raptor_id = aInt;
-		case 3: //lon
-			aDouble = strtod((char *)item,NULL);
-			p_struct->tmpvertex->lon = aDouble;
-			break;
-		case 4: //lat
+		case 3: //lat
 			aDouble = strtod((char *)item,NULL);
 			p_struct->tmpvertex->lat = aDouble;
+			break;
+		case 4: //lon
+			aDouble = strtod((char *)item,NULL);
+			p_struct->tmpvertex->lon = aDouble;
 			break;
 		case 5: //height
 			p_struct->tmpvertex->height = -1;

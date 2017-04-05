@@ -36,8 +36,13 @@ struct nodeWaysNode {
 };
 
 
-struct stopsIdxNode {
+struct stop_idsIdxNode {
 	char * stop_id;
+	int idx;
+};
+
+struct stopsIdxNode {
+	int64_t	key;
 	int idx;
 };
 
