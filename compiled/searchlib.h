@@ -12,6 +12,7 @@
 #include <ucw/heap.h>
 #include <yaml.h>
 #include "include/graph.pb-c.h"
+#include "libraptor.h"
 
 /*!
  * @abstract Library for searching path
@@ -19,6 +20,10 @@
  * @discussion This library containf functions to load saved graph and speeds
  * configuration and repeatedly searching paths.
  */
+
+#define ROUTE_TYPE_NONE 0
+#define ROUTE_TYPE_WALK 1
+#define ROUTE_TYPE_PT 2
 
 /*!
  * @struct config_t
@@ -74,14 +79,24 @@ struct dijnode_t {
 };
 
 struct mmdijnode_t {
-	int idx;
-	int fromIdx;
+	int idx;	// Index of vertex
+	int fromIdx;	// Index to previous dijArray item
 	int fromEdgeIdx;
+	char fromEdgeType;
 	bool reached;
 	bool completed;
 	bool majorized;
 	int time;
 	double penalty;
+};
+
+struct mmqueue_t {
+	struct mmdijnode_t * dijArray;
+	struct mmdijnode_t * vert;
+	int ** vertlut;
+	int * heap;
+	int n_heap;		
+	
 };
 /*! @struct point_t
  * @abstract Struct for representing point in searched path
@@ -95,7 +110,9 @@ struct point_t {
 	double lon;
 	int height;
 	int type;	
+	int vertIdx;
 	uint64_t wayid;
+	char edgetype;
 };
 
 /* @struct search_result_t
@@ -252,7 +269,7 @@ struct search_data_t * prepareData(char * configName, char * dataName);
 struct search_result_t findPath(struct search_data_t * data,
 		double fromLat, double fromLon, double toLat, double toLon);
 
-void processFoundMMRoutes(struct search_data_t data, struct mmdijnode_t * dijArray, int ** vertlut, int fromIdx, int toIdx);
+void processFoundMMRoutes(struct search_data_t data,Timetable * tt, struct mmdijnode_t * dijArray, int ** vertlut, int fromIdx, int toIdx);
 struct search_result_t findTransfer(struct search_data_t * data,
 		char * from, char * to);
 

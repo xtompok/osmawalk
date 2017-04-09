@@ -149,7 +149,7 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 	int stopscnt;
 	stopscnt = 0;
 	for (int i=0;i<graph->n_stops;i++){
-		if (nodesIdx_find(graph->stops[i]->id)!=NULL){
+		if (nodesIdx_find(graph->stops[i]->osmid)!=NULL){
 			stopscnt++;
 		}
 	}
@@ -161,7 +161,7 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 	for (int i=0;i<graph->n_stops;i++){
 		Graph__Stop * stop;
 		stop = graph->stops[i];
-		if (nodesIdx_find(stop->id)==NULL){
+		if (nodesIdx_find(stop->osmid)==NULL){
 			continue;
 		}
 		newStops[newIdx]=stop;

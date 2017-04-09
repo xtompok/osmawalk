@@ -139,12 +139,12 @@ void nodesIdx_refresh(int n_nodes, Graph__Vertex ** vertices){
 	printf("%d nodes refreshed\n",n_nodes);
 }
 
-void stop_idsIdx_refresh(int n_stops, Graph__Stop ** stops){
-	stop_idsIdx_cleanup();
-	stop_idsIdx_init();
+void sId2sIdx_refresh(int n_stops, Graph__Stop ** stops){
+	sId2sIdx_cleanup();
+	sId2sIdx_init();
 	for (int i=0;i<n_stops;i++){
-		struct stop_idsIdxNode * val;
-		val = stop_idsIdx_new(stops[i]->stop_id);
+		struct sId2sIdxNode * val;
+		val = sId2sIdx_new(stops[i]->stop_id);
 		struct nodesIdxNode * nd;
 		nd = nodesIdx_find(stops[i]->osmid);
 		if (nd == NULL){
@@ -156,14 +156,13 @@ void stop_idsIdx_refresh(int n_stops, Graph__Stop ** stops){
 	printf("%d stops refreshed\n",n_stops);
 }
 
-void stopsIdx_refresh(int n_stops, Graph__Stop ** stops){
-	stopsIdx_cleanup();
-	stopsIdx_init();
+void osmId2sIdx_refresh(int n_stops, Graph__Stop ** stops){
+	osmId2sIdx_cleanup();
+	osmId2sIdx_init();
 	for (int i=0;i<n_stops;i++){
-		struct stopsIdxNode * val;
-		val = stopsIdx_new(stops[i]->osmid);
+		struct osmId2sIdxNode * val;
+		val = osmId2sIdx_new(stops[i]->osmid);
 		val->idx = i;
-		printf("Stop: osmid: %lld,gtfs_id: %s\n",stops[i]->osmid,stops[i]->stop_id);
 	}
 	printf("%d stops refreshed\n",n_stops);
 }
@@ -447,7 +446,9 @@ int findNearestVertex(Graph__Graph * graph, double lon, double lat){
 		}
 	}
 	printf("Min dist: %f\n",sqrt(minDist));
-	printf("Point %d: %f, %f\n",minIdx,graph->vertices[minIdx]->lon,graph->vertices[minIdx]->lat);
+	printf("Point %d\n",minIdx);
+//	printf("%f\n",graph->vertices[minIdx]->lon);
+//	printf("%f\n",graph->vertices[minIdx]->lat);
 	return minIdx;
 }
 
@@ -465,10 +466,20 @@ struct dijnode_t *  prepareDijkstra(Graph__Graph * graph){
 	return dijArray;
 }
 
-void prepareMMNode(struct mmdijnode_t * node,int idx,int fromIdx,int fromEdgeIdx,int time,double penalty){
+#define DIJ_CMP(x,y) (q->dijArray[x].time < q->dijArray[y].time)
+
+#define MMHEAP_INSERT(elem) \
+	HEAP_INSERT(int,q->heap,q->n_heap,DIJ_CMP,HEAP_SWAP,(elem))
+#define MMHEAP_DELETE_MIN() \
+	HEAP_DELETE_MIN(int,q->heap,q->n_heap,DIJ_CMP,HEAP_SWAP)
+#define MMHEAP_DECREASE(elem,val) \
+	HEAP_DECREASE(q->heap,q->n_heap,DIJ_CMP,HEAP_SWAP,(elem),(val))
+
+void prepareMMNode(struct mmdijnode_t * node,int idx,int fromIdx,int fromEdgeIdx,char fromEdgeType,int time,double penalty){
 	node->idx = idx;
 	node->fromIdx = fromIdx;
 	node->fromEdgeIdx = fromEdgeIdx;
+	node->fromEdgeType = fromEdgeType;
 	node->time = time;
 	node->penalty = penalty;
 	node->reached = 1;
@@ -476,102 +487,210 @@ void prepareMMNode(struct mmdijnode_t * node,int idx,int fromIdx,int fromEdgeIdx
 	node->majorized = 0;
 } 
 
+void addFirstNodeToQueue(struct mmqueue_t * q,int idx,time_t time){
+	struct mmdijnode_t * node;
+	node = GARY_PUSH(q->dijArray);
+
+	prepareMMNode(node,idx,-1,-1,ROUTE_TYPE_NONE,time,0);
+	
+	// Add to vertlut
+	int * vertlutItem;
+	vertlutItem = GARY_PUSH(q->vertlut[idx]);
+	*vertlutItem = node-q->dijArray;
+
+	// Add to heap
+	GARY_PUSH(q->heap);
+	MMHEAP_INSERT(node - q->dijArray);
+	q->vert = q->dijArray+q->heap[0];
+}
+void addNodeToQueue(struct mmqueue_t * q,
+		int idx,
+		int fromEdgeIdx,
+		char fromEdgeType,
+		time_t time,
+		double penalty){
+	// Check if it is not majorized by another node already in queue
+	// Check if it majorizes some nodes in queue and mark them as majorized
+	for (int j=0;j<GARY_SIZE(q->vertlut[idx]);j++){
+		struct mmdijnode_t * anode;
+		anode = q->dijArray + q->vertlut[idx][j];
+		if ((time >= anode->time)&&(penalty >= anode->penalty)){
+			return;
+		}
+		if ((time <= anode->time)&&(penalty <= anode->penalty)){
+			anode->majorized=1;
+		}
+	}
+
+	struct mmdijnode_t * node;
+
+	// Add to dijArray
+	int vertIdx;	// Preserve vert pointer through reallocation
+	vertIdx = q->vert-q->dijArray;
+	node = GARY_PUSH(q->dijArray);
+	q->vert = q->dijArray+vertIdx;
+
+	prepareMMNode(node,idx,vertIdx,fromEdgeIdx,fromEdgeType,time,penalty);
+	
+	// Add to vertlut
+	int * vertlutItem;
+	vertlutItem = GARY_PUSH(q->vertlut[idx]);
+	*vertlutItem = node-q->dijArray;
+
+	// Add to heap
+	GARY_PUSH(q->heap);
+	MMHEAP_INSERT(node - q->dijArray);
+}
+
+struct mmdijnode_t * getQueueMin(struct mmqueue_t * q){
+	if (q->n_heap==0){
+		err("Heap empty");
+	}
+
+	MMHEAP_DELETE_MIN();
+	int vIdx;
+	vIdx = q->heap[q->n_heap+1];
+	GARY_POP(q->heap);
+	q->vert = q->dijArray + vIdx;
+
+	if (!q->vert->reached){
+		err("Found unreached vertex, exitting\n");
+	}
+
+	if (q->vert->majorized){
+		return NULL;	
+	}
+
+	return q->vert;
+}
+
+struct mmqueue_t * createMMQueue(Graph__Graph * graph){
+	
+	struct mmqueue_t * q;
+	q = malloc(sizeof(struct mmqueue_t));
+	q->n_heap = 0;
+	GARY_INIT_SPACE(q->heap,graph->n_vertices/3);
+	GARY_PUSH(q->heap);	// First item is unused
+
+	q->vertlut = calloc(sizeof(int*),graph->n_vertices);
+	for (int i=0;i<graph->n_vertices;i++){
+		GARY_INIT(q->vertlut[i],0);	
+	}
+
+	GARY_INIT_SPACE(q->dijArray,graph->n_vertices/3);
+	return q;
+	
+} 
+void freeMMQueue(struct mmqueue_t * queue,int n_vertices){
+	GARY_FREE(queue->heap);
+	for (int i=0;i<n_vertices;i++){
+		GARY_FREE(queue->vertlut[i]);	
+	}
+	free(queue->vertlut);
+	GARY_FREE(queue->dijArray);
+	free(queue);
+}
+
 struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,time_t starttime,
 		Timetable * tt){
 	Graph__Graph * graph;
 	graph = data.graph;
 
 
-	struct mem_data * md;
-	md = create_mem_data(tt);
-	clear_mem_data(md,tt->n_stops);
+	struct timetable * newtt;
+	time_t date;
+	date = starttime - (starttime%(24*3600));
+	newtt = gen_tt_for_date(tt,date,NULL);
+
+	uint64_t * stopslut;
+	int maxraptorid;
+	maxraptorid = 0;
+	for (int i=0;i < graph->n_stops;i++){
+		if (graph->stops[i]->raptor_id > maxraptorid){
+			maxraptorid = graph->stops[i]->raptor_id;	
+		}
+	}
+	stopslut = calloc(sizeof(uint64_t),maxraptorid+1);
+	for (int i=0;i < graph->n_stops;i++){
+		stopslut[graph->stops[i]->raptor_id] = graph->stops[i]->osmid;
+	}
 	
 	struct nodeways_t * nodeways;
 	nodeways = data.nodeWays;
 	
-	int * heap;			// Indices to the dijArray
-	int n_heap;
-	GARY_INIT_SPACE(heap,graph->n_vertices/3);
-	int ** vertlut;		// Map vertex -> dijArray indices
-	vertlut = calloc(sizeof(int*),graph->n_vertices);
-	for (int i=0;i<graph->n_vertices;i++){
-		GARY_INIT(vertlut[i],0);	
-	}
+	struct mmqueue_t * queue;
+	queue = createMMQueue(graph);
 
-	#define DIJ_CMP(x,y) (dijArray[x].time < dijArray[y].time)
-
-	#define MMHEAP_INSERT(elem) \
-		HEAP_INSERT(int,heap,n_heap,DIJ_CMP,HEAP_SWAP,(elem))
-	#define MMHEAP_DELETE_MIN() \
-		HEAP_DELETE_MIN(int,heap,n_heap,DIJ_CMP,HEAP_SWAP)
-	#define MMHEAP_DECREASE(elem,val) \
-		HEAP_DECREASE(heap,n_heap,DIJ_CMP,HEAP_SWAP,(elem),(val))
-	
-	struct mmdijnode_t * dijArray;	// The current search data are here
-	GARY_INIT_SPACE(dijArray,graph->n_vertices/3);
-
-	struct mmdijnode_t * node;
-	int * vertlutItem;
-
-	node = GARY_PUSH(dijArray);
-	prepareMMNode(node,fromIdx,-1,-1,starttime,0);
-
-	vertlutItem = GARY_PUSH(vertlut[fromIdx]);
-	*vertlutItem = node-dijArray;
-	
-	// First element is unused
-	GARY_PUSH(heap);
-	// For first vertex
-	GARY_PUSH(heap);
-
-	n_heap = 0;
-	MMHEAP_INSERT(0);
+	addFirstNodeToQueue(queue,fromIdx,starttime);
 
 	int best_time;
 	best_time = -1;
 
-	while(n_heap > 0){
-		MMHEAP_DELETE_MIN();
-		if (n_heap%500==0){
-			printf("Heap: %d\n",n_heap);
-		}
-		int vIdx;
-		struct mmdijnode_t * vert;
-		vIdx = heap[n_heap+1];
-		GARY_POP(heap);
-		vert = dijArray + vIdx;
-
-		bool skip_item;
-		skip_item=0;
-
-		if (vert->majorized){
+	while(queue->n_heap > 0){
+		if (getQueueMin(queue) == NULL){
 			continue;
+		}
+
+		if (queue->n_heap%500==0){
+			printf("Heap: %d\n",queue->n_heap);
 		}
 
 		//printf("Vertex: %d, time: %d, penalty: %f\n",vert->idx,vert->time,vert->penalty);
 		//printf("DijArray: %d\n",GARY_SIZE(dijArray));
 
-		if (!vert->reached){
-			printf("Found unreached vertex, exitting\n");
-			return NULL;
-		}
 		// Process public transport connections
-		struct stopsIdxNode * stopsNode;
+		struct osmId2sIdxNode * stopsNode;
 		int64_t osmid;
-		osmid = graph->vertices[vert->idx]->osmid;
-		stopsNode = stopsIdx_find(osmid);
+		osmid = graph->vertices[queue->vert->idx]->osmid;
+		stopsNode = osmId2sIdx_find(osmid);
 		if (stopsNode != NULL){
-			printf("Stop %d found\n",stopsNode->idx);
+			char * timestr;
+			timestr = prt_time((queue->vert->time)%(24*3600));
+			printf("Stop %d found at %s\n",stopsNode->idx,timestr);
+			free(timestr);
+
 			struct stop_conns * conns;
-			conns = search_stop_conns(tt,graph->stops[stopsNode->idx]->raptor_id,vert->time);
+			conns = search_stop_conns(newtt,graph->stops[stopsNode->idx]->raptor_id,queue->vert->time%(24*3600));
+			for (int ridx = 0; ridx < conns->n_routes; ridx++){
+				struct stop_route * r;
+				r = conns->routes+ridx;
+				timestr = prt_time(r->departure);
+				printf("Departure at %s\n",timestr);
+				free(timestr);
+				for (int sidx = 0;sidx < r->n_stops;sidx++){
+					int64_t osmid;
+					time_t arrival;
+					double penalty;
+
+					osmid = stopslut[r->stops[sidx].to];
+					
+					// Stop not in map area
+					if(osmid == 0){
+						continue;
+					}
+
+					arrival = r->stops[sidx].arrival;
+					penalty = 0;
+					
+					struct nodesIdxNode * nd;
+					nd = nodesIdx_find(osmid);
+					if (nd == NULL){
+						printf("No matching node for node id %lld\n",osmid);
+						continue;
+					}
+					addNodeToQueue(queue,nd->idx,r->id,ROUTE_TYPE_PT,arrival,queue->vert->penalty + penalty);
+				}
+					
+			}
+			free_conns(conns);
 		}
 
 		// Process walk connections	
-		for (int i=0;i<nodeways[vert->idx].n_ways;i++){	
+		for (int i=0;i<nodeways[queue->vert->idx].n_ways;i++){	
 			Graph__Edge * way;
-			way = graph->edges[nodeways[vert->idx].ways[i]];
+			way = graph->edges[nodeways[queue->vert->idx].ways[i]];
 			int wayend;
-			if (way->vfrom == vert->idx){
+			if (way->vfrom == queue->vert->idx){
 				wayend = way->vto;	
 			} else {
 				wayend = way->vfrom;
@@ -582,72 +701,38 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 
 			int time;
 			time = calcTime(graph,data.conf,way);
-			
-			//printf("Type:%d, from:%lld, to:%lld, curr:%lld pen: %f, time:%d\n",way->type,fosmid,tosmid,currosmid,penalty,time);
 
-			for (int j=0;j<GARY_SIZE(vertlut[wayend]);j++){
-				struct mmdijnode_t * anode;
-				anode = dijArray + vertlut[wayend][j];
-				if (((vert->time + time) >= anode->time)&&((vert->penalty + penalty) >= anode->penalty)){
-					skip_item = 1;
-					break;
-				}
-			}
-			if (skip_item){
-				skip_item=0;
-				continue;	
-			}
-
-			// Add to dijArray
-			int vertIdx;
-			vertIdx = vert-dijArray;
-			node = GARY_PUSH(dijArray);
-			vert = dijArray+vertIdx;
-			prepareMMNode(node,wayend,vIdx,nodeways[vert->idx].ways[i],vert->time+time,vert->penalty+penalty);
-			// Add to vertlut
-			vertlutItem = GARY_PUSH(vertlut[wayend]);
-			*vertlutItem = node-dijArray;
-			// Add to heap
-			GARY_PUSH(heap);
-			MMHEAP_INSERT(node-dijArray);
-			
-			//printf("Vertex already reached %d times\n",GARY_SIZE(vertlut[vert->idx]));
-
-			for (int j=0;j<GARY_SIZE(vertlut[vert->idx]);j++){
-				struct mmdijnode_t * anode;
-				anode = dijArray + vertlut[vert->idx][j];
-				if ((node->time <= anode->time)&&(node->penalty <= anode->penalty)){
-					anode->majorized=1;
-				}
-			}
+			addNodeToQueue(queue,wayend,nodeways[queue->vert->idx].ways[i],ROUTE_TYPE_WALK,
+				queue->vert->time + time,queue->vert->penalty + penalty);
 		}
 
 
-		vert->completed = true;
-		if (best_time == -1 && vert->idx == toIdx){
+		queue->vert->completed = true;
+		if (best_time == -1 && queue->vert->idx == toIdx){
 			printf("Found path");
-			best_time = vert->time-starttime;
+			best_time = queue->vert->time-starttime;
 		}
 
 		// Break if connection is too long
 		if ((best_time != -1) && 
-			((vert->time-starttime) > 1.5*best_time)){
+			((queue->vert->time-starttime) > 1.5*best_time)){
 			printf("Path too long, exitting.");
 			
 			break;
 		}
 	}
 
-	processFoundMMRoutes(data,dijArray,vertlut,fromIdx,toIdx);
+	processFoundMMRoutes(data,tt,queue->dijArray,queue->vertlut,fromIdx,toIdx);
+	free_tt(newtt);
 
-#undef DIJ_CMP
-#undef DIJ_SWAP
-	return dijArray;
+	return queue->dijArray;
 				
 		
 }
+#undef DIJ_CMP
+#undef DIJ_SWAP
 
-void processFoundMMRoutes(struct search_data_t data, struct mmdijnode_t * dijArray, int ** vertlut, int fromIdx, int toIdx){
+void processFoundMMRoutes(struct search_data_t data, Timetable * tt, struct mmdijnode_t * dijArray, int ** vertlut, int fromIdx, int toIdx){
 	int n_routes;
 	n_routes = GARY_SIZE(vertlut[toIdx]);
 	printf("Found %d routes\n",n_routes);	
@@ -673,6 +758,8 @@ void processFoundMMRoutes(struct search_data_t data, struct mmdijnode_t * dijArr
 			utm2wgs(data,&lon,&lat);
 			point->lon = lon;
 			point->lat = lat;
+			point->edgetype = node->fromEdgeType;
+			point->vertIdx = node->idx;
 
 			point->height = data.graph->vertices[node->idx]->height;
 	//		point->type = data.graph->vertices[node->idx]->type;
@@ -692,11 +779,33 @@ void processFoundMMRoutes(struct search_data_t data, struct mmdijnode_t * dijArr
 
 
 	for (int i=0;i<n_routes;i++){
-		char filename[13];
+		char filename[20];
 		sprintf(filename,"track_%d.gpx",i);
 		writeGpxFile(routes[i],filename);	
 	}
 	
+	for (int r=0;r<n_routes;r++){
+		printf("Route %d:\n",r);
+		for (int s=0;s<routes[r].n_points;s++){
+			struct point_t * pt;
+			pt = routes[r].points+s;
+			if (pt->edgetype == ROUTE_TYPE_PT){
+				int64_t osmid;	
+				struct osmId2sIdxNode * stopsNode;
+				int raptor_id;
+
+				osmid = data.graph->vertices[routes[r].points[s-1].vertIdx]->osmid;
+				stopsNode = osmId2sIdx_find(osmid);
+				raptor_id = data.graph->stops[stopsNode->idx]->raptor_id;
+				printf("From: %s ",tt->stops[raptor_id]->name);
+				osmid = data.graph->vertices[pt->vertIdx]->osmid;
+				stopsNode = osmId2sIdx_find(osmid);
+				raptor_id = data.graph->stops[stopsNode->idx]->raptor_id;
+				printf("To: %s\n",tt->stops[raptor_id]->name);
+					
+			}
+		}
+	}
 }
 
 void findWay(struct search_data_t data,struct dijnode_t * dijArray,int fromIdx, int toIdx){
@@ -857,17 +966,17 @@ struct search_data_t * prepareData(char * configName, char * dataName){
 	}
 	data->nodeWays = makeNodeWays(data->graph);
 	nodesIdx_refresh(data->graph->n_vertices,data->graph->vertices);
-	stop_idsIdx_refresh(data->graph->n_stops,data->graph->stops);
-	stopsIdx_refresh(data->graph->n_stops,data->graph->stops);
+	sId2sIdx_refresh(data->graph->n_stops,data->graph->stops);
+	osmId2sIdx_refresh(data->graph->n_stops,data->graph->stops);
 	calcDistances(data->graph);
 	return data;
 }
 
 struct search_result_t findTransfer(struct search_data_t * data, char * from, char * to){
 	int fromIdx;
-	struct stop_idsIdxNode * stopsNode;
+	struct sId2sIdxNode * stopsNode;
 	struct search_result_t result;
-	stopsNode = stop_idsIdx_find(from);
+	stopsNode = sId2sIdx_find(from);
 	if (stopsNode == NULL){
 		printf("Stop %s not found\n",from);
 		result.n_points=0;
@@ -875,7 +984,7 @@ struct search_result_t findTransfer(struct search_data_t * data, char * from, ch
 	}
 	fromIdx = stopsNode->idx;
 
-	stopsNode = stop_idsIdx_find(to);
+	stopsNode = sId2sIdx_find(to);
 	if (stopsNode == NULL){
 		printf("Stop %s not found\n",to);
 		result.n_points=0;
@@ -927,7 +1036,7 @@ struct search_result_t findPath(struct search_data_t * data,double fromLat, doub
 	int toIdx;
 	toIdx = findNearestVertex(data->graph,toLon,toLat);
 
-	printf("Searching from %lld(%f,%f,%d) to %lld(%f,%f,%d)\n",data->graph->vertices[fromIdx]->osmid,
+/*	printf("Searching from %lld(%f,%f,%d) to %lld(%f,%f,%d)\n",data->graph->vertices[fromIdx]->osmid,
 			data->graph->vertices[fromIdx]->lat,
 			data->graph->vertices[fromIdx]->lon,
 			data->graph->vertices[fromIdx]->height,
@@ -936,7 +1045,7 @@ struct search_result_t findPath(struct search_data_t * data,double fromLat, doub
 			data->graph->vertices[toIdx]->lon,
 			data->graph->vertices[toIdx]->height
 			);
-
+*/
 	struct dijnode_t * dijArray;
 	dijArray = prepareDijkstra(data->graph);
 
@@ -944,7 +1053,10 @@ struct search_result_t findPath(struct search_data_t * data,double fromLat, doub
 	
 
 	Timetable * timetable;
-	timetable = load_timetable("/home/jethro/Programy/mmpf/raptor/tt.bin");
+	timetable = load_timetable("/home/jethro/Programy/diplomka/mmpf/raptor/tt.bin");
+	if (timetable == NULL){
+		err("Cannot load timetable");
+	}
 
 
 
