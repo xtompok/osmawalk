@@ -86,7 +86,8 @@ struct mmdijnode_t {
 	bool reached;
 	bool completed;
 	bool majorized;
-	int time;
+	time_t time;
+	time_t departed;
 	double penalty;
 };
 
@@ -106,13 +107,21 @@ struct mmqueue_t {
  * @field type Type of edge on searched path from this point
  */
 struct point_t {
+	// Location
 	double lat;
 	double lon;
 	int height;
-	int type;	
-	int vertIdx;
-	uint64_t wayid;
-	char edgetype;
+	// Time
+	time_t departure;
+	time_t arrival;
+	// Vertex features
+	Objtype vertType;	
+	int64_t vertId;
+	int stopIdx;	// Index of the stop in Raptor
+	// Edge features
+	Objtype edgeType;
+	int64_t wayId;
+	int routeIdx;	// Index of the route in Raptor
 };
 
 /* @struct search_result_t
@@ -225,15 +234,6 @@ int findNearestVertex(Graph__Graph * graph, double lon, double lat);
  */
 struct dijnode_t *  prepareDijkstra(Graph__Graph * graph);
 
-/*! Find way using Dijkstra
- * @param data Search data 
- * @param dijArray Array with aditional structs
- * @param fromIdx Start vertex index
- * @param toIdx End vertex index
- */
-void findWay(struct search_data_t data, 
-		struct dijnode_t * dijArray,
-		int fromIdx, int toIdx);
 /*! Convert search results from additions for vertices to array
  * @param data Search data
  * @param dijArray Array with additional structs

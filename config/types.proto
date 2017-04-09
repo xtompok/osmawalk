@@ -25,6 +25,8 @@ enum objtype {
 	DIRECT = 50;
 	GENERATED = 51;
 	DIRECT_STOP = 52;
+
+	PUBLIC_TRANSPORT = 60; // Used only when searching
 	
 	WALKAREA = 100;
 	AREAWAY = 101;

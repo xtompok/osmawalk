@@ -5,6 +5,7 @@
 #include <float.h>
 #include <inttypes.h>
 #include <time.h>
+#include <err.h>
 
 #include <yaml.h>
 #include <proj_api.h>
@@ -475,12 +476,13 @@ struct dijnode_t *  prepareDijkstra(Graph__Graph * graph){
 #define MMHEAP_DECREASE(elem,val) \
 	HEAP_DECREASE(q->heap,q->n_heap,DIJ_CMP,HEAP_SWAP,(elem),(val))
 
-void prepareMMNode(struct mmdijnode_t * node,int idx,int fromIdx,int fromEdgeIdx,char fromEdgeType,int time,double penalty){
+void prepareMMNode(struct mmdijnode_t * node,int idx,int fromDijIdx,int fromEdgeIdx,Objtype fromEdgeType,time_t time,time_t departed,double penalty){
 	node->idx = idx;
-	node->fromIdx = fromIdx;
+	node->fromIdx = fromDijIdx;
 	node->fromEdgeIdx = fromEdgeIdx;
 	node->fromEdgeType = fromEdgeType;
 	node->time = time;
+	node->departed = departed;
 	node->penalty = penalty;
 	node->reached = 1;
 	node->completed = 0;
@@ -491,7 +493,7 @@ void addFirstNodeToQueue(struct mmqueue_t * q,int idx,time_t time){
 	struct mmdijnode_t * node;
 	node = GARY_PUSH(q->dijArray);
 
-	prepareMMNode(node,idx,-1,-1,ROUTE_TYPE_NONE,time,0);
+	prepareMMNode(node,idx,-1,-1,ROUTE_TYPE_NONE,time,0,0);
 	
 	// Add to vertlut
 	int * vertlutItem;
@@ -508,6 +510,7 @@ void addNodeToQueue(struct mmqueue_t * q,
 		int fromEdgeIdx,
 		char fromEdgeType,
 		time_t time,
+		time_t departed,
 		double penalty){
 	// Check if it is not majorized by another node already in queue
 	// Check if it majorizes some nodes in queue and mark them as majorized
@@ -530,7 +533,7 @@ void addNodeToQueue(struct mmqueue_t * q,
 	node = GARY_PUSH(q->dijArray);
 	q->vert = q->dijArray+vertIdx;
 
-	prepareMMNode(node,idx,vertIdx,fromEdgeIdx,fromEdgeType,time,penalty);
+	prepareMMNode(node,idx,vertIdx,fromEdgeIdx,fromEdgeType,time,departed,penalty);
 	
 	// Add to vertlut
 	int * vertlutItem;
@@ -544,7 +547,7 @@ void addNodeToQueue(struct mmqueue_t * q,
 
 struct mmdijnode_t * getQueueMin(struct mmqueue_t * q){
 	if (q->n_heap==0){
-		err("Heap empty");
+		err(2,"Heap empty");
 	}
 
 	MMHEAP_DELETE_MIN();
@@ -554,7 +557,7 @@ struct mmdijnode_t * getQueueMin(struct mmqueue_t * q){
 	q->vert = q->dijArray + vIdx;
 
 	if (!q->vert->reached){
-		err("Found unreached vertex, exitting\n");
+		err(1,"Found unreached vertex, exitting\n");
 	}
 
 	if (q->vert->majorized){
@@ -678,7 +681,7 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 						printf("No matching node for node id %lld\n",osmid);
 						continue;
 					}
-					addNodeToQueue(queue,nd->idx,r->id,ROUTE_TYPE_PT,arrival,queue->vert->penalty + penalty);
+					addNodeToQueue(queue,nd->idx,r->id,ROUTE_TYPE_PT,arrival,r->departure,queue->vert->penalty + penalty);
 				}
 					
 			}
@@ -703,7 +706,7 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 			time = calcTime(graph,data.conf,way);
 
 			addNodeToQueue(queue,wayend,nodeways[queue->vert->idx].ways[i],ROUTE_TYPE_WALK,
-				queue->vert->time + time,queue->vert->penalty + penalty);
+				queue->vert->time + time,0,queue->vert->penalty + penalty);
 		}
 
 
@@ -758,11 +761,30 @@ void processFoundMMRoutes(struct search_data_t data, Timetable * tt, struct mmdi
 			utm2wgs(data,&lon,&lat);
 			point->lon = lon;
 			point->lat = lat;
-			point->edgetype = node->fromEdgeType;
-			point->vertIdx = node->idx;
-
 			point->height = data.graph->vertices[node->idx]->height;
-	//		point->type = data.graph->vertices[node->idx]->type;
+
+			point->departure = node->departed; // TODO shift one point left
+			point->arrival = node->time;
+
+			point->vertType = data.graph->vertices[node->idx]->type;
+			point->vertId = data.graph->vertices[node->idx]->osmid;
+
+			struct osmId2sIdxNode * stopnode;
+			stopnode = osmId2sIdx_find(point->vertId);
+			if (stopnode != NULL ){
+				point->stopIdx = stopnode->idx;
+			}
+
+			//edgeType, wayId, routeIdx
+			if (node->fromEdgeType == ROUTE_TYPE_WALK ){
+				point->edgeType = data.graph->edges[node->fromEdgeIdx]->type;
+				point->wayId = 	data.graph->edges[node->fromEdgeIdx]->osmid;
+			} else if (node->fromEdgeType == ROUTE_TYPE_PT){
+				point->edgeType = OBJTYPE__PUBLIC_TRANSPORT;
+				point->routeIdx = node->fromEdgeIdx; 
+			} else {
+				point->edgeType = OBJTYPE__NONE;	
+			}
 
 			node = dijArray + node->fromIdx;
 				
@@ -789,98 +811,20 @@ void processFoundMMRoutes(struct search_data_t data, Timetable * tt, struct mmdi
 		for (int s=0;s<routes[r].n_points;s++){
 			struct point_t * pt;
 			pt = routes[r].points+s;
-			if (pt->edgetype == ROUTE_TYPE_PT){
-				int64_t osmid;	
+			if (pt->edgeType == OBJTYPE__PUBLIC_TRANSPORT){
 				struct osmId2sIdxNode * stopsNode;
 				int raptor_id;
 
-				osmid = data.graph->vertices[routes[r].points[s-1].vertIdx]->osmid;
-				stopsNode = osmId2sIdx_find(osmid);
+				stopsNode = osmId2sIdx_find(routes[r].points[s-1].vertId);
 				raptor_id = data.graph->stops[stopsNode->idx]->raptor_id;
 				printf("From: %s ",tt->stops[raptor_id]->name);
-				osmid = data.graph->vertices[pt->vertIdx]->osmid;
-				stopsNode = osmId2sIdx_find(osmid);
+				stopsNode = osmId2sIdx_find(pt->vertId);
 				raptor_id = data.graph->stops[stopsNode->idx]->raptor_id;
 				printf("To: %s\n",tt->stops[raptor_id]->name);
 					
 			}
 		}
 	}
-}
-
-void findWay(struct search_data_t data,struct dijnode_t * dijArray,int fromIdx, int toIdx){
-	
-	int tmp;
-	tmp=fromIdx;
-	fromIdx=toIdx;
-	toIdx=tmp;
-
-	Graph__Graph * graph;
-	graph = data.graph;
-
-	struct nodeways_t * nodeways;
-	nodeways = data.nodeWays;
-
-	int * heap;
-	int n_heap;
-	heap = malloc(sizeof(int)*(graph->n_vertices+1));
-	int * heapIndex;
-	heapIndex = malloc(sizeof(int)*graph->n_vertices);
-
-	#define DIJ_SWAP(heap,a,b,t) ( \
-		heapIndex[heap[a]]=b,heapIndex[heap[b]]=a,\
-		t=heap[a],heap[a]=heap[b],heap[b]=t)
-
-	#define DIJ_CMP(x,y) (dijArray[x].dist<dijArray[y].dist)
-
-	dijArray[fromIdx].reached=true;
-	dijArray[fromIdx].dist=0;
-	
-	n_heap = 0;
-	heapIndex[fromIdx]=1;
-	HEAP_INSERT(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,fromIdx);
-
-	while(n_heap > 0){
-		HEAP_DELETE_MIN(int,heap,n_heap,DIJ_CMP,DIJ_SWAP);
-		int vIdx;
-		vIdx = heap[n_heap+1];
-		
-		if (!dijArray[vIdx].reached){
-			printf("Found unreached vertex, exitting\n");
-			return;
-		}
-		for (int i=0;i<nodeways[vIdx].n_ways;i++){
-			Graph__Edge * way;
-			way = graph->edges[nodeways[vIdx].ways[i]];
-			int wayend;
-			if (way->vfrom == vIdx){
-				wayend = way->vto;
-			} else {
-				wayend = way->vfrom;
-			}
-			double len;
-			len = calcWeight(data.graph,data.conf,way);
-			if (dijArray[wayend].dist <= (dijArray[vIdx].dist+len))
-				continue;
-			dijArray[wayend].dist = dijArray[vIdx].dist+len;
-			dijArray[wayend].fromIdx = vIdx;
-			dijArray[wayend].fromEdgeIdx = nodeways[vIdx].ways[i];
-			if (dijArray[wayend].reached){
-				HEAP_DECREASE(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,heapIndex[wayend],wayend);
-			}else {
-				dijArray[wayend].reached = true;
-				heapIndex[wayend]=n_heap+1;
-				HEAP_INSERT(int,heap,n_heap,DIJ_CMP,DIJ_SWAP,wayend);
-			}
-		}
-		dijArray[vIdx].completed=true;
-		if (vIdx == toIdx)
-			break;
-	}
-	#undef DIJ_CMP
-	#undef DIJ_SWAP
-	free(heap);
-	free(heapIndex);
 }
 
 struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * dijArray, int fromIdx, int toIdx, int * n_points){
@@ -919,8 +863,8 @@ struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * d
 		results[count].lat = lat;
 		results[count].lon = lon;
 		results[count].height = graph->vertices[idx]->height;
-		results[count].type = graph->edges[dijArray[idx].fromEdgeIdx]->type;
-		results[count].wayid = graph->edges[dijArray[idx].fromEdgeIdx]->osmid;
+		results[count].edgeType = graph->edges[dijArray[idx].fromEdgeIdx]->type;
+		results[count].wayId = graph->edges[dijArray[idx].fromEdgeIdx]->osmid;
 		idx = dijArray[idx].fromIdx;
 		count++;
 	}
@@ -930,7 +874,7 @@ struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * d
 	results[count].lat = lat;
 	results[count].lon = lon;
 	results[count].height = graph->vertices[idx]->height;
-	results[count].type=-1;	
+	results[count].edgeType=-1;	
 	return results;
 }
 
@@ -961,8 +905,7 @@ struct search_data_t * prepareData(char * configName, char * dataName){
 	data->conf = parseConfigFile(configName);
 	data->graph = loadMap(dataName);
 	if (data->graph==NULL){
-		printf("Error loading map\n");	
-		return data;
+		err(1,"Error loading map\n");	
 	}
 	data->nodeWays = makeNodeWays(data->graph);
 	nodesIdx_refresh(data->graph->n_vertices,data->graph->vertices);
@@ -972,6 +915,7 @@ struct search_data_t * prepareData(char * configName, char * dataName){
 	return data;
 }
 
+/*
 struct search_result_t findTransfer(struct search_data_t * data, char * from, char * to){
 	int fromIdx;
 	struct sId2sIdxNode * stopsNode;
@@ -1025,7 +969,7 @@ struct search_result_t findTransfer(struct search_data_t * data, char * from, ch
 	free(dijArray);
 	return result;	
 
-}
+}*/
 
 struct search_result_t findPath(struct search_data_t * data,double fromLat, double fromLon, double toLat, double toLon){
 	wgs2utm(*data,&fromLon,&fromLat);
@@ -1055,7 +999,7 @@ struct search_result_t findPath(struct search_data_t * data,double fromLat, doub
 	Timetable * timetable;
 	timetable = load_timetable("/home/jethro/Programy/diplomka/mmpf/raptor/tt.bin");
 	if (timetable == NULL){
-		err("Cannot load timetable");
+		err(1,"Cannot load timetable");
 	}
 
 
