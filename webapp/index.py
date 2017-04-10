@@ -2,10 +2,12 @@
 from flask import Flask
 from flask import render_template,Response
 from flask import request
-from find import prepareData, findPath, SearchResult, getMapBBox 
+from find import prepareData, findPath, SearchResult, getMapBBox, result_data 
 import json
 import re
+import result_pb2
 from gpx import GPX
+import timetable
 
 local_name = "localhost:5000"
 deploy_name = "walk.bezva.org"
@@ -14,6 +16,7 @@ app = Flask(__name__)
 
 data = prepareData("../config/speeds.yaml","../data/praha-graph.pbf")
 bbox = getMapBBox(data)
+tt = timetable.Timetable("../../diplomka/mmpf/raptor/tt.bin")
 
 def get_attribute(request,name,convert=None,default=None):
 	attr = request.args.get(name,None)
@@ -48,6 +51,25 @@ def do_search():
 
 	print "From lon: {}, from lat: {}, to lon: {}, to lat: {}".format(flon,flat,tlon,tlat)
 	path = findPath(data,flat,flon,tlat,tlon)
+	print "Result size {}B".format(path.len)
+	pbf = "".join(map(chr,path.data[:path.len]))
+	result = result_pb2.Result()
+	result.ParseFromString(pbf)
+	print "Routes: {}".format(len(result.routes))
+	#routes = []
+	for r in result.routes:
+		print "Route len: {}, time: {}".format(r.time,r.dist)
+		coords = []
+		for p in r.points:
+			coords.append((p.lon,p.lat))
+		linestring = {"type": "Feature",
+			"geometry": {"type": "LineString", "coordinates": coords},
+			"properties": {"time":r.time,"dist":r.dist}
+		}
+		return json.dumps(linestring)
+
+	return ""
+
 	if path.n_points == 0:
 		return ""
 	coords = []

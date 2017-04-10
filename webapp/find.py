@@ -1,14 +1,20 @@
 #!/usr/bin/python
 
-from ctypes import cdll,Structure
-from ctypes import POINTER,c_double,c_int,c_ulonglong,c_void_p,c_char_p
+from ctypes import *
 
 libsearch = cdll.LoadLibrary("../compiled/libsearch.so")
+class PBFResult(Structure):
+	_fields_ = [("len",c_int),
+		("data",POINTER(c_uint8))]
+
 class Point(Structure):
 	_fields_ = [("lat",c_double),
 		("lon",c_double),
 		("height",c_int),
-		("type",c_int),
+		("departure",c_uint64),
+		("arrival",c_uint64),
+		("vertType",c_int),
+		("stopIdx",c_int),
 		("wayid",c_ulonglong)]
 
 class SearchResult(Structure):
@@ -27,16 +33,19 @@ prepareData = libsearch.prepareData
 prepareData.restype = c_void_p
 
 findPath = libsearch.findPath
-findPath.restype = SearchResult
+findPath.restype = PBFResult
 findPath.argtypes = (c_void_p,c_double,c_double,c_double,c_double) 
 
-findTransfer = libsearch.findTransfer
-findTransfer.restype = SearchResult
-findTransfer.argtypes = (c_void_p,c_char_p,c_char_p)
+#findTransfer = libsearch.findTransfer
+#findTransfer.restype = SearchResult
+#findTransfer.argtypes = (c_void_p,c_char_p,c_char_p)
 
 getMapBBox = libsearch.getMapBBox
 getMapBBox.restype = BBox
 getMapBBox.argtypes = (c_void_p,)
+
+def result_data(res):
+	return (res.data._type_ * res.len).from_address(addressof(res.data))
 
 
 #

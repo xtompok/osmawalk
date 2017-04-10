@@ -139,6 +139,11 @@ struct search_result_t {
 
 };
 
+struct pbf_result_t {
+	int len;
+	uint8_t * data;	
+};
+
 /* @struct search_data_t
  * @abstract Struct for handling loaded graph and speeds configuration
  * @field pj_wgs84 PROJ.4 structure for WGS-84 projection
@@ -266,10 +271,10 @@ struct search_data_t * prepareData(char * configName, char * dataName);
  * @param toLon End point longitude
  * @result Structure for handli search result
  */
-struct search_result_t findPath(struct search_data_t * data,
+struct pbf_result_t findPath(struct search_data_t * data,
 		double fromLat, double fromLon, double toLat, double toLon);
 
-void processFoundMMRoutes(struct search_data_t data,Timetable * tt, struct mmdijnode_t * dijArray, int ** vertlut, int fromIdx, int toIdx);
+struct pbf_result_t processFoundMMRoutes(struct search_data_t data,Timetable * tt, struct mmdijnode_t * dijArray, int ** vertlut, int fromIdx, int toIdx);
 struct search_result_t findTransfer(struct search_data_t * data,
 		char * from, char * to);
 

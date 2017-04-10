@@ -72,10 +72,10 @@ int main (int argc, char ** argv){
 	printf("Graph has %d vertices and %d edges\n",data->graph->n_vertices,data->graph->n_edges);
 	printMapBBox(*data);
 
-	struct search_result_t result;
+	struct pbf_result_t result;
 	result = findPath(data,flat,flon,tlat,tlon);
-	printResults(result);
-	writeGpxFile(result,"track.gpx");
+	//printResults(result);
+	//writeGpxFile(result,"track.gpx");
 
 	return 0;
 }

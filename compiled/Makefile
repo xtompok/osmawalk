@@ -2,7 +2,7 @@ CC=gcc
 PG=
 # Hardcoded paths begin
 LIBOSMPBFPATH=../ext-lib/libosmpbf
-RAPTORPATH=/home/jethro/Programy/mmpf/raptor/
+RAPTORPATH=/home/jethro/Programy/diplomka/mmpf/raptor/
 #Hardcoded paths end
 
 INC=-I/usr/include/libucw  -I$(LIBOSMPBFPATH) -I$(RAPTORPATH) -I/usr/include/postgresql
@@ -10,7 +10,7 @@ CFLAGS= -c $(PG)  -ggdb3 -Wall -Wno-format -Wno-unused-function -std=gnu99 -O2 -
 PFLAGS= -E -Wall -std=gnu99 -O3 -march=native -I/usr/include/libucw 
 LDFLAGS= $(PG) -L$(LIBOSMPBFPATH) -L$(RAPTORPATH) -lraptor -lprotobuf-c -lucw-6.5 -lproj -lyaml -lm -lz 
 
-LIBSEARCH_SRC=writegpx.c include/types.pb-c.c include/graph.pb-c.c
+LIBSEARCH_SRC=writegpx.c include/types.pb-c.c include/graph.pb-c.c include/result.pb-c.c
 LIBSEARCH_OBJ=$(LIBSEARCH_SRC:.c=.o)
 LIBSEARCH_LIB=libsearch.so
 
@@ -70,5 +70,8 @@ protobuf: ../config/types.proto ../config/premap.proto ../config/graph.proto
 	protoc-c --proto_path ../config/ ../config/types.proto --c_out include/
 	protoc-c --proto_path ../config/ ../config/premap.proto --c_out include/
 	protoc-c --proto_path ../config/ ../config/graph.proto --c_out include/
+	protoc-c --proto_path ../config/ ../config/result.proto --c_out include/
+	protoc --proto_path ../config ../config/types.proto --python_out ../webapp/
+	protoc --proto_path ../config ../config/result.proto --python_out ../webapp/
 
 .PHONY: protobuf all search postgres

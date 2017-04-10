@@ -13,6 +13,7 @@
 #include <ucw/gary.h>
 
 #include "include/graph.pb-c.h"
+#include "include/result.pb-c.h"
 
 #include "searchlib.h"
 #include "writegpx.h"
@@ -594,7 +595,7 @@ void freeMMQueue(struct mmqueue_t * queue,int n_vertices){
 	free(queue);
 }
 
-struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,time_t starttime,
+struct pbf_result_t findMMWay(struct search_data_t data, int fromIdx, int toIdx,time_t starttime,
 		Timetable * tt){
 	Graph__Graph * graph;
 	graph = data.graph;
@@ -725,17 +726,17 @@ struct mmdijnode_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx
 		}
 	}
 
-	processFoundMMRoutes(data,tt,queue->dijArray,queue->vertlut,fromIdx,toIdx);
-	free_tt(newtt);
+	return processFoundMMRoutes(data,tt,queue->dijArray,queue->vertlut,fromIdx,toIdx);
+//	free_tt(newtt);
 
-	return queue->dijArray;
+//	return queue->dijArray;
 				
 		
 }
 #undef DIJ_CMP
 #undef DIJ_SWAP
 
-void processFoundMMRoutes(struct search_data_t data, Timetable * tt, struct mmdijnode_t * dijArray, int ** vertlut, int fromIdx, int toIdx){
+struct pbf_result_t processFoundMMRoutes(struct search_data_t data, Timetable * tt, struct mmdijnode_t * dijArray, int ** vertlut, int fromIdx, int toIdx){
 	int n_routes;
 	n_routes = GARY_SIZE(vertlut[toIdx]);
 	printf("Found %d routes\n",n_routes);	
@@ -773,6 +774,8 @@ void processFoundMMRoutes(struct search_data_t data, Timetable * tt, struct mmdi
 			stopnode = osmId2sIdx_find(point->vertId);
 			if (stopnode != NULL ){
 				point->stopIdx = stopnode->idx;
+			} else {
+				point->stopIdx = -1;	
 			}
 
 			//edgeType, wayId, routeIdx
@@ -797,6 +800,67 @@ void processFoundMMRoutes(struct search_data_t data, Timetable * tt, struct mmdi
 			routes[i].points[j]=points[routes[i].n_points-1-j];
 		}
 		GARY_FREE(points);
+	}
+
+	Result__Result * pbRoutes;
+	pbRoutes = malloc(sizeof(Result__Result));
+	result__result__init(pbRoutes);
+	pbRoutes->n_routes = n_routes;			
+	pbRoutes->routes = calloc(sizeof(Result__Route *),n_routes);
+	for (int i=0;i<n_routes;i++){
+		pbRoutes->routes[i] = malloc(sizeof(Result__Route));
+		Result__Route * r;
+		r = pbRoutes->routes[i];
+		result__route__init(r);
+		r->time = routes[i].time;
+		r->dist = routes[i].dist;
+		r->n_points = routes[i].n_points;
+		r->points = calloc(sizeof(Result__Point *),r->n_points);	
+		for (int j=0; j<r->n_points;j++){
+			r->points[j] = malloc(sizeof(Result__Point));
+			Result__Point * pbPt;
+			struct point_t * pt;
+			pt = routes[i].points + j;
+			pbPt = r->points[j];
+			result__point__init(pbPt);
+
+			pbPt->lat = pt->lat;
+			pbPt->lon = pt->lon;
+			pbPt->height = pt->height;
+			
+			pbPt->departure = pt->departure;
+			pbPt->arrival = pt->arrival;
+			
+			pbPt->verttype = pt->vertType;
+			pbPt->has_vertid = 1;
+			pbPt->vertid = pt->vertId;
+			if (pt->stopIdx != -1){
+				pbPt->has_stopidx = 1;
+				pbPt->stopidx = pt->stopIdx;
+			}
+
+			pbPt->edgetype = pt->edgeType;		
+			if (pt->edgeType == ROUTE_TYPE_WALK ){
+				pbPt->has_wayid = 1;
+				pbPt->wayid = pt->wayId;
+			} else if (pt->edgeType == ROUTE_TYPE_PT){
+				pbPt->has_routeidx = 1;
+				pbPt->routeidx = pt->routeIdx;
+			}	
+				
+		}
+
+
+	}
+
+	struct pbf_result_t pbf_packed;
+	pbf_packed.len = result__result__get_packed_size(pbRoutes);
+	pbf_packed.data = malloc(pbf_packed.len);
+	result__result__pack(pbRoutes,pbf_packed.data);
+
+	printf("Len: %d\n",pbf_packed.len);
+	for (int i=0;i<100;i++){
+		printf("%d ",pbf_packed.data[i]);	
 	}
 
 
@@ -825,6 +889,7 @@ void processFoundMMRoutes(struct search_data_t data, Timetable * tt, struct mmdi
 			}
 		}
 	}
+	return pbf_packed;
 }
 
 struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * dijArray, int fromIdx, int toIdx, int * n_points){
@@ -971,7 +1036,7 @@ struct search_result_t findTransfer(struct search_data_t * data, char * from, ch
 
 }*/
 
-struct search_result_t findPath(struct search_data_t * data,double fromLat, double fromLon, double toLat, double toLon){
+struct pbf_result_t findPath(struct search_data_t * data,double fromLat, double fromLon, double toLat, double toLon){
 	wgs2utm(*data,&fromLon,&fromLat);
 	int fromIdx;
 	fromIdx = findNearestVertex(data->graph,fromLon,fromLat);
@@ -1004,7 +1069,8 @@ struct search_result_t findPath(struct search_data_t * data,double fromLat, doub
 
 
 
-	findMMWay(*data,fromIdx,toIdx,time(NULL),timetable);
+	return findMMWay(*data,fromIdx,toIdx,time(NULL),timetable);
+	/*
 	printf("Found\n");
 	struct search_result_t result;
 	int n_points;
@@ -1024,6 +1090,7 @@ struct search_result_t findPath(struct search_data_t * data,double fromLat, doub
 	}
 	free(dijArray);
 	return result;	
+	*/
 }
 
 
