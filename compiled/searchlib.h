@@ -131,7 +131,7 @@ struct point_t {
  * @field dist Travelled distance
  * @field time Time needed for it
  */
-struct search_result_t {
+struct search_route_t {
 	int n_points;
 	struct point_t * points;
 	double dist;
@@ -139,8 +139,13 @@ struct search_result_t {
 
 };
 
-struct pbf_result_t {
-	int len;
+struct search_result_t {
+	int n_routes;
+	struct search_route_t * routes;	
+}
+
+struct pbf_data_t {
+	long int len;
 	uint8_t * data;	
 };
 
@@ -158,6 +163,7 @@ struct search_data_t{
 	struct config_t conf;
 	Graph__Graph * graph;
 	struct nodeways_t * nodeWays;	
+	Timetable * timetable;
 };
 
 /* @struct bbox_t
@@ -261,7 +267,7 @@ void writeGpxFile(struct search_result_t result,char * filename);
  * @param dataName Name of the file with searching graph
  * @result Search data structure
  */
-struct search_data_t * prepareData(char * configName, char * dataName);
+struct search_data_t * prepareData(char * configName, char * dataName, char * timetableName);
 
 /*! Find path in graph from coorinates to coordinates
  * @param data Search data
@@ -271,10 +277,11 @@ struct search_data_t * prepareData(char * configName, char * dataName);
  * @param toLon End point longitude
  * @result Structure for handli search result
  */
-struct pbf_result_t findPath(struct search_data_t * data,
+struct pbf_data_t findPath(struct search_data_t * data,
 		double fromLat, double fromLon, double toLat, double toLon);
 
-struct pbf_result_t processFoundMMRoutes(struct search_data_t data,Timetable * tt, struct mmdijnode_t * dijArray, int ** vertlut, int fromIdx, int toIdx);
+struct pbf_data_t processFoundMMRoutes(struct search_data_t data, struct mmqueue_t * queue, int fromIdx, int toIdx);
+struct pbf_data_t generatePBF(struct search_result_t * routes, int n_routes);
 struct search_result_t findTransfer(struct search_data_t * data,
 		char * from, char * to);
 

@@ -2,7 +2,7 @@
 from flask import Flask
 from flask import render_template,Response
 from flask import request
-from find import prepareData, findPath, SearchResult, getMapBBox, result_data 
+from find import prepareData, findPath, SearchResult, getMapBBox 
 import json
 import re
 import result_pb2
@@ -14,7 +14,7 @@ deploy_name = "walk.bezva.org"
 
 app = Flask(__name__)
 
-data = prepareData("../config/speeds.yaml","../data/praha-graph.pbf")
+data = prepareData("../config/speeds.yaml","../data/praha-graph.pbf","../../diplomka/mmpf/raptor/tt.bin")
 bbox = getMapBBox(data)
 tt = timetable.Timetable("../../diplomka/mmpf/raptor/tt.bin")
 
@@ -56,7 +56,7 @@ def do_search():
 	result = result_pb2.Result()
 	result.ParseFromString(pbf)
 	print "Routes: {}".format(len(result.routes))
-	#routes = []
+	routes = []
 	for r in result.routes:
 		print "Route len: {}, time: {}".format(r.time,r.dist)
 		coords = []

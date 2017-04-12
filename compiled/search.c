@@ -16,6 +16,7 @@
 
 char dataFileName[] = "../data/praha-graph.pbf";
 char configFileName[] = "../config/speeds.yaml";
+char timetableFileName[] = "/home/jethro/Programy/diplomka/mmpf/raptor/tt.bin";
 
 // Print results of searching way
 void printResults(struct search_result_t result){
@@ -55,14 +56,14 @@ int main (int argc, char ** argv){
 	double tlon;
 	double tlat;
 
-	if (argc==7){
-		data = prepareData(argv[1],argv[2]);
+	if (argc==8){
+		data = prepareData(argv[1],argv[2],argv[3]);
 		flat = atof(argv[3]);
 		flon = atof(argv[4]);
 		tlat = atof(argv[5]);
 		tlon = atof(argv[6]);
 	}else {
-		data = prepareData(configFileName,dataFileName); 
+		data = prepareData(configFileName,dataFileName,timetableFileName); 
 		flat = atof(argv[1]);
 		flon = atof(argv[2]);
 		tlat = atof(argv[3]);
@@ -72,7 +73,7 @@ int main (int argc, char ** argv){
 	printf("Graph has %d vertices and %d edges\n",data->graph->n_vertices,data->graph->n_edges);
 	printMapBBox(*data);
 
-	struct pbf_result_t result;
+	struct pbf_data_t result;
 	result = findPath(data,flat,flon,tlat,tlon);
 	//printResults(result);
 	//writeGpxFile(result,"track.gpx");

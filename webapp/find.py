@@ -4,7 +4,7 @@ from ctypes import *
 
 libsearch = cdll.LoadLibrary("../compiled/libsearch.so")
 class PBFResult(Structure):
-	_fields_ = [("len",c_int),
+	_fields_ = [("len",c_long),
 		("data",POINTER(c_uint8))]
 
 class Point(Structure):
@@ -43,9 +43,6 @@ findPath.argtypes = (c_void_p,c_double,c_double,c_double,c_double)
 getMapBBox = libsearch.getMapBBox
 getMapBBox.restype = BBox
 getMapBBox.argtypes = (c_void_p,)
-
-def result_data(res):
-	return (res.data._type_ * res.len).from_address(addressof(res.data))
 
 
 #

@@ -346,35 +346,43 @@ struct config_t parseConfigFile(char * filename){
 	return conf;
 }
 
-Graph__Graph * loadMap(char * filename){
+struct pbf_data_t readFile(char * filename){
 	FILE * IN;
 	IN = fopen(filename,"r");
+	struct pbf_data_t data;
+	data.len = 0;
 	if (IN==NULL){
-		printf("File opening error\n");	
-		return NULL;
+		printf("File opening error (%s)\n",filename);	
+		return data;
 	}
 	fseek(IN,0,SEEK_END);
-	long int len;
-	len = ftell(IN);
+
+	data.len = ftell(IN);
 	fseek(IN,0,SEEK_SET);
-	uint8_t * buf;
-	buf = (uint8_t *)malloc(len);
-	//printf("Allocated %d MB\n",len>>20);
+	data.data = (uint8_t *)malloc(data.len);
 	size_t read;
-	read = fread(buf,1,len,IN);
-	if (read!=len){
-		printf("Not read all file");
-		return NULL;
+	read = fread(data.data,1,data.len,IN);
+	if (read!=data.len){
+		printf("Not read all file %s\n",filename);
+		data.len = 0;
+		free(data.data);
 	}
 	fclose(IN);
-	
+	return data;
+}
+
+Graph__Graph * loadMap(char * filename){
+	struct pbf_data_t data;
+	data = readFile(filename);
+	if (data.len == 0){
+		return NULL;
+	}	
 	Graph__Graph * graph;
-	graph = graph__graph__unpack(NULL,len,buf);
-	free(buf);
+	graph = graph__graph__unpack(NULL,data.len,data.data);
+	free(data.data);
 
 	return graph;
 }
-
 
 void calcDistances(Graph__Graph * graph){
 	for (int i=0;i<graph->n_edges;i++){
@@ -595,8 +603,7 @@ void freeMMQueue(struct mmqueue_t * queue,int n_vertices){
 	free(queue);
 }
 
-struct pbf_result_t findMMWay(struct search_data_t data, int fromIdx, int toIdx,time_t starttime,
-		Timetable * tt){
+struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,time_t starttime){
 	Graph__Graph * graph;
 	graph = data.graph;
 
@@ -604,7 +611,7 @@ struct pbf_result_t findMMWay(struct search_data_t data, int fromIdx, int toIdx,
 	struct timetable * newtt;
 	time_t date;
 	date = starttime - (starttime%(24*3600));
-	newtt = gen_tt_for_date(tt,date,NULL);
+	newtt = gen_tt_for_date(data.timetable,date,NULL);
 
 	uint64_t * stopslut;
 	int maxraptorid;
@@ -725,23 +732,27 @@ struct pbf_result_t findMMWay(struct search_data_t data, int fromIdx, int toIdx,
 			break;
 		}
 	}
+	free_tt(newtt);
+	return queue;
 
-	return processFoundMMRoutes(data,tt,queue->dijArray,queue->vertlut,fromIdx,toIdx);
-//	free_tt(newtt);
 
-//	return queue->dijArray;
 				
 		
 }
 #undef DIJ_CMP
 #undef DIJ_SWAP
 
-struct pbf_result_t processFoundMMRoutes(struct search_data_t data, Timetable * tt, struct mmdijnode_t * dijArray, int ** vertlut, int fromIdx, int toIdx){
+struct pbf_data_t processFoundMMRoutes(struct search_data_t data, struct mmqueue_t * queue,int fromIdx, int toIdx){
+	struct mmdijnode_t * dijArray;
+	int ** vertlut;
+	dijArray = queue->dijArray;
+	vertlut = queue->vertlut;
+
 	int n_routes;
 	n_routes = GARY_SIZE(vertlut[toIdx]);
 	printf("Found %d routes\n",n_routes);	
-	struct search_result_t * routes;
-	routes = calloc(sizeof(struct search_result_t),n_routes);
+	struct search_route_t * routes;
+	routes = calloc(sizeof(struct search_route_t),n_routes);
 	struct mmdijnode_t * node;
 	for (int i=0;i<n_routes;i++){
 		node = dijArray+vertlut[toIdx][i];
@@ -802,6 +813,35 @@ struct pbf_result_t processFoundMMRoutes(struct search_data_t data, Timetable * 
 		GARY_FREE(points);
 	}
 
+
+	for (int i=0;i<n_routes;i++){
+		char filename[20];
+		sprintf(filename,"track_%d.gpx",i);
+		writeGpxFile(routes[i],filename);	
+	}
+	
+	for (int r=0;r<n_routes;r++){
+		printf("Route %d:\n",r);
+		for (int s=0;s<routes[r].n_points;s++){
+			struct point_t * pt;
+			pt = routes[r].points+s;
+			if (pt->edgeType == OBJTYPE__PUBLIC_TRANSPORT){
+				struct osmId2sIdxNode * stopsNode;
+				int raptor_id;
+
+				stopsNode = osmId2sIdx_find(routes[r].points[s-1].vertId);
+				raptor_id = data.graph->stops[stopsNode->idx]->raptor_id;
+				printf("From: %s ",data.timetable->stops[raptor_id]->name);
+				stopsNode = osmId2sIdx_find(pt->vertId);
+				raptor_id = data.graph->stops[stopsNode->idx]->raptor_id;
+				printf("To: %s\n",data.timetable->stops[raptor_id]->name);
+					
+			}
+		}
+	}
+	return generatePBF(routes,n_routes);
+}
+struct pbf_data_t generatePBF(struct search_route_t * routes, int n_routes){
 	Result__Result * pbRoutes;
 	pbRoutes = malloc(sizeof(Result__Result));
 	result__result__init(pbRoutes);
@@ -853,97 +893,17 @@ struct pbf_result_t processFoundMMRoutes(struct search_data_t data, Timetable * 
 
 	}
 
-	struct pbf_result_t pbf_packed;
+	struct pbf_data_t pbf_packed;
 	pbf_packed.len = result__result__get_packed_size(pbRoutes);
 	pbf_packed.data = malloc(pbf_packed.len);
 	result__result__pack(pbRoutes,pbf_packed.data);
 
 	printf("Len: %d\n",pbf_packed.len);
-	for (int i=0;i<100;i++){
-		printf("%d ",pbf_packed.data[i]);	
-	}
-
-
-	for (int i=0;i<n_routes;i++){
-		char filename[20];
-		sprintf(filename,"track_%d.gpx",i);
-		writeGpxFile(routes[i],filename);	
-	}
-	
-	for (int r=0;r<n_routes;r++){
-		printf("Route %d:\n",r);
-		for (int s=0;s<routes[r].n_points;s++){
-			struct point_t * pt;
-			pt = routes[r].points+s;
-			if (pt->edgeType == OBJTYPE__PUBLIC_TRANSPORT){
-				struct osmId2sIdxNode * stopsNode;
-				int raptor_id;
-
-				stopsNode = osmId2sIdx_find(routes[r].points[s-1].vertId);
-				raptor_id = data.graph->stops[stopsNode->idx]->raptor_id;
-				printf("From: %s ",tt->stops[raptor_id]->name);
-				stopsNode = osmId2sIdx_find(pt->vertId);
-				raptor_id = data.graph->stops[stopsNode->idx]->raptor_id;
-				printf("To: %s\n",tt->stops[raptor_id]->name);
-					
-			}
-		}
-	}
 	return pbf_packed;
-}
-
-struct point_t *  resultsToArray(struct search_data_t data, struct dijnode_t * dijArray, int fromIdx, int toIdx, int * n_points){
-	Graph__Graph * graph;
-	graph = data.graph;
-
-	if (!dijArray[fromIdx].completed){
-		printf("Route not found\n");
-		*n_points = 0;
-		return NULL;
-	}
-
-	int count;
-	count = 1;
-	//printf("Dist: %f\n",dijArray[fromIdx].dist);
-	int idx;
-	idx = fromIdx;
-	while (idx != toIdx){
-		idx = dijArray[idx].fromIdx;
-		count++;
-	}
-
-	//printf("Cnt: %d\n",count);
-	*n_points = count;
 	
-	struct point_t * results;
-	results = malloc(sizeof(struct point_t)*(count+1));
-	count = 0;
-	idx = fromIdx;
-	double lat;
-	double lon;
-	while (idx != toIdx){
-		lat = graph->vertices[idx]->lat;
-		lon = graph->vertices[idx]->lon;
-		utm2wgs(data,&lon,&lat);
-		results[count].lat = lat;
-		results[count].lon = lon;
-		results[count].height = graph->vertices[idx]->height;
-		results[count].edgeType = graph->edges[dijArray[idx].fromEdgeIdx]->type;
-		results[count].wayId = graph->edges[dijArray[idx].fromEdgeIdx]->osmid;
-		idx = dijArray[idx].fromIdx;
-		count++;
-	}
-	lat = graph->vertices[idx]->lat;
-	lon = graph->vertices[idx]->lon;
-	utm2wgs(data,&lon,&lat);
-	results[count].lat = lat;
-	results[count].lon = lon;
-	results[count].height = graph->vertices[idx]->height;
-	results[count].edgeType=-1;	
-	return results;
-}
+} 
 
-void writeGpxFile(struct search_result_t result,char * filename){
+void writeGpxFile(struct search_route_t result,char * filename){
 	if (result.n_points==0){
 		return;
 	}
@@ -962,7 +922,7 @@ void writeGpxFile(struct search_result_t result,char * filename){
 	fclose(OUT);
 }
 
-struct search_data_t * prepareData(char * configName, char * dataName){
+struct search_data_t * prepareData(char * configName, char * dataName, char * timetableName){
 	struct search_data_t * data;
 	data = malloc(sizeof(struct search_data_t));
 	data->pj_wgs84 = pj_init_plus("+proj=longlat +datum=WGS84 +no_defs");
@@ -972,6 +932,11 @@ struct search_data_t * prepareData(char * configName, char * dataName){
 	if (data->graph==NULL){
 		err(1,"Error loading map\n");	
 	}
+	data->timetable = load_timetable(timetableName);
+	if (data->timetable == NULL){
+		err(1,"Error loading timetable");
+	}
+
 	data->nodeWays = makeNodeWays(data->graph);
 	nodesIdx_refresh(data->graph->n_vertices,data->graph->vertices);
 	sId2sIdx_refresh(data->graph->n_stops,data->graph->stops);
@@ -981,10 +946,10 @@ struct search_data_t * prepareData(char * configName, char * dataName){
 }
 
 /*
-struct search_result_t findTransfer(struct search_data_t * data, char * from, char * to){
+struct search_route_t findTransfer(struct search_data_t * data, char * from, char * to){
 	int fromIdx;
 	struct sId2sIdxNode * stopsNode;
-	struct search_result_t result;
+	struct search_route_t result;
 	stopsNode = sId2sIdx_find(from);
 	if (stopsNode == NULL){
 		printf("Stop %s not found\n",from);
@@ -1036,7 +1001,7 @@ struct search_result_t findTransfer(struct search_data_t * data, char * from, ch
 
 }*/
 
-struct pbf_result_t findPath(struct search_data_t * data,double fromLat, double fromLon, double toLat, double toLon){
+struct pbf_data_t findPath(struct search_data_t * data,double fromLat, double fromLon, double toLat, double toLon){
 	wgs2utm(*data,&fromLon,&fromLat);
 	int fromIdx;
 	fromIdx = findNearestVertex(data->graph,fromLon,fromLat);
@@ -1055,24 +1020,18 @@ struct pbf_result_t findPath(struct search_data_t * data,double fromLat, double 
 			data->graph->vertices[toIdx]->height
 			);
 */
-	struct dijnode_t * dijArray;
-	dijArray = prepareDijkstra(data->graph);
 
 	//findWay(*data, dijArray,fromIdx, toIdx);
-	
 
-	Timetable * timetable;
-	timetable = load_timetable("/home/jethro/Programy/diplomka/mmpf/raptor/tt.bin");
-	if (timetable == NULL){
-		err(1,"Cannot load timetable");
-	}
-
-
-
-	return findMMWay(*data,fromIdx,toIdx,time(NULL),timetable);
+	struct mmqueue_t * queue;
+	queue = findMMWay(*data,fromIdx,toIdx,time(NULL));
+	struct pbf_data_t result;
+	result = processFoundMMRoutes(*data,queue,fromIdx,toIdx);
+	freeMMQueue(queue,data->graph->n_vertices);
+	return result;
 	/*
 	printf("Found\n");
-	struct search_result_t result;
+	struct search_route_t result;
 	int n_points;
 	result.points = resultsToArray(*data,dijArray,fromIdx,toIdx,&n_points);
 	result.n_points = n_points;
