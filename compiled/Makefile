@@ -2,7 +2,7 @@ CC=gcc
 PG=
 # Hardcoded paths begin
 LIBOSMPBFPATH=../ext-lib/libosmpbf
-RAPTORPATH=/home/jethro/Programy/diplomka/mmpf/raptor/
+RAPTORPATH=../ext-lib/mmpf/raptor/
 #Hardcoded paths end
 
 INC=-I/usr/include/libucw  -I$(LIBOSMPBFPATH) -I$(RAPTORPATH) -I/usr/include/postgresql

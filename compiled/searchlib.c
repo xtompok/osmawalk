@@ -742,7 +742,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 #undef DIJ_CMP
 #undef DIJ_SWAP
 
-struct pbf_data_t processFoundMMRoutes(struct search_data_t data, struct mmqueue_t * queue,int fromIdx, int toIdx){
+struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mmqueue_t * queue,int fromIdx, int toIdx){
 	struct mmdijnode_t * dijArray;
 	int ** vertlut;
 	dijArray = queue->dijArray;
@@ -831,23 +831,34 @@ struct pbf_data_t processFoundMMRoutes(struct search_data_t data, struct mmqueue
 
 				stopsNode = osmId2sIdx_find(routes[r].points[s-1].vertId);
 				raptor_id = data.graph->stops[stopsNode->idx]->raptor_id;
-				printf("From: %s ",data.timetable->stops[raptor_id]->name);
+				char * timestr;
+				timestr = prt_time(pt->departure);
+				printf("From: %s at %s\n",data.timetable->stops[raptor_id]->name,timestr);
+				free(timestr);
 				stopsNode = osmId2sIdx_find(pt->vertId);
 				raptor_id = data.graph->stops[stopsNode->idx]->raptor_id;
-				printf("To: %s\n",data.timetable->stops[raptor_id]->name);
+				timestr = prt_time(pt->arrival % (24*3600));
+				printf("To: %s at %s by %d\n",data.timetable->stops[raptor_id]->name,timestr,pt->routeIdx);
+				free(timestr);
+				
 					
 			}
 		}
 	}
-	return generatePBF(routes,n_routes);
+	struct search_result_t result;
+	result.routes = routes;
+	result.n_routes = n_routes;
+	return result;
 }
-struct pbf_data_t generatePBF(struct search_route_t * routes, int n_routes){
+struct pbf_data_t generatePBF(struct search_result_t * result){
+	struct search_route_t * routes;
+	routes = result->routes;
 	Result__Result * pbRoutes;
 	pbRoutes = malloc(sizeof(Result__Result));
 	result__result__init(pbRoutes);
-	pbRoutes->n_routes = n_routes;			
-	pbRoutes->routes = calloc(sizeof(Result__Route *),n_routes);
-	for (int i=0;i<n_routes;i++){
+	pbRoutes->n_routes = result->n_routes;			
+	pbRoutes->routes = calloc(sizeof(Result__Route *),result->n_routes);
+	for (int i=0;i<result->n_routes;i++){
 		pbRoutes->routes[i] = malloc(sizeof(Result__Route));
 		Result__Route * r;
 		r = pbRoutes->routes[i];
@@ -1025,10 +1036,13 @@ struct pbf_data_t findPath(struct search_data_t * data,double fromLat, double fr
 
 	struct mmqueue_t * queue;
 	queue = findMMWay(*data,fromIdx,toIdx,time(NULL));
-	struct pbf_data_t result;
+	struct search_result_t result;
 	result = processFoundMMRoutes(*data,queue,fromIdx,toIdx);
+	struct pbf_data_t pbfRes;
+	pbfRes = generatePBF(&result);	
+	
 	freeMMQueue(queue,data->graph->n_vertices);
-	return result;
+	return pbfRes;
 	/*
 	printf("Found\n");
 	struct search_route_t result;

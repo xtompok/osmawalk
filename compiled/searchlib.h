@@ -142,7 +142,7 @@ struct search_route_t {
 struct search_result_t {
 	int n_routes;
 	struct search_route_t * routes;	
-}
+};
 
 struct pbf_data_t {
 	long int len;
@@ -260,7 +260,7 @@ struct point_t *  resultsToArray(struct search_data_t data,
  * @param result Structure handlig search result
  * @param filename Filename of the GPX file
  */
-void writeGpxFile(struct search_result_t result,char * filename);
+void writeGpxFile(struct search_route_t result,char * filename);
 
 /*! Prepare all data for searching 
  * @param configName Name of the configuration file
@@ -280,8 +280,8 @@ struct search_data_t * prepareData(char * configName, char * dataName, char * ti
 struct pbf_data_t findPath(struct search_data_t * data,
 		double fromLat, double fromLon, double toLat, double toLon);
 
-struct pbf_data_t processFoundMMRoutes(struct search_data_t data, struct mmqueue_t * queue, int fromIdx, int toIdx);
-struct pbf_data_t generatePBF(struct search_result_t * routes, int n_routes);
+struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mmqueue_t * queue, int fromIdx, int toIdx);
+struct pbf_data_t generatePBF(struct search_result_t * result);
 struct search_result_t findTransfer(struct search_data_t * data,
 		char * from, char * to);
 

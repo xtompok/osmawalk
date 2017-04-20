@@ -16,10 +16,10 @@
 
 char dataFileName[] = "../data/praha-graph.pbf";
 char configFileName[] = "../config/speeds.yaml";
-char timetableFileName[] = "/home/jethro/Programy/diplomka/mmpf/raptor/tt.bin";
+char timetableFileName[] = "../ext-lib/mmpf/raptor/tt.bin";
 
 // Print results of searching way
-void printResults(struct search_result_t result){
+void printResults(struct search_route_t result){
 	if (result.n_points==0){
 		printf("Route not found\n");
 		return;
