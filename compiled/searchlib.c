@@ -16,159 +16,11 @@
 #include "include/result.pb-c.h"
 
 #include "searchlib.h"
-#include "writegpx.h"
-#include "hashes.c"
+#include "hashes.h"
+#include "utils.h"
+#include "postprocess.h"
 
 #include "libraptor.h"
-
-// Utils
-int utm2wgs(struct search_data_t data,double * lon, double * lat){
-	int res;
-	res= pj_transform(data.pj_utm,data.pj_wgs84,1,1,lon,lat,NULL);
-	*lon = (*lon * 180)/M_PI;
-	*lat = (*lat * 180)/M_PI;
-	return res;
-}
-int wgs2utm(struct search_data_t data,double * lon, double * lat){
-	*lon = (*lon/180)*M_PI;
-	*lat = (*lat/180)*M_PI;
-	return pj_transform(data.pj_wgs84,data.pj_utm,1,1,lon,lat,NULL);
-}
-
-double calcWeight(Graph__Graph * graph, struct config_t conf, Graph__Edge * edge){
-	return calcTime(graph,conf,edge)*conf.penalties[edge->type];
-}
-
-double calcTime(Graph__Graph * graph, struct config_t conf,Graph__Edge * edge){
-	double speed;
-	speed = conf.speeds[edge->type];
-	if (speed==0){
-		printf("Speed not defined for %lld (type %d)\n",edge->osmid,edge->type);
-		return DBL_MAX;
-	}
-	int fromHeight;
-	int toHeight;
-	fromHeight = graph->vertices[edge->vfrom]->height;
-	toHeight = graph->vertices[edge->vto]->height;
-	int dh = toHeight-fromHeight;
-	//return (edge->dist+abs(dh)*(dh>0?conf.upscale:conf.downscale))/speed;
-	if (edge->dist > 100){
-		printf("Dist too big");
-	}
-	return (edge->dist)/speed;
-}
-
-
-struct bbox_t getMapBBox(struct search_data_t * data){
-	Graph__Graph * graph;
-	int64_t minlon;
-	int64_t minlat;
-	int64_t maxlon;
-	int64_t maxlat;
-
-	graph = data->graph;
-	
-	minlon = graph->vertices[0]->lon;
-	maxlon = graph->vertices[0]->lon;
-	minlat = graph->vertices[0]->lat;
-	maxlat = graph->vertices[0]->lat;
-	for (int i=0;i<graph->n_vertices;i++){
-		int64_t lon;
-		int64_t lat;
-		lon = graph->vertices[i]->lon;
-		lat = graph->vertices[i]->lat;
-
-		minlon=(lon<minlon)?lon:minlon;
-		minlat=(lat<minlat)?lat:minlat;
-		maxlon=(lon>maxlon)?lon:maxlon;
-		maxlat=(lat>maxlat)?lat:maxlat;
-	}
-
-	struct bbox_t bbox;
-	bbox.minlon=minlon;
-	bbox.minlat=minlat;
-	bbox.maxlon=maxlon;
-	bbox.maxlat=maxlat;
-	utm2wgs(*data,&bbox.minlon,&bbox.minlat);
-	utm2wgs(*data,&bbox.maxlon,&bbox.maxlat);
-	return bbox;
-}
-
-
-void printMapBBox(struct search_data_t data){
-	Graph__Graph * graph;
-	int64_t minlon;
-	int64_t minlat;
-	int64_t maxlon;
-	int64_t maxlat;
-
-	graph = data.graph;
-	
-	minlon = graph->vertices[0]->lon;
-	maxlon = graph->vertices[0]->lon;
-	minlat = graph->vertices[0]->lat;
-	maxlat = graph->vertices[0]->lat;
-	for (int i=0;i<graph->n_vertices;i++){
-		int64_t lon;
-		int64_t lat;
-		lon = graph->vertices[i]->lon;
-		lat = graph->vertices[i]->lat;
-
-		minlon=(lon<minlon)?lon:minlon;
-		minlat=(lat<minlat)?lat:minlat;
-		maxlon=(lon>maxlon)?lon:maxlon;
-		maxlat=(lat>maxlat)?lat:maxlat;
-	}
-
-	printf("Bounding box in UTM: (%lld,%lld), (%lld,%lld)\n",minlat,minlon,maxlat,maxlon);
-	double fminlon=minlon;
-	double fminlat=minlat;
-	double fmaxlon=maxlon;
-	double fmaxlat=maxlat;
-	utm2wgs(data,&fminlon,&fminlat);
-	utm2wgs(data,&fmaxlon,&fmaxlat);
-	printf("Bounding box in WGS-84: (%lf,%lf), (%lf,%lf)\n",fminlat,fminlon,fmaxlat,fmaxlon);
-}
-
-void nodesIdx_refresh(int n_nodes, Graph__Vertex ** vertices){
-	nodesIdx_cleanup();
-	nodesIdx_init();
-	for (int i=0;i<n_nodes;i++){
-		struct nodesIdxNode * val;
-		val = nodesIdx_new(vertices[i]->osmid);
-		val->idx = i;
-	}
-	printf("%d nodes refreshed\n",n_nodes);
-}
-
-void sId2sIdx_refresh(int n_stops, Graph__Stop ** stops){
-	sId2sIdx_cleanup();
-	sId2sIdx_init();
-	for (int i=0;i<n_stops;i++){
-		struct sId2sIdxNode * val;
-		val = sId2sIdx_new(stops[i]->stop_id);
-		struct nodesIdxNode * nd;
-		nd = nodesIdx_find(stops[i]->osmid);
-		if (nd == NULL){
-			printf("No matching node for node id %lld\n",stops[i]->osmid);
-			continue;
-		}
-		val->idx = nodesIdx_find(stops[i]->osmid)->idx;
-	}
-	printf("%d stops refreshed\n",n_stops);
-}
-
-void osmId2sIdx_refresh(int n_stops, Graph__Stop ** stops){
-	osmId2sIdx_cleanup();
-	osmId2sIdx_init();
-	for (int i=0;i<n_stops;i++){
-		struct osmId2sIdxNode * val;
-		val = osmId2sIdx_new(stops[i]->osmid);
-		val->idx = i;
-	}
-	printf("%d stops refreshed\n",n_stops);
-}
-
 
 // Loading 
 struct config_t parseConfigFile(char * filename){
@@ -653,7 +505,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 		struct osmId2sIdxNode * stopsNode;
 		int64_t osmid;
 		osmid = graph->vertices[queue->vert->idx]->osmid;
-		stopsNode = osmId2sIdx_find(osmid);
+		stopsNode = osmId2sIdx_find2(osmid);
 		if (stopsNode != NULL){
 			char * timestr;
 			timestr = prt_time((queue->vert->time)%(24*3600));
@@ -684,7 +536,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 					penalty = 0;
 					
 					struct nodesIdxNode * nd;
-					nd = nodesIdx_find(osmid);
+					nd = nodesIdx_find2(osmid);
 					if (nd == NULL){
 						printf("No matching node for node id %lld\n",osmid);
 						continue;
@@ -742,197 +594,6 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 #undef DIJ_CMP
 #undef DIJ_SWAP
 
-struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mmqueue_t * queue,int fromIdx, int toIdx){
-	struct mmdijnode_t * dijArray;
-	int ** vertlut;
-	dijArray = queue->dijArray;
-	vertlut = queue->vertlut;
-
-	int n_routes;
-	n_routes = GARY_SIZE(vertlut[toIdx]);
-	printf("Found %d routes\n",n_routes);	
-	struct search_route_t * routes;
-	routes = calloc(sizeof(struct search_route_t),n_routes);
-	struct mmdijnode_t * node;
-	for (int i=0;i<n_routes;i++){
-		node = dijArray+vertlut[toIdx][i];
-		routes[i].time = node->time;
-		routes[i].dist = node->penalty;
-		printf("Route %d: time: %f, penalty: %f\n",i,routes[i].time,routes[i].dist); 
-		struct point_t * points;
-		GARY_INIT(points,0);
-		do {
-			struct point_t * point;
-			point = GARY_PUSH(points);
-			
-			double lon;
-			double lat;
-
-			lon = data.graph->vertices[node->idx]->lon;
-			lat = data.graph->vertices[node->idx]->lat;
-			utm2wgs(data,&lon,&lat);
-			point->lon = lon;
-			point->lat = lat;
-			point->height = data.graph->vertices[node->idx]->height;
-
-			point->departure = node->departed; // TODO shift one point left
-			point->arrival = node->time;
-
-			point->vertType = data.graph->vertices[node->idx]->type;
-			point->vertId = data.graph->vertices[node->idx]->osmid;
-
-			struct osmId2sIdxNode * stopnode;
-			stopnode = osmId2sIdx_find(point->vertId);
-			if (stopnode != NULL ){
-				point->stopIdx = stopnode->idx;
-			} else {
-				point->stopIdx = -1;	
-			}
-
-			//edgeType, wayId, routeIdx
-			if (node->fromEdgeType == ROUTE_TYPE_WALK ){
-				point->edgeType = data.graph->edges[node->fromEdgeIdx]->type;
-				point->wayId = 	data.graph->edges[node->fromEdgeIdx]->osmid;
-			} else if (node->fromEdgeType == ROUTE_TYPE_PT){
-				point->edgeType = OBJTYPE__PUBLIC_TRANSPORT;
-				point->routeIdx = node->fromEdgeIdx; 
-			} else {
-				point->edgeType = OBJTYPE__NONE;	
-			}
-
-			node = dijArray + node->fromIdx;
-				
-		} while (node->idx != fromIdx);
-
-		routes[i].n_points = GARY_SIZE(points);
-		routes[i].points = calloc(sizeof(struct point_t),routes[i].n_points);
-		printf("Points: %d\n",routes[i].n_points);
-		for (int j=0;j<routes[i].n_points;j++){
-			routes[i].points[j]=points[routes[i].n_points-1-j];
-		}
-		GARY_FREE(points);
-	}
-
-
-	for (int i=0;i<n_routes;i++){
-		char filename[20];
-		sprintf(filename,"track_%d.gpx",i);
-		writeGpxFile(routes[i],filename);	
-	}
-	
-	for (int r=0;r<n_routes;r++){
-		printf("Route %d:\n",r);
-		for (int s=0;s<routes[r].n_points;s++){
-			struct point_t * pt;
-			pt = routes[r].points+s;
-			if (pt->edgeType == OBJTYPE__PUBLIC_TRANSPORT){
-				struct osmId2sIdxNode * stopsNode;
-				int raptor_id;
-
-				stopsNode = osmId2sIdx_find(routes[r].points[s-1].vertId);
-				raptor_id = data.graph->stops[stopsNode->idx]->raptor_id;
-				char * timestr;
-				timestr = prt_time(pt->departure);
-				printf("From: %s at %s\n",data.timetable->stops[raptor_id]->name,timestr);
-				free(timestr);
-				stopsNode = osmId2sIdx_find(pt->vertId);
-				raptor_id = data.graph->stops[stopsNode->idx]->raptor_id;
-				timestr = prt_time(pt->arrival % (24*3600));
-				printf("To: %s at %s by %d\n",data.timetable->stops[raptor_id]->name,timestr,pt->routeIdx);
-				free(timestr);
-				
-					
-			}
-		}
-	}
-	struct search_result_t result;
-	result.routes = routes;
-	result.n_routes = n_routes;
-	return result;
-}
-struct pbf_data_t generatePBF(struct search_result_t * result){
-	struct search_route_t * routes;
-	routes = result->routes;
-	Result__Result * pbRoutes;
-	pbRoutes = malloc(sizeof(Result__Result));
-	result__result__init(pbRoutes);
-	pbRoutes->n_routes = result->n_routes;			
-	pbRoutes->routes = calloc(sizeof(Result__Route *),result->n_routes);
-	for (int i=0;i<result->n_routes;i++){
-		pbRoutes->routes[i] = malloc(sizeof(Result__Route));
-		Result__Route * r;
-		r = pbRoutes->routes[i];
-		result__route__init(r);
-		r->time = routes[i].time;
-		r->dist = routes[i].dist;
-		r->n_points = routes[i].n_points;
-		r->points = calloc(sizeof(Result__Point *),r->n_points);	
-		for (int j=0; j<r->n_points;j++){
-			r->points[j] = malloc(sizeof(Result__Point));
-			Result__Point * pbPt;
-			struct point_t * pt;
-			pt = routes[i].points + j;
-			pbPt = r->points[j];
-			result__point__init(pbPt);
-
-			pbPt->lat = pt->lat;
-			pbPt->lon = pt->lon;
-			pbPt->height = pt->height;
-			
-			pbPt->departure = pt->departure;
-			pbPt->arrival = pt->arrival;
-			
-			pbPt->verttype = pt->vertType;
-			pbPt->has_vertid = 1;
-			pbPt->vertid = pt->vertId;
-			if (pt->stopIdx != -1){
-				pbPt->has_stopidx = 1;
-				pbPt->stopidx = pt->stopIdx;
-			}
-
-			pbPt->edgetype = pt->edgeType;		
-			if (pt->edgeType == ROUTE_TYPE_WALK ){
-				pbPt->has_wayid = 1;
-				pbPt->wayid = pt->wayId;
-			} else if (pt->edgeType == ROUTE_TYPE_PT){
-				pbPt->has_routeidx = 1;
-				pbPt->routeidx = pt->routeIdx;
-			}	
-				
-		}
-
-
-	}
-
-	struct pbf_data_t pbf_packed;
-	pbf_packed.len = result__result__get_packed_size(pbRoutes);
-	pbf_packed.data = malloc(pbf_packed.len);
-	result__result__pack(pbRoutes,pbf_packed.data);
-
-	printf("Len: %d\n",pbf_packed.len);
-	return pbf_packed;
-	
-} 
-
-void writeGpxFile(struct search_route_t result,char * filename){
-	if (result.n_points==0){
-		return;
-	}
-	printf("Writing results to file %s\n",filename);
-	FILE * OUT;
-	OUT = fopen(filename,"w");
-	writeGpxHeader(OUT);
-	writeGpxStartTrack(OUT);
-	for (int i=0;i<result.n_points;i++){
-		struct point_t p;
-		p = result.points[i];
-		writeGpxTrkpt(OUT,p.lat,p.lon,p.height);
-	}
-	writeGpxEndTrack(OUT);
-	writeGpxFooter(OUT);
-	fclose(OUT);
-}
-
 struct search_data_t * prepareData(char * configName, char * dataName, char * timetableName){
 	struct search_data_t * data;
 	data = malloc(sizeof(struct search_data_t));
@@ -961,7 +622,7 @@ struct search_route_t findTransfer(struct search_data_t * data, char * from, cha
 	int fromIdx;
 	struct sId2sIdxNode * stopsNode;
 	struct search_route_t result;
-	stopsNode = sId2sIdx_find(from);
+	stopsNode = sId2sIdx_find2(from);
 	if (stopsNode == NULL){
 		printf("Stop %s not found\n",from);
 		result.n_points=0;
@@ -969,7 +630,7 @@ struct search_route_t findTransfer(struct search_data_t * data, char * from, cha
 	}
 	fromIdx = stopsNode->idx;
 
-	stopsNode = sId2sIdx_find(to);
+	stopsNode = sId2sIdx_find2(to);
 	if (stopsNode == NULL){
 		printf("Stop %s not found\n",to);
 		result.n_points=0;
@@ -1038,6 +699,9 @@ struct pbf_data_t findPath(struct search_data_t * data,double fromLat, double fr
 	queue = findMMWay(*data,fromIdx,toIdx,time(NULL));
 	struct search_result_t result;
 	result = processFoundMMRoutes(*data,queue,fromIdx,toIdx);
+	writeGPXForResult(&result);
+	printMMRoutes(data,&result);
+
 	struct pbf_data_t pbfRes;
 	pbfRes = generatePBF(&result);	
 	

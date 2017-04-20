@@ -10,7 +10,7 @@ CFLAGS= -c $(PG)  -ggdb3 -Wall -Wno-format -Wno-unused-function -std=gnu99 -O2 -
 PFLAGS= -E -Wall -std=gnu99 -O3 -march=native -I/usr/include/libucw 
 LDFLAGS= $(PG) -L$(LIBOSMPBFPATH) -L$(RAPTORPATH) -lraptor -lprotobuf-c -lucw-6.5 -lproj -lyaml -lm -lz 
 
-LIBSEARCH_SRC=writegpx.c include/types.pb-c.c include/graph.pb-c.c include/result.pb-c.c
+LIBSEARCH_SRC=writegpx.c postprocess.c utils.c hashes.c include/types.pb-c.c include/graph.pb-c.c include/result.pb-c.c
 LIBSEARCH_OBJ=$(LIBSEARCH_SRC:.c=.o)
 LIBSEARCH_LIB=libsearch.so
 
@@ -29,7 +29,7 @@ TODB_OBJ=$(TODB_SRC:.c=.o)
 TODB_LDFLAGS=
 TODB_EXE=todb
 
-CSVGRAPH_SRC=include/graph.pb-c.c include/types.pb-c.c searchgraph.c
+CSVGRAPH_SRC=include/graph.pb-c.c include/types.pb-c.c searchgraph.c hashes.c
 CSVGRAPH_OBJ=$(CSVGRAPH_SRC:.c=.o)
 CSVGRAPH_LDFLAGS=-lcsv
 CSVGRAPH_EXE=csvtograph

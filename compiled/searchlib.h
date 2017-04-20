@@ -8,11 +8,14 @@
 #include <float.h>
 #include <inttypes.h>
 
-#include <proj_api.h>
 #include <ucw/heap.h>
 #include <yaml.h>
 #include "include/graph.pb-c.h"
 #include "libraptor.h"
+
+#include "postprocess.h"
+#include "utils.h"
+#include "types.h"
 
 /*!
  * @abstract Library for searching path
@@ -21,192 +24,6 @@
  * configuration and repeatedly searching paths.
  */
 
-#define ROUTE_TYPE_NONE 0
-#define ROUTE_TYPE_WALK 1
-#define ROUTE_TYPE_PT 2
-
-/*!
- * @struct config_t
- * @abstract Struct for representing configuration file.
- * @field desc Protocol buffer descriptor for decoding name of th item -> tag of
- * the item
- * @field maxvalue Maximum tag
- * @field speeds Array of speeds, speed for tag i is on the position i
- * @field ratios Array of speed ratios, ratio for tag i is on the position i
- * @field upscale How many horizontal meters equals one vertical meter whe going
- * up
- * @field downscale How many horizontal meters equals one vertical meter whe going
- * down
- */
-struct config_t {
-	ProtobufCEnumDescriptor desc;
-	int maxvalue;
-	double * speeds;
-	double * ratios;
-	double * penalties;
-	double upscale;
-	double downscale;
-//	double maxslope;
-//	double upslopescale;
-//	double downslopescale;
-};
-
-/*! @struct nodeways_t
- * @abstract Struct representing array of ways on which node lies
- * @field n_ways Number of ways
- * @field ways Array of indexes to the array of ways
- */
-struct nodeways_t{
-	int n_ways;
-	int * ways;
-};
-
-/*! @struct dijnode_t
- * @abstract Struct fo representing additional information for vertex when
- * searching with Dijkstra algorithm
- * @field fromIdx From which index we came
- * @field fromEdgeIdx From which edge we came
- * @field reached The vertex was reached
- * @field completed The vertex was completed
- * @filed dist Distance from starting point
- */
-struct dijnode_t {
-	int fromIdx;
-	int fromEdgeIdx;
-	bool reached;
-	bool completed;
-	double dist;
-};
-
-struct mmdijnode_t {
-	int idx;	// Index of vertex
-	int fromIdx;	// Index to previous dijArray item
-	int fromEdgeIdx;
-	char fromEdgeType;
-	bool reached;
-	bool completed;
-	bool majorized;
-	time_t time;
-	time_t departed;
-	double penalty;
-};
-
-struct mmqueue_t {
-	struct mmdijnode_t * dijArray;
-	struct mmdijnode_t * vert;
-	int ** vertlut;
-	int * heap;
-	int n_heap;		
-	
-};
-/*! @struct point_t
- * @abstract Struct for representing point in searched path
- * @field lat Latitude of a point
- * @field lon Longitude of a point
- * @field height Height of a point
- * @field type Type of edge on searched path from this point
- */
-struct point_t {
-	// Location
-	double lat;
-	double lon;
-	int height;
-	// Time
-	time_t departure;
-	time_t arrival;
-	// Vertex features
-	Objtype vertType;	
-	int64_t vertId;
-	int stopIdx;	// Index of the stop in Raptor
-	// Edge features
-	Objtype edgeType;
-	int64_t wayId;
-	int routeIdx;	// Index of the route in Raptor
-};
-
-/* @struct search_result_t
- * @abstract Struct for handling found path
- * @field n_points Number of points on path
- * @field points Points on path
- * @field dist Travelled distance
- * @field time Time needed for it
- */
-struct search_route_t {
-	int n_points;
-	struct point_t * points;
-	double dist;
-	double time;
-
-};
-
-struct search_result_t {
-	int n_routes;
-	struct search_route_t * routes;	
-};
-
-struct pbf_data_t {
-	long int len;
-	uint8_t * data;	
-};
-
-/* @struct search_data_t
- * @abstract Struct for handling loaded graph and speeds configuration
- * @field pj_wgs84 PROJ.4 structure for WGS-84 projection
- * @field pj_utm PROJ.4 structutre for UTM projection
- * @field conf Searching configuration
- * @field graph Searching graph
- * @field nodeWays Array of ways for each vertex, on which vertex lies
- */
-struct search_data_t{
-	projPJ pj_wgs84;
-	projPJ pj_utm;
-	struct config_t conf;
-	Graph__Graph * graph;
-	struct nodeways_t * nodeWays;	
-	Timetable * timetable;
-};
-
-/* @struct bbox_t
- * @abstract Struct for bounding box
- * @field minlon Minimal longitude
- * @field minlat Minimal latitude
- * @field maxlon Maximal longitude
- * @field maxlat Maximal latitude
- */
-struct bbox_t{
-	double minlon;
-	double minlat;
-	double maxlon;
-	double maxlat;		
-};
-
-/*!
- * Converts inplace coordinates from UTM to WGS-84
- * @param data Search data (for projections)
- * @param lon x coordinate
- * @param lat y coordinate
- * @result Result of a PROJ.4 conferting function
- */
-int utm2wgs(struct search_data_t data, double * lon, double * lat);
-/*!
- * Converts inplace coordinates from WGS-84 to UTM
- * @param data Search data (for projections)
- * @param lon Longitude
- * @param lat Latitude
- * @result Result of a PROJ.4 conferting function
- */
-int wgs2utm(struct search_data_t data, double * lon, double * lat);
-/*!
- * Calculate time for going through an edge
- * @param graph Search graph
- * @param conf Speeds config
- * @param edge Pointer to an edge
- * @result Time in seconds
- */
-double calcTime(Graph__Graph * graph,struct config_t conf,Graph__Edge * edge);
-
-void nodesIdx_refresh(int n_nodes, Graph__Vertex ** vertices);
-void stopsIdx_refresh(int n_stops, Graph__Stop ** stops);
 
 /*!
  * Parse config file
@@ -245,23 +62,6 @@ int findNearestVertex(Graph__Graph * graph, double lon, double lat);
  */
 struct dijnode_t *  prepareDijkstra(Graph__Graph * graph);
 
-/*! Convert search results from additions for vertices to array
- * @param data Search data
- * @param dijArray Array with additional structs
- * @param fromIdx Start vertex index
- * @param toIdx End vertex index
- * @param n_points Save number of points of the way to this pointer
- * @result Array of points on the way
- */
-struct point_t *  resultsToArray(struct search_data_t data, 
-		struct dijnode_t * dijArray, 
-		int fromIdx, int toIdx, int * n_points);
-/*! Write searched way to GPX file
- * @param result Structure handlig search result
- * @param filename Filename of the GPX file
- */
-void writeGpxFile(struct search_route_t result,char * filename);
-
 /*! Prepare all data for searching 
  * @param configName Name of the configuration file
  * @param dataName Name of the file with searching graph
@@ -280,8 +80,6 @@ struct search_data_t * prepareData(char * configName, char * dataName, char * ti
 struct pbf_data_t findPath(struct search_data_t * data,
 		double fromLat, double fromLon, double toLat, double toLon);
 
-struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mmqueue_t * queue, int fromIdx, int toIdx);
-struct pbf_data_t generatePBF(struct search_result_t * result);
 struct search_result_t findTransfer(struct search_data_t * data,
 		char * from, char * to);
 

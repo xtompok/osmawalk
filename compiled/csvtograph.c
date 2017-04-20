@@ -9,7 +9,7 @@
 #include <csv.h>
 #include <ucw/gary.h>
 #include "include/graph.pb-c.h"
-#include "hashes.c"
+#include "hashes.h"
 #include "searchgraph.h"
 
 struct parse_t {
@@ -26,16 +26,6 @@ struct parse_t {
 	Graph__Stop * tmpstop;
 };
 
-void nodesIdx_refresh(int n_nodes, Graph__Vertex ** vertices){
-	nodesIdx_cleanup();
-	nodesIdx_init();
-	for (int i=0;i<n_nodes;i++){
-		struct nodesIdxNode * val;
-		val = nodesIdx_new(vertices[i]->osmid);
-		val->idx = i;
-	}
-	printf("%d nodes refreshed\n",n_nodes);
-}
 
 void node_item_cb(void * item,size_t len,void * data){
 	struct parse_t * p_struct;
@@ -152,7 +142,7 @@ void way_item_cb(void * item,size_t len,void * data){
 			p_struct->tmpedge->type = num;
 			break;
 		case 2: //from
-			n = nodesIdx_find(num);
+			n = nodesIdx_find2(num);
 			if (!n){
 				p_struct->ok=0;
 				printf("Wrong from id: %lld\n",num);
@@ -161,7 +151,7 @@ void way_item_cb(void * item,size_t len,void * data){
 			p_struct->tmpedge->vfrom = n->idx;
 			break;
 		case 3: //to
-			n = nodesIdx_find(num);
+			n = nodesIdx_find2(num);
 			if (!n){
 				p_struct->ok=0;
 				printf("Wrong to id: %lld\n",num);
@@ -200,20 +190,20 @@ void direct_item_cb(void * item,size_t len,void * data){
 	num = strtoll((char *)item,NULL,10);
 	switch (p_struct->state) {
 		case 0: //from
-			if (nodesIdx_find(num) == NULL){
+			if (nodesIdx_find2(num) == NULL){
 				printf("Unknown direct node %llu\n",num);
 				p_struct->ok=0;
 				return;
 			}
-			p_struct->tmpedge->vfrom = nodesIdx_find(num)->idx;
+			p_struct->tmpedge->vfrom = nodesIdx_find2(num)->idx;
 			break;
 		case 1: //to
-			if (nodesIdx_find(num) == NULL){
+			if (nodesIdx_find2(num) == NULL){
 				printf("Unknown direct node %llu\n",num);
 				p_struct->ok=0;
 				return;
 			}
-			p_struct->tmpedge->vto = nodesIdx_find(num)->idx;
+			p_struct->tmpedge->vto = nodesIdx_find2(num)->idx;
 			break;
 
 	}
