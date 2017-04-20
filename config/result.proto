@@ -1,0 +1,33 @@
+syntax = "proto2";
+package Result;
+import "types.proto";
+
+message Point {
+	required double lat = 1;
+	required double lon = 2;
+	optional int32 height = 3;
+	required sint64 departure = 4;
+	required sint64 arrival = 5;
+	
+	required objtype verttype = 10;
+	optional sint64 vertid = 11;
+	optional sint32 stopidx = 12;
+	
+	required objtype edgetype = 20;
+	optional sint64 wayid = 21;
+	optional sint32 routeidx = 22;	
+}
+
+
+message Route {
+	required int32 time = 1;
+	required double dist = 2;
+	repeated Point points = 3;
+	optional double penalty = 4;	
+}
+
+message Result {
+	repeated Route routes = 1;	
+}
+
+
