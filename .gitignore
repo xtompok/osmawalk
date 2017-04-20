@@ -73,7 +73,11 @@ gmon-praha.out
 # SRTM files
 /osm/heights.txt
 *.hgt
+*.hgt.zip
 
 # Others
 /text/jakpsat
 /compiled/tree.[ch]
+
+track_*.gpx
+
