@@ -31,6 +31,11 @@ def get_attribute(request,name,convert=None,default=None):
 	return (attr,None)
 	
 def same_line(pt1,pt2):
+	""" Returns false only if both edges are public transport and the line differs"""
+	if pt1.edgetype != objtypes.PUBLIC_TRANSPORT:
+		return True
+	if pt2.edgetype != objtypes.PUBLIC_TRANSPORT:
+		return True
 	return pt1.routeidx == pt2.routeidx
 
 def split_route(route):
@@ -39,10 +44,10 @@ def split_route(route):
 	subroute = [mempt]
 	for pt in route.points:
 		print pt.edgetype
-		if (pt.edgetype != mempt.edgetype or (pt.edgetype == objtypes.PUBLIC_TRANSPORT and not same_line(pt,mempt))) :
+		if (pt.edgetype != mempt.edgetype or not same_line(pt,mempt)):
 			subroutes.append(subroute)
 			subroute = [mempt]
-			mempt = pt
+		mempt = pt
 		subroute.append(pt)
 	subroutes.append(subroute)
 	return subroutes
