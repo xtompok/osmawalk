@@ -6,6 +6,7 @@ from find import prepareData, findPath, SearchResult, getMapBBox
 import json
 import re
 import result_pb2
+import types_pb2 as objtypes
 from gpx import GPX
 import timetable
 
@@ -29,6 +30,82 @@ def get_attribute(request,name,convert=None,default=None):
 			return (default,"Attribute '{}' in wrong format".format(name))
 	return (attr,None)
 	
+def same_line(pt1,pt2):
+	return pt1.routeidx == pt2.routeidx
+
+def split_route(route):
+	subroutes = []
+	mempt = route.points[0]
+	subroute = [mempt]
+	for pt in route.points:
+		print pt.edgetype
+		if (pt.edgetype != mempt.edgetype or (pt.edgetype == objtypes.PUBLIC_TRANSPORT and not same_line(pt,mempt))) :
+			subroutes.append(subroute)
+			subroute = [mempt]
+			mempt = pt
+		subroute.append(pt)
+	subroutes.append(subroute)
+	return subroutes
+
+def routeseg2geojson(rtseg):
+	print "Route segment len:{}".format(len(rtseg))
+	etype = rtseg[1].edgetype
+	properties = {"type":etype}
+	if (etype == objtypes.PUBLIC_TRANSPORT):
+		route = tt.routes[rtseg[1].routeidx]
+		properties["name"] = route.name
+	coords = list(map(lambda pt: [pt.lon,pt.lat,pt.height],rtseg))
+	linestring = {"type": "Feature",
+		"geometry": {"type": "LineString", "coordinates": coords},
+		"properties": properties
+	}
+	return linestring
+
+def point2geojson(coord,properties):
+	point = {"type": "Feature",
+		"geometry": {"type": "Point", "coordinates": coord},
+		"properties":properties
+	}
+	return point
+
+def stopName(routeidx,stopidx):
+	return tt.stops[stopidx].name
+
+def points2geojson(route):
+	points = []
+	for (idx,pt) in enumerate(route.points):
+		if pt.edgetype == objtypes.PUBLIC_TRANSPORT:
+			prevpt = route.points[idx-1]
+			geojson = point2geojson([prevpt.lon,prevpt.lat],
+				{"type":objtypes.PUBLIC_TRANSPORT,
+				"name":stopName(prevpt.routeidx,prevpt.stopidx),
+				"subtype":"departure",
+				"departure":prevpt.departure,
+				"arrival":prevpt.arrival})
+			points.append(geojson)
+			geojson = point2geojson([pt.lon,pt.lat],
+				{"type":objtypes.PUBLIC_TRANSPORT,
+				"name":stopName(pt.routeidx,pt.stopidx),
+				"subtype":"arrival",
+				"departure":pt.departure,
+				"arrival":pt.arrival})
+			points.append(geojson)
+	return points
+		
+	
+def route2geojson(route):
+	subroutes = split_route(route)
+	features = list(map(routeseg2geojson,split_route(route)))
+	features += points2geojson(route)
+	collection = {"type": "FeatureCollection",
+		"features": features,
+		"properties": {"time": route.time,
+			"dist":route.dist,
+			"penalty":route.penalty}
+		}
+	return collection
+
+
 
 @app.route('/')
 def leaflet_page(name=None):
@@ -50,6 +127,7 @@ def do_search():
 		print "Error: {}".format(error)
 
 	print "From lon: {}, from lat: {}, to lon: {}, to lat: {}".format(flon,flat,tlon,tlat)
+	print "./search {} {} {} {}".format(flat,flon,tlat,tlon) 
 	path = findPath(data,flat,flon,tlat,tlon)
 	print "Result size {}B".format(path.len)
 	pbf = "".join(map(chr,path.data[:path.len]))
@@ -59,29 +137,10 @@ def do_search():
 	routes = []
 	for r in result.routes:
 		print "Route len: {}, time: {}".format(r.time,r.dist)
-		coords = []
-		for p in r.points:
-			coords.append((p.lon,p.lat))
-		linestring = {"type": "Feature",
-			"geometry": {"type": "LineString", "coordinates": coords},
-			"properties": {"time":r.time,"dist":r.dist}
-		}
-		return json.dumps(linestring)
+		return json.dumps(route2geojson(r))
 
 	return ""
 
-	if path.n_points == 0:
-		return ""
-	coords = []
-	for i in range(path.n_points):
-		coords.append((path.points[i].lon,path.points[i].lat))
-	print "Points: {}".format(len(coords))
-	
-	linestring = {"type": "Feature",
-			"geometry": {"type": "LineString","coordinates": coords},
-			"properties": {"time":path.time,"dist":path.dist}
-		}
-	return json.dumps(linestring)
 
 @app.route('/gpx')
 def make_gpx():

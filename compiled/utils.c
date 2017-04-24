@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "hashes.h"
 #include <float.h>
+#include <time.h>
 
 int utm2wgs(struct search_data_t data,double * lon, double * lat){
 	int res;
@@ -118,4 +119,19 @@ char * stopNameFromOSMId(struct search_data_t * data,uint64_t osmid){
 	stopsNode = osmId2sIdx_find2(osmid);
 	raptor_id = data->graph->stops[stopsNode->idx]->raptor_id;
 	return data->timetable->stops[raptor_id]->name;
+}
+
+// Source: http://stackoverflow.com/questions/32424125/c-code-to-get-local-time-offset-in-minutes-relative-to-utc
+long tz_offset_second(time_t t) {
+	struct tm local = *localtime(&t);
+	struct tm utc = *gmtime(&t);
+	long diff = ((local.tm_hour - utc.tm_hour) * 60 + (local.tm_min - utc.tm_min))
+			* 60L + (local.tm_sec - utc.tm_sec);
+	int delta_day = local.tm_mday - utc.tm_mday;
+	if ((delta_day == 1) || (delta_day < -1)) {
+		diff += 24L * 60 * 60;
+	} else if ((delta_day == -1) || (delta_day > 1)) {
+		diff -= 24L * 60 * 60;
+	}
+	return diff;
 }

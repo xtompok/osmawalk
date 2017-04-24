@@ -56,7 +56,7 @@ struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mm
 			struct osmId2sIdxNode * stopnode;
 			stopnode = osmId2sIdx_find2(point->vertId);
 			if (stopnode != NULL ){
-				point->stopIdx = stopnode->idx;
+				point->stopIdx = data.graph->stops[stopnode->idx]->raptor_id;
 			} else {
 				point->stopIdx = -1;	
 			}
@@ -168,10 +168,10 @@ struct pbf_data_t generatePBF(struct search_result_t * result){
 			}
 
 			pbPt->edgetype = pt->edgeType;		
-			if (pt->edgeType == ROUTE_TYPE_WALK ){
+			if (0 && pt->edgeType == OBJTYPE__FOREST ){ // TODO: Fix OSM edges
 				pbPt->has_wayid = 1;
 				pbPt->wayid = pt->wayId;
-			} else if (pt->edgeType == ROUTE_TYPE_PT){
+			} else if (pt->edgeType == OBJTYPE__PUBLIC_TRANSPORT){
 				pbPt->has_routeidx = 1;
 				pbPt->routeidx = pt->routeIdx;
 			}	

@@ -494,11 +494,15 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 			continue;
 		}
 
-		if (queue->n_heap%500==0){
-			printf("Heap: %d\n",queue->n_heap);
-		}
 
-		//printf("Vertex: %d, time: %d, penalty: %f\n",vert->idx,vert->time,vert->penalty);
+		/*if (queue->n_heap%500==0){
+			printf("Heap: %d\n",queue->n_heap);
+		}*/
+
+		char * strtime;
+		strtime = prt_time(queue->vert->time%(24*3600));
+		//printf("Vertex: %d, time: %s, penalty: %f\n",queue->vert->idx,strtime,queue->vert->penalty);
+		free(strtime);
 		//printf("DijArray: %d\n",GARY_SIZE(dijArray));
 
 		// Process public transport connections
@@ -509,7 +513,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 		if (stopsNode != NULL){
 			char * timestr;
 			timestr = prt_time((queue->vert->time)%(24*3600));
-			printf("Stop %d found at %s\n",stopsNode->idx,timestr);
+			//printf("Stop %d found at %s\n",stopsNode->idx,timestr);
 			free(timestr);
 
 			struct stop_conns * conns;
@@ -518,7 +522,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 				struct stop_route * r;
 				r = conns->routes+ridx;
 				timestr = prt_time(r->departure);
-				printf("Departure at %s\n",timestr);
+				//printf("Departure at %s\n",timestr);
 				free(timestr);
 				for (int sidx = 0;sidx < r->n_stops;sidx++){
 					int64_t osmid;
@@ -533,7 +537,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 					}
 
 					arrival = r->stops[sidx].arrival;
-					penalty = 0;
+					penalty = 0.1;
 					
 					struct nodesIdxNode * nd;
 					nd = nodesIdx_find2(osmid);
@@ -696,7 +700,7 @@ struct pbf_data_t findPath(struct search_data_t * data,double fromLat, double fr
 	//findWay(*data, dijArray,fromIdx, toIdx);
 
 	struct mmqueue_t * queue;
-	queue = findMMWay(*data,fromIdx,toIdx,time(NULL));
+	queue = findMMWay(*data,fromIdx,toIdx,time(NULL)+tz_offset_second(time(NULL)));
 	struct search_result_t result;
 	result = processFoundMMRoutes(*data,queue,fromIdx,toIdx);
 	writeGPXForResult(&result);

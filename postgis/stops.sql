@@ -2,6 +2,13 @@ DROP TABLE IF EXISTS stops;
 CREATE TABLE stops AS
 	WITH sq AS (
 		SELECT MAX(id) AS max FROM nodes
+	), gtfscnt AS (
+		SELECT COUNT(*) AS cnt	
+		FROM gtfs_stops
+		WHERE stop_id NOT IN (
+			SELECT DISTINCT ref 
+			FROM nodes
+			WHERE ref IS NOT NULL)
 	)
 	SELECT 	row_number() OVER () + sq.max AS id,
 		stop_id,
@@ -19,7 +26,7 @@ CREATE TABLE stops AS
 	
 	UNION
 	
-	SELECT row_number() OVER () + sq.max AS id,
+	SELECT row_number() OVER () + sq.max + gtfscnt.cnt AS id,
 		gs.stop_id,
 		gs.raptor_id,
        		n.lon,
@@ -27,7 +34,7 @@ CREATE TABLE stops AS
 		n.loc,
 	       	-1 AS square1,
 	       	-1 AS square2
-	FROM sq,gtfs_stops AS gs
+	FROM sq,gtfscnt,gtfs_stops AS gs
 	INNER JOIN nodes AS n ON gs.stop_id = n.ref
 ;
 

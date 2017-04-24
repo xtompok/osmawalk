@@ -37,4 +37,6 @@ double calcTime(Graph__Graph * graph,struct config_t conf,Graph__Edge * edge);
 
 char * stopNameFromOSMId(struct search_data_t * data,uint64_t osmid);
 
+long tz_offset_second(time_t t);
+
 #endif

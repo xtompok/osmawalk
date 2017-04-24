@@ -1,0 +1,20 @@
+#leftcol {
+	width: 200px;
+	height: auto;
+	float: left;	
+}
+
+#map{
+	margin-left: 205px;
+}
+
+.stop{
+	margin: 5px;
+	padding: 5px;
+	background-color: YellowGreen;
+}
+.line{
+	margin: 10px;	
+	padding: 5px;
+	background-color: salmon;
+}

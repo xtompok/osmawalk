@@ -30,6 +30,7 @@ class BBox(Structure):
 		("maxlat",c_double)]
 
 prepareData = libsearch.prepareData
+prepareData.argtypes = (c_char_p,c_char_p,c_char_p)
 prepareData.restype = c_void_p
 
 findPath = libsearch.findPath
@@ -43,6 +44,7 @@ findPath.argtypes = (c_void_p,c_double,c_double,c_double,c_double)
 getMapBBox = libsearch.getMapBBox
 getMapBBox.restype = BBox
 getMapBBox.argtypes = (c_void_p,)
+
 
 
 #
