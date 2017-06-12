@@ -29,6 +29,7 @@ BARRIER:
                 - canal
                 - weir
             building: "*"
+            "building:part": yes
             landuse:
                 - allotments
                 - basin
