@@ -9,5 +9,5 @@ CREATE TABLE direct AS
 	direct_ok AS dir
 	INNER JOIN degs AS d1 ON d1.id = dir.id1
 	INNER JOIN degs AS d2 ON d2.id = dir.id2
-	WHERE d1.cnt > d2.cnt AND random() < (5.0/d1.cnt)
+	WHERE d1.cnt >= d2.cnt AND random() < (5.0/d1.cnt)
 ;
