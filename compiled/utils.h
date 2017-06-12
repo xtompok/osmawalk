@@ -3,9 +3,6 @@
 
 #include "types.h"
 
-
-double calcWeight(Graph__Graph * graph, struct config_t conf, Graph__Edge * edge);
-
 struct bbox_t getMapBBox(struct search_data_t * data);
 
 void printMapBBox(struct search_data_t data);
@@ -26,14 +23,6 @@ int utm2wgs(struct search_data_t data, double * lon, double * lat);
  * @result Result of a PROJ.4 conferting function
  */
 int wgs2utm(struct search_data_t data, double * lon, double * lat);
-/*!
- * Calculate time for going through an edge
- * @param graph Search graph
- * @param conf Speeds config
- * @param edge Pointer to an edge
- * @result Time in seconds
- */
-double calcTime(Graph__Graph * graph,struct config_t conf,Graph__Edge * edge);
 
 char * stopNameFromOSMId(struct search_data_t * data,uint64_t osmid);
 

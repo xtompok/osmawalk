@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ucw/gary.h>
-#include "hashes.c"
+#include "hashes.h"
 #include "searchgraph.h"
 #include "searchlib.h"
 
@@ -47,7 +47,7 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 	int nodescnt;
 
 	nodescnt=0;
-	queue[0] = nodesIdx_find(graph->vertices[0]->osmid)->idx;
+	queue[0] = nodesIdx_find2(graph->vertices[0]->osmid)->idx;
 
 	while((nodescnt < graph->n_vertices/2)){
 		lastIdx = 0;
@@ -149,7 +149,7 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 	int stopscnt;
 	stopscnt = 0;
 	for (int i=0;i<graph->n_stops;i++){
-		if (nodesIdx_find(graph->stops[i]->osmid)!=NULL){
+		if (nodesIdx_find2(graph->stops[i]->osmid)!=NULL){
 			stopscnt++;
 		}
 	}
@@ -161,7 +161,7 @@ void largestComponent(Graph__Graph * graph, struct vertexedges_t *  vertexEdges)
 	for (int i=0;i<graph->n_stops;i++){
 		Graph__Stop * stop;
 		stop = graph->stops[i];
-		if (nodesIdx_find(stop->osmid)==NULL){
+		if (nodesIdx_find2(stop->osmid)==NULL){
 			continue;
 		}
 		newStops[newIdx]=stop;

@@ -5,12 +5,12 @@ LIBOSMPBFPATH=../ext-lib/libosmpbf
 RAPTORPATH=../ext-lib/mmpf/raptor/
 #Hardcoded paths end
 
-INC=-I/usr/include/libucw  -I$(LIBOSMPBFPATH) -I$(RAPTORPATH) -I/usr/include/postgresql
+INC=-I/usr/include/libucw -I/usr/local/include/  -I$(LIBOSMPBFPATH) -I$(RAPTORPATH) -I/usr/include/postgresql
 CFLAGS= -c $(PG)  -ggdb3 -Wall -Wno-format -Wno-unused-function -std=gnu99 -O2 -march=native $(INC)
 PFLAGS= -E -Wall -std=gnu99 -O3 -march=native -I/usr/include/libucw 
 LDFLAGS= $(PG) -L$(LIBOSMPBFPATH) -L$(RAPTORPATH) -lraptor -lprotobuf-c -lucw-6.5 -lproj -lyaml -lm -lz 
 
-LIBSEARCH_SRC=writegpx.c postprocess.c utils.c hashes.c include/types.pb-c.c include/graph.pb-c.c include/result.pb-c.c
+LIBSEARCH_SRC=writegpx.c postprocess.c utils.c hashes.c mmqueue.c config.c penalty.c include/types.pb-c.c include/graph.pb-c.c include/result.pb-c.c
 LIBSEARCH_OBJ=$(LIBSEARCH_SRC:.c=.o)
 LIBSEARCH_LIB=libsearch.so
 
