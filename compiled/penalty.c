@@ -2,11 +2,13 @@
 #include <stdio.h>
 
 #include "penalty.h"
-double calcTransportPenalty(Graph__Graph * graph, struct config_t conf, struct stop_route * r){
-	return 0.1;
+double calcTransportPenalty(Graph__Graph * graph, struct config_t conf, struct stop_route * r,time_t arrival){
+//	printf("Transport penalty:(%ld %ld %f\n",arrival,r->departure,(arrival-r->departure));
+	return (arrival-r->departure);
 }
 
 double calcWalkPenalty(Graph__Graph * graph, struct config_t conf, Graph__Edge * edge){
+//	printf("Walk penalty: %f\n", calcTime(graph,conf,edge)*conf.penalties[edge->type]);
 	return calcTime(graph,conf,edge)*conf.penalties[edge->type];
 }
 

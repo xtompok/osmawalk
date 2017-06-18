@@ -10,20 +10,15 @@
 
 
 struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mmqueue_t * queue,int fromIdx, int toIdx){
-	struct mmdijnode_t * dijArray;
-	int ** vertlut;
-	dijArray = queue->dijArray;
-	vertlut = queue->vertlut;
-
 	int n_routes;
-	n_routes = GARY_SIZE(vertlut[toIdx]);
+	n_routes = GARY_SIZE(queue->vertlut[toIdx]);
 	printf("Found %d routes\n",n_routes);	
 	struct search_route_t * routes;
 	routes = calloc(sizeof(struct search_route_t),n_routes);
 	struct mmdijnode_t * node;
 	for (int i=0;i<n_routes;i++){
-		node = dijArray+vertlut[toIdx][i];
-		routes[i].time = node->time;
+		node = queue->vertlut[toIdx][i];
+		routes[i].time = node->arrival;
 		routes[i].dist = node->penalty;
 		printf("Route %d: time: %f, penalty: %f\n",i,routes[i].time,routes[i].dist); 
 		struct point_t * points;
@@ -37,44 +32,30 @@ struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mm
 			double lon;
 			double lat;
 
-			lon = data.graph->vertices[node->idx]->lon;
-			lat = data.graph->vertices[node->idx]->lat;
+			lon = node->osmvert->lon;
+			lat = node->osmvert->lat;
 			utm2wgs(data,&lon,&lat);
 			point->lon = lon;
 			point->lat = lat;
-			point->height = data.graph->vertices[node->idx]->height;
+			point->height = node->osmvert->height;
 
+			point->arrival = node->arrival;
 			if (memdepart != -1){
 				point->departure = memdepart; 
+			}else{
+				point->departure = point->arrival;
 			}
-			memdepart = node->departed;
-			point->arrival = node->time;
-
-			point->vertType = data.graph->vertices[node->idx]->type;
-			point->vertId = data.graph->vertices[node->idx]->osmid;
-
-			struct osmId2sIdxNode * stopnode;
-			stopnode = osmId2sIdx_find2(point->vertId);
-			if (stopnode != NULL ){
-				point->stopIdx = data.graph->stops[stopnode->idx]->raptor_id;
-			} else {
-				point->stopIdx = -1;	
+			if (node->edge && node->edge->edge_type == EDGE_TYPE_PT){
+				memdepart = node->edge->ptedge->departure;	
 			}
 
-			//edgeType, wayId, routeIdx
-			if (node->fromEdgeType == ROUTE_TYPE_WALK ){
-				point->edgeType = data.graph->edges[node->fromEdgeIdx]->type;
-				point->wayId = 	data.graph->edges[node->fromEdgeIdx]->osmid;
-			} else if (node->fromEdgeType == ROUTE_TYPE_PT){
-				point->edgeType = OBJTYPE__PUBLIC_TRANSPORT;
-				point->routeIdx = node->fromEdgeIdx; 
-			} else {
-				point->edgeType = OBJTYPE__NONE;	
-			}
+			point->osmvert = node->osmvert;
+			point->stop = node->stop;
+			point->edge = node->edge;
 
-			node = dijArray + node->fromIdx;
+			node = node->prev;
 				
-		} while (node->idx != fromIdx);
+		} while (node != NULL);
 
 		routes[i].n_points = GARY_SIZE(points);
 		routes[i].points = calloc(sizeof(struct point_t),routes[i].n_points);
@@ -110,16 +91,18 @@ void printMMRoutes(struct search_data_t * data,struct search_result_t * res){
 			} else {
 				prevpt = NULL;	
 			}
-			if (pt->edgeType == OBJTYPE__PUBLIC_TRANSPORT){
+			if (pt->edge && pt->edge->edge_type == EDGE_TYPE_PT){
 				char * timestr;
 				char * stopstr;
 				timestr = prt_time(prevpt->departure);
-				stopstr = stopNameFromOSMId(data,prevpt->vertId);
-				printf("From: %s at %s\n",stopstr,timestr);
+				//stopstr = stopNameFromOSMId(data,prevpt->vertId);
+				//printf("From: %s at %s\n",stopstr,timestr);
+				printf("From: %s at %s\n",prevpt->stop->name,timestr);
 				free(timestr);
 				timestr = prt_time(pt->arrival % (24*3600));
-				stopstr = stopNameFromOSMId(data,pt->vertId);
-				printf("To: %s at %s by %d\n",stopstr,timestr,pt->routeIdx);
+				//stopstr = stopNameFromOSMId(data,pt->vertId);
+				//printf("To: %s at %s by %d\n",stopstr,timestr,pt->routeIdx);
+				printf("To: %s at %s by %s\n",pt->stop->name,timestr,pt->edge->ptedge->route->name);
 				free(timestr);
 			}
 		}
@@ -159,7 +142,7 @@ struct pbf_data_t generatePBF(struct search_result_t * result){
 			pbPt->departure = pt->departure;
 			pbPt->arrival = pt->arrival;
 			
-			pbPt->verttype = pt->vertType;
+			/*pbPt->verttype = pt->vertType;
 			pbPt->has_vertid = 1;
 			pbPt->vertid = pt->vertId;
 			if (pt->stopIdx != -1){
@@ -174,7 +157,7 @@ struct pbf_data_t generatePBF(struct search_result_t * result){
 			} else if (pt->edgeType == OBJTYPE__PUBLIC_TRANSPORT){
 				pbPt->has_routeidx = 1;
 				pbPt->routeidx = pt->routeIdx;
-			}	
+			}*/	
 				
 		}
 

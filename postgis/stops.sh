@@ -1,7 +1,7 @@
 #!/bin/bash
 
 USERNAME=$USER
-RAPTOR_DIR=~/Programy/diplomka/mmpf/raptor/
+RAPTOR_DIR=../ext-lib/mmpf/raptor/
 OSMWALKDB=osmwalk-prepare
 
 COMMAND="TRUNCATE TABLE gtfs_stops"

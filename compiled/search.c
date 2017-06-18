@@ -28,7 +28,7 @@ void printResults(struct search_route_t result){
 	for (int i=0;i<result.n_points;i++){
 		struct point_t p;
 		p = result.points[i];
-		printf("%f,%f,%d,%d,%lld\n",p.lat,p.lon,p.height,p.edgeType,p.wayId);
+		printf("%f,%f,%d,%d,%lld\n",p.lat,p.lon,p.height,-1,-1);
 	}
 }
 

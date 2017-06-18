@@ -129,27 +129,6 @@ struct dijnode_t {
 	double dist;
 };
 
-struct mmdijnode_t {
-	int idx;	// Index of vertex
-	int fromIdx;	// Index to previous dijArray item
-	int fromEdgeIdx;
-	char fromEdgeType;
-	bool reached;
-	bool completed;
-	bool majorized;
-	time_t time;
-	time_t departed;
-	double penalty;
-};
-
-struct mmqueue_t {
-	struct mmdijnode_t * dijArray;
-	struct mmdijnode_t * vert;
-	int ** vertlut;
-	int * heap;
-	int n_heap;		
-	
-};
 /*! @struct point_t
  * @abstract Struct for representing point in searched path
  * @field lat Latitude of a point
@@ -166,13 +145,10 @@ struct point_t {
 	time_t departure;
 	time_t arrival;
 	// Vertex features
-	Objtype vertType;	
-	int64_t vertId;
-	int stopIdx;	// Index of the stop in Raptor
+	Graph__Vertex * osmvert;
+	Stop * stop;
 	// Edge features
-	Objtype edgeType;
-	int64_t wayId;
-	int routeIdx;	// Index of the route in Raptor
+	struct edge_t * edge;
 };
 
 /* @struct search_result_t

@@ -3,16 +3,55 @@
 
 #include "include/graph.pb-c.h"
 #include <time.h>
+#include <ucw/mempool.h>
 #include "types.h"
 
-void prepareMMNode(struct mmdijnode_t * node,int idx,int fromDijIdx,int fromEdgeIdx,Objtype fromEdgeType,time_t time,time_t departed,double penalty);
-void addFirstNodeToQueue(struct mmqueue_t * q,int idx,time_t time);
+struct ptedge_t{
+	uint64_t departure;
+	Route * route;
+};
+
+#define EDGE_TYPE_WALK 1
+#define EDGE_TYPE_PT 2
+struct edge_t {
+	char edge_type;
+	union {
+		Graph__Edge * osmedge;
+		struct ptedge_t * ptedge;
+	};
+};
+
+struct mmdijnode_t {
+	struct mmdijnode_t * prev;
+	Graph__Vertex * osmvert;
+	Stop * stop;
+	struct edge_t * edge;
+	bool reached;
+	bool completed;
+	bool majorized;
+	time_t arrival;
+	double penalty;
+};
+
+struct mmqueue_t {
+	struct mempool * pool;
+	Graph__Graph * graph;
+	//struct mmdijnode_t * dijArray;
+	struct mmdijnode_t * vert;
+	struct mmdijnode_t *** vertlut;
+	struct mmdijnode_t ** heap;
+	int n_heap;		
+	
+};
+
+void prepareMMNode(struct mmdijnode_t * node);
+void addFirstNodeToQueue(struct mmqueue_t * q,Graph__Vertex * v, Stop * s, uint64_t time);
 void addNodeToQueue(struct mmqueue_t * q,
-		int idx,
-		int fromEdgeIdx,
-		char fromEdgeType,
-		time_t time,
-		time_t departed,
+		struct mmdijnode_t * prev,
+		Graph__Vertex * v,
+		Stop * s,
+		struct edge_t * e,
+		uint64_t arrival,
 		double penalty);
 
 struct mmdijnode_t * getQueueMin(struct mmqueue_t * q);

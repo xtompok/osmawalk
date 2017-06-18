@@ -2,6 +2,7 @@
 #define POSTPROCESS_H
 
 #include "types.h"
+#include "mmqueue.h"
 
 struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mmqueue_t * queue,int fromIdx, int toIdx);
 

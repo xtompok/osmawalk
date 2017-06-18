@@ -176,6 +176,9 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 	}
 	stopslut = calloc(sizeof(uint64_t),maxraptorid+1);
 	for (int i=0;i < graph->n_stops;i++){
+		if (graph->stops[i]->raptor_id!=data.timetable->stops[i]->id){
+			printf("ERROR: %lld vs. %d at %d\n",graph->stops[i]->raptor_id,data.timetable->stops[i]->id,i);	
+		}
 		stopslut[graph->stops[i]->raptor_id] = graph->stops[i]->osmid;
 	}
 	
@@ -185,7 +188,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 	struct mmqueue_t * queue;
 	queue = createMMQueue(graph);
 
-	addFirstNodeToQueue(queue,fromIdx,starttime);
+	addFirstNodeToQueue(queue,graph->vertices[fromIdx],NULL,starttime); //TODO: pridat i zastavku, pokud je
 
 	int best_time;
 	best_time = -1;
@@ -201,24 +204,22 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 		}*/
 
 		char * strtime;
-		strtime = prt_time(queue->vert->time%(24*3600));
+		strtime = prt_time(queue->vert->arrival%(24*3600));
 		//printf("Vertex: %d, time: %s, penalty: %f\n",queue->vert->idx,strtime,queue->vert->penalty);
 		free(strtime);
 		//printf("DijArray: %d\n",GARY_SIZE(dijArray));
 
 		// Process public transport connections
-		struct osmId2sIdxNode * stopsNode;
-		int64_t osmid;
-		osmid = graph->vertices[queue->vert->idx]->osmid;
-		stopsNode = osmId2sIdx_find2(osmid);
-		if (stopsNode != NULL){
+		if (queue->vert->stop != NULL){
 			char * timestr;
-			timestr = prt_time((queue->vert->time)%(24*3600));
+			timestr = prt_time((queue->vert->arrival)%(24*3600));
 			//printf("Stop %d found at %s\n",stopsNode->idx,timestr);
 			free(timestr);
 
 			struct stop_conns * conns;
-			conns = search_stop_conns(newtt,graph->stops[stopsNode->idx]->raptor_id,queue->vert->time%(24*3600));
+			printf("%p\n",queue);
+			printf("Id: \n",queue->vert->stop->id);
+			conns = search_stop_conns(newtt,queue->vert->stop->id,queue->vert->arrival%(24*3600));
 			for (int ridx = 0; ridx < conns->n_routes; ridx++){
 				struct stop_route * r;
 				r = conns->routes+ridx;
@@ -229,7 +230,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 					int64_t osmid;
 					time_t arrival;
 
-					osmid = stopslut[r->stops[sidx].to];
+					osmid = stopslut[r->stops[sidx].to->id];
 					
 					// Stop not in map area
 					if(osmid == 0){
@@ -240,9 +241,9 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 					double penalty;
 					penalty = 0;
 					
-					//penalty += calcPointPenalty(graph,data.config,graph->vertices[queue->vert->idx]);
+					//penalty += calcPointPenalty(graph,data.config,graph->vertices[queue->vert->osmvert->idx]);
 					//penalty += calcWaitPenalty(graph,data.config,TODO: way type,TODO time);
-					penalty += calcTransportPenalty(graph,data.conf,r);
+					penalty += calcTransportPenalty(graph,data.conf,r,arrival);
 					//penalty += calcChangePenalty(graph,data.conf,q->vert->fromEdgeType,way);	
 					
 					struct nodesIdxNode * nd;
@@ -251,7 +252,14 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 						printf("No matching node for node id %lld\n",osmid);
 						continue;
 					}
-					addNodeToQueue(queue,nd->idx,r->id,ROUTE_TYPE_PT,arrival,r->departure,queue->vert->penalty + penalty);
+					struct edge_t * e;
+					e = malloc(sizeof(struct edge_t));
+					e->edge_type = EDGE_TYPE_PT;
+					e->ptedge = malloc(sizeof(struct ptedge_t));
+					e->ptedge->route = r->pbroute;
+					e->ptedge->departure = r->departure;
+					// TODO: Add stop properties
+					addNodeToQueue(queue,queue->vert,graph->vertices[nd->idx],r->stops[sidx].to,e,arrival,queue->vert->penalty + penalty);
 				}
 					
 			}
@@ -259,11 +267,11 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 		}
 
 		// Process walk connections	
-		for (int i=0;i<nodeways[queue->vert->idx].n_ways;i++){	
+		for (int i=0;i<nodeways[queue->vert->osmvert->idx].n_ways;i++){	
 			Graph__Edge * way;
-			way = graph->edges[nodeways[queue->vert->idx].ways[i]];
+			way = graph->edges[nodeways[queue->vert->osmvert->idx].ways[i]];
 			int wayend;
-			if (way->vfrom == queue->vert->idx){
+			if (way->vfrom == queue->vert->osmvert->idx){
 				wayend = way->vto;	
 			} else {
 				wayend = way->vfrom;
@@ -271,7 +279,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 			double penalty;
 			penalty = 0;
 			
-			//penalty += calcPointPenalty(graph,data.config,graph->vertices[queue->vert->idx]);
+			//penalty += calcPointPenalty(graph,data.config,graph->vertices[queue->vert->osmvert->idx]);
 			penalty += calcWalkPenalty(graph,data.conf,way);
 			//penalty += calcChangePenalty(graph,data.conf,q->vert->fromEdgeType,way);	
 
@@ -279,20 +287,41 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 			int time;
 			time = calcTime(graph,data.conf,way);
 
-			addNodeToQueue(queue,wayend,nodeways[queue->vert->idx].ways[i],ROUTE_TYPE_WALK,
-				queue->vert->time + time,0,queue->vert->penalty + penalty);
+
+			struct edge_t * e;
+			e = malloc(sizeof(struct edge_t));
+			e->edge_type = EDGE_TYPE_WALK;
+			e->osmedge = way;
+
+			struct osmId2sIdxNode * stopsNode;
+			int64_t osmid;
+			osmid = graph->vertices[wayend]->osmid;
+			stopsNode = osmId2sIdx_find2(osmid);
+			Stop * stop;
+			if (stopsNode){
+				stop = data.timetable->stops[stopsNode->idx];
+			} else {
+				stop = NULL;
+			}
+			/*printf("queue: %p\n",queue);
+			
+			if (stop != NULL){
+				printf("stop id: %d\n",stop->id);			
+			}*/
+			addNodeToQueue(queue,queue->vert,graph->vertices[wayend],stop,e,queue->vert->arrival + time,queue->vert->penalty + penalty);
+
 		}
 
 
 		queue->vert->completed = true;
-		if (best_time == -1 && queue->vert->idx == toIdx){
+		if (best_time == -1 && queue->vert->osmvert->idx == toIdx){
 			printf("Found path");
-			best_time = queue->vert->time-starttime;
+			best_time = queue->vert->arrival-starttime;
 		}
 
 		// Break if connection is too long
 		if ((best_time != -1) && 
-			((queue->vert->time-starttime) > 1.5*best_time)){
+			((queue->vert->arrival-starttime) > 1.5*best_time)){
 			printf("Path too long, exitting.");
 			
 			break;

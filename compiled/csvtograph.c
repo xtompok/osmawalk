@@ -321,6 +321,10 @@ int main (int argc, char ** argv){
 			graph->n_edges,
 			graph->n_vertices,
 			graph->n_stops);
+	for (int i=0;i<graph->n_vertices;i++){
+		graph->vertices[i]->idx = i;
+	}
+	
 	saveSearchGraph(graph,"../data/postgis-graph.pbf");
 
 

@@ -9,7 +9,7 @@
 //double calcPointPenalty(graph,data.conf,point
 
 double calcWalkPenalty(Graph__Graph * graph, struct config_t conf, Graph__Edge * edge);
-double calcTransportPenalty(Graph__Graph * graph, struct config_t conf, struct stop_route * r);
+double calcTransportPenalty(Graph__Graph * graph, struct config_t conf, struct stop_route * r,time_t arrival);
 
 /*!
  * Calculate time for going through an edge

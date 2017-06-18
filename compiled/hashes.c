@@ -105,7 +105,7 @@ void osmId2sIdx_refresh(int n_stops, Graph__Stop ** stops){
 	for (int i=0;i<n_stops;i++){
 		struct osmId2sIdxNode * val;
 		val = osmId2sIdx_new(stops[i]->osmid);
-		val->idx = i;
+		val->idx = stops[i]->raptor_id;
 	}
 	printf("%d stops refreshed\n",n_stops);
 }

@@ -16,6 +16,7 @@
 #include "postprocess.h"
 #include "utils.h"
 #include "types.h"
+#include "mmqueue.h"
 
 /*!
  * @abstract Library for searching path
