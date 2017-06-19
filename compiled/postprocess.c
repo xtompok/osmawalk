@@ -141,23 +141,42 @@ struct pbf_data_t generatePBF(struct search_result_t * result){
 			
 			pbPt->departure = pt->departure;
 			pbPt->arrival = pt->arrival;
-			
-			/*pbPt->verttype = pt->vertType;
-			pbPt->has_vertid = 1;
-			pbPt->vertid = pt->vertId;
-			if (pt->stopIdx != -1){
-				pbPt->has_stopidx = 1;
-				pbPt->stopidx = pt->stopIdx;
-			}
+				
+			pbPt->osmvert = malloc(sizeof(Graph__Vertex));
+			graph__vertex__init(pbPt->osmvert);
 
-			pbPt->edgetype = pt->edgeType;		
-			if (0 && pt->edgeType == OBJTYPE__FOREST ){ // TODO: Fix OSM edges
-				pbPt->has_wayid = 1;
-				pbPt->wayid = pt->wayId;
-			} else if (pt->edgeType == OBJTYPE__PUBLIC_TRANSPORT){
-				pbPt->has_routeidx = 1;
-				pbPt->routeidx = pt->routeIdx;
-			}*/	
+			pbPt->osmvert->osmid = pt->osmvert->osmid ;
+			pbPt->osmvert->lat = pt->osmvert->lat ;
+			pbPt->osmvert->lon = pt->osmvert->lon ;
+			pbPt->osmvert->type = pt->osmvert->type ;
+			pbPt->osmvert->height = pt->osmvert->height ;
+			pbPt->osmvert->idx = pt->osmvert->idx ;
+
+			if (pt->stop != NULL){
+				pbPt->stop = malloc(sizeof(Result__Stop));
+				result__stop__init(pbPt->stop);
+				pbPt->stop->name = malloc(strlen(pt->stop->name));
+				strcpy(pbPt->stop->name,pt->stop->name);
+				// TODO stop id 
+			}
+			if (pt->edge && pt->edge->edge_type == EDGE_TYPE_WALK){
+				pbPt->edgetype = RESULT__EDGE_TYPE__WALK;
+				pbPt->walkedge = malloc(sizeof(Graph__Edge));
+				graph__edge__init(pbPt->walkedge);
+				pbPt->walkedge->idx = pt->edge->osmedge->idx ;
+				pbPt->walkedge->osmid = pt->edge->osmedge->osmid ;
+				pbPt->walkedge->crossing = pt->edge->osmedge->crossing ;
+				pbPt->walkedge->type = pt->edge->osmedge->type ;
+				// TODO other properties
+			
+			}else if (pt->edge && pt->edge->edge_type == EDGE_TYPE_PT){
+				pbPt->edgetype = RESULT__EDGE_TYPE__PT;	
+				pbPt->ptedge = malloc(sizeof(Result__PTEdge));
+				result__ptedge__init(pbPt->ptedge);
+				pbPt->ptedge->name = pt->edge->ptedge->route->name;
+				//pbPr->ptedge->id = pt->edge->ptedge->id;
+			}
+			
 				
 		}
 

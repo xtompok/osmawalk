@@ -32,11 +32,11 @@ def get_attribute(request,name,convert=None,default=None):
 	
 def same_line(pt1,pt2):
 	""" Returns false only if both edges are public transport and the line differs"""
-	if pt1.edgetype != objtypes.PUBLIC_TRANSPORT:
+	if pt1.edgetype != result_pb2.PT:
 		return True
-	if pt2.edgetype != objtypes.PUBLIC_TRANSPORT:
+	if pt2.edgetype != result_pb2.PT:
 		return True
-	return pt1.routeidx == pt2.routeidx
+	return pt1.ptedge.name == pt2.ptedge.name #TODO use ids
 
 def split_route(route):
 	subroutes = []
@@ -54,10 +54,16 @@ def split_route(route):
 
 def routeseg2geojson(rtseg):
 	print "Route segment len:{}".format(len(rtseg))
-	etype = rtseg[1].edgetype
+	if (rtseg[1].edgetype == result_pb2.WALK):
+		etype = rtseg[1].walkedge.type
+	elif (rtseg[1].edgetype == result_pb2.PT):
+		etype = objtypes.PUBLIC_TRANSPORT
+	else:
+		etype = objtypes.NONE
 	properties = {"type":etype}
-	if (etype == objtypes.PUBLIC_TRANSPORT):
-		route = tt.routes[rtseg[1].routeidx]
+	if (rtseg[1].edgetype == result_pb2.PT):
+		print "Route name: ",rtseg[1].ptedge.name
+		route = rtseg[1].ptedge
 		properties["name"] = route.name
 	coords = list(map(lambda pt: [pt.lon,pt.lat,pt.height],rtseg))
 	linestring = {"type": "Feature",
@@ -79,18 +85,18 @@ def stopName(routeidx,stopidx):
 def points2geojson(route):
 	points = []
 	for (idx,pt) in enumerate(route.points):
-		if pt.edgetype == objtypes.PUBLIC_TRANSPORT:
+		if pt.edgetype == result_pb2.PT:
 			prevpt = route.points[idx-1]
 			geojson = point2geojson([prevpt.lon,prevpt.lat],
 				{"type":objtypes.PUBLIC_TRANSPORT,
-				"name":stopName(prevpt.routeidx,prevpt.stopidx),
+				"name":prevpt.stop.name,
 				"subtype":"departure",
 				"departure":prevpt.departure,
 				"arrival":prevpt.arrival})
 			points.append(geojson)
 			geojson = point2geojson([pt.lon,pt.lat],
 				{"type":objtypes.PUBLIC_TRANSPORT,
-				"name":stopName(pt.routeidx,pt.stopidx),
+				"name":pt.stop.name,
 				"subtype":"arrival",
 				"departure":pt.departure,
 				"arrival":pt.arrival})

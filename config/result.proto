@@ -1,6 +1,23 @@
 syntax = "proto2";
 package Result;
 import "types.proto";
+import "graph.proto";
+
+enum edge_type {
+	NONE = 0;
+	WALK = 1;
+	PT = 2;	
+}
+
+message Stop {
+	required string name = 1;
+	optional string id = 2;
+}
+
+message PTEdge {
+	required string name = 1;
+	optional int32 id = 2;	
+}
 
 message Point {
 	required double lat = 1;
@@ -9,13 +26,12 @@ message Point {
 	required sint64 departure = 4;
 	required sint64 arrival = 5;
 	
-	required objtype verttype = 10;
-	optional sint64 vertid = 11;
-	optional sint32 stopidx = 12;
-	
-	required objtype edgetype = 20;
-	optional sint64 wayid = 21;
-	optional sint32 routeidx = 22;	
+	optional graph.Vertex osmvert = 10;
+	optional Stop stop = 11; 
+
+	required edge_type edgetype = 20;
+	optional graph.Edge walkedge = 21;
+	optional PTEdge ptedge = 22; 
 }
 
 

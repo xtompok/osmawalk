@@ -73,5 +73,6 @@ protobuf: ../config/types.proto ../config/premap.proto ../config/graph.proto
 	protoc-c --proto_path ../config/ ../config/result.proto --c_out include/
 	protoc --proto_path ../config ../config/types.proto --python_out ../webapp/
 	protoc --proto_path ../config ../config/result.proto --python_out ../webapp/
+	protoc --proto_path ../config ../config/graph.proto --python_out ../webapp/
 
 .PHONY: protobuf all search postgres
