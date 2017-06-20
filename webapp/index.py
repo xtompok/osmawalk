@@ -148,9 +148,8 @@ def do_search():
 	routes = []
 	for r in result.routes:
 		print "Route len: {}, time: {}".format(r.time,r.dist)
-		return json.dumps(route2geojson(r))
-
-	return ""
+		routes.append(route2geojson(r))
+	return json.dumps(routes)
 
 
 @app.route('/gpx')

@@ -17,6 +17,8 @@ var redIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
+var connections = [];
+
 // Create the base map with
 function createBaseMap(){
 	var map = L.map('map').setView([50.0770, 14.4322], 15);
@@ -35,10 +37,10 @@ function findPath(from,to){
 		pathFound(JSON.parse(data));		
 	}});
 }
-function pointFeature(feature,layer){
+function pointFeature(feature,layer,description){
 	switch (feature.properties.type){
 		case 60:
-			addStop(feature.properties)
+			description.push(addStop(feature.properties))
 			switch (feature.properties.subtype){
 				case "departure":
 					layer.bindPopup("D:"+feature.properties.name+"<br>"+
@@ -55,11 +57,11 @@ function pointFeature(feature,layer){
 	}
 	
 }
-function linestringFeature(feature,layer){
+function linestringFeature(feature,layer,description){
 	switch (feature.properties.type){
 		case 60:
 			layer.bindPopup("Line "+feature.properties.name);
-			addLine(feature.properties);
+			description.push(addLine(feature.properties));
 		break;
 	}
 	
@@ -85,14 +87,14 @@ function addStop(data){
 			break;	
 	}
 	div.innerHTML = stopstr;
-	leftcol.appendChild(div);
+	return div;
 }
 function addLine(data){
 	var div;
 	div = document.createElement('div')
 	div.classList.add("line")
 	div.innerHTML = data.name;
-	leftcol.appendChild(div);
+	return div;
 	
 }
 
@@ -102,12 +104,23 @@ function clearConnection(){
 	}	
 }
 function pathFound(data){
-	dist.innerHTML=formatDist(data.properties.dist.toFixed(0));
-	time.innerHTML=formatTotalTime(data.properties.time.toFixed(0));
+	//data = data[0]
+	//dist.innerHTML=formatDist(data.properties.dist.toFixed(0));
+	//time.innerHTML=formatTotalTime(data.properties.time.toFixed(0));
 	clearConnection();
+	connections = [];
+	data.forEach(function(item,index,array){
+		var con  = processRoute(item);
+		connections.push(con)
+	});
+	showConnections(connections);
+	// TODO: GPX export
+}
 
-
-
+function processRoute(data){
+	var pathLayer;
+	var description;
+	description = []
 	pathLayer =new  L.GeoJSON(data,{
 		style: function(feature){
 			switch (feature.properties.type){
@@ -120,17 +133,53 @@ function pathFound(data){
 		onEachFeature: function(feature,layer){
 			switch (feature.geometry.type){
 				case "Point":
-					pointFeature(feature,layer);
+					pointFeature(feature,layer,description);
 				break;
 				case "LineString":
-					linestringFeature(feature,layer);
+					linestringFeature(feature,layer,description);
 				break;
 			}
 		}
 	});
-	gpxbut.disabled = false
-	gpxbut.onclick = function(){downloadGPX(from.getLatLng(),to.getLatLng())}
-	pathLayer.addTo(map);
+	var con = {};
+	con.layer = pathLayer;
+	con.description = description;
+	return con;
+}
+function showConnections(cons){
+	cons.forEach(function(con,conidx,cons){
+		var div;
+		div = document.createElement('div');
+		div.classList.add("connection");
+		var title;
+		title = document.createElement('emph');
+		title.innerHTML = "Route "+conidx;
+		title.addEventListener("click",div,false);
+		div.appendChild(title);
+		div.handleEvent = function(evt){
+			switch (evt.type){
+				case 'click':
+					if (div.childNodes[1].style.display == 'none'){
+						div.childNodes[1].style.display = 'block';	
+						map.addLayer(con.layer);
+					}else{
+						div.childNodes[1].style.display = 'none';	
+						map.removeLayer(con.layer);
+					}			
+					break;	
+			}	
+		}
+		var subdiv;
+		subdiv = document.createElement('div');
+		subdiv.classList.add("description");
+		con.description.forEach(function(item,index,array){
+			subdiv.appendChild(item);
+		});
+		subdiv.style.display = 'none';
+		div.appendChild(subdiv);
+		leftcol.appendChild(div);
+	});
+	//con.layer.addTo(map);	
 }
 
 function formatDist(dist){
