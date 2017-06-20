@@ -26,7 +26,7 @@
 		var to;
 		var map = createBaseMap();
 		var stage = 0;
-		var pathLayer;
+		var connections = [];
 		var dist = document.getElementById("delka")
 		var time = document.getElementById("cas")
 		var gpxbut = document.getElementById("gpxbut")
@@ -48,9 +48,9 @@
 				if (to){
 					map.removeLayer(to);
 				}
-				if (pathLayer){
-					map.removeLayer(pathLayer);
-				}
+				connections.forEach(function(item,index,aarray){
+					map.removeLayer(item.layer);	
+				});
 				dist.innerHTML="-";
 				time.innerHTML="-";
 				gpxbut.disabled = true

@@ -1,5 +1,5 @@
 import sys
-sys.path.append("../../diplomka/mmpf/raptor")
+sys.path.append("../ext-lib/mmpf/raptor")
 import data_pb2
 
 class Timetable:

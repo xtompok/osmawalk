@@ -57,19 +57,6 @@
 #define HASH_WANT_NEW
 #include <ucw/hashtable.h>
 
-/*!
- * @abstract Hash table osm id -> index in array of stops
- */
-
-#define HASH_NODE struct osmId2sIdxNode
-#define HASH_PREFIX(name) osmId2sIdx_##name
-#define HASH_KEY_ATOMIC osmid 
-#define HASH_ATOMIC_TYPE int64_t
-#define HASH_DEFAULT_SIZE 6000
-#define HASH_WANT_CLEANUP
-#define HASH_WANT_FIND
-#define HASH_WANT_NEW
-#include <ucw/hashtable.h>
 
 void nodesIdx_refresh(int n_nodes, Graph__Vertex ** vertices){
 	nodesIdx_cleanup();
@@ -99,16 +86,6 @@ void sId2sIdx_refresh(int n_stops, Graph__Stop ** stops){
 	printf("%d stops refreshed\n",n_stops);
 }
 
-void osmId2sIdx_refresh(int n_stops, Graph__Stop ** stops){
-	osmId2sIdx_cleanup();
-	osmId2sIdx_init();
-	for (int i=0;i<n_stops;i++){
-		struct osmId2sIdxNode * val;
-		val = osmId2sIdx_new(stops[i]->osmid);
-		val->idx = stops[i]->raptor_id;
-	}
-	printf("%d stops refreshed\n",n_stops);
-}
 struct nodesIdxNode * nodesIdx_find2(int64_t key){
 	return nodesIdx_find(key);	
 }
@@ -125,6 +102,3 @@ struct sId2sIdxNode * sId2sIdx_find2(char * stop_id){
 	return sId2sIdx_find(stop_id);
 }
 
-struct osmId2sIdxNode * osmId2sIdx_find2(int64_t key){
-	return osmId2sIdx_find(key);	
-}

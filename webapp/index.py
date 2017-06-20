@@ -15,9 +15,9 @@ deploy_name = "walk.bezva.org"
 
 app = Flask(__name__)
 
-data = prepareData("../config/speeds.yaml","../data/praha-graph.pbf","../../diplomka/mmpf/raptor/tt.bin")
+data = prepareData("../config/speeds.yaml","../data/praha-graph.pbf","../ext-lib/mmpf/raptor/tt.bin")
 bbox = getMapBBox(data)
-tt = timetable.Timetable("../../diplomka/mmpf/raptor/tt.bin")
+tt = timetable.Timetable("../ext-lib/mmpf/raptor/tt.bin")
 
 def get_attribute(request,name,convert=None,default=None):
 	attr = request.args.get(name,None)

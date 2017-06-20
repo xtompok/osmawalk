@@ -144,6 +144,8 @@ struct point_t {
 	// Time
 	time_t departure;
 	time_t arrival;
+	// Penalty (for debugging)
+	double penalty;
 	// Vertex features
 	Graph__Vertex * osmvert;
 	Stop * stop;

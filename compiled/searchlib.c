@@ -166,7 +166,10 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 	date = starttime - (starttime%(24*3600));
 	newtt = gen_tt_for_date(data.timetable,date,NULL);
 
-	uint64_t * stopslut;
+	uint64_t curdate = date;
+
+	uint64_t * raptor2osm;
+	uint64_t * raptor2idx;
 	int maxraptorid;
 	maxraptorid = 0;
 	for (int i=0;i < graph->n_stops;i++){
@@ -174,13 +177,13 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 			maxraptorid = graph->stops[i]->raptor_id;	
 		}
 	}
-	stopslut = calloc(sizeof(uint64_t),maxraptorid+1);
+	raptor2osm = calloc(sizeof(uint64_t),maxraptorid+1);
+	raptor2idx = calloc(sizeof(uint64_t),maxraptorid+1);
 	for (int i=0;i < graph->n_stops;i++){
-		if (graph->stops[i]->raptor_id!=data.timetable->stops[i]->id){
-			printf("ERROR: %lld vs. %d at %d\n",graph->stops[i]->raptor_id,data.timetable->stops[i]->id,i);	
-		}
-		stopslut[graph->stops[i]->raptor_id] = graph->stops[i]->osmid;
+		raptor2osm[graph->stops[i]->raptor_id] = graph->stops[i]->osmid;
+		raptor2idx[graph->stops[i]->raptor_id] = i;
 	}
+	
 	
 	struct nodeways_t * nodeways;
 	nodeways = data.nodeWays;
@@ -230,7 +233,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 					int64_t osmid;
 					time_t arrival;
 
-					osmid = stopslut[r->stops[sidx].to->id];
+					osmid = raptor2osm[r->stops[sidx].to->id];
 					
 					// Stop not in map area
 					if(osmid == 0){
@@ -259,7 +262,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 					e->ptedge->route = r->pbroute;
 					e->ptedge->departure = r->departure;
 					// TODO: Add stop properties
-					addNodeToQueue(queue,queue->vert,graph->vertices[nd->idx],r->stops[sidx].to,e,arrival,queue->vert->penalty + penalty);
+					addNodeToQueue(queue,queue->vert,graph->vertices[nd->idx],r->stops[sidx].to,e,curdate+arrival,queue->vert->penalty + penalty);
 				}
 					
 			}
@@ -293,14 +296,10 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 			e->edge_type = EDGE_TYPE_WALK;
 			e->osmedge = way;
 
-			struct osmId2sIdxNode * stopsNode;
-			int64_t osmid;
-			osmid = graph->vertices[wayend]->osmid;
-			stopsNode = osmId2sIdx_find2(osmid);
 			Stop * stop;
-			if (stopsNode){
-				stop = data.timetable->stops[stopsNode->idx];
-			} else {
+			if (graph->vertices[wayend]->has_stop_id){
+				stop = data.timetable->stops[graph->vertices[wayend]->stop_id];		
+			}else{
 				stop = NULL;
 			}
 			/*printf("queue: %p\n",queue);
@@ -355,7 +354,6 @@ struct search_data_t * prepareData(char * configName, char * dataName, char * ti
 	data->nodeWays = makeNodeWays(data->graph);
 	nodesIdx_refresh(data->graph->n_vertices,data->graph->vertices);
 	sId2sIdx_refresh(data->graph->n_stops,data->graph->stops);
-	osmId2sIdx_refresh(data->graph->n_stops,data->graph->stops);
 	calcDistances(data->graph);
 	return data;
 }

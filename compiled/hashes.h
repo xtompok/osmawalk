@@ -23,15 +23,9 @@ struct nodeWaysNode * nodeWays_find2(int64_t key);
 
 struct sId2sIdxNode * sId2sIdx_find2(char * stop_id);
 
-/*!
- * @abstract Hash table osm id -> index in array of stops
- */
-struct osmId2sIdxNode * osmId2sIdx_find2(int64_t key);
-
 
 void nodesIdx_refresh(int n_nodes, Graph__Vertex ** vertices);
 
 void sId2sIdx_refresh(int n_stops, Graph__Stop ** stops);
 
-void osmId2sIdx_refresh(int n_stops, Graph__Stop ** stops);
 #endif

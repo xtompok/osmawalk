@@ -49,6 +49,8 @@ struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mm
 				memdepart = node->edge->ptedge->departure;	
 			}
 
+			point->penalty = node->penalty;
+
 			point->osmvert = node->osmvert;
 			point->stop = node->stop;
 			point->edge = node->edge;
@@ -81,6 +83,7 @@ void writeGPXForResult(struct search_result_t * res){
 }
 void printMMRoutes(struct search_data_t * data,struct search_result_t * res){
 	for (int r=0;r<res->n_routes;r++){
+		printf("------------------------");
 		printf("Route %d:\n",r);
 		for (int s=0;s<res->routes[r].n_points;s++){
 			struct point_t * pt;
@@ -105,6 +108,7 @@ void printMMRoutes(struct search_data_t * data,struct search_result_t * res){
 				printf("To: %s at %s by %s\n",pt->stop->name,timestr,pt->edge->ptedge->route->name);
 				free(timestr);
 			}
+			printf("Time: %lld, penalty: %f\n",pt->arrival,pt->penalty);
 		}
 	}
 	
@@ -155,7 +159,7 @@ struct pbf_data_t generatePBF(struct search_result_t * result){
 			if (pt->stop != NULL){
 				pbPt->stop = malloc(sizeof(Result__Stop));
 				result__stop__init(pbPt->stop);
-				pbPt->stop->name = malloc(strlen(pt->stop->name));
+				pbPt->stop->name = malloc(strlen(pt->stop->name)+1);
 				strcpy(pbPt->stop->name,pt->stop->name);
 				// TODO stop id 
 			}

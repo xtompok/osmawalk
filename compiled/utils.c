@@ -89,14 +89,6 @@ void printMapBBox(struct search_data_t data){
 	printf("Bounding box in WGS-84: (%lf,%lf), (%lf,%lf)\n",fminlat,fminlon,fmaxlat,fmaxlon);
 }
 
-char * stopNameFromOSMId(struct search_data_t * data,uint64_t osmid){
-	struct osmId2sIdxNode * stopsNode;
-	int raptor_id;
-	stopsNode = osmId2sIdx_find2(osmid);
-	raptor_id = data->graph->stops[stopsNode->idx]->raptor_id;
-	return data->timetable->stops[raptor_id]->name;
-}
-
 // Source: http://stackoverflow.com/questions/32424125/c-code-to-get-local-time-offset-in-minutes-relative-to-utc
 long tz_offset_second(time_t t) {
 	struct tm local = *localtime(&t);

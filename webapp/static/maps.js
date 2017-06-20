@@ -17,7 +17,6 @@ var redIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-var connections = [];
 
 // Create the base map with
 function createBaseMap(){
@@ -178,8 +177,11 @@ function showConnections(cons){
 		subdiv.style.display = 'none';
 		div.appendChild(subdiv);
 		leftcol.appendChild(div);
+		if (conidx == 0){
+			subdiv.style.display = 'block';
+			map.addLayer(con.layer);	
+		}
 	});
-	//con.layer.addTo(map);	
 }
 
 function formatDist(dist){

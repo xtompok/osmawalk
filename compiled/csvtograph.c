@@ -89,6 +89,9 @@ void stop_item_cb(void * item,size_t len,void * data){
 		case 2: //raptor_id
 			aInt = strtoll((char *)item,NULL,10);
 			p_struct->tmpstop->raptor_id = aInt;
+			p_struct->tmpvertex->has_stop_id = 1;
+			p_struct->tmpvertex->stop_id = aInt;
+			break;
 		case 3: //lat
 			aDouble = strtod((char *)item,NULL);
 			p_struct->tmpvertex->lat = aDouble;
