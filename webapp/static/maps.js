@@ -120,7 +120,7 @@ function processRoute(data){
 	var pathLayer;
 	var description;
 	description = []
-	pathLayer =new  L.GeoJSON(data,{
+	pathLayer =new  L.GeoJSON(data.geojson,{
 		style: function(feature){
 			switch (feature.properties.type){
 				case 7: return {color: "#ff0000"};
@@ -143,6 +143,9 @@ function processRoute(data){
 	var con = {};
 	con.layer = pathLayer;
 	con.description = description;
+	con.time = data.time;
+	con.penalty = data.penalty;
+	con.dist = data.dist;
 	return con;
 }
 function showConnections(cons){
@@ -150,11 +153,18 @@ function showConnections(cons){
 		var div;
 		div = document.createElement('div');
 		div.classList.add("connection");
+		var header;
+		header = document.createElement('div');
+		header.classList.add("conn-header");
 		var title;
-		title = document.createElement('emph');
-		title.innerHTML = "Route "+conidx;
-		title.addEventListener("click",div,false);
-		div.appendChild(title);
+		title = document.createElement('strong');
+		title.appendChild(document.createTextNode("Route "+conidx));
+		header.appendChild(title);
+		header.appendChild(document.createElement('br'));
+		header.appendChild(document.createTextNode("arrival: "+formatStopTime(con.time.toFixed(0))));
+		header.appendChild(document.createElement('br'));
+		header.appendChild(document.createTextNode("walk dist: "+formatDist(con.dist.toFixed(0))));
+		div.addEventListener("click",div,false);
 		div.handleEvent = function(evt){
 			switch (evt.type){
 				case 'click':
@@ -175,6 +185,7 @@ function showConnections(cons){
 			subdiv.appendChild(item);
 		});
 		subdiv.style.display = 'none';
+		div.appendChild(header);
 		div.appendChild(subdiv);
 		leftcol.appendChild(div);
 		if (conidx == 0){

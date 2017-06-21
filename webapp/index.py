@@ -148,7 +148,7 @@ def do_search():
 	routes = []
 	for r in result.routes:
 		print "Route len: {}, time: {}".format(r.time,r.dist)
-		routes.append(route2geojson(r))
+		routes.append({"time":r.time,"dist":r.dist,"penalty":r.penalty,"geojson":route2geojson(r)})
 	return json.dumps(routes)
 
 
