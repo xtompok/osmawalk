@@ -75,6 +75,10 @@ int main (int argc, char ** argv){
 
 	struct pbf_data_t result;
 	result = findPath(data,flat,flon,tlat,tlon);
+
+	freePackedPBF(result);
+	freeData(data);
+
 	//printResults(result);
 	//writeGpxFile(result,"track.gpx");
 

@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include "mmqueue.h"
+#include "include/result.pb-c.h"
 
 struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mmqueue_t * queue,int fromIdx, int toIdx);
 
@@ -11,6 +12,8 @@ void writeGPXForResult(struct search_result_t * res);
 void printMMRoutes(struct search_data_t * data,struct search_result_t * res);
 
 struct pbf_data_t generatePBF(struct search_result_t * result);
+void freeUnpackedPBF(Result__Result * result);
+void freePackedPBF(struct pbf_data_t data);
 
 /*! Write searched way to GPX file
  * @param result Structure handlig search result

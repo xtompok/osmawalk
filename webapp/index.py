@@ -2,7 +2,7 @@
 from flask import Flask
 from flask import render_template,Response
 from flask import request
-from find import prepareData, findPath, SearchResult, getMapBBox 
+from find import prepareData, findPath, SearchResult, getMapBBox, freePackedPBF 
 import json
 import re
 import result_pb2
@@ -142,6 +142,7 @@ def do_search():
 	path = findPath(data,flat,flon,tlat,tlon)
 	print "Result size {}B".format(path.len)
 	pbf = "".join(map(chr,path.data[:path.len]))
+	freePackedPBF(path)
 	result = result_pb2.Result()
 	result.ParseFromString(pbf)
 	print "Routes: {}".format(len(result.routes))
@@ -179,6 +180,7 @@ def make_gpx():
 		out_gpx.writeTrkpt(pt.lat,pt.lon,pt.height)
 	out_gpx.endTrack()
 	out_gpx.close()
+	freePackedPBF(path)
 
 	hdr = {'Content-Type': 'application/xml+gpx','Content-Disposition': 'attachment; filename=route.gpx'}
 

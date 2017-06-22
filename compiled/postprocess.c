@@ -113,6 +113,30 @@ void printMMRoutes(struct search_data_t * data,struct search_result_t * res){
 	}
 	
 }
+void freeUnpackedPBF(Result__Result * result){
+	for (int ridx=0;ridx<result->n_routes;ridx++){
+		Result__Route * r;
+		r = result->routes[ridx];
+		for (int ptidx = 0;ptidx < r->n_points;ptidx++){
+			Result__Point * pt;
+			pt = r->points[ptidx];
+			if (pt->stop){
+				free(pt->stop);
+			}
+			if (pt->edgetype == RESULT__EDGE_TYPE__WALK){
+				free(pt->ptedge);
+			
+			}
+			free(pt);
+		}
+		free(r);
+	}
+	free(result->routes);
+	free(result);
+}
+void freePackedPBF(struct pbf_data_t data){
+	free(data.data);	
+}
 
 struct pbf_data_t generatePBF(struct search_result_t * result){
 	struct search_route_t * routes;
@@ -146,32 +170,17 @@ struct pbf_data_t generatePBF(struct search_result_t * result){
 			pbPt->departure = pt->departure;
 			pbPt->arrival = pt->arrival;
 				
-			pbPt->osmvert = malloc(sizeof(Graph__Vertex));
-			graph__vertex__init(pbPt->osmvert);
-
-			pbPt->osmvert->osmid = pt->osmvert->osmid ;
-			pbPt->osmvert->lat = pt->osmvert->lat ;
-			pbPt->osmvert->lon = pt->osmvert->lon ;
-			pbPt->osmvert->type = pt->osmvert->type ;
-			pbPt->osmvert->height = pt->osmvert->height ;
-			pbPt->osmvert->idx = pt->osmvert->idx ;
+			pbPt->osmvert = pt->osmvert;
 
 			if (pt->stop != NULL){
 				pbPt->stop = malloc(sizeof(Result__Stop));
 				result__stop__init(pbPt->stop);
-				pbPt->stop->name = malloc(strlen(pt->stop->name)+1);
-				strcpy(pbPt->stop->name,pt->stop->name);
+				pbPt->stop->name = pt->stop->name;
 				// TODO stop id 
 			}
 			if (pt->edge && pt->edge->edge_type == EDGE_TYPE_WALK){
 				pbPt->edgetype = RESULT__EDGE_TYPE__WALK;
-				pbPt->walkedge = malloc(sizeof(Graph__Edge));
-				graph__edge__init(pbPt->walkedge);
-				pbPt->walkedge->idx = pt->edge->osmedge->idx ;
-				pbPt->walkedge->osmid = pt->edge->osmedge->osmid ;
-				pbPt->walkedge->crossing = pt->edge->osmedge->crossing ;
-				pbPt->walkedge->type = pt->edge->osmedge->type ;
-				// TODO other properties
+				pbPt->walkedge = pt->edge->osmedge;
 			
 			}else if (pt->edge && pt->edge->edge_type == EDGE_TYPE_PT){
 				pbPt->edgetype = RESULT__EDGE_TYPE__PT;	
@@ -191,6 +200,8 @@ struct pbf_data_t generatePBF(struct search_result_t * result){
 	pbf_packed.len = result__result__get_packed_size(pbRoutes);
 	pbf_packed.data = malloc(pbf_packed.len);
 	result__result__pack(pbRoutes,pbf_packed.data);
+
+	freeUnpackedPBF(pbRoutes);
 
 	printf("Len: %d\n",pbf_packed.len);
 	return pbf_packed;

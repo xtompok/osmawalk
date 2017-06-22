@@ -50,6 +50,10 @@ struct pbf_data_t readFile(char * filename){
 	return data;
 }
 
+void freeMap(Graph__Graph * graph){
+	graph__graph__free_unpacked(graph,NULL);	
+}
+
 Graph__Graph * loadMap(char * filename){
 	struct pbf_data_t data;
 	data = readFile(filename);
@@ -89,6 +93,12 @@ void calcDistances(Graph__Graph * graph){
 	}
 }
 
+void freeNodeWays(struct nodeways_t * nodeways,int n_vertices){
+	for (int i=0;i<n_vertices;i++){
+		free(nodeways[i].ways);	
+	}
+	free(nodeways);
+}
 
 struct nodeways_t * makeNodeWays(Graph__Graph * graph){
 	struct nodeways_t * nodeways;
@@ -128,6 +138,7 @@ int findNearestVertex(Graph__Graph * graph, double lon, double lat){
 		double dlat;
 		dlon = graph->vertices[i]->lon-lon;
 		dlat = graph->vertices[i]->lat-lat;
+	
 		dist = dlon*dlon+dlat*dlat;
 		if (dist < minDist){
 			minDist = dist;
@@ -168,22 +179,6 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 
 	uint64_t curdate = date;
 
-	uint64_t * raptor2osm;
-	uint64_t * raptor2idx;
-	int maxraptorid;
-	maxraptorid = 0;
-	for (int i=0;i < graph->n_stops;i++){
-		if (graph->stops[i]->raptor_id > maxraptorid){
-			maxraptorid = graph->stops[i]->raptor_id;	
-		}
-	}
-	raptor2osm = calloc(sizeof(uint64_t),maxraptorid+1);
-	raptor2idx = calloc(sizeof(uint64_t),maxraptorid+1);
-	for (int i=0;i < graph->n_stops;i++){
-		raptor2osm[graph->stops[i]->raptor_id] = graph->stops[i]->osmid;
-		raptor2idx[graph->stops[i]->raptor_id] = i;
-	}
-	
 	
 	struct nodeways_t * nodeways;
 	nodeways = data.nodeWays;
@@ -214,26 +209,26 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 
 		// Process public transport connections
 		if (queue->vert->stop != NULL){
-			char * timestr;
+			/*char * timestr;
 			timestr = prt_time((queue->vert->arrival)%(24*3600));
-			//printf("Stop %d found at %s\n",stopsNode->idx,timestr);
-			free(timestr);
+			printf("Stop %d found at %s\n",stopsNode->idx,timestr);
+			free(timestr);*/
 
 			struct stop_conns * conns;
-			printf("%p\n",queue);
-			printf("Id: \n",queue->vert->stop->id);
+		//	printf("%p\n",queue);
+		//	printf("Id: \n",queue->vert->stop->id);
 			conns = search_stop_conns(newtt,queue->vert->stop->id,queue->vert->arrival%(24*3600));
 			for (int ridx = 0; ridx < conns->n_routes; ridx++){
 				struct stop_route * r;
 				r = conns->routes+ridx;
-				timestr = prt_time(r->departure);
+				//timestr = prt_time(r->departure);
 				//printf("Departure at %s\n",timestr);
-				free(timestr);
+				//free(timestr);
 				for (int sidx = 0;sidx < r->n_stops;sidx++){
 					int64_t osmid;
 					time_t arrival;
 
-					osmid = raptor2osm[r->stops[sidx].to->id];
+					osmid = data.raptor2osm[r->stops[sidx].to->id];
 					
 					// Stop not in map area
 					if(osmid == 0){
@@ -326,6 +321,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 			break;
 		}
 	}
+
 	free_tt(newtt);
 	return queue;
 
@@ -335,6 +331,19 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 }
 #undef DIJ_CMP
 #undef DIJ_SWAP
+
+void freeData(struct search_data_t * data){
+	free_timetable(data->timetable);
+	pj_free(data->pj_wgs84);
+	pj_free(data->pj_utm);
+	freeNodeWays(data->nodeWays,data->graph->n_vertices);
+	freeMap(data->graph);
+	free(data->raptor2osm);
+	free(data->raptor2idx);
+
+	
+	free(data);	
+}
 
 struct search_data_t * prepareData(char * configName, char * dataName, char * timetableName){
 	struct search_data_t * data;
@@ -351,6 +360,20 @@ struct search_data_t * prepareData(char * configName, char * dataName, char * ti
 		err(1,"Error loading timetable");
 	}
 
+	int maxraptorid;
+	maxraptorid = 0;
+	for (int i=0;i < data->graph->n_stops;i++){
+		if (data->graph->stops[i]->raptor_id > maxraptorid){
+			maxraptorid = data->graph->stops[i]->raptor_id;	
+		}
+	}
+	data->raptor2osm = calloc(sizeof(uint64_t),maxraptorid+1);
+	data->raptor2idx = calloc(sizeof(uint64_t),maxraptorid+1);
+	for (int i=0;i < data->graph->n_stops;i++){
+		data->raptor2osm[data->graph->stops[i]->raptor_id] = data->graph->stops[i]->osmid;
+		data->raptor2idx[data->graph->stops[i]->raptor_id] = i;
+	}
+	
 	data->nodeWays = makeNodeWays(data->graph);
 	nodesIdx_refresh(data->graph->n_vertices,data->graph->vertices);
 	sId2sIdx_refresh(data->graph->n_stops,data->graph->stops);

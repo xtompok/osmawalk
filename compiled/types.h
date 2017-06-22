@@ -193,6 +193,8 @@ struct search_data_t{
 	Graph__Graph * graph;
 	struct nodeways_t * nodeWays;	
 	Timetable * timetable;
+	uint64_t * raptor2osm;
+	uint64_t * raptor2idx;
 };
 
 /* @struct bbox_t

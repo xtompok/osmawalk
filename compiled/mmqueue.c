@@ -58,6 +58,12 @@ void addFirstNodeToQueue(struct mmqueue_t * q,Graph__Vertex * v, Stop * s, uint6
 	MMHEAP_INSERT(node);
 	q->vert = q->heap[0];
 }
+void freeEdge(struct edge_t * e){
+	if (e->edge_type == EDGE_TYPE_PT){
+		free(e->ptedge);
+	}
+	free(e);
+}
 
 void addNodeToQueue(struct mmqueue_t * q,
 		struct mmdijnode_t * prev,
@@ -74,6 +80,7 @@ void addNodeToQueue(struct mmqueue_t * q,
 		struct mmdijnode_t * anode;
 		anode = vertnodes[j];
 		if ((arrival >= anode->arrival)&&(penalty >= anode->penalty)){
+			free(e);
 			return;
 		}
 		if ((arrival <= anode->arrival)&&(penalty <= anode->penalty)){
@@ -149,6 +156,17 @@ struct mmqueue_t * createMMQueue(Graph__Graph * graph){
 void freeMMQueue(struct mmqueue_t * queue,int n_vertices){
 	GARY_FREE(queue->heap);
 	for (int i=0;i<n_vertices;i++){
+		for (int j=0;j<GARY_SIZE(queue->vertlut[i]);j++){
+			struct mmdijnode_t * node;
+			node = queue->vertlut[i][j];	
+			if (node->edge == NULL){
+				continue;	
+			}
+			if (node->edge->edge_type == EDGE_TYPE_PT){
+				free(node->edge->ptedge);	
+			}
+			free(node->edge);
+		}
 		GARY_FREE(queue->vertlut[i]);	
 	}
 	free(queue->vertlut);

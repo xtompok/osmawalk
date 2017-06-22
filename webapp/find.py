@@ -37,6 +37,10 @@ findPath = libsearch.findPath
 findPath.restype = PBFResult
 findPath.argtypes = (c_void_p,c_double,c_double,c_double,c_double) 
 
+
+freePackedPBF = libsearch.freePackedPBF
+freePackedPBF.argtypes = (PBFResult,)
+
 #findTransfer = libsearch.findTransfer
 #findTransfer.restype = SearchResult
 #findTransfer.argtypes = (c_void_p,c_char_p,c_char_p)

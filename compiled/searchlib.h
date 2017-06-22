@@ -69,6 +69,7 @@ struct dijnode_t *  prepareDijkstra(Graph__Graph * graph);
  * @result Search data structure
  */
 struct search_data_t * prepareData(char * configName, char * dataName, char * timetableName);
+void freeData(struct search_data_t * data);
 
 /*! Find path in graph from coorinates to coordinates
  * @param data Search data
