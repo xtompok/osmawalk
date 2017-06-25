@@ -26,7 +26,8 @@ struct tag_t {
 
 struct mapconfig_t {
 	ProtobufCEnumDescriptor desc;
-	struct tag_t * type;
+	struct tag_t * waytype;
+	struct tag_t * nodetype;
 	struct tag_t * tunnel;
 	struct tag_t * bridge;
 	struct tag_t * area;
@@ -50,7 +51,8 @@ void addBoolItemToMapConf(struct mapconfig_t * conf, struct mapConfItem_t item,s
 void addAreaItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item);
 void addTunnelItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item);
 void addBridgeItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item);
-void addTypeItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item);
+void addNodeTypeItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item);
+void addWayTypeItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item);
 void addStopPosItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item);
 
 int parseMapConfigFile(char * filename, struct mapconfig_t * conf,

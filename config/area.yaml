@@ -17,5 +17,5 @@ no:
         1:
             area: 
                 - "no"
-	    natural:
-	    	- "tree_row"
+            natural:
+                - "tree_row"

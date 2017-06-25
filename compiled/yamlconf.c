@@ -85,10 +85,16 @@ void addStopPosItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t ite
 	addBoolItemToMapConf(conf,item,&(conf->stop_pos));
 }
 
-void addTypeItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
+void addNodeTypeItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
 	int enum_val;
 	enum_val = enumValueForName(conf->desc, item.name);
-	conf->type = addItemToTagList(conf->type,item,enum_val);
+	conf->nodetype = addItemToTagList(conf->nodetype,item,enum_val);
+}
+
+void addWayTypeItemToMapConf(struct mapconfig_t *  conf,struct mapConfItem_t item){
+	int enum_val;
+	enum_val = enumValueForName(conf->desc, item.name);
+	conf->waytype = addItemToTagList(conf->waytype,item,enum_val);
 }
 
 int parseMapConfigFile(char * filename, struct mapconfig_t * conf,
@@ -102,14 +108,12 @@ int parseMapConfigFile(char * filename, struct mapconfig_t * conf,
 	FILE * IN;
 	IN = fopen(filename,"r");
 	if (IN==NULL){
-		printf("Config file opening error\n");	
-		return 1;
+		err(1,"Config file %s opening error\n",filename);	
 	}
 	yaml_parser_set_input_file(&parser,IN);
 
 	if (!yaml_parser_load(&parser,&document)){
-		printf("Error while parsing config file");
-		return 1;	
+		err(1,"Error while parsing config file %s\n",filename);
 	}
 	fclose(IN);
 

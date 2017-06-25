@@ -51,5 +51,5 @@ COMMAND="COPY stops(id,stop_id,raptor_id,lat,lon) TO STDOUT WITH DELIMITER ';' C
 psql -c "$COMMAND" $DATABASE $USERNAME >../data/stops.csv
 
 echo Exporting stops ways...
-COMMAND="COPY stops_direct_ok(sid,nid) TO STDOUT DELIMITER ';' CSV HEADER;"
+COMMAND="COPY stops_direct_ok(sid,nid,objtype) TO STDOUT DELIMITER ';' CSV HEADER;"
 psql -c "$COMMAND" $DATABASE $USERNAME >../data/stops-direct.csv

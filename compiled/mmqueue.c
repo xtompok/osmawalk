@@ -72,6 +72,9 @@ void addNodeToQueue(struct mmqueue_t * q,
 		struct edge_t * e,
 		uint64_t arrival,
 		double penalty){
+	if (penalty < 0){
+		errx(2,"Penalty %f is negative!");	
+	}
 	// Check if it is not majorized by another node already in queue
 	// Check if it majorizes some nodes in queue and mark them as majorized
 	struct mmdijnode_t ** vertnodes;

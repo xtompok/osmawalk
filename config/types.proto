@@ -25,6 +25,8 @@ enum objtype {
 	DIRECT = 50;
 	GENERATED = 51;
 	DIRECT_STOP = 52;
+	DIRECT_UNDERGROUND = 53;
+	DIRECT_LINKAGE = 54;
 
 	PUBLIC_TRANSPORT = 60; // Used only when searching
 	
@@ -36,4 +38,9 @@ enum objtype {
 	MULTIPOLYGON = 250;
 	INSIDE = 251;
 	IGNORE = 256;
+
+	NODE = 109;
+	STOP = 110;
+	TRAFFIC_LIGHTS = 111;
+
 }

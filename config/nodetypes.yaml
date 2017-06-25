@@ -1,0 +1,12 @@
+BARRIER: 
+        0:
+            barrier : "*"
+
+STOP:
+        0:
+                public_transport:
+                        - stop_position
+TRAFFIC_LIGHTS:
+        0:        
+                crossing:
+                        - traffic_signals

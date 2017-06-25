@@ -51,6 +51,10 @@ void node_item_cb(void * item,size_t len,void * data){
 			aInt = strtoll((char *)item,NULL,10);
 			p_struct->tmpvertex->height = aInt;
 			break;
+		case 4: //type
+			aInt = strtoll((char *)item,NULL,10);
+			p_struct->tmpvertex->type = aInt;
+			break;
 
 	}
 
@@ -208,6 +212,9 @@ void direct_item_cb(void * item,size_t len,void * data){
 			}
 			p_struct->tmpedge->vto = nodesIdx_find2(num)->idx;
 			break;
+		case 2: //objtype
+			p_struct->tmpedge->type = num;
+			break;
 
 	}
 
@@ -227,7 +234,6 @@ void direct_line_cb(int ch, void * data){
 	*e = malloc(sizeof(Graph__Edge));
 	graph__edge__init(*e);
 	p_struct->tmpedge = *e;
-	p_struct->tmpedge->type = p_struct->type;
 	p_struct->first = 0;
 
 }
@@ -296,10 +302,7 @@ int main (int argc, char ** argv){
 	
 	parseFile(basedir,"ways.csv",&parser,p_struct,way_item_cb,way_line_cb);
 
-	p_struct->type=50;
 	parseFile(basedir,"direct.csv",&parser,p_struct,direct_item_cb,direct_line_cb);
-
-	p_struct->type=51;
 	parseFile(basedir,"stops-direct.csv",&parser,p_struct,direct_item_cb,direct_line_cb);
 
 	Graph__Graph * graph;

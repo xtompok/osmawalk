@@ -201,10 +201,10 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 			printf("Heap: %d\n",queue->n_heap);
 		}*/
 
-		char * strtime;
+		/*char * strtime;
 		strtime = prt_time(queue->vert->arrival%(24*3600));
 		//printf("Vertex: %d, time: %s, penalty: %f\n",queue->vert->idx,strtime,queue->vert->penalty);
-		free(strtime);
+		free(strtime);*/
 		//printf("DijArray: %d\n",GARY_SIZE(dijArray));
 
 		// Process public transport connections
@@ -239,10 +239,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 					double penalty;
 					penalty = 0;
 					
-					//penalty += calcPointPenalty(graph,data.config,graph->vertices[queue->vert->osmvert->idx]);
-					//penalty += calcWaitPenalty(graph,data.config,TODO: way type,TODO time);
 					penalty += calcTransportPenalty(graph,data.conf,r,arrival);
-					//penalty += calcChangePenalty(graph,data.conf,q->vert->fromEdgeType,way);	
 					
 					struct nodesIdxNode * nd;
 					nd = nodesIdx_find2(osmid);
@@ -257,6 +254,11 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 					e->ptedge->route = r->pbroute;
 					e->ptedge->departure = r->departure;
 					// TODO: Add stop properties
+
+					penalty += calcPointPenalty(graph,data.conf,graph->vertices[nd->idx]);
+					int wait;
+					wait = r->departure - (queue->vert->arrival%(24*3600));
+					penalty += calcChangePenalty(graph,data.conf,e->ptedge,queue->vert,wait);	
 					addNodeToQueue(queue,queue->vert,graph->vertices[nd->idx],r->stops[sidx].to,e,curdate+arrival,queue->vert->penalty + penalty);
 				}
 					
@@ -277,7 +279,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 			double penalty;
 			penalty = 0;
 			
-			//penalty += calcPointPenalty(graph,data.config,graph->vertices[queue->vert->osmvert->idx]);
+			penalty += calcPointPenalty(graph,data.conf,graph->vertices[wayend]);
 			penalty += calcWalkPenalty(graph,data.conf,way);
 			//penalty += calcChangePenalty(graph,data.conf,q->vert->fromEdgeType,way);	
 

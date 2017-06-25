@@ -46,7 +46,7 @@ void usage(void){
 
 int main (int argc, char ** argv){
 	printf("Argc: %d\n",argc);
-	if (argc<5){
+	if (argc<5 && argc !=1 ){
 		usage();
 		return 1;
 	}
@@ -62,12 +62,26 @@ int main (int argc, char ** argv){
 		flon = atof(argv[4]);
 		tlat = atof(argv[5]);
 		tlon = atof(argv[6]);
-	}else {
+	}else if (argc==5){
 		data = prepareData(configFileName,dataFileName,timetableFileName); 
 		flat = atof(argv[1]);
 		flon = atof(argv[2]);
 		tlat = atof(argv[3]);
 		tlon = atof(argv[4]);
+	}else{
+		data = prepareData(configFileName,dataFileName,timetableFileName); 
+		for (double flon=14; flon < 15; flon += 0.5){
+		for (double tlon=14; tlon < 15; tlon += 0.5){
+		for (double flat=49; flat < 51; flat += 0.5){
+		for (double tlat=49; tlat < 51; tlat += 0.5){
+		struct pbf_data_t result;
+
+		result = findPath(data,flat,flon,tlat,tlon);
+
+		freePackedPBF(result);
+		}}}}
+		freeData(data);
+		return 0;
 	}
 
 	printf("Graph has %d vertices and %d edges\n",data->graph->n_vertices,data->graph->n_edges);

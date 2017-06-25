@@ -23,7 +23,7 @@ char node_cb(size_t len,uint8_t * inbuf){
 		node->lat,
 		node->lon,
 		node->height,
-		node->objtype,
+		node->type,
 		node->inside,
 		node->intunnel,
 		node->onbridge,

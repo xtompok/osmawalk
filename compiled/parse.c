@@ -246,8 +246,8 @@ void dumpNode(OSM_Node * node, struct obj_attr attr){
 	pbNode = malloc(sizeof(Premap__Node));
 	premap__node__init(pbNode);
 	pbNode->id = node->id;
-	pbNode->has_objtype = true;
-	pbNode->objtype = attr.objtype;
+	pbNode->has_type = true;
+	pbNode->type = attr.objtype;
 	pbNode->has_intunnel = true;
 	pbNode->intunnel = attr.tunnel;
 	pbNode->has_onbridge = true;
@@ -292,7 +292,7 @@ int relation(OSM_Relation *r) {
 		printf("	%s: %s\n",r->tags->data[i].key,r->tags->data[i].val);
     	}
 	struct obj_attr attr;
-	attr.objtype = classify(r->tags,conf.type);
+	attr.objtype = classify(r->tags,conf.waytype);
 	attr.tunnel  = classify(r->tags,conf.tunnel);
 	attr.bridge = classify(r->tags,conf.bridge);
 	dumpMultipol(r,attr);
@@ -301,7 +301,7 @@ int relation(OSM_Relation *r) {
 
 int way(OSM_Way *w) {
 	struct obj_attr attr;
-	attr.objtype = classify(w->tags,conf.type);
+	attr.objtype = classify(w->tags,conf.waytype);
 	attr.area = classify(w->tags,conf.area);
 	attr.tunnel  = classify(w->tags,conf.tunnel);
 	attr.bridge = classify(w->tags,conf.bridge);
@@ -313,7 +313,7 @@ int way(OSM_Way *w) {
 
 int node(OSM_Node *n) {
 	struct obj_attr attr;
-	attr.objtype = classify(n->tags,conf.type);
+	attr.objtype = classify(n->tags,conf.nodetype);
 	attr.tunnel  = classify(n->tags,conf.tunnel);
 	attr.bridge = classify(n->tags,conf.bridge);
 	attr.stop = classify(n->tags,conf.stop_pos);
@@ -339,13 +339,15 @@ int main(int argc, char **argv) {
 	proj_utm = pj_init_plus("+proj=utm +zone=33 +ellps=WGS84 +units=m +no_defs");
 
 	conf.desc = objtype__descriptor;
-	GARY_INIT(conf.type,0);
+	GARY_INIT(conf.nodetype,0);
+	GARY_INIT(conf.waytype,0);
 	GARY_INIT(conf.area,0);
 	GARY_INIT(conf.bridge,0);
 	GARY_INIT(conf.tunnel,0);
 	GARY_INIT(conf.stop_pos,0);
 
-	parseMapConfigFile("../config/types.yaml",&conf,addTypeItemToMapConf);
+	parseMapConfigFile("../config/nodetypes.yaml",&conf,addNodeTypeItemToMapConf);
+	parseMapConfigFile("../config/waytypes.yaml",&conf,addWayTypeItemToMapConf);
 	parseMapConfigFile("../config/area.yaml",&conf,addAreaItemToMapConf);
 	parseMapConfigFile("../config/bridge.yaml",&conf,addBridgeItemToMapConf);
 	parseMapConfigFile("../config/tunnel.yaml",&conf,addTunnelItemToMapConf);

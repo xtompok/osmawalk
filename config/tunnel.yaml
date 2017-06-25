@@ -10,6 +10,11 @@ yes:
                 - "-4"
                 - "-5"
 
+            station:
+                - "subway"
+            transport:
+                - "subway"
+
 no:
         0:
             tunnel:

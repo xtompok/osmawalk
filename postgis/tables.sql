@@ -56,7 +56,8 @@ CREATE TABLE gtfs_stops (
 	raptor_id INTEGER,
 	stop_name VARCHAR(100),
 	stop_lon DOUBLE PRECISION,
-	stop_lat DOUBLE PRECISION
+	stop_lat DOUBLE PRECISION,
+	underground BOOLEAN
 );
 
 CREATE INDEX ON multipols_refs (ref);

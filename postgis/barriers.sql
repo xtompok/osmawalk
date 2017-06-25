@@ -8,7 +8,7 @@ CREATE TABLE barriers AS
 			(ST_DumpRings((ST_Dump(sq.multi)).geom)).path[1] AS ring_num,
 			(ST_DumpRings((ST_Dump(sq.multi)).geom)).geom AS geom  
 		FROM (
-			SELECT mp.id AS id,ST_BuildArea(ST_Collect(w.geom)) AS multi
+			SELECT mp.id AS id,ST_BuildArea(ST_MakeValid(ST_Union(w.geom))) AS multi
 			FROM multipols AS mp
 			INNER JOIN multipols_refs AS mpr ON mp.id = mpr.id
 			INNER JOIN ways AS w ON w.id = mpr.ref
@@ -21,7 +21,7 @@ CREATE TABLE barriers AS
 
 	UNION
 
-	SELECT id, ST_Polygon(geom,3065)
+	SELECT id, ST_Polygon(ST_MakeValid(geom),3065)
 	FROM ways
 	WHERE type=30 
 		AND area=true 
@@ -30,7 +30,7 @@ CREATE TABLE barriers AS
 
 	UNION
 
-	SELECT id, geom
+	SELECT id, ST_MakeValid(geom)
 	FROM ways
 	WHERE type=30 
 		AND NOT (
