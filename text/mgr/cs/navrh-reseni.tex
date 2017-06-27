@@ -1,11 +1,61 @@
 \input{data}
-- moje reseni
-  - zdrojova data
-  - parovani zdrojovych dat
-  - predzpracovani
+
+\section{Párování zdrojových dat}
+Abychom moli plánovat spojení využívající jak pěší chůzi, tak jízdu MHD, je
+potřeba data z obou zdrojů vhodně provázat. Máme k dispozici následující údaje:
+\begin{enumerate}
+\item OSM
+\begin{itemize}
+	\item jméno zastávky
+	\item pozici zastávky
+	\item ID zastávky (jen u některých)
+\end{itemize}
+\item GTFS
+\begin{itemize}
+	\item jméno zastávky
+	\item pozici zastávky
+	\item ID zastávky
+\end{itemize}
+\end{enumerate} 
+V ideální připadě by bylo možné spárovat zastávky jednoduše dle ID, bohužel v
+OSM má ID jen několik zastávek, většinu zastávek je tedy potřeba spárovat jinak.
+Nabízelo by se párování podle pozic a jmen zastávek, ale bohužel zastávky v GTFS
+jsou výrazně posunuté oproti OSM i skutečnosti, navíc ne všechny zastávkové
+stojany jsou v OSM vyznačeny, zvláště tam, kde je několik zastávkových stojanů
+za sebou, například v autobusových terminálech. Pokoušet se párovat zastávky v
+GTFS pouze na zastávky v OSM by bylo velmi náročné s nejistým výsledkem.
+Využíváme proto toho, že v OSM máme zmapované nejen zastávky, ale i cesty a
+zastávkám v GTFS vytváříme speciální vrcholy dle jejich zeměpisné pozice v GTFS
+a pomocí zkratek (viz dále TODO ref) je spojujeme s nejbližšími cestami.
+
+Pro zastávky z GTFS, pro které máme v OSM odpovídající ID, použijeme polohu z
+OSM a zkratky k cestní síti hledáme z této polohy. Zkratky jsou i zde potřeba,
+protože dle pravidel OSM (TODO ref) se zastávka umisťuje na místo, kde zastavuje
+vozidlo, což například u tramvají je bod na kolejích, které ale pro pěší
+plánování nepoužíváme, tudíž je potřeba najít vhodný blízký bod v cestní síti.
+
+Zvláštní pozornost je potřeba věnovat u párování zastávek metra. V současné
+chvíli je metro v Praze zmapované dvěma způsoby. První způsob je novější a
+přesnější, jsou při něm zmapována nástupiště a eskalátorové tunely. Při tomto
+podrobném mapování jsou také přidána ID stanic, tudíž je možné stanice jednoduše
+spárovat a hledat cestu od hrany nástupiště. Častějším způsobem je ale starší
+způsob, kdy je stanice metra pouze bod, od kterého vede eskalátorový tunel na
+povrch. Tento eskalátorový tunel je pouze virtuální spojka, neodpovídá reálné
+poloze podzemních tras. Takovéto stanice rovněž nemají přiřazená ID. U těchto
+stanic používáme polohu z GTFS a zkratky spojující zastávku s cestní sítí
+hledáme do blízkých míst, která jsou v podzemí, což vede k poměrně dobré
+aproximaci přístupu do metra. Jak bude postupovat mapování stanic metra, bude
+tento typ stanic postupně eliminován a dojde ke zpřesnění navigace při
+přestupech.
+
+Z hlediska implementace jsou vždy preferovány zastávky a stanice zmapované
+přesněji, které mají ID, stačí tedy vylepšovat mapu a při dalším předzpracování
+dat se nově zmapované zastávky dostanou i do vyhledávače.
+
+\section{Předzpracování dat}
     - parovani dat
     - generovani spojek
-  - vyhledavani
+\section{Vyhledávání trasy}
     - chodici a mhd hrany
     - funkce na vypocet penalt
     - eliminace duplicitnich tras
