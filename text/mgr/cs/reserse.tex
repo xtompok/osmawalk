@@ -1,0 +1,38 @@
+\section{Rešerše}
+\subsection{Time dependent modely}
+\subsection{Time expanded modely}
+\subsection{RAPTOR}
+RAPTOR (Round-Based Public Transport Routing) \ref{raptor} je oproti
+time-dependent modelům založen na zcela odlišných myšlenkách a při svém běhu
+nevyužívá Dijkstrův algoritmus. RAPTOR se snaží využít co nejvíce vlastností,
+kterými se odlišuje síť veřejné dopravy od obyčejné cestní sítě. Také umožňuje
+snadno optimalizovat na počet přestupů.
+
+Algoritmus pracuje po kolech. Každé kolo zanmená nástup do dalšího dopravního
+prostředku, celkově je tedy počet kol o 1 větší než maximální počet přestupů.
+Algoritmus pracuje s linkami. Každá linka má několik spojů, což jsou konkrétní
+vozidla, která všechna projíždí stejnou posloupnost zastávek. Každý spoj má
+uloženy časy odjezdu z jednotlivých zastávek, předpokládáme, že se dva spoje
+jedné linky na trase nepředjíždí. Pro každou zastávku si pro každé kolo
+pamatujeme, zda a kdy je dosažitelná pomocí kterého kola. Nedosažitelnost
+zastávky reprezentujeme pomocí nastavení času příjezdu v daném kole na $\infty$.
+
+Na začátku jsou všechny zastávky ve všech kolech nedosažitelné. Nastavíme
+výchozí zastávce čas dosažení v prvním kole na zadaný čas odjezdu a spustíme
+algoritmus. Ten postupně prochzí linky po jejich zastávkách a pokud narazí na
+dosažitelnou zastávku, tak najde nejbližší spoj linky, který z dané zastávky
+odjíždí po čase dosažitelnosti a tímto spojem se \uv{vydá} a průběžně upravuje
+časy dosažitelnosti na dalších zastávkách. Pokud po cestě nalezne další
+dosažitelnou zastávku, jako spoj z této zastávky vybere ten z původního spoje a
+spoje navazujícího na původní čas dosažitelnosti, který odjíždí dříve a takto
+pokračuje až do konce linky. Po průchodu všech linek se všechny časy
+dosažitelnosti zkopírují do dalšího kola a algoritmus se znovu spustí. Po
+stanoveném počtu kol algoritmus skončí a u jednotlivých zastávek je pro každé
+kolo (odpovídající počtu přestupů - 1) uloženo, zda je s daným počtem přestupů
+dosažitelná a v jakém čase. K jednotlivým časům u zastávek je vhodné si uložit
+ilinku, která způsobila úpravu na daný čas, abychom byli schopni zrekonstruovat
+spojení využité k dosažení dané zastávky. 
+
+Tento algoritus je snadno implementovatelný a při vhodně zvolených datových
+strukturách velmi rychlý a vhodně využívající keš. 
+\subsection{Contraction hierarchy}
