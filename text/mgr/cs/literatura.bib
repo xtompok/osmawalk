@@ -92,3 +92,28 @@
   volume = {6},
   pages = {1-25}
 }
+
+
+@article{RAPTOR,
+author = {Daniel Delling and Thomas Pajor and Renato F. Werneck},
+title = {Round-Based Public Transit Routing},
+journal = {Transportation Science},
+volume = {49},
+number = {3},
+pages = {591-604},
+year = {2015},
+doi = {10.1287/trsc.2014.0534},
+
+URL = { 
+        https://doi.org/10.1287/trsc.2014.0534
+    
+},
+eprint = { 
+        https://doi.org/10.1287/trsc.2014.0534
+    
+}
+,
+    abstract = { We study the problem of computing all Pareto-optimal journeys in a dynamic public transit network for multiple criteria, such as arrival time and number of transfers. Existing algorithms consider this as a graph problem and solve it using various graph search algorithms. Unfortunately, this leads to either high query times or suboptimal solutions. We take a different approach. We introduce RAPTOR, our novel round-based public transit router. Unlike previous algorithms, it is not Dijkstra-based, looks at each route (such as a bus line) in the network at most once per round, and can be made even faster with simple pruning rules and parallelization using multiple cores. Because it does not rely on preprocessing, RAPTOR works in fully dynamic scenarios. Starting from arrival time and number of transfers as criteria, it can be easily extended to handle flexible departure times or arbitrary additional criteria. As practical examples we consider fare zones and reliability of transfers. When run on complex public transportation networks (such as London), RAPTOR computes all Pareto-optimal journeys between two random locations an order of magnitude faster than previous approaches, which easily enables interactive applications. }
+}
+
+
