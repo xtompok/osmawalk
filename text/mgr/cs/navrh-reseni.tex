@@ -83,11 +83,38 @@ používají právě tato čísla. Původní identifikátor je u zastávky stál
 kvůli následnému párování (viz níže), ale již se pro vazbu mezi daty nepoužívá.
 \TODO: co z toho do implementace?
 
-\subsection{Platnost jízdního řádu}
-
 \subsection{Rozdělení linek}
+Formát GTFS rozlišuje linky a spoje. Linka obsahuje všechny společné údaje a
+jednotlivé spoje pak reprezentují jízdu vozidla dané linky mezi konkrétními
+stanicemi, různé spoje jedné linky mohou projíždět různé posloupnosti stanic
+(například spoje zatahující do vozovny, zkrácené vložené spoje, \dots).
+Algoritmus RAPTOR ale vyžaduje, aby spoje konkrétní linky projížděly vždy
+stejnou posloupnost zastávek. Abychom toho dosáhli, v rámci předzpracování
+najdeme všechny různé posloupnosti zastávek projížděné jednou linkou a vytvoříme
+sublinky pro každou takovou posloupnost. Tyto sublinky zdědí společné údaje z
+původní linky a již splňují požadavky kladené algoritmem RAPTOR. 
+
+\subsection{Platnost jízdního řádu}
+Ve formátu GTFS jsou linky, spoje a dny, ve kterých daný spoj jede, provázány
+pomocí tabulky trips. V předchozím odstavci jsme popsali rozdělení linek podle
+toho, kudy spoje jedou, nyní využijeme, že každý spoj v GTFS má právě jednu
+množinu dní, kdy jede. \TODO prozkoumat, jak předzpracování doopravdy funguje
+U každé sublinky si pak držíme odkaz na to, kdy jede.
+
+Místo dvojího způsobu záznamu, kdy daný spoj jede -- pomocí výčtu dnů v týdnu a
+seznamu výjimek -- si pro každou možnost, jak může nějaký spoj jet, uložíme
+bitmapu platnosti a datum začátku a konce platnosti současného jízdního řádu. 
+Bitmapa začíná první den platnosti a $i$-tý bit udává, zda i-tý den od začátku
+platnosti daný spoj jede.  
 
 \subsection{Podzemní stanice}
+Při párování zastávek a pozic na mapě budeme potřebovat zvlášť ošetřovat
+podzemní stanice, ze kterých se nelze vydat libovolným směrem, ale jen
+eskalátorovým tunelem. V rámci předzpracování označíme jako podzemní takové
+zastávky, ve kterých jezdí metro. V Praze takovýto předpoklad funguje správně,
+protože všechny nadzemní stanice metra jsou zmapovány detailním způsobem, kdy
+zpracování dat funguje korektně, pro jiná města s jinou kvalitou zmapování by
+bylo potřeba stanovit odlišná kritéria.
 
 
 \section{Párování zdrojových dat}
@@ -116,7 +143,8 @@ za sebou, například v autobusových terminálech. Pokoušet se párovat zastá
 GTFS pouze na zastávky v OSM by bylo velmi náročné s nejistým výsledkem.
 Využíváme proto toho, že v OSM máme zmapované nejen zastávky, ale i cesty a
 zastávkám v GTFS vytváříme speciální vrcholy dle jejich zeměpisné pozice v GTFS
-a pomocí zkratek (viz dále \TODO ref) je spojujeme s nejbližšími cestami.
+a pomocí zkratek je spojujeme s nejbližšími cestami. Bod reprezentující zastávku
+pak v mapových datech označíme jako zastávku.
 
 Pro zastávky z GTFS, pro které máme v OSM odpovídající ID, použijeme polohu z
 OSM a zkratky k cestní síti hledáme z této polohy. Zkratky jsou i zde potřeba,
@@ -138,9 +166,7 @@ aproximaci přístupu do metra. Jak bude postupovat mapování stanic metra, bud
 tento typ stanic postupně eliminován a dojde ke zpřesnění navigace při
 přestupech.
 
-Z hlediska implementace jsou vždy preferovány zastávky a stanice zmapované
-přesněji, které mají ID, stačí tedy vylepšovat mapu a při dalším předzpracování
-dat se nově zmapované zastávky dostanou i do vyhledávače.
+Vždy jsou preferovány zastávky a stanice zmapované přesněji, které mají ID,
+stačí tedy vylepšovat mapu a při dalším předzpracování dat se nově zmapované
+zastávky dostanou i do vyhledávače.
 
-\section{Příprava společných vyhledávacích dat}
-    - generovani spojek

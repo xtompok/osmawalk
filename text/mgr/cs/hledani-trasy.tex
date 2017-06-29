@@ -1,4 +1,54 @@
 \chapter{Vyhledávání trasy}
+V připravených datech je možné opakovaně vyhledávat spojení. Ke hledání spojení
+se využívá Dijkstrův algoritmus a RAPTOR. Nejprve se naleznou nejbližší vrcholy
+grafu k zadaným výchozím a cílovým souřadnicím. Poté se začne Dijkstrovým
+algoritmem prohledávat graf pěších cest. Pokud při prohledávání narazíme na
+zastávku MHD, provedeme z této zastávky jedno kolo algoritmu RAPTOR, najdeme
+tedy všechny zastávky, kam se umíme bez přestupu dostat z dané zastávky. Všechny
+tyto zastávky přidáme do fronty Dijkstrova algoritmu s časem dosažení rovným
+času příjezdu do dané stanice. 
+
+Během běhu algoritmu počítáme pro každou cestu její penaltu -- čím větší má
+cesta penaltu, tím horší pro nás je. Samotný Dijkstrův algoritmus bere vrcholy
+podle času dosažení. Po nalezení nejrychlejší cesty se nezastaví, ale počítá
+dokud nezpracovává vrchol o nějaký koeficient horší, než je nejkratší cesta. 
+Tento postup byl zvolen, protože při hledání cesty se chce uživatel dostat z výchozího
+do cílového bodu co nejrychleji, ale má nějaké preference na to, jak by měla
+cesta vypadat. Pokud vyhledáváme podle času, dostane uživatel jednak nejkratší
+cestu, jednak alternativní cesty, které jsou sice o něco delší, ale více splňují
+představy uživatele o optimální cestě.
+
+Pokud bychom během vyhledávání udržovali všechny trojice (vrchol, čas příjezdu,
+penalta), byl by procházený stavový prostor obrovský a vyhledávání by bylo velmi
+náročné na paměť i čas. Pro redukci stavového prostoru uvažujeme uspořádání pro
+každý vrchol, kde spojení $A$ je horší než spojení $B$, pokud $A$ má pozdější
+čas dosažení vrcholu a vyšší penaltu než $B$. V takovém případě spojení $A$ do
+fronty otevřených vrcholů vůbec nepřidáváme, případně ho zahodíme, když na něj
+ve frontě narazíme. Takovéto situaci říkáme, že spojení $B$ majorizuje spojení
+$A$
+
+\section{Redukce duplicitních tras}
+\TODO implementovat
+
+I přes uvažování pouze nemajorizovaných spojení získáme mnoho spojení, které se
+liší jen drobnými změnami v pěších částech trasy. Pro skutečnou cestu podle
+nalezeného spojení nemají tyto drobné rozdíly význam, proto se snažíme takovéto
+duplicity ignorovat. Základním předpokladem, který učiníme, budiž to, že pokud
+se dvě spojení liší v použitém spoji MHD, tak chceme obě zobrazit. Dále se tedy
+zabýváme jen spojeními, které mají shodné části využívající MHD. Jako duplicitní
+spojení bychom rádi označili taková spojení, která vedou celou cestu blízko
+sebe. Takovéto pravidlo je ale časově náročné implementovat, použijeme
+zjednodušenou variantu, kdy vezmeme pouze pěší části spojení a porovnáváme vždy
+odpovídající pěší části proti sobě. Procházíme hrany a hledáme, kde se liší.
+Zapamatujeme si index první takovéto hrany. Pak projdeme úsek od konce a opět
+hledáme první hranu, kde se liší. Tímto máme ohraničený úsek, kde se cesty liší.
+Podíváme se u obou cest na vrchol uprostřed tohoto úseku a pokud jsou tyto
+vrcholy příliš blízko sebe, označíme úsek jako duplicitní. Pokud mají dvě
+spojení všechny pěší úseky duplicitní, jedno ze spojení zahodíme. Idea je, že
+pokud se dvě cesty liší v nějakém úseku, tak uprostřed tohoto úseku budou od
+sebe nejdál. Toto pravidlo sice může eliminovat i cesty, které jsou odlišné a
+potkávají se zrovna uprostřed, ale to se nestává často a pravidlo lze
+implementovat v lineárním čase.
     - chodici a mhd hrany
     - funkce na vypocet penalt
     - eliminace duplicitnich tras
