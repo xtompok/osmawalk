@@ -19,12 +19,42 @@ Praha\footnote{\url{http://opendata.iprpraha.cz/DPP/JR/jrdata.zip}}. Tato data
 obsahují metro, tramvaje, autobusy a přívozy v Praze a okolí, bohužel neobsahují
 integrované vlakové spoje.
 
-Struktura GTFS je následující:
-%TODO rozepsat
+GTFS je distribuováno jako archiv ZIP obsahující jednotlivé tabulky ve formátu
+CSV. Význam jednotlivých tabulek je následující:
 \begin{itemize}
-\item zastávky
-\item linky
-\item spoje
+\item {\em agency.txt} obsahuje informace o dopravcích na jednotlivých linkách.
+V našem vyhledávání není používán.
+\item {\em stops.txt} obsahuje informace o zastávkách. Zastávky jsou dvou typů.
+Prvním typem je zastávkový stojan, který reprezentuje fyzické místo, kde
+zastavuje nějaký spoj některé linky. Druhým typem je \uv{stanice}, která udává
+oblast několika stojanů, obvykle stejného jména. Nemusí mít fyzickou
+reprezentaci a slouží pro zobrazování v mapě a svázání logicky blízkých stojanů.
+Protože stanice pro náš vyhledávač nenese důležitou informaci, využíváme pouze
+zastávkové stojany (\TODO implementovat). Pro vyhledávání spojení využíváme
+následující položky:
+\begin{itemize}
+	\item {\tt stop\_id} -- jednoznačný identifikátor zastávky
+	\item {\tt stop\_name} -- název zastávky
+	\item {\tt stop\_lat, stop\_lon} -- poloha zastávky
+	\item {\tt location\_type} -- informace, zda jde o stojan, nebo stanici
+\end{itemize}
+\item {\em routes.txt} obsahuje informace o linkovém vedení. Pro vyhledávání
+spojení využíváme následující položky:
+\begin{itemize}
+	\item {\tt route\_id} --
+	\item {\tt route\_short\_name} -- 
+	\item {\tt route\_type} -- 
+\end{itemize}
+\item {\em trips.txt} obsahuje informace o spojích. Tato tabulka slouží ke
+svázání spoje (cesty konkrétního dopravního prostředku po posloupnosti zastávek
+v daný čas), linky a množiny dní, kdy daný spoj jezdí. Pro vyhledávání využíváme
+následující položky:
+\begin{itemize}
+	\item {\tt route\_id} -- 
+	\item {\tt service\_id} -- 
+	\item {\tt trip\_id} -- 
+	\item {\tt } -- 
+\end{itemize}
 \item časy zastavení
 \item kalendář
 \end{itemize}
