@@ -41,18 +41,18 @@ následující položky:
 \item {\em routes.txt} obsahuje informace o linkovém vedení. Pro vyhledávání
 spojení využíváme následující položky:
 \begin{itemize}
-	\item {\tt route\_id} --
-	\item {\tt route\_short\_name} -- 
-	\item {\tt route\_type} -- 
+	\item {\tt route\_id} -- jednoznačný identifikátor linky
+	\item {\tt route\_short\_name} -- krátký název linky, v Praze označení linky
+	\item {\tt route\_type} -- typ dopravního prostředku linky, například autobus, loď, metro
 \end{itemize}
 \item {\em trips.txt} obsahuje informace o spojích. Tato tabulka slouží ke
 svázání spoje (cesty konkrétního dopravního prostředku po posloupnosti zastávek
 v daný čas), linky a množiny dní, kdy daný spoj jezdí. Pro vyhledávání využíváme
 následující položky:
 \begin{itemize}
-	\item {\tt route\_id} -- 
-	\item {\tt service\_id} -- 
-	\item {\tt trip\_id} -- 
+	\item {\tt route\_id} -- identifikátor linky
+	\item {\tt service\_id} -- identifikátor jízdních dní spoje
+	\item {\tt trip\_id} -- jednoznačný identifikátor spoje
 	\item {\tt } -- 
 \end{itemize}
 \item časy zastavení

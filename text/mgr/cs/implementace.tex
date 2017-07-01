@@ -1,2 +1,37 @@
 \chapter{Implementace}
-- implementace meho reseni
+\section{Příprava mapových dat}
+Počáteční fáze přípravy dat je shodná s přípravou data v bakalářské práci -- pomocí shellového skriptu je nalezeno poslední vydání OSM dat pro Českou republiku, tato data jsou stažena, rozbalena a pomocí programu osmconvert je z nich vyříznuta definovaná oblast. Současně jsou stažena i výšková data z projektu SRTM. V případě potřeby generování vyhledávacích dat pro jiné město nebo jinou zemi je potřeba tento skript upravit, pro jiné české město stačí přepsat hranice výřezu, jiný stát by potřeboval i vlastní zdroj dat OSM a upravit souřadnice pro stahování SRTM. 
+
+(\TODO nelhat moc, zjistit, co bylo uděláno na SFG) Další pokračování přípravy dat je sice sémanticky stejné, jako bylo v bakalářské práci, ale mechanizmus přípravy byl kompletně změněn. Data jsou nejprve klasifikována, pro tento účel byl vytvořen kód v jazyce C, který dle dodané konfigurace přiřadí typ hranám a nově i vrcholům. Jazyk C jsme zvolili z důvodu rychlosti a paměťové efektivity, velkou roli také hrála znalost jazyka autorem. Ve většině programů, které jsme napsali je také využívána knihovna LibUCW (\TODO ref), která poskytuje velké množství algoritmů, datových struktur a obvyklých konstrukcí v C a je naprogramována s ohledem na maximální výkon.
+
+Výsledek klasifikace je uložen do formátu PBF jako objekt Premap. Tento objekt je následně nahrán do databáze PostgreSQL s nadstavbou PostGIS pomocí kombinace shellového skriptu a programu v C, který čte Premap a vytváří z něj CSV. Zkoušeli jsme různé varianty vkládání do databáze, protože jde o velké množství dat a tento způsob se ukázal nejefektivnější z jednoduchých způsobů vkládání. 
+
+Protože příprava dat je vlastně práce s velkým množstvím objektů naráz, jedná se o přístup velmi podobný databázovým systémům, které umí s velkým množstvím dat naráz pracovat. (\TODO někam umístit) 
+
+Další zpracování provádíme v databázi pomocí databázových dotazů a tvorby nových pomocných tabulek. Oproti zpracování v C, které bylo uvedeno v bakalářské práci, jsme zpracováním v databázi získali možnost připravovat data i pro velká města na běžném počítači. Původní verze programu měla totiž všechna data v paměti, což pro Prahu znamenalo až desítky gigabajtů dat a přepsání programu tak, aby byl prostorově úspornější by bylo poměrně náročné, byla proto raději zvolena jiná platforma, která poskytuje několik výhod:
+\begin{itemize}
+	\item Výměna paměti za čas -- v PostgreSQL si snadno můžeme podle dostupné paměti stroje zvolit množství paměti, kterou databáze bude využívat. Na strojích s menší velikostí operační paměti se data budou připravovat déle, ale zvládnou se připravit. Stejně tak i výkonnější stroje mohou být využity na maximum a čas zpracování bude nižší. Všechna tato nastavení jsou pouze nastavení databázového systému, na kódu práce se nic nemění
+	\item Abstrakce -- použitím databázového systému nás odstíní od většiny implementačních detailů původní práce a zůstane nám kratší a výstižnější kód, který popisuje přípravu dat. Na druhou stranu s použitím databázového systému vzniká nutnost tvorby indexů, aby databáze pracovala efektivně. Některé jsou přímočaré, u jiných je potřeba zkoumat různá řešení, ale použitím nevhodného indexu neztratíme kvalitu dat, jen rychlost výpočtu. 
+	\item Snadná rozšiřitelnost -- protože jsme se díky abstrakci oprostili od implementačních detailů, je mnohem jednodušší upravovat průchod přípravou dat, případně do něj přidávat další fáze.
+
+ 
+step linesplit_function
+step split_ways 
+step ways_geom
+step mp_geom
+step barriers
+step walk_in_nodes
+step bbox_function
+step direct_candidates
+step ok_candidates
+step direct_filter
+step stops
+step stops_bbox
+step stops_direct_cand
+step stops_direct_ok
+
+\end{itemize}
+\section{Příprava jízdních řádů}
+\section{Vyhledávání}
+\subsection{Vyhledávací knihovna}
+\subsection{Webová aplikace}
