@@ -57,8 +57,19 @@ platforma, která poskytuje několik výhod:
 \end{itemize}
 
 \subsection{Rozdělení dlouhých cest}
-\TODO step linesplit\_function
-\TODO step split\_ways 
+Rozdělení příliš dlouhých úseků cest jsme implementovali pomocí funkce v jazyku
+plpgsql, který je integrován v databázovém systému. Funkce dostane ID cesty ke
+zpracování a maximální délku segmentu jako parametry. Pak postupně prochází
+jednotlivé segmenty mezi body cesty a v případě, že narazí na segment delší než
+je maximální délka segmentu, tak ho postupně od začátku dělí na úseky maximální
+povolené délky a přidává do tabulky uzlů uzly, které vznikly dělením. Všechny
+uzly (jak původní, tak nově vzniklé) funkce průběžně vrací v tom pořadí, v jakém
+se vyskytují na cestě. Z tabulky, která váže uzly k cestám, jsou pak odebrány
+staré vazby cest, které byly děleny, a jsou nahrazeny novými vazbami včetně
+vložených bodů. Tabulka po této operaci zůstává konzistentní a lze ji použít pro
+tvorbu geometrií cest. Dělí se jen pochozí cesty, dělit překážky a
+neklasifikované cesty nemá smysl, protože se u nich absence dlouhých úseků
+nevyužívá.
 
 \subsection{Tvorba geometrií}
 Abychom mohli využívat nadstavby PostGIS pro zodpovídání prostorových dotazů,
@@ -122,10 +133,45 @@ vrcholu vede v průměru maximálně 5 zkratek, což je empiricky zjištěná ko
 na základě analýzy mapových dat a experimentů s generováním zkratek.
 
 \section{Příprava jízdních řádů}
-step stops
-step stops\_bbox
-step stops\_direct\_cand
-step stops\_direct\_ok
+Jízdní řády jsou nejprve staženy pomocí shellového skriptu a nahrány do
+PostgreSQL databáze, jejíž schema odpovídá formátu GTFS. Průchod přes databázi
+jsme zvolili, poněvadž nám pak dává možnost ptát se pouze na část dat,
+aniž bychom museli držet celá data v paměti. Výhledově je také možné přesunout
+celé předzpracování do databáze, což by ušetřilo paměť nutnou pro předzpracování
+v současné implementaci.
+
+Zpracování jízdních řádů dále pokračuje skriptem v jazyce Python, který rozdělí
+linky na sublinky, přiřadí k nim spoje a (\TODO dopsat, zmínka o kompirmovaných
+tabulkách). Nakonec vytvoří 3 soubory -- {\tt tt.bin} obsahující jízdní řády pro
+hledání spojení, {\tt routes.bin} obsahující informace o linkách, v současné
+době není využíván a {\tt stopslut.csv} obsahující údaje nutné pro propojení dat
+z GTFS s daty z OSM: ID zastávky v GTFS, ID zastávky v připravených datech,
+jméno zastávky, její souřadnice a informaci, jestli je zastávka podzemní. 
+
+Data jízdních řádů jsou již připravena pro použití ke hledání, dále zpracováváme
+pouze propojovací soubor {\tt stopslut.csv}. Ten nejprve nahrajeme do databáze
+jako novou tabulku. Poté zjistíme, které zastávkové stojany mají ID v OSM a tuto
+informaci si u zastávek uložíme. Protože následně budeme opět hledat zkratky,
+uložíme si pro každou zastávku i údaj o tom, ve kterých dvou čtvercích leží.  
+Následuje generování zkratek mezi zastávkami a pochozími cestami. Toto se děje
+zvlášť pro povrchové a zvlášť pro podzemní zastávky, povrchové spojujeme s body
+na povrchu, podzemní s body v podzemí. Z nalezených zkratek opět vyloučíme ty,
+které kříží nějakou překážku a nakonec přidáme vazby stanic metra, které jsou
+detailně zmapované v OSM s body zastavení v mapě. Na tuto vazbu používáme
+speciální typ hrany, abychom tyto detailní vazby odlišili od obecných zkratek,
+které nemusí vždy být možné. 
+
+Nyní již máme v databázi připravená všechna data potřebná pro tvorbu
+vyhledávacího grafu. Data z tabulek jsou exportována do CSV a pak je pomocí
+jednoduchého programu v C vytvořen výstupní soubor PBF s vyhledávacím grafem a
+údaji o vazbě na jízdní řád. V tomto kroku je také kontrolována dosažitelnost
+všech vrcholů grafu a je vybrána největší souvislá komponenta, která obsahuje
+alespoň polovinu vrcholů. Samotné vyhledávání pak hledá vždy v souvislém grafu.
+(\TODO zmínit i v obecném popisu) Protože při změně jízdních řádů dochází ke změnám
+očíslování zastávek, je potřeba přegenerovat i tu část generování vyhledávacího
+grafu, která zajišťuje párování zastávek. Tato část není výpočetně náročná, je
+proto možné ji spouštět při každé změně jízdních řádů. Naopak není přegenerování
+nutné, při aktualizaci mapových dat není třeba přegenerovávat jízdní řády. 
 \section{Vyhledávání}
 \subsection{Vyhledávací knihovna}
 \subsection{Webová aplikace}
