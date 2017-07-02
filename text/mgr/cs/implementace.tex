@@ -1,37 +1,131 @@
 \chapter{Implementace}
 \section{Příprava mapových dat}
-Počáteční fáze přípravy dat je shodná s přípravou data v bakalářské práci -- pomocí shellového skriptu je nalezeno poslední vydání OSM dat pro Českou republiku, tato data jsou stažena, rozbalena a pomocí programu osmconvert je z nich vyříznuta definovaná oblast. Současně jsou stažena i výšková data z projektu SRTM. V případě potřeby generování vyhledávacích dat pro jiné město nebo jinou zemi je potřeba tento skript upravit, pro jiné české město stačí přepsat hranice výřezu, jiný stát by potřeboval i vlastní zdroj dat OSM a upravit souřadnice pro stahování SRTM. 
+Počáteční fáze přípravy dat je shodná s přípravou data v bakalářské práci --
+pomocí shellového skriptu je nalezeno poslední vydání OSM dat pro Českou
+republiku, tato data jsou stažena, rozbalena a pomocí programu osmconvert je z
+nich vyříznuta definovaná oblast. Současně jsou stažena i výšková data z
+projektu SRTM. V případě potřeby generování vyhledávacích dat pro jiné město
+nebo jinou zemi je potřeba tento skript upravit, pro jiné české město stačí
+přepsat hranice výřezu, jiný stát by potřeboval i vlastní zdroj dat OSM a
+upravit souřadnice pro stahování SRTM. 
 
-(\TODO nelhat moc, zjistit, co bylo uděláno na SFG) Další pokračování přípravy dat je sice sémanticky stejné, jako bylo v bakalářské práci, ale mechanizmus přípravy byl kompletně změněn. Data jsou nejprve klasifikována, pro tento účel byl vytvořen kód v jazyce C, který dle dodané konfigurace přiřadí typ hranám a nově i vrcholům. Jazyk C jsme zvolili z důvodu rychlosti a paměťové efektivity, velkou roli také hrála znalost jazyka autorem. Ve většině programů, které jsme napsali je také využívána knihovna LibUCW (\TODO ref), která poskytuje velké množství algoritmů, datových struktur a obvyklých konstrukcí v C a je naprogramována s ohledem na maximální výkon.
+(\TODO nelhat moc, zjistit, co bylo uděláno na SFG) Další pokračování přípravy
+dat je sice sémanticky stejné, jako bylo v bakalářské práci, ale mechanizmus
+přípravy byl kompletně změněn. Data jsou nejprve klasifikována, pro tento účel
+byl vytvořen kód v jazyce C, který dle dodané konfigurace přiřadí typ hranám a
+nově i vrcholům. Jazyk C jsme zvolili z důvodu rychlosti a paměťové efektivity,
+velkou roli také hrála znalost jazyka autorem. Ve většině programů, které jsme
+napsali je také využívána knihovna LibUCW (\TODO ref), která poskytuje velké
+množství algoritmů, datových struktur a obvyklých konstrukcí v C a je
+naprogramována s ohledem na maximální výkon.
 
-Výsledek klasifikace je uložen do formátu PBF jako objekt Premap. Tento objekt je následně nahrán do databáze PostgreSQL s nadstavbou PostGIS pomocí kombinace shellového skriptu a programu v C, který čte Premap a vytváří z něj CSV. Zkoušeli jsme různé varianty vkládání do databáze, protože jde o velké množství dat a tento způsob se ukázal nejefektivnější z jednoduchých způsobů vkládání. 
+Výsledek klasifikace je uložen do formátu PBF jako objekt Premap. Tento objekt
+je následně nahrán do databáze PostgreSQL s nadstavbou PostGIS pomocí kombinace
+shellového skriptu a programu v C, který čte Premap a vytváří z něj CSV.
+Zkoušeli jsme různé varianty vkládání do databáze, protože jde o velké množství
+dat a tento způsob se ukázal nejefektivnější z jednoduchých způsobů vkládání. 
 
-Protože příprava dat je vlastně práce s velkým množstvím objektů naráz, jedná se o přístup velmi podobný databázovým systémům, které umí s velkým množstvím dat naráz pracovat. (\TODO někam umístit) 
+Protože příprava dat je vlastně práce s velkým množstvím objektů naráz, jedná se
+o přístup velmi podobný databázovým systémům, které umí s velkým množstvím dat
+naráz pracovat. (\TODO někam umístit) 
 
-Další zpracování provádíme v databázi pomocí databázových dotazů a tvorby nových pomocných tabulek. Oproti zpracování v C, které bylo uvedeno v bakalářské práci, jsme zpracováním v databázi získali možnost připravovat data i pro velká města na běžném počítači. Původní verze programu měla totiž všechna data v paměti, což pro Prahu znamenalo až desítky gigabajtů dat a přepsání programu tak, aby byl prostorově úspornější by bylo poměrně náročné, byla proto raději zvolena jiná platforma, která poskytuje několik výhod:
+Další zpracování provádíme v databázi pomocí databázových dotazů a tvorby nových
+pomocných tabulek. Oproti zpracování v C, které bylo uvedeno v bakalářské práci,
+jsme zpracováním v databázi získali možnost připravovat data i pro velká města
+na běžném počítači. Původní verze programu měla totiž všechna data v paměti, což
+pro Prahu znamenalo až desítky gigabajtů dat a přepsání programu tak, aby byl
+prostorově úspornější by bylo poměrně náročné, byla proto raději zvolena jiná
+platforma, která poskytuje několik výhod:
 \begin{itemize}
-	\item Výměna paměti za čas -- v PostgreSQL si snadno můžeme podle dostupné paměti stroje zvolit množství paměti, kterou databáze bude využívat. Na strojích s menší velikostí operační paměti se data budou připravovat déle, ale zvládnou se připravit. Stejně tak i výkonnější stroje mohou být využity na maximum a čas zpracování bude nižší. Všechna tato nastavení jsou pouze nastavení databázového systému, na kódu práce se nic nemění
-	\item Abstrakce -- použitím databázového systému nás odstíní od většiny implementačních detailů původní práce a zůstane nám kratší a výstižnější kód, který popisuje přípravu dat. Na druhou stranu s použitím databázového systému vzniká nutnost tvorby indexů, aby databáze pracovala efektivně. Některé jsou přímočaré, u jiných je potřeba zkoumat různá řešení, ale použitím nevhodného indexu neztratíme kvalitu dat, jen rychlost výpočtu. 
-	\item Snadná rozšiřitelnost -- protože jsme se díky abstrakci oprostili od implementačních detailů, je mnohem jednodušší upravovat průchod přípravou dat, případně do něj přidávat další fáze.
-
- 
-step linesplit_function
-step split_ways 
-step ways_geom
-step mp_geom
-step barriers
-step walk_in_nodes
-step bbox_function
-step direct_candidates
-step ok_candidates
-step direct_filter
-step stops
-step stops_bbox
-step stops_direct_cand
-step stops_direct_ok
-
+	\item Výměna paměti za čas -- v PostgreSQL si snadno můžeme podle
+	dostupné paměti stroje zvolit množství paměti, kterou databáze bude
+	využívat. Na strojích s menší velikostí operační paměti se data budou
+	připravovat déle, ale zvládnou se připravit. Stejně tak i výkonnější
+	stroje mohou být využity na maximum a čas zpracování bude nižší. Všechna
+	tato nastavení jsou pouze nastavení databázového systému, na kódu práce
+	se nic nemění
+	\item Abstrakce -- použitím databázového systému nás odstíní od většiny
+	implementačních detailů původní práce a zůstane nám kratší a výstižnější
+	kód, který popisuje přípravu dat. Na druhou stranu s použitím
+	databázového systému vzniká nutnost tvorby indexů, aby databáze
+	pracovala efektivně. Některé jsou přímočaré, u jiných je potřeba zkoumat
+	různá řešení, ale použitím nevhodného indexu neztratíme kvalitu dat, jen
+	rychlost výpočtu. 
+	\item Snadná rozšiřitelnost -- protože jsme se díky abstrakci oprostili
+	od implementačních detailů, je mnohem jednodušší upravovat průchod
+	přípravou dat, případně do něj přidávat další fáze.
 \end{itemize}
+
+\subsection{Rozdělení dlouhých cest}
+\TODO step linesplit\_function
+\TODO step split\_ways 
+
+\subsection{Tvorba geometrií}
+Abychom mohli využívat nadstavby PostGIS pro zodpovídání prostorových dotazů,
+musíme nejprve objektům přiřadit geometrie. V datech OSM máme určené pozice bodů
+a u složitějších objektů seznam bodů, ze kterých se objekty skládají a jejich
+pořadí. Z těchto informací sestavíme pomocí prostředků PostGISu geometrie
+jednotlivých objektů a k objektům si je uložíme. Jak jsme již zmínili dříve,
+používáme pouze uzly, cesty a z relací multipolygony. Z multipolygonů bereme
+pouze vnější okraj, což zařídíme snadno pomocí prostředků PostGISu, který přímo
+podporuje multipolygony a umí určit jejich vnější okraj.
+ 
+\subsection{Příprava překážek}
+Jako překážky bereme všechny objekty, které klasifikací získaly typ překážka.
+U uzavřených cest je potřeba rozhodnout, zda se jedná o obvod nebo i vnitřní
+oblast. V rámci klasifikace se u každé cesty na základě kritérií rozhodne,
+jestli by daná cesta měla být plochou a tato informace je využívána právě při
+přípravě překážek. Součástí tvorby překážek také musí být ošetření nesprávných
+geometrií, které vznikají jednak na okrajích mapy, kde některé cesty nejsou
+kompletní, protože obsahují body mimo výřez, jednak uvnitř mapy vlivem chybných
+editací od uživatelů, kde vznikají špatně uzavřené polygony, dva uzly na stejném
+místě a další chyby, které nesmí vést k selhání přípravy dat.
+
+\subsection{Tvorba zkratek}
+Tvorba zkratek je stejně jako v bakalářské práci i zde nejsložitější a
+nejnáročnější částí přípravy dat. Nejprve je nutné zvolit body, mezi kterými je
+možné zkratky vytvářet. Protože musí spojovat nějaké pochozí cesty, nejprve
+vybereme všechny vrcholy, které jsou na nějakých pochozích cestách. Zkratky
+nelze vytvářet uvnitř překážek ani v podzemí, tyto vrcholy posléze z výběru
+odebereme a získáme všechny kandidáty na začátky a konce zkratek. 
+
+Nyní bychom potřebovali najít všechny dvojice bodů, které jsou k sobě blíže než
+30\,m (Konstanta byla zvolena empiricky z mapových dat, aby zkratky doplňovaly
+potřebné pěší vazby a zároveň nebyly zbytečně dlouhé.) a z nich vybrat některé,
+ze kterých se stanou zkratky. Takováto přímočará implementace je ale příliš
+pomalá, protože vrcholů je velké množství a funkce pro počítání vzdálenosti je
+výpočetně náročná, vede to tedy na dlouhý výpočetní čas.
+
+Abychom tento problém obešli, využili jsme toho, že zkratky jsou lokální a není
+tedy třeba porovnávat dvojice bodů, které jsou od sebe příliš vzdáleny. Použili
+jsme techniku proložených čtvercových sítích, kde mapový výřez rozdělíme
+čtvercovou sítí na čtverce $100\times100$\,metrů, čtverce očíslujeme a každému
+bodu přiřadíme číslo čtverce, ve kterém leží. Poté čtvercovou síť posuneme o
+50\,metrů uhlopříčně a akci opakujeme. U každého bodu si nyní pamatujeme čísla
+dvou čtverců, ve kterých bod leží. Pokud nyní vezmeme libovolné 2 body, které
+jsou k sobě blíže než 50\,m, tak budou mít společný první nebo druhý čtverec.
+Pokud mají společný první, pak jsme hotovi. Pokud první společný nemají, pak
+vezmeme druhý čtverec (\TODO dovysvětlit).
+
+Protože platí předchozí tvrzení, můžeme nyní vzít vždy jen ty dvojice bodů,
+které sdílí jeden ze čtverců. Takto jednak získáme méně dvojic, u kterých je
+potřeba testovat vzájemná vzdálenost, jednak se takovýto dotaz dá snadno
+zrychlit použitím indexů, protože se porovnávají dvě čísla na rovnost. 
+
+Když máme všechny blízké dvojice bodů, jako kandidáty na zkratky uvážíme
+všechny úsečky mezi blízkými dvojicemi, které neprotínají žádnou překážku. Z
+takovýchto dvojic pak vybíráme zkratky, které skutečně použijeme. Děláme
+tak pomocí grafu, kde hrany jsou zkratky a vrcholy konce zkratek. Každou zkratku
+pak přidáme s pravděpodobností $\frac{5}{\delta}$, kde $\delta$ je stupeň konce
+zkratky s vyšším stupněm v grafu. Tento výběr vede k situaci, že z každého
+vrcholu vede v průměru maximálně 5 zkratek, což je empiricky zjištěná konstanta
+na základě analýzy mapových dat a experimentů s generováním zkratek.
+
 \section{Příprava jízdních řádů}
+step stops
+step stops\_bbox
+step stops\_direct\_cand
+step stops\_direct\_ok
 \section{Vyhledávání}
 \subsection{Vyhledávací knihovna}
 \subsection{Webová aplikace}
