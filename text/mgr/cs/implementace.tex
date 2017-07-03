@@ -172,6 +172,55 @@ očíslování zastávek, je potřeba přegenerovat i tu část generování vyh
 grafu, která zajišťuje párování zastávek. Tato část není výpočetně náročná, je
 proto možné ji spouštět při každé změně jízdních řádů. Naopak není přegenerování
 nutné, při aktualizaci mapových dat není třeba přegenerovávat jízdní řády. 
+
 \section{Vyhledávání}
+Vyhledávací část jsme navrhli jako knihovnu, která umožňuje snadnou integraci do
+jiných projektů. Knihovna je napsána v jazyce C s využitím knihovny LibUCW.
+Spolu s knihovnou jsme napsali i jednoduchý demonstrační program, který umožňuje
+vyhledávání z příkazové řádky. K pohodlnému interaktivnímu hledání jsme napsali
+jednoduchou webovou aplikaci, která umožňuje hledání spojení na mapě spolu s
+vizualizací jednotlivých nalezených tras a umožňuje jejich export do formátu
+GPX.
+
 \subsection{Vyhledávací knihovna}
+
 \subsection{Webová aplikace}
+Webová aplikace je napsaná v Pythonu ve webovém frameworku Flask(\TODO ref).
+Python jsme zvolili z důvodu snadné interakce se sdílenými knihovnami pro C a
+rychlosti vývoje aplikací v něm. Flask pak je jednoduchým webovým frameworkem,
+který se osvědčil na jiných projektech. Webová aplikace má dvě části -- backend,
+který zajišťuje hledání cesty a frontend, který předává informace o zvolených
+bodech backendu, zobrazuje mapu a výsledky vyhledávání. 
+
+\subsubsection{Backend}
+Backend se kromě renderování hlavní stránky z připraveného templatu stará o
+hledání tras a jejich předávání frontendu. Když je ve frontendu zvolen výchozí a
+cílový bod, je vyvolán požadavek {\tt GET
+/search?flon=<flon>\&flat=<flat>\&tlon=<tlon>\&tlat=<tlat>}, kde {\tt flon} a
+{\tt flat} je zeměpisná délka a šířka výchozího bodu a {\tt tlon} a {\tt tlat}
+je zeměpisná délka a šířka cílového bodu. Souřadnice výchozího a cílového bodu
+jsou předány vyhledávací knihovně a počká se na vrácení výsledku hledání. Tento
+výsledek je ve formátu PBF, jak je specifikováno v sekci Formát dat(\TODO ref).
+Protože knihovna Leaflet vyžaduje pro zobrazení prostorových dat formát
+GeoJSON(\TODO ref), je potřeba nalezené trasy převést do tohoto formátu. Při
+tomto převodu jsou současně spojeny všechny navazující hrany stejného typu (v
+případě MHD i stejného spoje) do jedné lomené linie a také jsou přidány časy
+příchodů na zastávku a odjezdu spoje MHD v případě nástupu do MHD a časy
+příjezdů na zastávku v případě výstupu z MHD. Všechna tato geografická data jsou
+pak zabalena jako FeatureCollection do formátu GeoJSON a spolu s informacemi o
+čase, pěší vzdálenosti a penaltě zabalena do pole všech tras, které je předáno
+frontendu ke zpracování. Přesný formát předávaných dat je popsán v sekci Formáty
+dat {\TODO ref} 
+\subsubsection{Frontend}
+Frontend je napsán v Javascriptu s použitím knihovny Leaflet pro operace s
+mapou. Jako mapový podklad je použita mapa od MapBoxu (\TODO ref), přes kterou
+jsou vykreslovány jednotlivé nalezené trasy. (\TODO odsud dál do popisu
+uživatelského rozhraní?) Interakce s mapou, kromě základního
+posouvání a zvětšování, probíhá klinutím na bod. Prvním kliknutím je zvolen
+výchozí bod, ze kterého hledat, druhým kliknutím je zvolen cílový bod do kterého
+se hledá trasa. Volbou cílového bodu je odeslán požadavek na backend. Po
+vyhledání trasy jsou výsledky zpracovány a zobrazeny. Souhrn každé nalezené
+trasy je zobrazen v levém sloupci, při zvolení dané trasy ke zobrazení je trasa
+přidána do mapy, podle typu hran jsou jednotlivé části trasy obarveny a jsou
+zvýrazněna místa přestupu na MHD. Detailní informace o MHD lze zobrazit
+kliknutím na ikonu u přestupní zastávky nebo na hranu spoje MHD.
