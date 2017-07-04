@@ -140,13 +140,21 @@ aniž bychom museli držet celá data v paměti. Výhledově je také možné p�
 celé předzpracování do databáze, což by ušetřilo paměť nutnou pro předzpracování
 v současné implementaci.
 
-Zpracování jízdních řádů dále pokračuje skriptem v jazyce Python, který rozdělí
-linky na sublinky, přiřadí k nim spoje a (\TODO dopsat, zmínka o kompirmovaných
-tabulkách). Nakonec vytvoří 3 soubory -- {\tt tt.bin} obsahující jízdní řády pro
-hledání spojení, {\tt routes.bin} obsahující informace o linkách, v současné
-době není využíván a {\tt stopslut.csv} obsahující údaje nutné pro propojení dat
-z GTFS s daty z OSM: ID zastávky v GTFS, ID zastávky v připravených datech,
-jméno zastávky, její souřadnice a informaci, jestli je zastávka podzemní. 
+Zpracování jízdních řádů dále pokračuje skriptem v jazyce Python, který nejprve
+převede zastávky a platnosti jízdních řádů do výstupního formátu PBF a následně
+rozdělí linky na sublinky, přiřadí k nim spoje a sestaví soubor {\tt tt.bin}
+obsahující jízdní řády pro hledání spojení. Dále vytvoří {\tt routes.bin}
+obsahující informace o linkách, v současné době není využíván a {\tt
+stopslut.csv} obsahující údaje nutné pro propojení dat z GTFS s daty z OSM: ID
+zastávky v GTFS, ID zastávky v připravených datech, jméno zastávky, její
+souřadnice a informaci, jestli je zastávka podzemní. Pro rozdělování linek na
+sublinky je potřebné pro každý spoj zkoumat, jestli je součástí nějaké již známé
+sublinky, nebo tvoří sublinku novou, která ještě není známá. Pokud je sublinka
+již známá, pouze se k ní přidá další spoj, v opačném případě se vytvoří nová
+sublinka. Tuto logiku řeší třída {\tt Subroute}. Zpracování jízdních řádů je
+poměrně náročné na paměť, při dalších úpravách kódu by bylo vhodné algoritmus
+přepsat efektivněji či využít toho, že jsou data již v databázi a přepsat
+přípravu data pomocí databázových funkcí.  
 
 Data jízdních řádů jsou již připravena pro použití ke hledání, dále zpracováváme
 pouze propojovací soubor {\tt stopslut.csv}. Ten nejprve nahrajeme do databáze
@@ -194,9 +202,33 @@ nevyužívá žádné pěší přesuny, ani mezi zastávkami stejného jména, p
 vyhledávání není tedy příliš vhodný, sloužil pro testování správnosti úprav
 jízdních řádů.(\TODO kdyby byl čas, doladit?)
 
-Knihovnu jsme implementovali jako sdílenou knihovnu v jazyce C (\TODO s
-LibUCW?), tudíž je snadno navázatelná na zbytek vyhledávacího algoritmu. 
- 
+Knihovnu jsme implementovali jako sdílenou knihovnu v jazyce C, tudíž je snadno
+navázatelná na zbytek vyhledávacího algoritmu. Knihovna obsahuje 3 hlavní
+funkce -- {\tt gen\_tt\_for\_date}, {\tt search\_con} a {\tt
+search\_stop\_cons}. Funkce {\tt search\_con} implementuje celý algortimus
+RAPTOR, v naší práci se dále nevyužívá.
+
+Funkce {\tt gen\_tt\_for\_date} zajišťuje přípravu vyhledávacích dat pro
+konkrétní den z celého jízdního řádu. K vyhledávání spojení by bylo možné použít
+přímo jízdní řád pro celé období, ale pak by při každém zkoumání možných spojů
+ze zastávky bylo potřeba ošetřovat případy, kdy daný spoj linky nejede či daná
+linka není konkrétní den vůbec v provozu. Pro co nejjednodušší zpracování
+konkrétní zastávky při vyhledávání jsme se rozhodli si pro vyhledávání připravit
+konkrétní jízdní řád na daný den, který obsahuje jen linky a spoje, které v daný
+den jedou. V současnosti se jízdní řád generuje pro každý den použitý v
+konkrétním hledání, ale bylo by možné si kešovat jízdní řády pro nejpoužívanější
+dny, což by stále příliš nezhoršovalo nároky na paměť a ušetřil by se čas při
+hledání. Jízdní řád pro konkrétní den obsahuje všechny zastávky z celkového
+jízdního řádu, neobsluhované zastávky mají prázdnou množinu linek. Formát
+jízdního řádu pro konkrétní den je uveden v sekci Formáty dat (\TODO ref).
+
+Funkce {\tt search\_stop\_conns} slouží k hledání zastávek dosažitelných bez
+přestupu z dané zastávky v daný čas. Funkce projde všechny linky, které daný den
+z dané zastávky jedou, najde první spoj, který odjíždí po čase příchodu na danou
+zastávku a všechny zastávky tohoto spoje uloží jako dosažitelné s časem příjezdu
+podle nalezeného spoje. Funkce vrátí seznam linek a pro každou dosažitelné
+zastávky s časem příjezdu. Přesný formát dat je uveden v sekci Formáty dat
+(\TODO ref).
 
 \subsection{Webová aplikace}
 Webová aplikace je napsaná v Pythonu ve webovém frameworku Flask(\TODO ref).
@@ -228,4 +260,4 @@ dat {\TODO ref}
 \subsubsection{Frontend}
 Frontend je napsán v Javascriptu s použitím knihovny Leaflet pro operace s
 mapou. Jako mapový podklad je použita mapa od MapBoxu (\TODO ref), přes kterou
-jsou vykreslovány jednotlivé nalezené trasy.
+jsou vykreslovány jednotlivé nalezené trasy. (\TODO dopsat, ale jak konkrétně?)
