@@ -183,7 +183,20 @@ vizualizací jednotlivých nalezených tras a umožňuje jejich export do formá
 GPX.
 
 \subsection{Vyhledávací knihovna}
+\TODO hledání přes půlnoc včetně implementace
 \subsection{Knihovna algoritmu RAPTOR}
+Knihovnu implementující algoritmus RAPTOR jsme navrhli jako oddělenou knihovnu,
+stejně tak skripty zajišťující přípravu dat z jízdních řádů jsou také oddělené,
+tudíž lze snadno implementovat vyhledávač využívající pouze algoritmus RAPTOR
+bez závislostí na zbytku vyhledávacího kódu. V rámci přípravných prací jsme
+takový implementovali, (\TODO nazvy souboru, ...). Tento vyhledávač ale
+nevyužívá žádné pěší přesuny, ani mezi zastávkami stejného jména, pro praktické
+vyhledávání není tedy příliš vhodný, sloužil pro testování správnosti úprav
+jízdních řádů.(\TODO kdyby byl čas, doladit?)
+
+Knihovnu jsme implementovali jako sdílenou knihovnu v jazyce C (\TODO s
+LibUCW?), tudíž je snadno navázatelná na zbytek vyhledávacího algoritmu. 
+ 
 
 \subsection{Webová aplikace}
 Webová aplikace je napsaná v Pythonu ve webovém frameworku Flask(\TODO ref).
