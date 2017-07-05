@@ -1,0 +1,160 @@
+\chapter{Zdrojová data}
+
+Zdrojová data pro vyhledávač pochází ze dvou zdrojů. Prvním zdrojem jsou mapová
+data, která obsahují silnice, cesty, budovy a další mapové prvky. Druhým zdrojem
+jsou data o jízdních řádech, která obsahují linky, zastávky a spoje.
+
+\section{Mapová data}
+Mapová data jsou použita z projektu OpenStreetMap (OSM). Tato data neobsahují
+informace o nadmořské výšce jednotlivých bodů, k doplnění nadmořské výšky jsou
+použita data z projektu Shuttle Radar Topography Mission (SRTM), která jsou
+lineárně interpolována pro získání nadmořských výšek jednotlivých bodů v mapě.
+
+O datech OSM a jejich problémech jsme již rozsáhle pojednávali v bakalářské
+práci (\TODO ref), níže citujeme obecný úvod a popis základních primitiv. 
+\newcommand{\tuc}{\bf}
+\subsection{Projekt OpenStreetMap}
+Projekt OpenStreetMap (\TODO cite{osmweb}) vznikl v~Anglii v~roce 2004 a jeho prvotním cílem bylo
+vytvořit volně dostupná geografická data pro Velkou Británii. Iniciativa se
+postupně rozrostla do celého světa a dnes mapu pomáhá tvořit přes milion
+dobrovolníků. Česká republika je dnes poměrně kvalitně pokryta a zvláště velká
+města mají dostatečně detailní pokrytí i pro vyhledávání pěších tras.
+
+\subsection{Datová primitiva OSM} 
+Projekt OpenStreetMap používá tři základní geografická primitiva: uzly, cesty a
+relace. Ke každému z~těchto primitiv mohou být přiřazeny atributy, což jsou
+dvojice klíče a hodnoty. Každý typ primitiv má svou číselnou řadu, ze které
+dostává každý prvek unikátní číslo -- id. 
+U~polohových dat se neukládá výška, výsledná mapa je pouze dvourozměrná.
+Nyní popíšeme jednotlivá primitiva:
+
+{\tuc Uzly} jsou body s~určenými souřadnicemi. Uzly mohou mít atributy, ty pak
+určují bodový mapový objekt, například rozcestník nebo závoru. Existují i uzly
+bez atributů sloužící pouze jako součást cest nebo relací.
+
+{\tuc Cesty} jsou lomené čáry definované posloupností uzlů. Uzly se na cestě nemohou opakovat
+s~jedinou výjimkou: první a poslední bod mohou být shodné, potom se jedná
+o~uzavřenou cestu. Cesty jsou orientované, tzn. na pořadí uzlů záleží. Mohou
+existovat cesty bez atributů jako součásti relace, ale obvykle mají atributy
+určující, jaký objekt reálného světa popisují.
+
+Pomocí cest popisujeme linie a plochy. Pokud má být cesta plochou, musí být
+uzavřená, ale ne každá uzavřená cesta je plocha. Tento problém rozebíráme níže.
+Jedna cesta také může reprezentovat více fyzických objektů (například silnici
+s~tramvajovou tratí, park s~oplocením).
+
+{\tuc Relace} jsou posloupnosti uzlů a cest opatřené atributy. Každý prvek
+v~relaci navíc může mít určenou roli. Relace může obsahovat jako prvek i relaci,
+ale tato situace není příliš dobře podporována programy pracujícími s~daty OSM. 
+Obvykle jsou relacemi reprezentovány složitější objekty, které by se cestami a
+uzly popisovaly obtížně, nebo také \uv{virtuální} objekty jako například
+trasy linek MHD, cyklotrasy a územní hranice.
+
+Pro nás důležitý typ relace je {\tuc multipolygon}, který se používá k~reprezentaci
+složitějších ploch. Plocha reprezentovaná multipolygonem se může skládat z~více
+nesouvisejících částí nebo obsahovat díry. Multipolygon obsahuje cesty s~rolemi 
+\verb|INNER| resp. \verb|OUTER| indikující, zda je cesta součástí vnější resp.
+vnitřní hranice plochy. Hranice multipolygonu se mohou skládat z~více částí, ale
+vždy musí dohromady tvořit jednu nebo několik uzavřených částí tvořících obvody 
+plochy resp. díry v~ploše.
+
+\section{Výšková data}
+O výškových datech jsme také pojednávali v bakalářské práci, opět citujeme (\TODO ref):
+Abychom mohli správně odhadnout náročnost pěší trasy, musíme znát i informace
+o~nadmořské výšce jednotlivých bodů. Stejně tak jako většina jiných projektů jsme
+použili data SRTM (\TODO cite{srtmweb}), což jsou volně dostupná výšková data pro celý
+svět.
+
+Shuttle Radar Topography Mission byl projekt NASA, kdy při letu raketoplánu
+Endeavour v~roce 2000 byla pomocí radarové interferometrie změřena velká část
+Země a zpracovaná data byla následně poskytnuta volně k~dispozici.\footnote{\url{http://dds.cr.usgs.gov/srtm/version2_1/}} 
+
+Výšková data byla měřena po třech úhlových vteřinách (v~USA po jedné vteřině),
+tudíž v~České republice jsou data v~mřížce $90\times60$\,m. Data jsou rozdělena
+do tabulek po jednom stupni, přičemž sousední tabulky se vždy jedním sloupcem
+nebo řádkem překrývají. Každá tabulka má tedy 1201 sloupců a 1201 řádků, kde
+řádky odpovídají zeměpisné šířce a sloupce zeměpisné délce.
+
+Nadmořské výšky jsou kódovány celými 16bitovými čísly v~big-endian udávajícími
+nadmořskou výšku v~metrech. Pokud se v~některém místě nepodařilo výšku změřit,
+je udávána jako $-32768$. Tabulka je kódována jako binární soubor, v~němž
+jednotlivé řádky zapsány za sebou.
+
+\section{Jízdní řády}
+Data o jízdních řádech jsou očekávána ve formátu General Transit Feed
+Specification (GTFS), který je dobře specifikovaný a široce používaný ve světě.
+Konkrétně pro testování byla použita data o pražské integrované dopravě od IPR
+Praha\footnote{\url{http://opendata.iprpraha.cz/DPP/JR/jrdata.zip}}. Tato data
+obsahují metro, tramvaje, autobusy a přívozy v Praze a okolí, bohužel neobsahují
+integrované vlakové spoje.
+
+GTFS je distribuováno jako archiv ZIP obsahující jednotlivé tabulky ve formátu
+CSV. Význam jednotlivých tabulek je následující:
+\begin{itemize}
+\item {\em agency.txt} obsahuje informace o dopravcích na jednotlivých linkách.
+V našem vyhledávání není používán.
+\item {\em stops.txt} obsahuje informace o zastávkách. Zastávky jsou dvou typů.
+Prvním typem je zastávkový stojan, který reprezentuje fyzické místo, kde
+zastavuje nějaký spoj některé linky. Druhým typem je \uv{stanice}, která udává
+oblast několika stojanů, obvykle stejného jména. Nemusí mít fyzickou
+reprezentaci a slouží pro zobrazování v mapě a svázání logicky blízkých stojanů.
+Protože stanice pro náš vyhledávač nenese důležitou informaci, využíváme pouze
+zastávkové stojany (\TODO implementovat). Pro vyhledávání spojení využíváme
+následující položky:
+\begin{itemize}
+	\item {\tt stop\_id} -- jednoznačný identifikátor zastávky
+	\item {\tt stop\_name} -- název zastávky
+	\item {\tt stop\_lat, stop\_lon} -- poloha zastávky
+	\item {\tt location\_type} -- informace, zda jde o stojan, nebo stanici
+\end{itemize}
+\item {\em routes.txt} obsahuje informace o linkovém vedení. Pro vyhledávání
+spojení využíváme následující položky:
+\begin{itemize}
+	\item {\tt route\_id} -- jednoznačný identifikátor linky
+	\item {\tt route\_short\_name} -- krátký název linky, v Praze označení linky
+	\item {\tt route\_type} -- typ dopravního prostředku linky, například autobus, loď, metro
+\end{itemize}
+\item {\em trips.txt} obsahuje informace o spojích. Tato tabulka slouží ke
+svázání spoje (cesty konkrétního dopravního prostředku po posloupnosti zastávek
+v daný čas), linky a množiny dní, kdy daný spoj jezdí. Pro vyhledávání využíváme
+následující položky:
+\begin{itemize}
+	\item {\tt route\_id} -- identifikátor linky
+	\item {\tt service\_id} -- identifikátor jízdních dní spoje
+	\item {\tt trip\_id} -- jednoznačný identifikátor spoje
+\end{itemize}
+\item {\em stop\_times.txt} obsahuje informace o časech zastavení jednotlivých
+spojů v jednotlivých zastávkách. Pro vyhledávání spojení používáme následující
+položky:
+\begin{itemize}
+	\item {\tt trip\_id} -- identifikátor spoje
+	\item {\tt arrival\_time} -- čas příjezdu spoje do zastávky 
+	\item {\tt departure\_time} -- čas odjezdu spoje ze zastávky
+	\item {\tt stop\_id} -- identifikátor zastávky
+	\item {\tt stop\_sequence} -- pořadí zastávky na spoji. Je potřeba, aby
+	bylo nezáporné, celočíselné a po trase spoje se zvyšovalo, zvyšování po
+	1 ani počítání od 0 není nutné.
+\end{itemize}
+\item {\em calendar.txt} obsahuje informace o tom, které dny v týdnu jezdí které
+spoje. Pro vyhledávání spojení používáme následující položky:
+\begin{itemize}
+	\item {\tt service\_id} -- identifikátor jízdních dní spoje
+	\item {\tt monday \dots sunday} -- informace, zda spoj jede daný den. 
+	\item {\tt start\_date} -- první den platnosti jízdního řádu pro daný
+	spoj
+	\item {\tt end\_date} -- poslední den platnosti jízdního řádu pro daný
+	spoj (tento den ještě v rámci platnosti).
+\end{itemize}
+\item {\em calendar\_dates.txt} obshauje výjimky z pravidelnosti spojů,
+například státní svátky či jiná omezení. Obsahuje změny oproti souboru {\tt
+calendar.txt}. Může být použit i samostatně bez souboru {\tt
+calendar.txt}, pak obsahuje všechny jízdní dny daného spoje. Pro vyhledávání
+spojení používáme následující položky:
+\begin{itemize}
+	\item {\tt service\_id} -- identifikátor jízdních dní spoje 
+	\item {\tt date} -- datum změny
+	\item {\tt exception\_type} -- typ změny (1 = jede navíc, 2 = nejede, ač
+	by měl)
+\end{itemize}
+\end{itemize}
+
