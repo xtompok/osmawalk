@@ -1,8 +1,77 @@
 \chapter{Formáty dat}
+V rámci přípravy dat a vyhledávání tras jednak používáme interní struktury
+jednotlivých programovacích jazyků, jednak některé standardní formáty nezávislé
+na programovacím jazyku. Tyto formáty ppředstvíme v následující sekci, v dalších
+sekcích se již jen budeme věnovat obsahu jednotlivých struktur.
+\section{Používané formáty dat}
+\subsection{Protocol Buffers}
+Protocol Buffers (PBF) je způsob uložení strukturovaných dat. Byl navržen
+Googlem a je používán v případech, kdy potřebujeme přenést po síti zprávy s
+danou strukturou. Formát podoporuje různé datové typy (integer různých přesností
+a znaménkovosti, čísla s plovoucí řádovou čárkou, stringy, \dots) a
+strukturování zpráv. Komunikace probíhá ve fázích naplnění zprávy, její
+zabalení, odeslání, přijmutí a rozbalení. Při zabalení jsou data zkompirmována
+jednoduchým algoritmem, aby například malá čísla nezabírala zbytečně mnoho
+místa. Existují PBF verze 2 a verze 3. V naší práci používáme verzi 2, protože v
+době psaní bakalářské práce, kterou v naší práci rozšiřujeme, nebyly PBF verze 3
+ještě k dispozici a verze 3 nepřináší novinky, které by motivovaly k přechodu.
+
+Základní jednotkou PBF je zpráva, která obsahuje několik položek. Položkou může
+být základní datový typ nebo jiná zpráva, položky mohou být povinné, volitelné,
+nebo opakované. Každá položka má jméno, typ a číslo, které ho identifikuje v
+binární podobě zprávy. Zprávy se popisují pomocí vlastního jazyka, ze kterého se
+pak pomocí kompilátoru vytvoří vazby do jednotlivých programovacích jazyků. 
+Podrobnou dokumentaci včetně tutoriálů lze najít na stránkách projektu (\TODO
+ref).
+
+\subsection{JavaScript Object Notation}
+JavaScript Object Notation(\TODO ref) (JSON) je formát navržený pro předávání dat ve
+webových aplikacích. Díky své jednoduchosti a čitelné reprezentaci je hojně
+využíván nejen ve webových projektech, ale často i jako konfigurační jazyk.
+Vychází z Javascriptu, datové typy v něm jsou kromě primitivních typů slovník --
+neuspořádaný seznam dvojic klíč--hodnota a pole -- uspořádaná posloupnost
+položek. Formát zpráv není dopředu dán a podpora v programovacích jazycích je
+přímo integrovaná nebo dodaná pomocí knihovny. 
+
+\subsection{GeoJSON}
+GeoJSON(\TODO ref) je, jak již název napovídá, nadstavba formátu JSON pro přenos
+geografických informací. Z hlediska syntaxe se jedná o korektní JSON, který má
+ale předepsanou strukturu a názvy položek. Umožňuje ukládat body, linie, plochy,
+multipolygony a další objekty spolu s jejich atributy a je nativně podporován
+většinou JavaScriptových knihoven pro zobrazování mapových dat.
+
 \section{Formáty používané při přípravě dat}
 \TODO PBF
 \section{Formáty používané při vyhledávání tras}
 \TODO tt.bin, praha-graph.pbf, JŘ pro konkrétní den, struktury pro hledání,
 výstupní PBF, GPX
 \section{Formáty používané ve webové aplikaci}
-\TODO JSON s výsledky
+\subsection{Výsledky vyhledávání}
+Výsledky vyhledávání jsou předávány z backendu do frontendu webové aplikace
+(\TODO ref webová aplikace) pomocí formátu JSON. Ten je tvořen polem vyhledaných
+tras, kde každá trasa je slovník s následujícími klíči:
+\begin{itemize}
+	\item {\tt time} udávající čas příjezdu do cíle
+	\item {\tt dist} udávající celkovou pěší vzdálenost na nalezené trase
+	\item {\tt penalty} udávající penaltu vyhledané trasy
+	\item {\tt geojson} obsahující grafickou reprezentaci nalezené trasy. 
+\end{itemize}
+Grafická reprezentace nalezené trasy je reprezentována ve formátu GeoJSON a
+obsahuje lomené linie jednotlivých typů popisující průběh cesty a bodové prvky
+pro nástup a výstup z prostředku MHD.
+
+Liniové prvky (\TODO dopsat) 
+\begin{itemize}
+	\item	
+\end{itemize}
+Bodové prvky jsou reprezentovány pomocí typu Point s následujícími atributy: 
+\begin{itemize}
+	\item {\tt type} udávající typ bodu, zde vždy číslo reprezentující objtype PUBLIC\_TRANSPORT  	
+	\item {\tt name} udávající jméno zastávky
+	\item {\tt subtype} udávající operaci na zastávce ({\tt departure} pro
+	nástup, {\tt arrival} pro výstup)
+	\item {\tt departure} čas odjezdu spoje ze zastávky
+	\item {\tt arrival} pro nástupní bod čas příchodu na zastávku, pro
+	výstupní bod čas příjezdu do zastávky
+\end{itemize}
+\TODO příklad
