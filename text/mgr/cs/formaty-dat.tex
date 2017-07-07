@@ -43,8 +43,119 @@ většinou JavaScriptových knihoven pro zobrazování mapových dat.
 \section{Formáty používané při přípravě dat}
 \TODO PBF
 \section{Formáty používané při vyhledávání tras}
-\TODO tt.bin, praha-graph.pbf, JŘ pro konkrétní den, struktury pro hledání,
-výstupní PBF, GPX
+\subsection{Formát jízdních řádů}
+Jízdní řády jsou po zpracování uloženy ve zprávě {\tt Timetable}. Způsob
+provázání dat v jednotlivých položkách je popsán v kapitole Implementace (\TODO
+ref). Zpráva má následující položky:
+\TODO zjistit, zda v popisu implementace je způsob ukládání dat
+\begin{itemize}
+	\item {\tt routes} obsahuje popis linek
+	\item {\tt stop\_times} obsahuje časy zastavení spojů 
+	\item {\tt trip\_validity} obsahuje pro každý spoj index na platnost 
+	\item {\tt validities} platnost -- obsahuje popis, které dny nějaký spoj
+	jede a které ne 
+	\item {\tt route\_stops} udává, která linka má jaké zastávky 
+	\item {\tt stops} obsahuje popis zastávek
+	\item {\tt transfers} obsahuje popis pěších přestupů, v práci není
+	používá 
+	\item {\tt stop\_routes} udává, které linky jedou přes jakou zastávku
+\end{itemize} 
+Každá linka je reprezentována zprávou typu {\tt Route} s následujícími
+položkami:
+\begin{itemize}
+	\item {\tt id} udává RAPTOR id linky 
+	\item {\tt nstops} udává počet zastávke linky
+	\item {\tt ntrips} udává počet spojů linky
+	\item {\tt stopsidx} udává index do pole {\tt route\_stops}, kde
+	začínají zastávky linky
+	\item {\tt tripsidx} udává index do pole {\tt stop\_times}, kde
+	začínají časy spojů linky
+	\item {\tt servicesidx} udává index do pole {\tt trip\_validities}, kde
+	začínají platnosti spojů linky
+	\item {\tt name} udává název linky
+	\item {\tt type} udává typ dopravního prostředku
+\end{itemize}
+Každá zastávka je reprezentována zprávou typu {\tt Stop} s následujícími
+položkami:
+\begin{itemize}
+	\item {\tt id} udává RAPTOR id zastávky
+	\item {\tt nroutes} udává počet linek projíždějících zastávkou
+	\item {\tt ntransfers} udává počet pěších přestupů ze zastávky
+	\item {\tt routeidx} udává index do pole {\tt stop\_routes}, kde
+	začínají linky dané zastávky
+	\item {\tt transferidx} udává index do pole {\tt transfers}, kde
+	začínají přestupy ze zastávky
+	\item {\tt name} udává jméno zastávky
+	\item {\tt underground} udává, zda je zastávka v podzemí
+\end{itemize}
+Každé zastavení spoje je reprezentováno zprávou typu {\tt StopTime} s
+následujícími položkami:
+\begin{itemize}
+	\item {\tt arrival} udává čas příjezdu do zastávky
+	\item {\tt departure} udává čas odjezdu ze zastávky
+\end{itemize}
+Každá množina dní, kdy některý spoj jede, je reprezentována pomocí zprávy typu
+{\tt Validity}, která má následující položky:
+\begin{itemize}
+	\item {\tt start} udává UNIX timestamp prvního dne platnosti 
+	\item {\tt end} udává UNIX timestamp posledního dne platnosti
+	\item {\tt bitmap} udává bitmapu platnosti počínaje prvním dnem
+	platnosti. Každý den odpovídá jednomu bitu.
+\end{itemize}
+Pokud bychom měli nějaké pěší přestupy, byly by reprezentovány zprávou typu {\tt
+Transfer} s následujícími položkami:
+\begin{itemize}
+	\item {\tt from} udává počáteční zastávku
+	\item {\tt to} udává koncovou zastávku
+	\item {\tt time} udává čas potřebný pro přesun mezi zastávkami
+\end{itemize}
+\TODO praha-graph.pbf, JŘ pro konkrétní den, struktury pro hledání,
+
+\subsection{Výsledky vyhledávání}
+Výsledky vyhledávání jsou z knihovny předávány jako zabalená zpráva PBF. Zpráva
+obsahuje pouze jednu opakovanou položku typu {\tt Route}, která obsahuje všechny
+nalezené trasy. Každá trasa pak má následující položky: 
+\begin{itemize}
+	\item {\tt time} udává čas příjezdu do cílového bodu
+	\item {\tt dist} udává celkovou délku pěších přechodů na trase
+	\item {\tt penalty} udává penaltu trasy
+	\item {\tt point} obsahuje jednotlivé body trasy
+\end{itemize}
+Jednotlivé body trasy jsou spolu s hranou, která do nich vede, popsány zprávou
+{\tt Point} s následujícími položkami: 
+\begin{itemize}
+	\item {\tt lat} a {\tt lon} udávají zeměpisnou šířku a délku bodu v
+	systému WGS-84
+	\item {\tt height} udává nadmořskou výšku bodu
+	\item {\tt departure} pokud je hrana MHD, pak udává čas odjezdu z místa
+	nástupu
+	\item {\tt arrival} udává čas příchodu/příjezdu do bodu 
+	\item {\tt osmvert} pokud je bod z OSM, pak obsahuje informace o vrcholu
+	z OSM, je to zpráva typu {\tt graph.Vertex}, která je popsána výše
+	\item {\tt stop} pokud je bod zastávka, pak obsahuje informace o vrcholu z GTFS
+	\item {\tt edgetype} udává, zda jde o pěší hranu, nebo přesun MHD
+	\item {\tt walkedge} pokud je hrana chůze, pak obsahuje informace o
+	hraně z OSM, je to zpráva typu {\tt graph.Edge}, která je popsána výše
+	\item {\tt ptedge} pokud je hrana MHD, pak obsahuje informace o hraně z
+	GTFS.
+\end{itemize}
+Informace o zastávce jsou uloženy ve zprávě {\tt Stop}, která má následující
+položky:
+\begin{itemize}
+	\item {\tt name} udává název zastávky
+	\item {\tt id} udává kód zastávky tak, jak je v GTFS
+\end{itemize}
+Informace o hraně využívající MHD jsou uloženy ve zprávě {\tt PTEdge}, která
+obsahuje následující položky:
+\begin{itemize}
+	\item {\tt name} udává název linky
+	\item {\tt id} udává id linky tak, jak je v GTFS
+\end{itemize}
+Uvnitř vyhledávací knihovny je výsledek vyhledávání reprezentován typem {\tt
+search\_result\_t}, který je svou strukturou velmi podobný výše popsanému PBF.
+
+\TODO GPX
+
 \section{Formáty používané ve webové aplikaci}
 \subsection{Výsledky vyhledávání}
 Výsledky vyhledávání jsou předávány z backendu do frontendu webové aplikace
@@ -60,9 +171,13 @@ Grafická reprezentace nalezené trasy je reprezentována ve formátu GeoJSON a
 obsahuje lomené linie jednotlivých typů popisující průběh cesty a bodové prvky
 pro nástup a výstup z prostředku MHD.
 
-Liniové prvky (\TODO dopsat) 
+Liniové prvky jsou reprezentovány typem LineString, více sousedících hran
+stejného typu je vždy spojeno v jeden úsek typu LineString. Hrany reprezentující různé
+spoje MHD se do jednoho úseku nespojují. Úseky mají následující atributy: 
 \begin{itemize}
-	\item	
+	\item {\tt type} udávající typ úseku (dle číslování objtype)
+	\item {\tt name} udávající jméno linky, atribut je přítomen pouze, pokud
+	jde o úsek typu MHD
 \end{itemize}
 Bodové prvky jsou reprezentovány pomocí typu Point s následujícími atributy: 
 \begin{itemize}
