@@ -38,4 +38,28 @@ spojení využité k dosažení dané zastávky.
 Tento algoritus je snadno implementovatelný a při vhodně zvolených datových
 strukturách velmi rychlý a vhodně využívající keš. 
 
-%TODO: vnitřní struktury
+\subsection{Uložení dat}
+Pro rychlý výpočet a efektivní využití cache je potřeba mít vhodně uložená data.
+Data stejného typu jsou vždy uložená v poli za sebou. Pokud různé objekty mají
+každý mít seznam stejného typu, jsou všechna data od všech objektů držena v
+jednom poli a každý objekt si drží počet svých prvků a odkaz na první z nich.
+Tímto má každý objekt vyhrazen svůj úsek a může s ním efektivně pracovat. Tento
+mechanismus nazveme \uv{polním mechanismem} a budeme na něj takto odkazovat ve
+zbytku kapitoly.
+
+Základem pro prohledávání je pole linek. Každá linka má odkaz na své zastávky a
+na časy zastavení spojů v zastávkách. Obojí je implementováno polním mechanismem
+a rozdělení na zastávky a spoje zajišťuje snadnou možnost hledání spojů v daný
+čas. Časy zastavení spojů v zastávkách jsou uspořádány v poli za sebou podle
+zastávek a pak podle času výjezdu spoje z výchozí zastávky. Protože
+předpokládáme, že se spoje nepředjíždí a všechny spoje jedné linky mají stejný
+počet zastávek, na předchozí spoj snadno přejdeme skokem v poli zastavení o
+počet zastávek linky vzad, následující spoj najdeme obdobným skokem vpřed. Také
+je možné pro konkrétní zastávku a konkrétní čas použít jednoduše binární
+vyhledávání pro nalezení nejbližšího spoje odjíždějícího po konkrétním čase. 
+
+Pro vyhledávání z konkrétní zastávky máme obdobně implementovány datové
+struktury kolem zastávek. Zastávky jsou uloženy v poli za sebou, každá si drží
+seznam linek, které jí projíždějí, a seznam pěších přestupů z dané zastávky. 
+Obojí je reprezentováno polním mechanismem.   
+

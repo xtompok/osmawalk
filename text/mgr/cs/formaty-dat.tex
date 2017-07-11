@@ -81,7 +81,7 @@ položkami:
 	\item {\tt id} udává RAPTOR id zastávky
 	\item {\tt nroutes} udává počet linek projíždějících zastávkou
 	\item {\tt ntransfers} udává počet pěších přestupů ze zastávky
-	\item {\tt routeidx} udává index do pole {\tt stop\_routes}, kde
+	-\item {\tt routeidx} udává index do pole {\tt stop\_routes}, kde
 	začínají linky dané zastávky
 	\item {\tt transferidx} udává index do pole {\tt transfers}, kde
 	začínají přestupy ze zastávky
@@ -109,7 +109,166 @@ Transfer} s následujícími položkami:
 	\item {\tt to} udává koncovou zastávku
 	\item {\tt time} udává čas potřebný pro přesun mezi zastávkami
 \end{itemize}
-\TODO praha-graph.pbf, JŘ pro konkrétní den, struktury pro hledání,
+\subsection{Jízdní řád pro konkrétní den}
+Pro samotné vyhledávání si vždy nejprve připravíme jízdní řád pro tento
+konkrétní den. Jízdní řád je reprezentován strukturou {\tt timetable} v C s následujícími
+položkami:
+\begin{itemize}
+	\item {\tt nroutes} udává počet linek
+	\item {\tt routes} obsahuje popis linek
+	\item {\tt st\_times} obsahuje popis zastavení spojů v zastávkách
+	\item {\tt transfers} obsahuje popis pěších přestupů
+	\item {\tt nstops} udává počet zastávek
+	\item {\tt stops} obsahuje popis zastávek
+	\item {\tt rt\_stops} obsahuje odkazy na zastávky pro linky 
+	\item {\tt st\_routes} obsahuje odkazy na linky pro zastávky
+\end{itemize}
+Každá linka je popsána strukturou {\tt route} s následujícími položkami:
+\begin{itemize}
+	\item {\tt pbroute} odkazuje na linku v původním jízdním řádu
+	\item {\tt nstops} udává počet zastávek linky
+	\item {\tt ntrips} udává počet spojů linky
+	\item {\tt stops} odkazuje na začátek odkazů na zastávky dané linky
+	\item {\tt trips} odkazuje na začátek zastavení spojů linky v zastávkách 
+	\item {\tt name} udává jméno linky
+\end{itemize}
+Každé zastavení spoje v zastávce je popsáno strukuturou {\tt st\_time}
+\begin{itemize}
+	\item {\tt arrival} udává čas příjezdu spoje do zastávky
+	\item {\tt departure} udává čas odjezdu spoje ze zastávky
+\end{itemize}
+Každá zastávka je popsána strukturou {\tt stop} s následujícími položkami
+\begin{itemize}
+	\item {\tt pbstop} odkazuje na zastávku v původním jízdním řádu
+	\item {\tt nroutes} udává počet linek projíždějících zastávkou daný den
+	\item {\tt ntransfers} udává počet pěších přestupů z dané zastávky
+	\item {\tt routes} odkazuje na začátek odkazů na linky projíždějící
+	zastávkou 
+	\item {\tt transfers} odkazuje na začátek pěších přestupů pro danou
+	zastávku
+	\item {\tt name} udává název zastávky
+\end{itemize}
+Každý pěší přestup mezi zastávkami je popsán strukturou {\tt transfer}. Tato
+struktura není v současné době využívána. Má tyto položky: (\TODO opravit
+implementaci)
+\begin{itemize}
+	\item {\tt from} odkazuje na výchozí zastávku
+	\item {\tt to} odkazuje na cílovou zastávku
+	\item {\tt time} udává čas v sekundách potřebný na přestup z výchozí do
+	cílové zastávky
+\end{itemize}
+\subsection{Vyhledávací graf}
+Vyhledávací graf je uložen v PBF ve zprávě {\tt Graph}, která obsahuje tyto
+položky:
+\begin{itemize}
+	\item {\tt vertices} obsahuje popis vrcholů grafu
+	\item {\tt edges} obsahuje popis hran grafu
+	\item {\tt stops} obsahuje popis vazeb mezi zastávkami a vrcholy grafu 
+\end{itemize} 
+Každý vrchol je popsán pomocí zprávy {\tt Vertex}, která obsahuje následující
+položky:
+\begin{itemize}
+	\item {\tt idx} udává číslo vrcholu
+	\item {\tt osmid} udává OSM id vrcholu
+	\item {\tt lat} a {\tt lon} udávají zeměpisnou šířku a délku vrcholu v
+	UTM
+	\item {\tt type} udává typ vrcholu
+	\item {\tt height} udává nadmořskou výšku vrcholu
+	\item {\tt stop\_id} pokud je vrchol zastávka, pak udává GTFS id
+	zastávky (\TODO ověřit) 
+\end{itemize} 
+Každá hrana je popsána pomocí zprávy {\tt Edge}, která obsahuje následující
+položky: 
+\begin{itemize}
+	\item {\tt idx} udává číslo hrany
+	\item {\tt osmid} udává OSM id hrany
+	\item {\tt vfrom} udává číslo výchozího vrcholu 
+	\item {\tt vto} udává číslo cílového vrcholu
+	\item {\tt type} udává typ hrany
+	\item {\tt crossing} má udávat typ cesty, kterou hrana kříží, nepoužívá
+	se
+	\item {\tt dist} udává délku hrany
+\end{itemize} 
+Každá zastávka je popsána pomocí zprávy {\tt Stop}, která obsahuje následující
+položky:
+\begin{itemize}
+	\item {\tt idx} udává číslo zastávkového vrcholu
+	\item {\tt osmid} udává OSM id zastávkového vrcholu 
+	\item {\tt raptor\_id} udává pořadí zastávky v algoritmu RAPTOR
+	\item {\tt stop\_id} udává id zastávky v GTFS
+\end{itemize} 
+
+\subsection{Struktury používané při hledání trasy}
+Pro samotné hledání potřebujeme haldu, kterou budeme používat pro Dijkstrův
+algoritmus. Halda je implementována pomocí struktury {\tt mmqueue\_t}, která
+obsahuje následující položky:
+\begin{itemize}
+	\item {\tt pool} odkazuje na memory pool pro alokaci nových vrcholů
+	vkládaných do fronty 
+	\item {\tt graph} odkazuje na vyhledávací graf popsaný výše
+	\item {\tt vert} odkazuje na aktuální vrchol 
+	\item {\tt vertlut} obsahuje pro každý vrchol grafu pole odkazů na
+	vrcholy v haldě, které patří k danému vrcholu
+	\item {\tt heap} obsahuje odkazy na jednotlivé vrcholy v haldě
+	\item {\tt n\_heap} udává počet vrcholů v haldě
+\end{itemize}
+Každý vrchol v haldě je popsán pomocí struktury {\tt mmdijnode\_t}, která
+obsahuje následující položky:
+\begin{itemize}
+	\item {\tt prev} odkazuje na předchozí vrchol na trase
+	\item {\tt osmvert} pokud je vrchol z OSM, odkazuje na vrchol ve
+	vyhledávacím grafu 
+	\item {\tt stop} pokud je vrchol zastávka, odkazuje na zastávku v
+	jízdním řádu pro celou platnost
+	\item {\tt edge} popisuje hranu, která vede do zpracovávaného vrcholu 
+	\item {\tt reached} indikuje, zda již byl vrchol dosažen
+	\item {\tt completed} indikuje, zda již byl vrchol uzavřen
+	\item {\tt majorized} indikuje, zda při přidávání jiných vrcholů byl
+	tento vrchol majorizován
+	\item {\tt arrival} udává čas příjezdu do vrcholu
+	\item {\tt penalty} udává penaltu při příchodu do vrcholu \TODO ověřit
+\end{itemize}
+Protože přicházející hrana může být jak hranou z OSM, tak hranou MHD, je
+reprezentována pomocí struktury {\tt edge\_t}, která obsahuje následující
+položky:
+\begin{itemize}
+	\item {\tt edge\_type} udává typ hrany ({\tt EDGE\_TYPE\_WALK} nebo {\tt
+	EDGE\_TYPE\_PT}
+	\item union {\tt osmedge} a {\tt ptedge} odkazuje buď na konkrétní hranu
+	ve vyhledávacím grafu, nebo na popis hrany MHD 
+\end{itemize}
+Hrany pomocí MHD jsou popsány strukturou {\tt ptedge\_t}, která obsahuje
+následující položky: 
+\begin{itemize}
+	\item {\tt departure} udává čas odjezdu z výchozí zastávky v sekundách
+	od začátku dne jízdního řádu
+	\item {\tt route} odkazuje na linku v jízdním řádu
+\end{itemize}
+
+Pro reprezentaci nalezených spojení MHD z dané zastávky slouží struktura {\tt
+stop\_conns}, která má následující položky:
+\begin{itemize}
+	\item {\tt n\_routes} udává počet linek jedoucích z dané zastávky
+	\item {\tt routes} popisuje linky jedoucí z dané zastávky
+\end{itemize}
+Každá linka je popsána pomocí struktury {\tt stop\_route, která obsahuje
+následující položky} 
+\begin{itemize}
+	\item {\tt departure} udává čas odjezdu linky ze zastávky, v sekundách
+	od počátku dne jízdního řádu 
+	\item {\tt pbroute} odkazuje na linku v původním jízdním řádu
+	\item {\tt n\_stops} udává počet zastávek na dané lince směrem na
+	konečnou
+	\item {\tt stops} popisuje jednotlivá zastavení na lince
+\end{itemize}
+Jednotlivá zastavení spoje v zastávkách po cestě jsou popsána pomocí struktury
+{\tt stop\_arr}, která obsahuje následující položky:
+\begin{itemize}
+	\item {\tt to} odkazuje na zastávku, kde spoj stojí
+	\item {\tt arrival} udává čas příjezdu \TODO v jakém formátu
+\end{itemize}
+ 
+\TODO jaké jsou další struktury pro hledání
 
 \subsection{Výsledky vyhledávání}
 Výsledky vyhledávání jsou z knihovny předávány jako zabalená zpráva PBF. Zpráva
