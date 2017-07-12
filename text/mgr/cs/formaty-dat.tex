@@ -40,6 +40,13 @@ ale předepsanou strukturu a názvy položek. Umožňuje ukládat body, linie, p
 multipolygony a další objekty spolu s jejich atributy a je nativně podporován
 většinou JavaScriptových knihoven pro zobrazování mapových dat.
 
+\subsection{GPX}
+Formát GPX(\TODO ref) je určen pro výměnu polohových dat mezi různými zařízeními s GPS,
+popřípadě mobilními a jinými aplikacemi. Data jsou uložena ve formátu XML, jsou
+dělena na cesty, trasy a významné body. Každá cesta, trasa i významný bod může
+mít uložené některé informace v předdefinovaných atributech, případně libovolné
+další informace uvnitř tagu {\tt <extensions>}. 
+
 \section{Formáty používané při přípravě dat}
 \TODO PBF
 \section{Formáty používané při vyhledávání tras}
@@ -313,7 +320,12 @@ obsahuje následující položky:
 Uvnitř vyhledávací knihovny je výsledek vyhledávání reprezentován typem {\tt
 search\_result\_t}, který je svou strukturou velmi podobný výše popsanému PBF.
 
-\TODO GPX
+Vyhledané trasy je možné uložit do formátu GPX (\TODO ref). V naší aplikaci používáme pouze trasy, každá
+nalezená vyhledaná trasa odpovídá jedné trase v GPX, tato trasa je rozdělena na
+pěší segmenty a segmenty MHD. Typ segmentu je uložen u každého segmentu v sekci
+{\tt <extensions>} v tagu {\tt <type>}. Každá trasa má ve své sekci {\tt
+<extensions>} uložený čas příjezdu, pěší vzdálenost a penaltu postupně v tazích
+{\tt <arrival>}, {\tt <len>} a {\tt <penalty>}.
 
 \section{Formáty používané ve webové aplikaci}
 \subsection{Výsledky vyhledávání}
