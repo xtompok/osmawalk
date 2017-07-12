@@ -27,11 +27,19 @@ class GPX:
         self.wpts.append(Wpt(name,lat,lon,ele))
         
 
-    def startTrack(self):
-        self.str +='<trk>\n<trkseg>\n'
+    def startTrack(self,num,arr,alen,penalty):
+        self.str +='<trk>\n<name>{}</name>\n<extensions>\n'.format(num)
+	self.str +='<arrival>{}</arrival>\n<len>{}</len>\n<penalty>{}</penalty>\n'.format(arr,alen,penalty)
+	self.str +='</extensions>\n'
+
+    def startTrkSeg(self,atype):
+    	self.str +='<trkseg>\n<extensions>\n<type>{}</type>\n</extensions>\n'.format(atype)
+
+    def endTrkSeg(self):
+    	self.str +='</trkseg>\n'
 
     def endTrack(self):
-        self.str +='</trkseg>\n</trk>\n'
+        self.str +='</trk>\n'
         for wpt in self.wpts:
             self.str +=str(wpt)
         self.wpts = []

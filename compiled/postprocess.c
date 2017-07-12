@@ -74,12 +74,7 @@ struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mm
 	return result;
 }
 void writeGPXForResult(struct search_result_t * res){
-	for (int i=0;i<res->n_routes;i++){
-		char filename[20];
-		sprintf(filename,"track_%d.gpx",i);
-		writeGpxFile(res->routes[i],filename);	
-			
-	}
+	writeGpxFile(res,"track.gpx");
 }
 void printMMRoutes(struct search_data_t * data,struct search_result_t * res){
 	for (int r=0;r<res->n_routes;r++){
@@ -208,21 +203,39 @@ struct pbf_data_t generatePBF(struct search_result_t * result){
 	
 } 
 
-void writeGpxFile(struct search_route_t result,char * filename){
-	if (result.n_points==0){
-		return;
-	}
+void writeGpxFile(struct search_result_t * result,char * filename){
 	printf("Writing results to file %s\n",filename);
 	FILE * OUT;
 	OUT = fopen(filename,"w");
 	writeGpxHeader(OUT);
-	writeGpxStartTrack(OUT);
-	for (int i=0;i<result.n_points;i++){
-		struct point_t p;
-		p = result.points[i];
-		writeGpxTrkpt(OUT,p.lat,p.lon,p.height);
+	for (int i=0;i<result->n_routes;i++){
+		struct search_route_t * rt;
+		rt = result->routes+i;
+		if (rt->n_points < 2){
+			continue;	
+		}
+		char * arr = malloc(10);
+		arr = prt_time(((int)(rt->time))%24*3600);
+		writeGpxStartTrack(OUT,i,arr,rt->dist,rt->points[rt->n_points-1].penalty);
+		free(arr);
+		int memtype;
+		memtype  = rt->points[1].edgetype;
+		writeGpxStartTrkSeg(OUT,memtype);
+		writeGpxTrkpt(OUT,rt->points[0].lat,rt->points[0].lon,rt->points[0].height);
+		for (int j=1;j<rt->n_points;j++){
+			struct point_t * pt;
+			pt = rt->points + j;
+			writeGpxTrkpt(OUT,pt->lat,pt->lon,pt->height);
+			if (j+1<rt->n_points && rt->points[j+1].edgetype != memtype){
+				memtype = rt->points[j+1].osmvert->type;
+				writeGpxEndTrkSeg(OUT);
+				writeGpxStartTrkSeg(OUT,memtype);
+				writeGpxTrkpt(OUT,pt->lat,pt->lon,pt->height);
+			}
+		}
+		writeGpxEndTrkSeg(OUT);
+		writeGpxEndTrack(OUT);
 	}
-	writeGpxEndTrack(OUT);
 	writeGpxFooter(OUT);
 	fclose(OUT);
 }

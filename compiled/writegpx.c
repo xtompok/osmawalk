@@ -26,15 +26,31 @@ void writeGpxMetadata(FILE * OUT){
 </metadata>\n");
 }
 
-void writeGpxStartTrack(FILE * OUT){
+void writeGpxStartTrack(FILE * OUT,int num,char * arr,double len, double penalty){
 	fprintf(OUT,"<trk>\n\
-<trkseg>\n\
-");
+<name>%d</name>\n\
+<extensions>\n\
+<arrival>%s</arrival>\n<len>%f</len>\n<penalty>%f</penalty>\n\
+</extensions>\n",num,arr,len,penalty);
 }
+void writeGpxStartTrkSeg(FILE * OUT, int type){
+	fprintf(OUT,"<trkseg>\n<extensions>\n<type>%d</type>\n</extensions>\n",type);
+}
+
 void writeGpxEndTrack(FILE * OUT){
-	fprintf(OUT,"</trkseg>\n\
-</trk>\n");
+	fprintf(OUT,"</trk>\n");
 }
+
+void writeGpxEndTrkSeg(FILE * OUT){
+	fprintf(OUT,"</trkseg>\n");
+}
+
+void writeWaypoint(FILE * OUT, double lat, double lon, double ele, char * route, char * arr, char * dep){
+	fprintf(OUT,"<wpt lat=%f lon=%f>\n<ele>%f</ele>\n<name>%s (%s)</name>\n<desc>Arrival at %s</desc>\n\
+</wpt>\n",lat,lon,ele,route,dep,arr);
+	
+}
+
 void writeGpxTrkpt(FILE * OUT, double lat, double lon, double ele){
 	fprintf(OUT,"\
     <trkpt lat=\"%f\" lon=\"%f\">\n\

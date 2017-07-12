@@ -19,6 +19,6 @@ void freePackedPBF(struct pbf_data_t data);
  * @param result Structure handlig search result
  * @param filename Filename of the GPX file
  */
-void writeGpxFile(struct search_route_t result,char * filename);
+void writeGpxFile(struct search_result_t * result,char * filename);
 
 #endif

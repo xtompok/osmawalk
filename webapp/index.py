@@ -9,6 +9,7 @@ import result_pb2
 import types_pb2 as objtypes
 from gpx import GPX
 import timetable
+import tempfile
 
 local_name = "localhost:5000"
 deploy_name = "walk.bezva.org"
@@ -170,17 +171,34 @@ def make_gpx():
 
 	print "From lon: {}, from lat: {}, to lon: {}, to lat: {}".format(flon,flat,tlon,tlat)
 	path = findPath(data,flat,flon,tlat,tlon)
-	if path.n_points == 0:
-		return ""
-	coords = []
-	out_gpx = GPX()
-	out_gpx.startTrack()
-	for i in range(path.n_points):
-		pt = path.points[i]
-		out_gpx.writeTrkpt(pt.lat,pt.lon,pt.height)
-	out_gpx.endTrack()
-	out_gpx.close()
+
+
+	pbf = "".join(map(chr,path.data[:path.len]))
 	freePackedPBF(path)
+	result = result_pb2.Result()
+	result.ParseFromString(pbf)
+	print "Routes: {}".format(len(result.routes))
+	out_gpx = GPX()
+
+	for (i,r) in enumerate(result.routes):
+		if len(r.points) < 2:
+			continue
+		memtype = r.points[1].edgetype 
+		out_gpx.startTrack(i,r.time,r.dist,r.penalty)
+		out_gpx.startTrkSeg(memtype)
+		out_gpx.writeTrkpt(r.points[0].lat,r.points[0].lon,r.points[0].height)
+		for i in range(1,len(r.points)):
+			pt = r.points[i]
+			out_gpx.writeTrkpt(pt.lat,pt.lon,pt.height)
+			if i+1 < len(r.points) and r.points[i+1].edgetype != memtype:
+				memtype = r.points[i+1].edgetype
+				out_gpx.endTrkSeg()
+				out_gpx.startTrkSeg(memtype)
+				out_gpx.writeTrkpt(pt.lat,pt.lon,pt.height)
+		out_gpx.endTrkSeg()
+		out_gpx.endTrack()
+
+	out_gpx.close()
 
 	hdr = {'Content-Type': 'application/xml+gpx','Content-Disposition': 'attachment; filename=route.gpx'}
 
