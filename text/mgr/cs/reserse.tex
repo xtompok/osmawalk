@@ -1,7 +1,56 @@
 \chapter{Rešerše}
+Data o různých cestních sítích obvykle ukládáme ve formě grafu, ve kterém pak
+vyhledáváme jednotlivé trasy pomocí prohledávání grafu, na které existuje mnoho
+známých algoritmů. Pokud ale potřebujeme udržovat kromě dat o cestní síti data o
+jízdních řádech, stává se situace mnohem složitější, protože zatímco po cestách
+můžeme jít kdykoli, cestovat hromadnou dopravou můžeme pouze tehdy, když zrovna
+jede nějaký spoj. Pro reprezentaci sítí hromadné dopravy se vyvinuly různé
+způsoby, dále představíme nejobvyklejší z nich.
 
-\section{Time dependent modely}
+\section{Time-dependent modely}
+Time-dependent modely \cite{time-dependent} se snaží odstranit problém s
+velikostí grafu hromadné dopravy. Místo toho, abychom měli pro každý spoj
+zvláštní hranu, sdružíme spoje do linek, kde všechny spoje jedné linky mají
+stejnou posloupnost zastávek. Vrcholy tentokrát budou jen jeden pro každou
+zastávku. Hrany mezi zastávkami budou jedna pro každou linku, která danou
+dvojici zastávek spojuje. V takovémto grafu již nemůžeme vyhledávat pomocí
+běžného průchodu grafu, potřebujeme mít upravenou funkci, která vyhledá v
+jednotlivých časech odjezdu pro každou linku nejbližší od okamžiku příjezdu do
+zastávky. Tento přístup nevytváří grafy s velkým počtem vrcholů a hran, navíc je
+tato reprezentace snáze připojitelná do vyhledávacího grafu pro obyčejnou cestní
+síť. U této varianty také existuje varianta, která má jeden staniční vrchol a
+pro každou linku projíždějící danou stanicí linkový vrchol. Tyto vrcholy jsou
+pak propojeny přestupovými hranami a umožňují realističtější modelování
+rozsáhlejších stanic a přestupů v rámci nich. Ani tento model však nevyužívá
+všech vlastností spojů MHD, jako je například to, že spoj má danou trasu a že
+když na něj někde nastoupíme, tak snadno můžeme do fronty přidat všechny
+průjezdní stanice.  
+
 \section{Time expanded modely}
+Time-expanded modely \cite{time-expanded} jsou konstruovány tak, aby ceny hran
+byly konstantní a šlo na takovýto graf použít běžné vyhledávání v grafu. V
+těchto modelech jsou jako vrcholy dvojice (zastávka, čas odjezdu) a (zastávka,
+čas příjezdu) pro každý čas odjezdu a příjezdu z každé zastávky. Hrany pak
+jsou jednak \uv{spojové} spojující vždy dvojici odjezd-příjezd mezi dvěma
+zastávkami pomocí nějakého spoje, jednak \uv{čekací}, které spojují jednotlivé
+časy v rámci jedné zastávky tak, jak jde čas. Spojení pak hledáme tak, že na
+množině vrcholů patřících k výchozí zastávce najdeme vrchol s nejbližším vyšším
+časem, než je náš odjezdový. Běžným průchodem do šířky podle času přes spojové a
+čekací hrany pak najdeme cestu do cílové zastávky. Nevýhodou této reprezentace
+je velikost grafu. \TODO realistic verze
+
+Tento základní model nerespektuje časy potřebné pro přestup, což může být
+zvlášť problematické u rozsáhlých stanic či zastávek s mnoha zastávkovými
+stojany. Tento problém se dá vyřešit rozdělením linie událostí u jedné zastávky
+na více. Vrcholy patřící k jedné zastávce rozdělíme na zastávkové, příjezdové a
+odjezdové. Odjezdové vrcholy odpovídají odjezdům spojů ze zastávky a příjezdové
+vrcholy příjezdům do zastávky. Zastávkové vrcholy odpovídají každý jednomu
+odjezdovému vrcholu. Zastávkové vrcholy jsou spojeny hranami do posloupnosti
+stejně jako v původním grafu. Z příjezdového vrcholu vedou hrany do nejbližšího
+zastávkového vrcholu, do kterého se stihne pěší přesun a do všech dřívějších
+odjezdových vrcholů, do kterých se stihne pěší přesun. Ze zastávkového vrcholu
+vede navíc hrana do odpovídajícího odjezdového vrcholu. 
+\TODO obrázek
 \section{Contraction hierarchy}
 \section{RAPTOR}
 RAPTOR (Round-Based Public Transport Routing) \citep*{RAPTOR} je oproti
