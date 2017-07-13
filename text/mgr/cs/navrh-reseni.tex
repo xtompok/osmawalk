@@ -3,9 +3,9 @@
 
 \section{Příprava mapových dat}
 Nejprve jsou stažena aktuální data pro Českou republiku, která jsou k dispozici
-s denními aktualizacemi (\TODO url). Z těchto dat je na základě nastavení
-vyříznut obdélník, který pokrývá zpracovávanou oblast. Poté začneme data
-zpracovávat.
+s denními aktualizacemi\footnote{\url{osm.kyblsoft.cz/archiv/}}. Z těchto dat je
+na základě nastavení vyříznut obdélník, který pokrývá zpracovávanou oblast. Poté
+začneme data zpracovávat.
 
 Nejprve jsou klasifikovány jednotlivé objekty. Klasifikují se uzly, hrany a
 multipolygony, jiné typy relací nejsou v současné době používány. Každý objekt
@@ -66,10 +66,16 @@ dalších zkratek má jen malý vliv na délky hledaných cest, proto jsou ze v�
 možných zkratek náhodně vybrány jen některé a to tak, aby z každého vrcholu
 vycházelo průměrně omezené množství zkratek. Takto zachováme pozitivní vliv
 zkratek na hledané cesty, ale zbytečně nezvětšujeme vyhledávací graf.
+\begin{figure}
+  \label{fig:zkratky}
+  \centering
+    \includegraphics[width=0.5\textwidth]{../img/zkratky.pdf}
+  \caption{Vygenerované zkratky mezi cestami (zeleně)}
+\end{figure}
 
 \section{Příprava jízdních řádů}
-Data z jízdních řádů dostáváme ve formátu GTFS (\TODO ref GTFS) a musíme je
-upravit do formátu vhodného pro algoritmus RAPTOR (\TODO ref RAPTOR). Samotný
+Data z jízdních řádů dostáváme ve formátu GTFS \cite{GTFS} a musíme je
+upravit do formátu vhodného pro algoritmus RAPTOR \cite{RAPTOR}. Samotný
 formát GTFS je již poměrně blízký cílovému formátu, ale je potřeba vyřešit
 několik drobností. \TODO přepsat
 
@@ -143,21 +149,29 @@ za sebou, například v autobusových terminálech. Pokoušet se párovat zastá
 GTFS pouze na zastávky v OSM by bylo velmi náročné s nejistým výsledkem.
 Využíváme proto toho, že v OSM máme zmapované nejen zastávky, ale i cesty a
 zastávkám v GTFS vytváříme speciální vrcholy dle jejich zeměpisné pozice v GTFS
-a pomocí zkratek je spojujeme s nejbližšími cestami. Bod reprezentující zastávku
-pak v mapových datech označíme jako zastávku.
+a pomocí zkratek je spojujeme s nejbližšími cestami (viz Obrázek
+\ref{fig:zastavka}. Bod reprezentující zastávku pak v mapových datech označíme
+jako zastávku.
+
+\begin{figure}
+  \centering
+    \includegraphics[width=\textwidth]{../img/tramvaj.pdf}
+  \caption{Zkratky pro připojení tramvajové zastávky (zeleně)}
+  \label{fig:zastavka}
+\end{figure}
 
 Pro zastávky z GTFS, pro které máme v OSM odpovídající ID, použijeme polohu z
 OSM a zkratky k cestní síti hledáme z této polohy. Zkratky jsou i zde potřeba,
-protože dle pravidel OSM (\TODO ref) se zastávka umisťuje na místo, kde zastavuje
+protože dle pravidel OSM \cite{OSM} se zastávka umisťuje na místo, kde zastavuje
 vozidlo, což například u tramvají je bod na kolejích, které ale pro pěší
 plánování nepoužíváme, tudíž je potřeba najít vhodný blízký bod v cestní síti.
 
 Zvláštní pozornost je potřeba věnovat u párování zastávek metra. V současné
-chvíli je metro v Praze zmapované dvěma způsoby. První způsob je novější a
+chvíli je metro v Praze zmapované dvěma způsoby. První způsob (viz Obrázek \ref{fig:metro-detail}) je novější a
 přesnější, jsou při něm zmapována nástupiště a eskalátorové tunely. Při tomto
 podrobném mapování jsou také přidána ID stanic, tudíž je možné stanice jednoduše
 spárovat a hledat cestu od hrany nástupiště. Častějším způsobem je ale starší
-způsob, kdy je stanice metra pouze bod, od kterého vede eskalátorový tunel na
+způsob (viz Obrázek \ref{fig:metro-hrube}), kdy je stanice metra pouze bod, od kterého vede eskalátorový tunel na
 povrch. Tento eskalátorový tunel je pouze virtuální spojka, neodpovídá reálné
 poloze podzemních tras. Takovéto stanice rovněž nemají přiřazená ID. U těchto
 stanic používáme polohu z GTFS a zkratky spojující zastávku s cestní sítí
@@ -165,6 +179,20 @@ hledáme do blízkých míst, která jsou v podzemí, což vede k poměrně dobr
 aproximaci přístupu do metra. Jak bude postupovat mapování stanic metra, bude
 tento typ stanic postupně eliminován a dojde ke zpřesnění navigace při
 přestupech.
+
+\begin{figure}
+  \centering
+    \includegraphics[width=0.5\textwidth]{../img/andel.pdf}
+  \caption{Detailně zmapovaná stanice metra}
+  \label{fig:metro-detail}
+\end{figure}
+
+\begin{figure}
+  \centering
+    \includegraphics[width=\textwidth]{../img/hradcanska.pdf}
+  \caption{Stanice metra zmapovaná starším způsobem}
+  \label{fig:metro-hrube}
+\end{figure}
 
 Vždy jsou preferovány zastávky a stanice zmapované přesněji, které mají ID,
 stačí tedy vylepšovat mapu a při dalším předzpracování dat se nově zmapované

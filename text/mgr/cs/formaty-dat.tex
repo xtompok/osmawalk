@@ -1,11 +1,14 @@
 \chapter{Formáty dat}
+\label{ch:formaty-dat}
 V rámci přípravy dat a vyhledávání tras jednak používáme interní struktury
 jednotlivých programovacích jazyků, jednak některé standardní formáty nezávislé
 na programovacím jazyku. Tyto formáty ppředstvíme v následující sekci, v dalších
 sekcích se již jen budeme věnovat obsahu jednotlivých struktur.
+
 \section{Používané formáty dat}
+
 \subsection{Protocol Buffers}
-Protocol Buffers (PBF) je způsob uložení strukturovaných dat. Byl navržen
+Protocol Buffers\cite{PBF} (PBF) je způsob uložení strukturovaných dat. Byl navržen
 Googlem a je používán v případech, kdy potřebujeme přenést po síti zprávy s
 danou strukturou. Formát podoporuje různé datové typy (integer různých přesností
 a znaménkovosti, čísla s plovoucí řádovou čárkou, stringy, \dots) a
@@ -21,11 +24,10 @@ být základní datový typ nebo jiná zpráva, položky mohou být povinné, vo
 nebo opakované. Každá položka má jméno, typ a číslo, které ho identifikuje v
 binární podobě zprávy. Zprávy se popisují pomocí vlastního jazyka, ze kterého se
 pak pomocí kompilátoru vytvoří vazby do jednotlivých programovacích jazyků. 
-Podrobnou dokumentaci včetně tutoriálů lze najít na stránkách projektu (\TODO
-ref).
+Podrobnou dokumentaci včetně tutoriálů lze najít na stránkách projektu.
 
 \subsection{JavaScript Object Notation}
-JavaScript Object Notation(\TODO ref) (JSON) je formát navržený pro předávání dat ve
+JavaScript Object Notation\cite{JSON} (JSON) je formát navržený pro předávání dat ve
 webových aplikacích. Díky své jednoduchosti a čitelné reprezentaci je hojně
 využíván nejen ve webových projektech, ale často i jako konfigurační jazyk.
 Vychází z Javascriptu, datové typy v něm jsou kromě primitivních typů slovník --
@@ -34,22 +36,24 @@ položek. Formát zpráv není dopředu dán a podpora v programovacích jazycí
 přímo integrovaná nebo dodaná pomocí knihovny. 
 
 \subsection{GeoJSON}
-GeoJSON(\TODO ref) je, jak již název napovídá, nadstavba formátu JSON pro přenos
+GeoJSON\cite{GeoJSON} je, jak již název napovídá, nadstavba formátu JSON pro přenos
 geografických informací. Z hlediska syntaxe se jedná o korektní JSON, který má
 ale předepsanou strukturu a názvy položek. Umožňuje ukládat body, linie, plochy,
 multipolygony a další objekty spolu s jejich atributy a je nativně podporován
 většinou JavaScriptových knihoven pro zobrazování mapových dat.
 
 \subsection{GPX}
-Formát GPX(\TODO ref) je určen pro výměnu polohových dat mezi různými zařízeními s GPS,
+Formát GPX\cite{GPX} je určen pro výměnu polohových dat mezi různými zařízeními s GPS,
 popřípadě mobilními a jinými aplikacemi. Data jsou uložena ve formátu XML, jsou
 dělena na cesty, trasy a významné body. Každá cesta, trasa i významný bod může
 mít uložené některé informace v předdefinovaných atributech, případně libovolné
 další informace uvnitř tagu {\tt <extensions>}. 
 
 \section{Formáty používané při přípravě dat}
+\label{ch:formaty-dat:priprava}
 \TODO PBF
 \section{Formáty používané při vyhledávání tras}
+\label{ch:formaty-dat:vyhledavani}
 \subsection{Formát jízdních řádů}
 Jízdní řády jsou po zpracování uloženy ve zprávě {\tt Timetable}. Způsob
 provázání dat v jednotlivých položkách je popsán v kapitole Implementace (\TODO
@@ -278,6 +282,7 @@ Jednotlivá zastavení spoje v zastávkách po cestě jsou popsána pomocí stru
 \TODO jaké jsou další struktury pro hledání
 
 \subsection{Výsledky vyhledávání}
+\label{ch:formaty-dat:vysledky}
 Výsledky vyhledávání jsou z knihovny předávány jako zabalená zpráva PBF. Zpráva
 obsahuje pouze jednu opakovanou položku typu {\tt Route}, která obsahuje všechny
 nalezené trasy. Každá trasa pak má následující položky: 
@@ -320,7 +325,7 @@ obsahuje následující položky:
 Uvnitř vyhledávací knihovny je výsledek vyhledávání reprezentován typem {\tt
 search\_result\_t}, který je svou strukturou velmi podobný výše popsanému PBF.
 
-Vyhledané trasy je možné uložit do formátu GPX (\TODO ref). V naší aplikaci používáme pouze trasy, každá
+Vyhledané trasy je možné uložit do formátu GPX\cite{GPX}. V naší aplikaci používáme pouze trasy, každá
 nalezená vyhledaná trasa odpovídá jedné trase v GPX, tato trasa je rozdělena na
 pěší segmenty a segmenty MHD. Typ segmentu je uložen u každého segmentu v sekci
 {\tt <extensions>} v tagu {\tt <type>}. Každá trasa má ve své sekci {\tt
@@ -330,7 +335,7 @@ pěší segmenty a segmenty MHD. Typ segmentu je uložen u každého segmentu v 
 \section{Formáty používané ve webové aplikaci}
 \subsection{Výsledky vyhledávání}
 Výsledky vyhledávání jsou předávány z backendu do frontendu webové aplikace
-(\TODO ref webová aplikace) pomocí formátu JSON. Ten je tvořen polem vyhledaných
+(viz \ref{ch:implementace:webapp}) pomocí formátu JSON. Ten je tvořen polem vyhledaných
 tras, kde každá trasa je slovník s následujícími klíči:
 \begin{itemize}
 	\item {\tt time} udávající čas příjezdu do cíle
@@ -360,4 +365,109 @@ Bodové prvky jsou reprezentovány pomocí typu Point s následujícími atribut
 	\item {\tt arrival} pro nástupní bod čas příchodu na zastávku, pro
 	výstupní bod čas příjezdu do zastávky
 \end{itemize}
-\TODO příklad
+Níže následuje ukázka výsledku vyhledávání ve formátu GeoJSON:
+\begin{code}
+[{
+	"penalty": 0.0,
+	"dist": 431.9468038633521,
+	"time": 1499878845
+	"geojson": 
+	{
+		"type": "FeatureCollection",
+		"features":[<features>],
+		"properties":
+		{
+			"penalty": 0.0, 
+			"dist": 431.9468038633521, 
+			"time": 1499878845
+		}
+	},
+}, 
+{
+	"penalty": 0.0,
+	"dist": 429.7844365040137,
+	"geojson": {...},
+	"time": 1499878847
+}
+]
+\end{code}
+
+Položka {\tt <features>} se nahradí za následující:
+\begin{code}
+{
+	"type": "Feature",
+	"geometry":
+	{
+		"type": "LineString",
+		"coordinates":
+		[
+			[14.4200284, 50.076007, 0], 
+			[14.4197562, 50.075874, 0], 
+			[14.4196109, 50.075901, 0]
+		]
+	}, 
+	"properties": {"type": 0}
+}, 
+{
+	"type": "Feature",
+	"geometry": 
+	{
+		"type": "LineString",
+		"coordinates":
+		[
+			[14.4196109, 50.075901, 0],
+			[14.4143221, 50.073275, 0]
+		]
+	},
+	"properties": {"type": 60, "name": "16"}
+}, {
+	"type": "Feature",
+	"geometry": 
+	{
+		"type": "LineString",
+		"coordinates":
+		[
+			[14.414322, 50.073275, 0],
+			[14.4143254, 50.073245, 0],
+			[14.4142694, 50.073198, 0],
+			[14.4141859, 50.073204, 0],
+			[14.4139825, 50.072994, 0],
+			[14.4141040, 50.072856, 0],
+			[14.4141328, 50.072675, 0],
+			[14.4143565, 50.072518, 0],
+			[14.4145202, 50.072425, 0]
+		]
+	},
+	"properties": {"type": 51}
+}, {
+	"type": "Feature",
+	"geometry":
+	{
+		"type": "Point", 
+		"coordinates": [14.419610, 50.0759010]
+	},
+	"properties": 
+	{
+		"arrival": 1499878463, 
+		"subtype": "departure", 
+		"type": 60, 
+		"name": "Karlovo náměstí",
+		"departure": 60900
+	}
+}, {
+	"type": "Feature",
+	"geometry":
+	{
+		"type": "Point",
+		"coordinates": [14.414322, 50.073275]
+	},
+	"properties": 
+	{
+		"arrival": 1499878740,
+		"subtype": "arrival",
+		"type": 60,
+		"name": "Palackého náměstí",
+		"departure": 1499878740
+	}
+}
+\end{code}

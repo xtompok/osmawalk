@@ -1,3 +1,4 @@
+% Encoding: UTF-8
 %
 %  Vzor bibliografické databáze pro automatickou tvorbu seznamu referencí
 %  pomocí BibTeXu
@@ -116,4 +117,83 @@ eprint = {
     abstract = { We study the problem of computing all Pareto-optimal journeys in a dynamic public transit network for multiple criteria, such as arrival time and number of transfers. Existing algorithms consider this as a graph problem and solve it using various graph search algorithms. Unfortunately, this leads to either high query times or suboptimal solutions. We take a different approach. We introduce RAPTOR, our novel round-based public transit router. Unlike previous algorithms, it is not Dijkstra-based, looks at each route (such as a bus line) in the network at most once per round, and can be made even faster with simple pruning rules and parallelization using multiple cores. Because it does not rely on preprocessing, RAPTOR works in fully dynamic scenarios. Starting from arrival time and number of transfers as criteria, it can be easily extended to handle flexible departure times or arbitrary additional criteria. As practical examples we consider fare zones and reliability of transfers. When run on complex public transportation networks (such as London), RAPTOR computes all Pareto-optimal journeys between two random locations an order of magnitude faster than previous approaches, which easily enables interactive applications. }
 }
 
+@Manual{PBF,
+  title        = {Language Guide -- Protocol Buffers},
+  organization = {Google},
+  timestamp    = {2017-07-12},
+  url          = {https://developers.google.com/protocol-buffers/docs/proto},
+}
 
+@TechReport{JSON,
+  author               = {ECMA},
+  title                = {The {JSON} Data Interchange Format},
+  institution          = {ECMA},
+  year                 = {2013},
+  number               = {Standard ECMA-404 1st Edition / October 2013},
+  month                = oct,
+  citeulike-article-id = {13414849},
+  citeulike-linkout-0  = {http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf},
+  edition              = {1st Edition},
+  key                  = {JSON},
+  keywords             = {ecma, json, 2},
+  posted-at            = {2014-10-31 11:59:00},
+  url                  = {http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf},
+}
+
+@Manual{GPX,
+  title     = {The GPS Exchange Format},
+  timestamp = {2017-07-12},
+  url       = {http://www.topografix.com/gpx.asp},
+}
+
+@TechReport{GeoJSON,
+  author       = {H. Butler and M. Daly and A. Doyle and S. Gillies and S. Hagen and T. Schaub},
+  title        = {The GeoJSON Format},
+  institution  = {RFC Editor},
+  year         = {2016},
+  type         = {RFC},
+  number       = {7946},
+  month        = {August},
+  howpublished = {Internet Requests for Comments},
+  issn         = {2070-1721},
+  publisher    = {RFC Editor},
+}
+
+@Manual{Flask,
+  title     = {Flask},
+  timestamp = {2017-07-12},
+  url       = {http://flask.pocoo.org/},
+}
+
+@Manual{LibUCW,
+  title     = {LibUCW},
+  author    = {Martin Mareš and Robert Špalek and Pavel Charvát and Daniel Fiala and Tomáš Gavenčiak and Robert Kessl and Jan Moskyto Matějka and Tomáš Valla and Michal Vaner},
+  timestamp = {2017-07-12},
+  url       = {https://www.ucw.cz/libucw/},
+}
+
+@Misc{bakalarka,
+  author = {Tomáš Pokorný},
+  title  = {Hledání pěších cest v mapě},
+  year   = {2014},
+  school = {Univerzita Karlova},
+  url    = {https://is.cuni.cz/webapps/zzp/detail/149888/},
+}
+
+@Misc{SRTM,
+  author       = {National Aeronautics and Space Administration},
+  title        = {The Shuttle Radar Topography Mission},
+  howpublished = {online},
+  month        = {07},
+  year         = {2017},
+  timestamp    = {2017-07-12},
+  url          = {https://www2.jpl.nasa.gov/srtm/},
+}
+
+@Misc{OSM,
+  author    = {přispěvatelé OSM},
+  timestamp = {2017-07-12},
+  url       = {http://www.openstreetmap.org/about},
+}
+
+@Comment{jabref-meta: databaseType:bibtex;}

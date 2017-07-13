@@ -1,5 +1,7 @@
 \chapter{Implementace}
+\label{ch:implementace}
 \section{Příprava mapových dat}
+\label{ch:implementace:OSM}
 Počáteční fáze přípravy dat je shodná s přípravou data v bakalářské práci --
 pomocí shellového skriptu je nalezeno poslední vydání OSM dat pro Českou
 republiku, tato data jsou stažena, rozbalena a pomocí programu osmconvert je z
@@ -15,7 +17,7 @@ přípravy byl kompletně změněn. Data jsou nejprve klasifikována, pro tento 
 byl vytvořen kód v jazyce C, který dle dodané konfigurace přiřadí typ hranám a
 nově i vrcholům. Jazyk C jsme zvolili z důvodu rychlosti a paměťové efektivity,
 velkou roli také hrála znalost jazyka autorem. Ve většině programů, které jsme
-napsali je také využívána knihovna LibUCW (\TODO ref), která poskytuje velké
+napsali je také využívána knihovna LibUCW\cite{LibUCW}, která poskytuje velké
 množství algoritmů, datových struktur a obvyklých konstrukcí v C a je
 naprogramována s ohledem na maximální výkon.
 
@@ -133,6 +135,7 @@ vrcholu vede v průměru maximálně 5 zkratek, což je empiricky zjištěná ko
 na základě analýzy mapových dat a experimentů s generováním zkratek.
 
 \section{Příprava jízdních řádů}
+\label{ch:implementace:GTFS}
 Jízdní řády jsou nejprve staženy pomocí shellového skriptu a nahrány do
 PostgreSQL databáze, jejíž schema odpovídá formátu GTFS. Průchod přes databázi
 jsme zvolili, poněvadž nám pak dává možnost ptát se pouze na část dat,
@@ -182,6 +185,7 @@ proto možné ji spouštět při každé změně jízdních řádů. Naopak nen�
 nutné, při aktualizaci mapových dat není třeba přegenerovávat jízdní řády. 
 
 \section{Vyhledávání}
+\label{ch:implementace:vyhledavani}
 Vyhledávací část jsme navrhli jako knihovnu, která umožňuje snadnou integraci do
 jiných projektů. Knihovna je napsána v jazyce C s využitím knihovny LibUCW.
 Spolu s knihovnou jsme napsali i jednoduchý demonstrační program, který umožňuje
@@ -220,7 +224,7 @@ konkrétním hledání, ale bylo by možné si kešovat jízdní řády pro nejp
 dny, což by stále příliš nezhoršovalo nároky na paměť a ušetřil by se čas při
 hledání. Jízdní řád pro konkrétní den obsahuje všechny zastávky z celkového
 jízdního řádu, neobsluhované zastávky mají prázdnou množinu linek. Formát
-jízdního řádu pro konkrétní den je uveden v sekci Formáty dat (\TODO ref).
+jízdního řádu pro konkrétní den je uveden v sekci \ref{ch:formaty-dat:vyhledavani}.
 
 Funkce {\tt search\_stop\_conns} slouží k hledání zastávek dosažitelných bez
 přestupu z dané zastávky v daný čas. Funkce projde všechny linky, které daný den
@@ -228,10 +232,11 @@ z dané zastávky jedou, najde první spoj, který odjíždí po čase příchod
 zastávku a všechny zastávky tohoto spoje uloží jako dosažitelné s časem příjezdu
 podle nalezeného spoje. Funkce vrátí seznam linek a pro každou dosažitelné
 zastávky s časem příjezdu. Přesný formát dat je uveden v sekci Formáty dat
-(\TODO ref).
+\ref{ch:formaty-dat:vyhledavani}.
 
 \subsection{Webová aplikace}
-Webová aplikace je napsaná v Pythonu ve webovém frameworku Flask(\TODO ref).
+\label{ch:implementace:webapp}
+Webová aplikace je napsaná v Pythonu ve webovém frameworku Flask\cite{Flask}.
 Python jsme zvolili z důvodu snadné interakce se sdílenými knihovnami pro C a
 rychlosti vývoje aplikací v něm. Flask pak je jednoduchým webovým frameworkem,
 který se osvědčil na jiných projektech. Webová aplikace má dvě části -- backend,
@@ -246,18 +251,18 @@ cílový bod, je vyvolán požadavek {\tt GET
 {\tt flat} je zeměpisná délka a šířka výchozího bodu a {\tt tlon} a {\tt tlat}
 je zeměpisná délka a šířka cílového bodu. Souřadnice výchozího a cílového bodu
 jsou předány vyhledávací knihovně a počká se na vrácení výsledku hledání. Tento
-výsledek je ve formátu PBF, jak je specifikováno v sekci Formát dat(\TODO ref).
+výsledek je ve formátu PBF, jak je specifikováno v sekci \ref{ch:formaty-dat:vysledky}.
 Protože knihovna Leaflet vyžaduje pro zobrazení prostorových dat formát
-GeoJSON(\TODO ref), je potřeba nalezené trasy převést do tohoto formátu. Při
+GeoJSON\cite{GeoJSON}, je potřeba nalezené trasy převést do tohoto formátu. Při
 tomto převodu jsou současně spojeny všechny navazující hrany stejného typu (v
 případě MHD i stejného spoje) do jedné lomené linie a také jsou přidány časy
 příchodů na zastávku a odjezdu spoje MHD v případě nástupu do MHD a časy
 příjezdů na zastávku v případě výstupu z MHD. Všechna tato geografická data jsou
 pak zabalena jako FeatureCollection do formátu GeoJSON a spolu s informacemi o
 čase, pěší vzdálenosti a penaltě zabalena do pole všech tras, které je předáno
-frontendu ke zpracování. Přesný formát předávaných dat je popsán v sekci Formáty
-dat {\TODO ref} 
+frontendu ke zpracování. Přesný formát předávaných dat je popsán v sekci \ref{ch:formaty-dat:vysledky}
 \subsubsection{Frontend}
 Frontend je napsán v Javascriptu s použitím knihovny Leaflet pro operace s
-mapou. Jako mapový podklad je použita mapa od MapBoxu (\TODO ref), přes kterou
+mapou. Jako mapový podklad je použita mapa od
+MapBoxu\footnote{\url{https://www.mapbox.com/}}, přes kterou
 jsou vykreslovány jednotlivé nalezené trasy. (\TODO dopsat, ale jak konkrétně?)

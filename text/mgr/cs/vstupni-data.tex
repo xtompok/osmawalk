@@ -5,16 +5,16 @@ data, která obsahují silnice, cesty, budovy a další mapové prvky. Druhým z
 jsou data o jízdních řádech, která obsahují linky, zastávky a spoje.
 
 \section{Mapová data}
-Mapová data jsou použita z projektu OpenStreetMap (OSM). Tato data neobsahují
+Mapová data jsou použita z projektu OpenStreetMap\cite{OSM} (OSM). Tato data neobsahují
 informace o nadmořské výšce jednotlivých bodů, k doplnění nadmořské výšky jsou
 použita data z projektu Shuttle Radar Topography Mission (SRTM), která jsou
 lineárně interpolována pro získání nadmořských výšek jednotlivých bodů v mapě.
 
 O datech OSM a jejich problémech jsme již rozsáhle pojednávali v bakalářské
-práci (\TODO ref), níže citujeme obecný úvod a popis základních primitiv. 
+práci\cite{bakalarka}, níže citujeme obecný úvod a popis základních primitiv. 
 \newcommand{\tuc}{\bf}
 \subsection{Projekt OpenStreetMap}
-Projekt OpenStreetMap (\TODO cite{osmweb}) vznikl v~Anglii v~roce 2004 a jeho prvotním cílem bylo
+Projekt OpenStreetMap\cite{OSM} vznikl v~Anglii v~roce 2004 a jeho prvotním cílem bylo
 vytvořit volně dostupná geografická data pro Velkou Británii. Iniciativa se
 postupně rozrostla do celého světa a dnes mapu pomáhá tvořit přes milion
 dobrovolníků. Česká republika je dnes poměrně kvalitně pokryta a zvláště velká
@@ -59,10 +59,11 @@ vždy musí dohromady tvořit jednu nebo několik uzavřených částí tvoříc
 plochy resp. díry v~ploše.
 
 \section{Výšková data}
-O výškových datech jsme také pojednávali v bakalářské práci, opět citujeme (\TODO ref):
+O výškových datech jsme také pojednávali v bakalářské práci, opět
+citujeme\cite{bakalarka}:
 Abychom mohli správně odhadnout náročnost pěší trasy, musíme znát i informace
 o~nadmořské výšce jednotlivých bodů. Stejně tak jako většina jiných projektů jsme
-použili data SRTM (\TODO cite{srtmweb}), což jsou volně dostupná výšková data pro celý
+použili data SRTM\cite{SRTM}, což jsou volně dostupná výšková data pro celý
 svět.
 
 Shuttle Radar Topography Mission byl projekt NASA, kdy při letu raketoplánu
@@ -99,7 +100,7 @@ zastavuje nějaký spoj některé linky. Druhým typem je \uv{stanice}, která u
 oblast několika stojanů, obvykle stejného jména. Nemusí mít fyzickou
 reprezentaci a slouží pro zobrazování v mapě a svázání logicky blízkých stojanů.
 Protože stanice pro náš vyhledávač nenese důležitou informaci, využíváme pouze
-zastávkové stojany (\TODO implementovat). Pro vyhledávání spojení využíváme
+zastávkové stojany. Pro vyhledávání spojení využíváme
 následující položky:
 \begin{itemize}
 	\item {\tt stop\_id} -- jednoznačný identifikátor zastávky
