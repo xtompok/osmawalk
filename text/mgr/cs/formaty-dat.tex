@@ -52,6 +52,47 @@ další informace uvnitř tagu {\tt <extensions>}.
 \section{Formáty používané při přípravě dat}
 \label{ch:formaty-dat:priprava}
 \TODO PBF
+\subsection{Výstupní data z databáze}
+Po zpracování dat pomocí PostgreSQL a PostGISu jsou upravená data vyexportována
+do CSV. Vrcholy jsou vyexportovány do souboru {\tt nodes.csv}, který obsahuje
+následující položky:
+\begin{itemize}
+	\item {\tt id} udává OSM id vrcholu
+	\item {\tt lat} a {\tt lon} udávají zeměpisnou šířku a délku vrcholu v
+	UTM
+	\item {\tt height} udává nadmořskou výšku vrcholu
+	\item \TODO implementovat typ vrcholu
+\end{itemize} 
+Hrany jsou vyexportovány do souboru {\tt ways.csv}, který obsahuje následující
+položky:
+\begin{itemize}
+	\item {\tt id} udává OSM id hrany
+	\item {\tt type} udává typ hrany
+	\item {\tt from} udává výchozí vrchol hrany
+	\item {\tt to} udává cílový vrchol hrany
+\end{itemize} 
+Hrany jsou uvažovány jako obousměrné.
+Zkratky jsou vyexportovány do souboru {\tt direct.csv}, který obsahuje
+následující položky:
+\begin{itemize}
+	\item {\tt id1} udává první vrchol zkratky
+	\item {\tt id2} udává druhý vrchol zkratky
+\end{itemize} 
+Zastávky jsou vyexportovány do souboru {\tt stops.csv}, který obsahuje
+následující položky:
+\begin{itemize}
+	\item {\tt id} udává OSM id zastávky
+	\item {\tt stop\_id} udává id zastávky v GTFS
+	\item {\tt raptor\_id} udává id zastávky v algoritmu RAPTOR
+	\item {\tt lat} a {\tt lon} udávají zeměpisné souřadnice zastávky v UTM
+\end{itemize} 
+Zkratky propojující zastávky se zbytkem grafu jsou vyexporotvány do souboru {\tt
+stops-direct.csv}, který obsahuje následující položky:
+\begin{itemize}
+	\item {\tt sid} udává id zastávky
+	\item {\tt nid} udává id vrcholu v grafu
+	\item {\tt objtype} udává typ zkratky
+\end{itemize} 
 \section{Formáty používané při vyhledávání tras}
 \label{ch:formaty-dat:vyhledavani}
 \subsection{Formát jízdních řádů}
