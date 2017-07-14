@@ -51,7 +51,49 @@ další informace uvnitř tagu {\tt <extensions>}.
 
 \section{Formáty používané při přípravě dat}
 \label{ch:formaty-dat:priprava}
-\TODO PBF
+\subsection{Přípravný formát pro databázi}
+Program {\tt parse} přečte data OSM, klasifikuje je a vytvoří 3 soubory
+reprezentující mapová data -- ({\tt }, {\tt } a {\tt }), které udržují po řadě
+informace o uzlech, cestách a multipolygonech. Jednotlivé datové prvky jsou
+uloženy jako zprávy ve formátu PBF popsaném níže, soubor je tvořen vždy délkou
+zprávy a samotnou zprávou řazenými za sebe. 
+
+Zpráva pro uzel obsahuje tyto položky:
+\begin{itemize}
+	\item {\tt id} udává OSM id uzlu 
+	\item {\tt lat} a {\tt lon} udávají zeměpisné souřadnice uzlu v UTM
+	\item {\tt height} udává nadmořskou výšku uzlu
+	\item {\tt type} udává typ uzlu
+	\item {\tt inside} udává, zda je uzel uvnitř nějaké překážky
+	\item {\tt inTunnel} udává, zda je uzel v podzemí
+	\item {\tt onBridge} udává, zda je uzel na mostě
+	\item {\tt stop} udává, zda je uzel zastávka
+	\item {\tt ref} udává hodnotu tagu {\tt ref} u uzlu, používá se pro
+	párování zastávek MHD
+\end{itemize}  
+Zpráva pro cestu obsahuje tyto položky:
+\begin{itemize}
+	\item {\tt id} udává OSM id cesty
+	\item {\tt refs} obsahuje posloupnost OSM id vrcholů, ze kterých se
+	cesta skládá
+	\item {\tt area} udává, zda je daná cesta plocha 
+	\item {\tt type} udává typ cesty (implicitně {\tt WAY}) 
+	\item {\tt bordertype} má udávat typ ohraničující cesty u nějaké
+	oblasti, v současné době se nepoužívá
+	\item {\tt crossing} má udávat, jaký typ cesty zpracovávaná cesta kříží,
+	v současné době se nepoužívá  
+	\item {\tt bridge} udává, zda je cesta na mostě
+	\item {\tt tunnel} udává, zda je cesta v podzemí
+\end{itemize} 
+Zpráva pro multipolygon obsahuje tyto položky:
+\begin{itemize}
+	\item {\tt id} udává OSM id multipolygonu
+	\item {\tt refs} udává, posloupnost cest, ze kterých se multipolygon
+	skládá
+	\item {\tt roles} udává pro každou cestu z předchozí posloupnosti její
+	roli (zda je vnější či vnitřní)
+	\item {\tt type} udává typ multipolygonu
+\end{itemize}  
 \subsection{Výstupní data z databáze}
 Po zpracování dat pomocí PostgreSQL a PostGISu jsou upravená data vyexportována
 do CSV. Vrcholy jsou vyexportovány do souboru {\tt nodes.csv}, který obsahuje
