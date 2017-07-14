@@ -196,6 +196,60 @@ GPX.
 
 \subsection{Vyhledávací knihovna}
 \TODO hledání přes půlnoc včetně implementace
+\subsection{Výběr povolených prostředků}
+\TODO vynechání linek včetně implementace
+\subsection{Výpočet penalt}
+Aby bylo možné hledat co nejvhodnější trasy pro různé požadavky, implementovali
+jsme obecné funkce pro výpočet penalty pro jednotlivé události, které mohou na
+trase nastat. Protože požadavky na preferenci různých typů tras mohou být velmi
+složité a obtížně parametrizovatelné, jsou funkce pro výpočet penalty napsané
+přímo ve zdrojovém kódu a je na uživatelích, aby si je případně upravili dle
+svých potřeb. Při dalším rozšiřování projektu by bylo možné udělat výpočet
+penalty pomocí pluginu v nějakém skriptovacím jazyce, aby bylo ho možné za běhu
+upravovat. Funkce pro výpočet penalt se nachází v souboru {\tt penalty.c} a jsou následující: 
+\begin{itemize}
+	\item {\tt calcChangePenalty(Graph\_\_Graph * graph, struct config\_t conf,
+	struct ptedge\_t * toEdge, struct mmdijnode\_t * point, uint64\_t time)}
+	slouží k výpočtu penalty za změnu typu hrany. Obvykle se využívá k
+	penalizaci přestupů při cestě MHD.
+	Argumenty funkce jsou následující:
+	\begin{itemize}
+		\item {\tt graph} odkazuje na vyhledávací graf
+		\item {\tt conf} popisuje konfiguraci vyhledávání od uživatele
+		\item {\tt toEdge} odkazuje na následující hranu, která bude MHD   
+		\item {\tt point} odkazuje jednak na aktuální bod, ve kterém se
+		nacházíme, jednak tento bod obsahuje i informace o předchozí
+		hraně.
+		\item {\tt time} udává čas čekání v daném vrcholu
+	\end{itemize}
+	\item {\tt calcPointPenalty(Graph\_\_Graph * graph,struct config\_t conf,
+	Graph\_\_Vertex *vert)} slouží k výpočtu penalty v daném bodě. Lze ji
+	použít například k penalizaci přecházení na semaforech. Argumenty
+	funkce jsou následující:
+	\begin{itemize}
+		\item {\tt graph} odkazuje na vyhledávací graf
+		\item {\tt conf} popisuje konfiguraci vyhledávání od uživatele
+		\item {\tt vert} odkazuje na vrchol, ve kterém počítáme penaltu
+	\end{itemize}
+	\item {\tt calcWalkPenalty(Graph\_\_Graph * graph, struct config\_t
+	conf, Graph\_\_Edge * edge)} slouží k výpočtu penalty za pěší úsek.
+	Argumenty funkce jsou následující:
+	\begin{itemize}
+		\item {\tt graph} odkazuje na vyhledávací graf
+		\item {\tt conf} popisuje konfiguraci vyhledávání od uživatele
+		\item {\tt edge} odkazuje na hranu, pro kterou počítáme penaltu
+	\end{itemize}
+	\item {\tt calcTransportPenalty(Graph\_\_Graph * graph, struct config\_t
+	conf, struct stop\_route * r,time\_t arrival)} slouží k výpočtu penalty
+	za úsek projetý MHD. Argumenty funkce jsou následující:
+	\begin{itemize}
+		\item {\tt graph} odkazuje na vyhledávací graf
+		\item {\tt conf} popisuje konfiguraci vyhledávání od uživatele
+		\item {\tt r} odkazuje na použitou linku
+		\item {\tt arrival} udává čas příjezdu na cílovou zastávku
+	\end{itemize}
+\end{itemize}
+
 \subsection{Knihovna algoritmu RAPTOR}
 Knihovnu implementující algoritmus RAPTOR jsme navrhli jako oddělenou knihovnu,
 stejně tak skripty zajišťující přípravu dat z jízdních řádů jsou také oddělené,
