@@ -32,8 +32,8 @@ char node_cb(size_t len,uint8_t * inbuf){
 		node->lon,
 		node->lat,
 		node->height,
-		node->square1,
-		node->square2);
+		0,
+		0);
 	premap__node__free_unpacked(node,NULL);
 	return 1;
 }
@@ -43,15 +43,13 @@ char way_cb(size_t len,uint8_t * inbuf){
 	way = premap__way__unpack(NULL,len,inbuf);
 //	fprintf(stderr,"Way: %lld\n",way->id);
 
-//	id,area,barrier,type,bridge,tunnel,wayidx
-	printf("%lld\t%d\t%d\t%d\t%d\t%d\t%d\n",
+//	id,area,type,bridge,tunnel,wayidx
+	printf("%lld\t%d\t%d\t%d\t%d\n",
 		way->id,
 		way->area,
-		way->barrier,
 		way->type,
 		way->bridge,
-		way->tunnel,
-		way->wayidx);
+		way->tunnel);
 	premap__way__free_unpacked(way,NULL);
 	return 1;
 }

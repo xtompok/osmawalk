@@ -29,7 +29,7 @@ COMMAND="COPY nodes (id,lat,lon,height,objtype,inside,intunnel,onbridge,stoppos,
 ./todb n |  psql -c "$COMMAND" $DATABASE $USERNAME
 
 echo Copying ways...
-COMMAND="COPY ways (id,area,barrier,type,bridge,tunnel,wayidx) FROM STDIN;"
+COMMAND="COPY ways (id,area,type,bridge,tunnel) FROM STDIN;"
 ./todb w | psql -c "$COMMAND" $DATABASE $USERNAME
 
 echo Copying way refs...

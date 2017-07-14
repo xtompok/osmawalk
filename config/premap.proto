@@ -14,34 +14,26 @@ message Node {
 	optional bool onBridge = 8;
 	optional bool stop = 9;
 	optional string ref = 10;
-	optional int64 nodeidx = 200;
-	optional int32 square1 = 210;
-	optional int32 square2 = 211;
 }
 
 message Way {
-
 	required int64 id=1;
 	repeated sint64 refs = 10;
 	optional bool area = 11;
-	optional bool barrier = 15;
 	optional objtype type = 12 [default=WAY];
 	optional objtype bordertype = 13;
 	optional objtype crossing = 14;
 	optional bool bridge = 16 [default=false];
 	optional bool tunnel = 17 [default=false];
-	optional int64 wayidx = 200;
-	optional bool render = 220;
 }
 
 message Relation {
 	required int64 id = 1;
 	optional int32 usable = 4 [default=0];
-    optional bool multipolygon = 7;
+	optional bool multipolygon = 7;
 	repeated string str_keys = 8;
 	repeated string str_vals = 9;
 	repeated sint64 refs = 10;
-	optional bool render = 15;
 }
 message Multipolygon {
 	enum Role {
@@ -49,8 +41,6 @@ message Multipolygon {
 		OUTER = 1;	
 	}
 	required int64 id = 1;
-	repeated string str_keys = 8;
-	repeated string str_vals = 9;
 	repeated sint64 refs = 10;
 	repeated Role roles = 11;
 	optional objtype type = 12 [default=WAY];

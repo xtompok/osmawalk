@@ -219,15 +219,15 @@ void writeGpxFile(struct search_result_t * result,char * filename){
 		writeGpxStartTrack(OUT,i,arr,rt->dist,rt->points[rt->n_points-1].penalty);
 		free(arr);
 		int memtype;
-		memtype  = rt->points[1].edgetype;
+		memtype  = rt->points[1].edge->edge_type;
 		writeGpxStartTrkSeg(OUT,memtype);
 		writeGpxTrkpt(OUT,rt->points[0].lat,rt->points[0].lon,rt->points[0].height);
 		for (int j=1;j<rt->n_points;j++){
 			struct point_t * pt;
 			pt = rt->points + j;
 			writeGpxTrkpt(OUT,pt->lat,pt->lon,pt->height);
-			if (j+1<rt->n_points && rt->points[j+1].edgetype != memtype){
-				memtype = rt->points[j+1].osmvert->type;
+			if (j+1<rt->n_points && rt->points[j+1].edge->edge_type != memtype){
+				memtype = rt->points[j+1].edge->edge_type;
 				writeGpxEndTrkSeg(OUT);
 				writeGpxStartTrkSeg(OUT,memtype);
 				writeGpxTrkpt(OUT,pt->lat,pt->lon,pt->height);

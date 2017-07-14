@@ -22,14 +22,11 @@ CREATE TABLE ways (
 	id BIGSERIAL PRIMARY KEY,
 --	refs INTEGER[],
 	area BOOLEAN,
-	barrier BOOLEAN,
 	"type" INTEGER,
 	bordertype INTEGER,
 	crossing INTEGER,
 	bridge BOOLEAN,
 	tunnel BOOLEAN,
-	wayidx INTEGER,
-	render BOOLEAN,
 	geom GEOMETRY(LINESTRINGZ,3065)
 );
 
