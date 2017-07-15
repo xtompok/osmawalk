@@ -2,7 +2,7 @@
 \label{ch:formaty-dat}
 V rámci přípravy dat a vyhledávání tras jednak používáme interní struktury
 jednotlivých programovacích jazyků, jednak některé standardní formáty nezávislé
-na programovacím jazyku. Tyto formáty ppředstvíme v následující sekci, v dalších
+na programovacím jazyku. Tyto formáty představíme v následující sekci, v dalších
 sekcích se již jen budeme věnovat obsahu jednotlivých struktur.
 
 \section{Používané formáty dat}
@@ -42,6 +42,12 @@ ale předepsanou strukturu a názvy položek. Umožňuje ukládat body, linie, p
 multipolygony a další objekty spolu s jejich atributy a je nativně podporován
 většinou JavaScriptových knihoven pro zobrazování mapových dat.
 
+\subsection{XML}
+XML \cite{XML} je značkovací formát používaný pro přenos strukturovaných dat
+mezi aplikacemi. Jedná se o textový formát, ve kterém jsou uložena strukturovaná
+data ve formě entit uspořádaných do stromové struktury. Každá entita má jméno a
+může mít parametry. 
+
 \subsection{GPX}
 Formát GPX\cite{GPX} je určen pro výměnu polohových dat mezi různými zařízeními s GPS,
 popřípadě mobilními a jinými aplikacemi. Data jsou uložena ve formátu XML, jsou
@@ -49,11 +55,33 @@ dělena na cesty, trasy a významné body. Každá cesta, trasa i významný bod
 mít uložené některé informace v předdefinovaných atributech, případně libovolné
 další informace uvnitř tagu {\tt <extensions>}. 
 
+\section{Systémy zeměpisných souřadnic}
+Zeměpisné souřadnice jsou v rámci práce používány ve dvou souřadnicových
+systémech -- UTM a WGS84. Při klasifikaci dat z OSM jsou jejich souřadnice
+převedeny do UTM a tak jsou dále uchovávány. Při přípravě výsledků vyhledávání
+jsou body na trasách převedeny zpět do WGS84 a takto jsou vráceny. Veškerá data
+předávaná knihovně či vrácená knihovnou jsou ve WGS84.
+\subsection{WGS84}
+World Geodetic System 1984 (WGS84) \cite{WGS84} je geodetický standard
+definující souřadnicový systém a referenční elipsoid pro popis polohy objektů na
+povrchu Země. Využívá polárních souřadnic, zeměpisná šířka se určuje od rovníku,
+zeměpisná délka od \uv{IERS Reference Meridian}. Výhodou je pokrytí celého
+povrchu Země jedním systémem, vzhledem k použití elipsoidu a polárních souřadnic
+je obtížné počítat vzdálenosti mezi dvěma body.
+\subsection{UTM}
+Univerzální transverzální Mercatorův systém souřadnic (UTM) \cite{UTM} je způsob
+určování polohy na povrchu země založený na mřížkách. Povrch země je rozdělen na
+60 zón a každá zóna je pak robrazena pomocí trasverzálního Mercatorova
+zobrazení. Souřadnice v rámci jedné zóny jsou pak udávány v metrech, lze proto
+snadno počítat vzdálenosti. Pozice bodu na Zemi se udává pomocí čísla zóny a
+pozice uvnitř ní. 
+
 \section{Formáty používané při přípravě dat}
 \label{ch:formaty-dat:priprava}
 \subsection{Přípravný formát pro databázi}
 Program {\tt parse} přečte data OSM, klasifikuje je a vytvoří 3 soubory
-reprezentující mapová data -- ({\tt }, {\tt } a {\tt }), které udržují po řadě
+reprezentující mapová data -- ({\tt nodes-stage1}, {\tt ways-stage1} a {\tt
+mp-stage1}), které udržují po řadě
 informace o uzlech, cestách a multipolygonech. Jednotlivé datové prvky jsou
 uloženy jako zprávy ve formátu PBF popsaném níže, soubor je tvořen vždy délkou
 zprávy a samotnou zprávou řazenými za sebe. 
@@ -243,8 +271,7 @@ Každá zastávka je popsána strukturou {\tt stop} s následujícími položkam
 	\item {\tt name} udává název zastávky
 \end{itemize}
 Každý pěší přestup mezi zastávkami je popsán strukturou {\tt transfer}. Tato
-struktura není v současné době využívána. Má tyto položky: (\TODO opravit
-implementaci)
+struktura není v současné době využívána. Má tyto položky:
 \begin{itemize}
 	\item {\tt from} odkazuje na výchozí zastávku
 	\item {\tt to} odkazuje na cílovou zastávku
@@ -320,14 +347,14 @@ obsahuje následující položky:
 	\item {\tt majorized} indikuje, zda při přidávání jiných vrcholů byl
 	tento vrchol majorizován
 	\item {\tt arrival} udává čas příjezdu do vrcholu
-	\item {\tt penalty} udává penaltu při příchodu do vrcholu \TODO ověřit
+	\item {\tt penalty} udává penaltu trasy až do současného vrcholu včetně
 \end{itemize}
 Protože přicházející hrana může být jak hranou z OSM, tak hranou MHD, je
 reprezentována pomocí struktury {\tt edge\_t}, která obsahuje následující
 položky:
 \begin{itemize}
 	\item {\tt edge\_type} udává typ hrany ({\tt EDGE\_TYPE\_WALK} nebo {\tt
-	EDGE\_TYPE\_PT}
+	EDGE\_TYPE\_PT})
 	\item union {\tt osmedge} a {\tt ptedge} odkazuje buď na konkrétní hranu
 	ve vyhledávacím grafu, nebo na popis hrany MHD 
 \end{itemize}
@@ -345,8 +372,8 @@ stop\_conns}, která má následující položky:
 	\item {\tt n\_routes} udává počet linek jedoucích z dané zastávky
 	\item {\tt routes} popisuje linky jedoucí z dané zastávky
 \end{itemize}
-Každá linka je popsána pomocí struktury {\tt stop\_route, která obsahuje
-následující položky} 
+Každá linka je popsána pomocí struktury {\tt stop\_route}, která obsahuje
+následující položky 
 \begin{itemize}
 	\item {\tt departure} udává čas odjezdu linky ze zastávky, v sekundách
 	od počátku dne jízdního řádu 
@@ -356,7 +383,7 @@ následující položky}
 	\item {\tt stops} popisuje jednotlivá zastavení na lince
 \end{itemize}
 Jednotlivá zastavení spoje v zastávkách po cestě jsou popsána pomocí struktury
-{\tt stop\_arr}, která obsahuje následující položky:
+{\tt stop\_arr}, která bsahuje následující položky:
 \begin{itemize}
 	\item {\tt to} odkazuje na zastávku, kde spoj stojí
 	\item {\tt arrival} udává čas příjezdu \TODO v jakém formátu

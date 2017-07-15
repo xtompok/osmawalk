@@ -11,7 +11,7 @@ nebo jinou zemi je potřeba tento skript upravit, pro jiné české město stač
 přepsat hranice výřezu, jiný stát by potřeboval i vlastní zdroj dat OSM a
 upravit souřadnice pro stahování SRTM. 
 
-(\TODO nelhat moc, zjistit, co bylo uděláno na SFG) Další pokračování přípravy
+Další pokračování přípravy
 dat je sice sémanticky stejné, jako bylo v bakalářské práci, ale mechanizmus
 přípravy byl kompletně změněn. Data jsou nejprve klasifikována, pro tento účel
 byl vytvořen kód v jazyce C, který dle dodané konfigurace přiřadí typ hranám a
@@ -27,9 +27,14 @@ shellového skriptu a programu v C, který čte Premap a vytváří z něj CSV.
 Zkoušeli jsme různé varianty vkládání do databáze, protože jde o velké množství
 dat a tento způsob se ukázal nejefektivnější z jednoduchých způsobů vkládání. 
 
-Protože příprava dat je vlastně práce s velkým množstvím objektů naráz, jedná se
-o přístup velmi podobný databázovým systémům, které umí s velkým množstvím dat
-naráz pracovat. (\TODO někam umístit) 
+Pro další zpracování jsme využili databázi, protože příprava dat je velmi
+podobná práci s databází -- zpracováváme velké množství nezávislých objektů či
+jejich dvojic, na což jsou databázové systémy vhodné a dobře připravené. Využití
+nadstavby PostGIS pak zjendnodušuje geometrické operace s prvky, protože tyto
+operace má již připravené jako funkce. Samotný přepis do PostgreSQL byl vykonán
+v rámci studentského fakultního grantu, dokumentace k němu níže uvedená vznikla
+až v rámci diplomové práce. Také ty části přípravy dat, které operují se
+zastávkami, byly implementovány až v rámci diplomové práce.
 
 Další zpracování provádíme v databázi pomocí databázových dotazů a tvorby nových
 pomocných tabulek. Oproti zpracování v C, které bylo uvedeno v bakalářské práci,
@@ -114,11 +119,17 @@ tedy třeba porovnávat dvojice bodů, které jsou od sebe příliš vzdáleny. 
 jsme techniku proložených čtvercových sítích, kde mapový výřez rozdělíme
 čtvercovou sítí na čtverce $100\times100$\,metrů, čtverce očíslujeme a každému
 bodu přiřadíme číslo čtverce, ve kterém leží. Poté čtvercovou síť posuneme o
-50\,metrů uhlopříčně a akci opakujeme. U každého bodu si nyní pamatujeme čísla
-dvou čtverců, ve kterých bod leží. Pokud nyní vezmeme libovolné 2 body, které
-jsou k sobě blíže než 50\,m, tak budou mít společný první nebo druhý čtverec.
-Pokud mají společný první, pak jsme hotovi. Pokud první společný nemají, pak
-vezmeme druhý čtverec (\TODO dovysvětlit).
+50\,metrů v jednom směru, v druhém směru a uhlopříčně a akci pokaždé opakujeme.
+U každého bodu si nyní pamatujeme čísla čtyř čtverců, ve kterých bod leží. 
+Pokud nyní vezmeme libovolné 2 body, které jsou k sobě blíže než 50\,m, tak
+budou mít společný některý čtverec. Pro důkaz si představme první čtverec jako
+fixní. Pokud jsou oba body v něm, jsme hotovi. Pokud v něm oba nejsou, pak jeden
+leží uvnitř v nějakém kvadrantu a druhý vně ve stejném či sousedním kvadrantu.
+Pro každou dvojici kvadrantů můžeme vybrat čtverec z ostatních posunutí, který
+oba kvadranty pokrývá. Toto je možné pouze pro čtverce, jejichž hrana je dlouhá
+alespoň dvojnásobek maximální vzádlenosti dvojice bodů, pokud bychom tedy chtěli
+vytvářet zkratky delší než 50 metrů, museli bychom odpovídajícím způsobem
+zvětšit i čtverce.
 
 Protože platí předchozí tvrzení, můžeme nyní vzít vždy jen ty dvojice bodů,
 které sdílí jeden ze čtverců. Takto jednak získáme méně dvojic, u kterých je

@@ -25,9 +25,17 @@ Protože chceme hledat co nejblíže od výchozího zadaného bodu, v případě
 rovných ulic, které jsou reprezentovány pomocí lomených linií s dlouhými úseky
 by se nám mohlo stát, že by nejbližší bod od hledaného místa neležel na ulici,
 kde jsme, ale na nějaké sousední, od které nás dělí pás budov. Proto dlouhé
-úseky cest rozdělíme na menší podúseky, čímž tento problém eliminujeme.
+úseky cest rozdělíme na menší podúseky (viz obr. \ref{fig:deleni}, čímž tento problém eliminujeme.
 Rozdělení se nám také bude hodit pro vytváření zkratek, o kterých pojednáváme
 níže.
+
+\begin{figure}
+  \centering
+    \includegraphics[width=0.75\textwidth]{../img/deleni.pdf}
+  \caption{Rozdělení dlouhých linií (všimněte si, že jsou děleny jen pochozí
+  linie)}
+  \label{fig:deleni}
+\end{figure}
 
 \subsection{Překážky}
 Pro další zpracování potřebujeme znát nejen cestní síť, ale i překážky, přes
@@ -67,27 +75,18 @@ možných zkratek náhodně vybrány jen některé a to tak, aby z každého vrc
 vycházelo průměrně omezené množství zkratek. Takto zachováme pozitivní vliv
 zkratek na hledané cesty, ale zbytečně nezvětšujeme vyhledávací graf.
 \begin{figure}
-  \label{fig:zkratky}
   \centering
     \includegraphics[width=0.5\textwidth]{../img/zkratky.pdf}
   \caption{Vygenerované zkratky mezi cestami (zeleně)}
+  \label{fig:zkratky}
 \end{figure}
 
 \section{Příprava jízdních řádů}
 Data z jízdních řádů dostáváme ve formátu GTFS \cite{GTFS} a musíme je
-upravit do formátu vhodného pro algoritmus RAPTOR \cite{RAPTOR}. Samotný
-formát GTFS je již poměrně blízký cílovému formátu, ale je potřeba vyřešit
-několik drobností. \TODO přepsat
-
-\subsection{ID zastávek}
-Zastávky mají dle specifikace GTFS jako ID použit obecný string. Data pro
-pražskou MHD mají toto ID rozdělené na na část reprezentující zastávku a část
-reprezentující konkrétní zastávkové stojany. Pro další zpracování je vhodné
-zvolit číselný identifikátor, jednotlivé zastávky jsou očíslovány čísly od 0 do
-počet zastávek - 1 a veškeré odkazy na konkrétní zastávky ve zpracovaných datech
-používají právě tato čísla. Původní identifikátor je u zastávky stále uložen
-kvůli následnému párování (viz níže), ale již se pro vazbu mezi daty nepoužívá.
-\TODO: co z toho do implementace?
+upravit do formátu vhodného pro algoritmus RAPTOR \cite{RAPTOR}. V rámci převodu
+mezi formáty je potřeba respektovat specifické požadavky algoritmu RAPTOR a také
+je potřeba připravit si informace potřebné pro propojení mezi zastávkami v
+jízdním řádu a zastávkami na mapě.
 
 \subsection{Rozdělení linek}
 Formát GTFS rozlišuje linky a spoje. Linka obsahuje všechny společné údaje a
@@ -100,12 +99,22 @@ najdeme všechny různé posloupnosti zastávek projížděné jednou linkou a v
 sublinky pro každou takovou posloupnost. Tyto sublinky zdědí společné údaje z
 původní linky a již splňují požadavky kladené algoritmem RAPTOR. 
 
+\subsection{ID zastávek}
+Zastávky mají dle specifikace GTFS jako ID použit obecný string. Data pro
+pražskou MHD mají toto ID rozdělené na na část reprezentující zastávku a část
+reprezentující konkrétní zastávkové stojany. Pro další zpracování je vhodné
+zvolit číselný identifikátor, jednotlivé zastávky jsou očíslovány čísly od 0 do
+počet zastávek - 1 a veškeré odkazy na konkrétní zastávky ve zpracovaných datech
+používají právě tato čísla. Původní identifikátor je u zastávky stále uložen
+kvůli následnému párování (viz níže), ale již se pro vazbu mezi daty nepoužívá.
+\TODO: co z toho do implementace?
+
 \subsection{Platnost jízdního řádu}
 Ve formátu GTFS jsou linky, spoje a dny, ve kterých daný spoj jede, provázány
 pomocí tabulky trips. V předchozím odstavci jsme popsali rozdělení linek podle
 toho, kudy spoje jedou, nyní využijeme, že každý spoj v GTFS má právě jednu
-množinu dní, kdy jede. \TODO prozkoumat, jak předzpracování doopravdy funguje
-U každé sublinky si pak držíme odkaz na to, kdy jede.
+množinu dní, kdy jede a tuto informaci si uložíme i u jednotlivých spojů v nově
+vytvářeném formátu.
 
 Místo dvojího způsobu záznamu, kdy daný spoj jede -- pomocí výčtu dnů v týdnu a
 seznamu výjimek -- si pro každou možnost, jak může nějaký spoj jet, uložíme

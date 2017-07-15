@@ -52,6 +52,27 @@ odjezdových vrcholů, do kterých se stihne pěší přesun. Ze zastávkového 
 vede navíc hrana do odpovídajícího odjezdového vrcholu. 
 \TODO obrázek
 \section{Contraction hierarchy}
+Contraction hierarchy \cite{CH} je způsob předzpracování dat tak, aby následné
+vyhledávání nemuselo procházet celý graf. U cestní sítě tomu odpovídá obvyklý
+postup při cestování -- nejprve cestujeme po místních silnicích, abychom se
+dostali na silnice první třídy a dálnice, po těch pak dojedeme blízko cíle, kde
+opět přecházíme na místní silnice, abychom dosáhli cíle. U cestní sítě se
+příprava dat provádí obdobně -- jsou nalezeny významné body, přes které
+přecházíme na silnice vyšších tříd a cesty na dlouhé vzdálenosti jsou pak
+rozděleny na hledání cesty do významných bodů a hledání cesty mezi nimi. Tato
+hierarchie může mít i několik stupňů a cesty mezi výzmanými body jsou často
+předpočítány.
+
+Obdobně se dá vytvořit podobná hierarchie i u hledání spojení MHD, kdy si
+udržuji zkratky mezi uzlovými zastávkami a nemusíme pak prohledávat jednotlivé
+mezilehlé zastávky, kde stejně nemůžeme na nic přestoupit. Problém této
+reprezentace pro nás je s přidáváním pěších tras, protože je potřeba mít všechny dopředu
+spočítané. Předvýpočet je stejně tak problematický i u cestní sítě, protože
+předpokládá pevné nastavení cestovních rychlostí a preferencí cest, na základě
+kterých jsou nalezeny ulzové body a vypočítány zkratky. Náš cíl je umožnit
+uživateli tyto parametry si zvolit při hledání dle svých potřeb, proto pro nás
+není tento model vhodný. 
+
 \section{RAPTOR}
 RAPTOR (Round-Based Public Transport Routing) \citep*{RAPTOR} je oproti
 time-dependent modelům založen na zcela odlišných myšlenkách a při svém běhu
