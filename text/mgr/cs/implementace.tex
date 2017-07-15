@@ -200,13 +200,21 @@ nutné, při aktualizaci mapových dat není třeba přegenerovávat jízdní ř
 Vyhledávací část jsme navrhli jako knihovnu, která umožňuje snadnou integraci do
 jiných projektů. Knihovna je napsána v jazyce C s využitím knihovny LibUCW.
 Spolu s knihovnou jsme napsali i jednoduchý demonstrační program, který umožňuje
-vyhledávání z příkazové řádky. K pohodlnému interaktivnímu hledání jsme napsali
-jednoduchou webovou aplikaci, která umožňuje hledání spojení na mapě spolu s
+vyhledávání z příkazové řádky. K pohodlnému interaktivnímu hledání jsme
+rozšířili webovou aplikaci, která umožňuje hledání spojení na mapě spolu s
 vizualizací jednotlivých nalezených tras a umožňuje jejich export do formátu
 GPX.
 
-\subsection{Vyhledávací knihovna}
-\TODO hledání přes půlnoc včetně implementace
+\subsection{Vyhledávání přes půlnoc}
+Vyhledávání v MHD ve večerních hodinách přidává další problém, který je potřeba
+vyřešit. Pokud vyhledáváme na konci dne, může se stát, že budeme cestovat přes
+půlnoc. Pak je třeba, v současném formátu jízdních řádů, hledat jednak v
+jízdních řádech pro končící den, kde jsou zaznamenány trasy těch spojů, které
+začínají před půlnocí, ale do cílové zastávky přijedou až po půlnoci, jednak v
+jízdních řádech pro den následující, kde jsou uvedeny spoje vyjíždějící až po
+půlnoci. V naší implementaci si rovnou připravíme jízdní řád pro současný a
+příští den a v případě, že zpracováváme vrchol, který má čas příjezdu až po
+půlnoci, použijeme oba jízdní řády, jinak pouze ten pro současný den.
 \subsection{Výběr povolených prostředků}
 \TODO vynechání linek včetně implementace
 \subsection{Výpočet penalt}
