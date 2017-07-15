@@ -27,7 +27,6 @@ CREATE TABLE walk_in_nodes AS
 		AND ST_Within(n.loc,b.geom) 
 		AND NOT ST_Within(n.loc,ST_ExteriorRing(b.geom))
 ;
-ALTER TABLE walk_in_nodes ADD UNIQUE (nid);
 ALTER TABLE walk_in_nodes ADD CONSTRAINT walk_in_nodesfk FOREIGN KEY (nid) REFERENCES nodes(id) MATCH FULL;
 CREATE INDEX ON walk_in_nodes(nid);
 
@@ -38,8 +37,8 @@ CREATE TABLE walk_tunnel_nodes AS
 	INNER JOIN ways AS w ON w.id = wr.id
 	WHERE w.tunnel = true;
 ALTER TABLE walk_tunnel_nodes ADD UNIQUE (id);
-ALTER TABLE walk_tunnel_nodes ADD CONSTRAINT walk_tunnel_nodesfk FOREIGN KEY (nid) REFERENCES nodes(id) MATCH FULL;
-CREATE INDEX ON walk_tunnel_nodes(nid);
+ALTER TABLE walk_tunnel_nodes ADD CONSTRAINT walk_tunnel_nodesfk FOREIGN KEY (id) REFERENCES nodes(id) MATCH FULL;
+CREATE INDEX ON walk_tunnel_nodes(id);
  
 
 
