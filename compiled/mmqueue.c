@@ -1,6 +1,7 @@
 #include <ucw/lib.h>
 
 #include <err.h>
+#include <stdio.h>
 
 #include <ucw/heap.h>
 #include <ucw/gary.h>
@@ -8,6 +9,7 @@
 
 #include "mmqueue.h"
 #include "hashes.h"
+
 
 
 #define DIJ_CMP(x,y) (x->arrival < y->arrival)
@@ -82,6 +84,9 @@ void addNodeToQueue(struct mmqueue_t * q,
 	for (int j=0;j<GARY_SIZE(vertnodes);j++){
 		struct mmdijnode_t * anode;
 		anode = vertnodes[j];
+		if (anode->majorized){
+			continue;
+		}
 		if ((arrival >= anode->arrival)&&(penalty >= anode->penalty)){
 			free(e);
 			return;
@@ -103,6 +108,20 @@ void addNodeToQueue(struct mmqueue_t * q,
 	node->edge = e;
 	node->arrival = arrival;
 	node->penalty = penalty;
+
+	for (int j=0;j<GARY_SIZE(vertnodes);j++){
+		if (vertnodes[j]->majorized){
+			continue;
+		}
+		if (equivWays(node,vertnodes[j])){
+			if (node->penalty < vertnodes[j]->penalty){
+				vertnodes[j]->majorized = 1;	
+			}else {
+				free(e);
+				return;
+			}
+		}
+	}
 	
 	// Add to vertlut
 	struct mmdijnode_t  ** vertlutItem;
@@ -176,4 +195,90 @@ void freeMMQueue(struct mmqueue_t * queue,int n_vertices){
 	//GARY_FREE(queue->dijArray);
 	mp_delete(queue->pool);
 	free(queue);
+}
+
+char equivWays(struct mmdijnode_t * way1, struct mmdijnode_t * way2){
+	int topt1;
+	int topt2;
+	topt1 = 0;
+	topt2 = 0;
+	struct mmdijnode_t * n1;
+	struct mmdijnode_t * n2;
+	n1 = way1;
+	n2 = way2;
+	while ( n1->edge && n1->edge->edge_type == ROUTE_TYPE_WALK){
+		topt1++;	
+		n1 = n1->prev;
+	}
+	while ( n2->edge && n2->edge->edge_type == ROUTE_TYPE_WALK){
+		topt2++;	
+		n2 = n2->prev;
+	}
+	// One way ends and other changes from public transport
+	if (n1->edge && !n2->edge){
+		printf("MHD vs start\n");
+		return 0;
+	}
+	if (!n1->edge && n2->edge){
+		printf("MHD vs start\n");
+		return 0;
+	}
+	// Both ways changes from public transport and connection is different
+	if ((n1->edge && n2->edge) && (
+		n1->edge->ptedge->route != n2->edge->ptedge->route || 
+		n1->edge->ptedge->departure != n2->edge->ptedge->departure)){
+		printf("Different public transport\n");
+		return 0;
+			
+	}
+	Graph__Edge ** buf1;
+	Graph__Edge ** buf2;
+	buf1 = calloc(sizeof(Graph__Edge *),topt1);
+	buf2 = calloc(sizeof(Graph__Edge *),topt2);
+	n1 = way1;
+	n2 = way2;
+	for (int i=0;i<topt1;i++)
+	{
+		buf1[i] = n1->edge->osmedge;	
+		n1 = n1->prev;
+	}
+	for (int i=0;i<topt2;i++)
+	{
+		buf2[i] = n2->edge->osmedge;	
+		n2 = n2->prev;
+	}
+	while (buf1[topt1-1] == buf2[topt2-1]){
+		topt1--;
+		topt2--;	
+	}
+	int frompt1;
+	int frompt2;
+	frompt1 = 0;
+	frompt2 = 0;
+	while (buf1[frompt1] == buf2[frompt2] && frompt1 < topt1 && frompt2 < topt2){
+		frompt1++;
+		frompt2++;
+	}
+
+	n1 = way1;
+	n2 = way2;
+	for (int i=0;i<(frompt1 + (topt1-frompt1)/2);i++){
+		n1 = n1->prev;	
+	}
+	for (int i=0;i<(frompt2 + (topt2-frompt2)/2);i++){
+		n2 = n2->prev;	
+	}
+	double dlon = n1->osmvert->lon - n2->osmvert->lon;
+	double dlat = n1->osmvert->lat - n2->osmvert->lat;
+	double dist = sqrt(dlon*dlon + dlat*dlat);
+	printf("Distance: %f\n",dist);
+	if (dist < 100){
+		printf("Equivalent\n");
+		return 1;	
+	}
+	printf("Different\n");
+	
+	return 0;
+
+
 }

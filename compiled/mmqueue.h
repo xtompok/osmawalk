@@ -57,5 +57,6 @@ void addNodeToQueue(struct mmqueue_t * q,
 struct mmdijnode_t * getQueueMin(struct mmqueue_t * q);
 struct mmqueue_t * createMMQueue(Graph__Graph * graph);
 void freeMMQueue(struct mmqueue_t * queue,int n_vertices);
+char equivWays(struct mmdijnode_t * way1, struct mmdijnode_t * way2);
 
 #endif
