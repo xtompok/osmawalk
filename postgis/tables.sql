@@ -13,8 +13,10 @@ CREATE TABLE nodes (
 	ref VARCHAR(15),
 	nodeidx INTEGER,
 	loc GEOMETRY(POINTZ,3065),
-	square1 INTEGER,
-	square2 INTEGER,
+	square00 INTEGER,
+	square01 INTEGER,
+	square10 INTEGER,
+	square11 INTEGER,
 	walk BOOLEAN DEFAULT FALSE
 );
 
@@ -66,8 +68,10 @@ CREATE INDEX ON nodes(inside);
 CREATE INDEX ON nodes(lat);
 CREATE INDEX ON nodes(lat, lon);
 CREATE INDEX ON nodes(lon);
-CREATE INDEX ON nodes(square1);
-CREATE INDEX ON nodes(square2);
+CREATE INDEX ON nodes(square00);
+CREATE INDEX ON nodes(square01);
+CREATE INDEX ON nodes(square10);
+CREATE INDEX ON nodes(square11);
 CREATE INDEX ON nodes(walk);
 CREATE INDEX ON nodes USING GIST(loc);
 CREATE INDEX ON ways(id);

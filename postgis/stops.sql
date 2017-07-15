@@ -16,8 +16,10 @@ CREATE TABLE stops AS
 		ST_X(ST_Transform(ST_SetSRID(ST_Makepoint(stop_lon,stop_lat),4326),3065)) AS lon,
 		ST_Y(ST_Transform(ST_SetSRID(ST_Makepoint(stop_lon,stop_lat),4326),3065)) AS lat,
 		ST_Transform(ST_SetSRID(ST_MakePoint(stop_lon, stop_lat),4326),3065) AS loc,
-		-1 AS square1,
-		-1 AS square2,
+		NULL AS square00,
+		NULL AS square01,
+		NULL AS square10,
+		NULL AS square11,
 		false AS osm,
 		underground AS underground
 	FROM gtfs_stops,sq
@@ -34,8 +36,10 @@ CREATE TABLE stops AS
        		n.lon,
 		n.lat,
 		n.loc,
-	       	n.square1 AS square1,
-	       	n.square2 AS square2,
+	       	n.square00 AS square00,
+	       	n.square01 AS square01,
+	       	n.square10 AS square10,
+	       	n.square11 AS square11,
 		true AS osm,
 		gs.underground AS underground
 	FROM sq,gtfscnt,gtfs_stops AS gs
