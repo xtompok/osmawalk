@@ -164,6 +164,8 @@ function showConnections(cons){
 		header.appendChild(document.createTextNode("arrival: "+formatStopTime(con.time.toFixed(0))));
 		header.appendChild(document.createElement('br'));
 		header.appendChild(document.createTextNode("walk dist: "+formatDist(con.dist.toFixed(0))));
+		header.appendChild(document.createElement('br'));
+		header.appendChild(document.createTextNode("penalty: "+con.penalty.toFixed(0)));
 		div.addEventListener("click",div,false);
 		div.handleEvent = function(evt){
 			switch (evt.type){

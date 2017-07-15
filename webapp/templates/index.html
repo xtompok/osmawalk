@@ -15,7 +15,7 @@
             </style>
         </head>
         <body>
-	    <div> Délka: <span id="delka">-</span>, čas: <span id="cas">-</span>, <button id="gpxbut">Stáhnout jako GPX</button><span style="float: right"><a href="https://github.com/xtompok/osmawalk">Zdrojový kód</a></span> </div>
+	    <div><button id="gpxbut">Stáhnout jako GPX</button><span style="float: right"><a href="https://github.com/xtompok/osmawalk">Zdrojový kód</a></span> </div>
 	    <div id='leftcol'>
 	    </div>
             <div id='map'></div>
@@ -27,8 +27,6 @@
 		var map = createBaseMap();
 		var stage = 0;
 		var connections = [];
-		var dist = document.getElementById("delka")
-		var time = document.getElementById("cas")
 		var gpxbut = document.getElementById("gpxbut")
 		var leftcol = document.getElementById("leftcol");
 		gpxbut.disabled=true
@@ -51,8 +49,6 @@
 				connections.forEach(function(item,index,aarray){
 					map.removeLayer(item.layer);	
 				});
-				dist.innerHTML="-";
-				time.innerHTML="-";
 				gpxbut.disabled = true
 
 

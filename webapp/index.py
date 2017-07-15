@@ -44,7 +44,6 @@ def split_route(route):
 	mempt = route.points[0]
 	subroute = [mempt]
 	for pt in route.points:
-		print pt.edgetype
 		if (pt.edgetype != mempt.edgetype or not same_line(pt,mempt)):
 			subroutes.append(subroute)
 			subroute = [mempt]
