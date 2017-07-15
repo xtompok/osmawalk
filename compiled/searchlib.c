@@ -24,6 +24,8 @@
 
 #include "libraptor.h"
 
+#define DAY_SECS (24*3600)
+
 
 struct pbf_data_t readFile(char * filename){
 	FILE * IN;
@@ -66,6 +68,7 @@ Graph__Graph * loadMap(char * filename){
 
 	return graph;
 }
+
 
 void calcDistances(Graph__Graph * graph){
 	for (int i=0;i<graph->n_edges;i++){
@@ -172,13 +175,14 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 	graph = data.graph;
 
 
-	struct timetable * newtt;
+	struct timetable * curtt;
+	struct timetable * nexttt;
 	time_t date;
-	date = starttime - (starttime%(24*3600));
-	newtt = gen_tt_for_date(data.timetable,date,NULL);
+	date = starttime - (starttime%DAY_SECS);
+	curtt = gen_tt_for_date(data.timetable,date,NULL);
+	nexttt = gen_tt_for_date(data.timetable,date+DAY_SECS,curtt);
 
 	uint64_t curdate = date;
-
 	
 	struct nodeways_t * nodeways;
 	nodeways = data.nodeWays;
@@ -217,7 +221,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 			struct stop_conns * conns;
 		//	printf("%p\n",queue);
 		//	printf("Id: \n",queue->vert->stop->id);
-			conns = search_stop_conns(newtt,queue->vert->stop->id,queue->vert->arrival%(24*3600));
+			conns = search_stop_conns(curtt,queue->vert->stop->id,queue->vert->arrival%(2*DAY_SECS));
 			for (int ridx = 0; ridx < conns->n_routes; ridx++){
 				struct stop_route * r;
 				r = conns->routes+ridx;
@@ -257,13 +261,64 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 
 					penalty += calcPointPenalty(graph,data.conf,graph->vertices[nd->idx]);
 					int wait;
-					wait = r->departure - (queue->vert->arrival%(24*3600));
+					wait = r->departure - (queue->vert->arrival%DAY_SECS);
 					penalty += calcChangePenalty(graph,data.conf,e->ptedge,queue->vert,wait);	
 					addNodeToQueue(queue,queue->vert,graph->vertices[nd->idx],r->stops[sidx].to,e,curdate+arrival,queue->vert->penalty + penalty);
 				}
 					
 			}
 			free_conns(conns);
+			// If after midnight, process connections for the next day
+			if (queue->vert->arrival - curdate > DAY_SECS){
+				conns = search_stop_conns(nexttt,queue->vert->stop->id,queue->vert->arrival%DAY_SECS);
+				for (int ridx = 0; ridx < conns->n_routes; ridx++){
+					struct stop_route * r;
+					r = conns->routes+ridx;
+					//timestr = prt_time(r->departure);
+					//printf("Departure at %s\n",timestr);
+					//free(timestr);
+					for (int sidx = 0;sidx < r->n_stops;sidx++){
+						int64_t osmid;
+						time_t arrival;
+
+						osmid = data.raptor2osm[r->stops[sidx].to->id];
+						
+						// Stop not in map area
+						if(osmid == 0){
+							continue;
+						}
+
+						arrival = r->stops[sidx].arrival;
+						double penalty;
+						penalty = 0;
+						
+						penalty += calcTransportPenalty(graph,data.conf,r,arrival);
+						
+						struct nodesIdxNode * nd;
+						nd = nodesIdx_find2(osmid);
+						if (nd == NULL){
+							printf("No matching node for node id %lld\n",osmid);
+							continue;
+						}
+						struct edge_t * e;
+						e = malloc(sizeof(struct edge_t));
+						e->edge_type = EDGE_TYPE_PT;
+						e->ptedge = malloc(sizeof(struct ptedge_t));
+						e->ptedge->route = r->pbroute;
+						e->ptedge->departure = r->departure;
+						// TODO: Add stop properties
+
+						penalty += calcPointPenalty(graph,data.conf,graph->vertices[nd->idx]);
+						int wait;
+						wait = r->departure - (queue->vert->arrival%DAY_SECS);
+						penalty += calcChangePenalty(graph,data.conf,e->ptedge,queue->vert,wait);	
+						addNodeToQueue(queue,queue->vert,graph->vertices[nd->idx],r->stops[sidx].to,e,
+							curdate+DAY_SECS+arrival,queue->vert->penalty + penalty);
+					}
+						
+				}
+				free_conns(conns);
+			}
 		}
 
 		// Process walk connections	
@@ -324,7 +379,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 		}
 	}
 
-	free_tt(newtt);
+	free_tt(curtt);
 	return queue;
 
 
@@ -463,6 +518,11 @@ struct pbf_data_t findPath(struct search_data_t * data,double fromLat, double fr
 
 	struct mmqueue_t * queue;
 	queue = findMMWay(*data,fromIdx,toIdx,time(NULL)+tz_offset_second(time(NULL)));
+	printf("Equivalences: \n");
+	for (int i=0;i< GARY_SIZE(queue->vertlut[toIdx]);i++){
+		equivWays(queue->vertlut[toIdx][0],queue->vertlut[toIdx][i]);
+			
+	}
 	struct search_result_t result;
 	result = processFoundMMRoutes(*data,queue,fromIdx,toIdx);
 	writeGPXForResult(&result);

@@ -165,6 +165,7 @@ struct search_route_t {
 	struct point_t * points;
 	double dist;
 	double time;
+	double penalty;
 
 };
 

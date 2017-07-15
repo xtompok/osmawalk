@@ -16,11 +16,18 @@ struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mm
 	struct search_route_t * routes;
 	routes = calloc(sizeof(struct search_route_t),n_routes);
 	struct mmdijnode_t * node;
+	int residx;
+	residx = 0;
 	for (int i=0;i<n_routes;i++){
 		node = queue->vertlut[toIdx][i];
-		routes[i].time = node->arrival;
-		routes[i].dist = node->penalty;
-		printf("Route %d: time: %f, penalty: %f\n",i,routes[i].time,routes[i].dist); 
+		if (node->majorized){
+			printf("Majorized, skipping\n");
+			continue;
+		}
+		routes[residx].time = node->arrival;
+		routes[residx].penalty = node->penalty;
+		routes[residx].dist = 0;
+		printf("Route %d: time: %f, penalty: %f\n",residx,routes[residx].time,routes[residx].dist); 
 		struct point_t * points;
 		GARY_INIT(points,0);
 		int memdepart;
@@ -47,6 +54,9 @@ struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mm
 			}
 			if (node->edge && node->edge->edge_type == EDGE_TYPE_PT){
 				memdepart = node->edge->ptedge->departure;	
+			}else if (node->edge && node->edge->edge_type == EDGE_TYPE_WALK)
+			{
+				routes[residx].dist += node->edge->osmedge->dist;
 			}
 
 			point->penalty = node->penalty;
@@ -59,18 +69,19 @@ struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mm
 				
 		} while (node != NULL);
 
-		routes[i].n_points = GARY_SIZE(points);
-		routes[i].points = calloc(sizeof(struct point_t),routes[i].n_points);
-		printf("Points: %d\n",routes[i].n_points);
-		for (int j=0;j<routes[i].n_points;j++){
-			routes[i].points[j]=points[routes[i].n_points-1-j];
+		routes[residx].n_points = GARY_SIZE(points);
+		routes[residx].points = calloc(sizeof(struct point_t),routes[residx].n_points);
+		printf("Points: %d\n",routes[residx].n_points);
+		for (int j=0;j<routes[residx].n_points;j++){
+			routes[residx].points[j]=points[routes[residx].n_points-1-j];
 		}
 		GARY_FREE(points);
+		residx++;
 	}
 
 	struct search_result_t result;
 	result.routes = routes;
-	result.n_routes = n_routes;
+	result.n_routes = residx;
 	return result;
 }
 void writeGPXForResult(struct search_result_t * res){
@@ -148,6 +159,8 @@ struct pbf_data_t generatePBF(struct search_result_t * result){
 		result__route__init(r);
 		r->time = routes[i].time;
 		r->dist = routes[i].dist;
+		r->has_penalty = 1;
+		r->penalty = routes[i].penalty;
 		r->n_points = routes[i].n_points;
 		r->points = calloc(sizeof(Result__Point *),r->n_points);	
 		for (int j=0; j<r->n_points;j++){
