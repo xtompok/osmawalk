@@ -6,8 +6,8 @@ jsou data o jízdních řádech, která obsahují linky, zastávky a spoje.
 
 \section{Mapová data}
 Mapová data jsou použita z projektu OpenStreetMap\cite{OSM} (OSM). Tato data neobsahují
-informace o nadmořské výšce jednotlivých bodů, k doplnění nadmořské výšky jsou
-použita data z projektu Shuttle Radar Topography Mission (SRTM), která jsou
+informace o nadmořské výšce jednotlivých bodů; k doplnění nadmořské výšky jsou
+použita data z projektu NASA Shuttle Radar Topography Mission (SRTM), která jsou
 lineárně interpolována pro získání nadmořských výšek jednotlivých bodů v mapě.
 
 O datech OSM a jejich problémech jsme již rozsáhle pojednávali v bakalářské
@@ -76,16 +76,16 @@ do tabulek po jednom stupni, přičemž sousední tabulky se vždy jedním sloup
 nebo řádkem překrývají. Každá tabulka má tedy 1201 sloupců a 1201 řádků, kde
 řádky odpovídají zeměpisné šířce a sloupce zeměpisné délce.
 
-Nadmořské výšky jsou kódovány celými 16bitovými čísly v~big-endian udávajícími
+Nadmořské výšky jsou kódovány celými 16bitovými čísly v~big endian udávajícími
 nadmořskou výšku v~metrech. Pokud se v~některém místě nepodařilo výšku změřit,
-je udávána jako $-32768$. Tabulka je kódována jako binární soubor, v~němž
+je udávána jako $-32768$. Tabulka je kódována jako binární soubor, v~němž jsou
 jednotlivé řádky zapsány za sebou.
 
 \section{Jízdní řády}
 Data o jízdních řádech jsou očekávána ve formátu General Transit Feed
 Specification (GTFS) \cite{GTFS}, který je dobře specifikovaný a široce používaný ve světě.
 Konkrétně pro testování byla použita data o pražské integrované dopravě od IPR
-Praha\footnote{\url{http://opendata.iprpraha.cz/DPP/JR/jrdata.zip}}. Tato data
+Praha.\footnote{\url{http://opendata.iprpraha.cz/DPP/JR/jrdata.zip}} Tato data
 obsahují metro, tramvaje, autobusy a přívozy v Praze a okolí, bohužel neobsahují
 integrované vlakové spoje.
 
@@ -140,7 +140,7 @@ položky:
 spoje. Pro vyhledávání spojení používáme následující položky:
 \begin{itemize}
 	\item {\tt service\_id} -- identifikátor jízdních dní spoje
-	\item {\tt monday \dots sunday} -- informace, zda spoj jede daný den. 
+	\item {\tt monday \dots{} sunday} -- informace, zda spoj jede daný den. 
 	\item {\tt start\_date} -- první den platnosti jízdního řádu pro daný
 	spoj
 	\item {\tt end\_date} -- poslední den platnosti jízdního řádu pro daný

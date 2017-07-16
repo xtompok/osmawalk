@@ -8,10 +8,10 @@ sekcích se již jen budeme věnovat obsahu jednotlivých struktur.
 \section{Používané formáty dat}
 
 \subsection{Protocol Buffers}
-Protocol Buffers\cite{PBF} (PBF) je způsob uložení strukturovaných dat. Byl navržen
+Protocol Buffers (PBF) \cite{PBF} je způsob uložení strukturovaných dat. Byl navržen
 Googlem a je používán v případech, kdy potřebujeme přenést po síti zprávy s
 danou strukturou. Formát podoporuje různé datové typy (integer různých přesností
-a znaménkovosti, čísla s plovoucí řádovou čárkou, stringy, \dots) a
+a znaménkovosti, čísla s plovoucí řádovou čárkou, řetězce znaků, \dots) a
 strukturování zpráv. Komunikace probíhá ve fázích naplnění zprávy, její
 zabalení, odeslání, přijmutí a rozbalení. Při zabalení jsou data zkompirmována
 jednoduchým algoritmem, aby například malá čísla nezabírala zbytečně mnoho
@@ -24,14 +24,14 @@ být základní datový typ nebo jiná zpráva, položky mohou být povinné, vo
 nebo opakované. Každá položka má jméno, typ a číslo, které ho identifikuje v
 binární podobě zprávy. Zprávy se popisují pomocí vlastního jazyka, ze kterého se
 pak pomocí kompilátoru vytvoří vazby do jednotlivých programovacích jazyků. 
-Podrobnou dokumentaci včetně tutoriálů lze najít na stránkách projektu.
+Podrobnou dokumentaci včetně tutoriálů lze najít na stránkách projektu. \cite{PBF}
 
 \subsection{JavaScript Object Notation}
 JavaScript Object Notation\cite{JSON} (JSON) je formát navržený pro předávání dat ve
 webových aplikacích. Díky své jednoduchosti a čitelné reprezentaci je hojně
 využíván nejen ve webových projektech, ale často i jako konfigurační jazyk.
 Vychází z Javascriptu, datové typy v něm jsou kromě primitivních typů slovník --
-neuspořádaný seznam dvojic klíč--hodnota a pole -- uspořádaná posloupnost
+neuspořádaný seznam dvojic klíč-hodnota a pole -- uspořádaná posloupnost
 položek. Formát zpráv není dopředu dán a podpora v programovacích jazycích je
 přímo integrovaná nebo dodaná pomocí knihovny. 
 
@@ -53,7 +53,11 @@ Formát GPX\cite{GPX} je určen pro výměnu polohových dat mezi různými zař
 popřípadě mobilními a jinými aplikacemi. Data jsou uložena ve formátu XML, jsou
 dělena na cesty, trasy a významné body. Každá cesta, trasa i významný bod může
 mít uložené některé informace v předdefinovaných atributech, případně libovolné
-další informace uvnitř tagu {\tt <extensions>}. 
+další informace uvnitř elementu {\tt <extensions>}. 
+
+\subsection{Unixový čas}
+Unixový čas je standardní způsob reprezentace data a času na Unixových
+systémech. Je obvykle ukládán v sekundách od půlnoci 1.\,1.\,1970 UTC.
 
 \section{Systémy zeměpisných souřadnic}
 Zeměpisné souřadnice jsou v rámci práce používány ve dvou souřadnicových
@@ -76,6 +80,18 @@ zobrazení. Souřadnice v rámci jedné zóny jsou pak udávány v metrech, lze 
 snadno počítat vzdálenosti. Pozice bodu na Zemi se udává pomocí čísla zóny a
 pozice uvnitř ní. 
 
+\section{Terminologie}
+V následujícím popisu struktur používáme u jednotlivých položek různá slovesa
+podle typu položky. Jedná se o následující:
+\begin{itemize}
+	\item \uv{udává} značí, že položka je jednoduchého datového typu a je
+		uložena přímo ve struktuře
+	\item \uv{odkazuje} značí, že se jedná o odkaz na danou položku či jeho
+		ekvivalent
+	\item \uv{popisuje}, případně \uv{obsahuje popis} značí, že položka je
+		složený typ a je přímo uložena v popisované struktuře
+\end{itemize}
+
 \section{Formáty používané při přípravě dat}
 \label{ch:formaty-dat:priprava}
 \subsection{Přípravný formát pro databázi}
@@ -90,7 +106,7 @@ Zpráva pro uzel obsahuje tyto položky:
 \begin{itemize}
 	\item {\tt id} udává OSM id uzlu 
 	\item {\tt lat} a {\tt lon} udávají zeměpisné souřadnice uzlu v UTM
-	\item {\tt height} udává nadmořskou výšku uzlu
+	\item {\tt height} udává nadmořskou výšku uzlu v metrech
 	\item {\tt type} udává typ uzlu
 	\item {\tt inside} udává, zda je uzel uvnitř nějaké překážky
 	\item {\tt inTunnel} udává, zda je uzel v podzemí
@@ -128,8 +144,7 @@ do CSV. Vrcholy jsou vyexportovány do souboru {\tt nodes.csv}, který obsahuje
 následující položky:
 \begin{itemize}
 	\item {\tt id} udává OSM id vrcholu
-	\item {\tt lat} a {\tt lon} udávají zeměpisnou šířku a délku vrcholu v
-	UTM
+	\item {\tt lat} a {\tt lon} udávají zeměpisné souřadnice vrcholu v UTM
 	\item {\tt height} udává nadmořskou výšku vrcholu
 	\item \TODO implementovat typ vrcholu
 \end{itemize} 
@@ -138,8 +153,8 @@ položky:
 \begin{itemize}
 	\item {\tt id} udává OSM id hrany
 	\item {\tt type} udává typ hrany
-	\item {\tt from} udává výchozí vrchol hrany
-	\item {\tt to} udává cílový vrchol hrany
+	\item {\tt from} udává id výchozího vrcholu hrany
+	\item {\tt to} udává id cílového vrcholu hrany
 \end{itemize} 
 Hrany jsou uvažovány jako obousměrné.
 Zkratky jsou vyexportovány do souboru {\tt direct.csv}, který obsahuje
@@ -156,7 +171,7 @@ následující položky:
 	\item {\tt raptor\_id} udává id zastávky v algoritmu RAPTOR
 	\item {\tt lat} a {\tt lon} udávají zeměpisné souřadnice zastávky v UTM
 \end{itemize} 
-Zkratky propojující zastávky se zbytkem grafu jsou vyexporotvány do souboru {\tt
+Zkratky propojující zastávky se zbytkem grafu jsou vyexportovány do souboru {\tt
 stops-direct.csv}, který obsahuje následující položky:
 \begin{itemize}
 	\item {\tt sid} udává id zastávky
@@ -179,14 +194,14 @@ ref). Zpráva má následující položky:
 	\item {\tt route\_stops} udává, která linka má jaké zastávky 
 	\item {\tt stops} obsahuje popis zastávek
 	\item {\tt transfers} obsahuje popis pěších přestupů, v práci není
-	používá 
+	používána 
 	\item {\tt stop\_routes} udává, které linky jedou přes jakou zastávku
 \end{itemize} 
 Každá linka je reprezentována zprávou typu {\tt Route} s následujícími
 položkami:
 \begin{itemize}
 	\item {\tt id} udává RAPTOR id linky 
-	\item {\tt nstops} udává počet zastávke linky
+	\item {\tt nstops} udává počet zastávek linky
 	\item {\tt ntrips} udává počet spojů linky
 	\item {\tt stopsidx} udává index do pole {\tt route\_stops}, kde
 	začínají zastávky linky
@@ -203,7 +218,7 @@ položkami:
 	\item {\tt id} udává RAPTOR id zastávky
 	\item {\tt nroutes} udává počet linek projíždějících zastávkou
 	\item {\tt ntransfers} udává počet pěších přestupů ze zastávky
-	-\item {\tt routeidx} udává index do pole {\tt stop\_routes}, kde
+	\item {\tt routeidx} udává index do pole {\tt stop\_routes}, kde
 	začínají linky dané zastávky
 	\item {\tt transferidx} udává index do pole {\tt transfers}, kde
 	začínají přestupy ze zastávky
@@ -219,8 +234,8 @@ následujícími položkami:
 Každá množina dní, kdy některý spoj jede, je reprezentována pomocí zprávy typu
 {\tt Validity}, která má následující položky:
 \begin{itemize}
-	\item {\tt start} udává UNIX timestamp prvního dne platnosti 
-	\item {\tt end} udává UNIX timestamp posledního dne platnosti
+	\item {\tt start} udává Unixový čas prvního dne platnosti 
+	\item {\tt end} udává Unixový čas posledního dne platnosti
 	\item {\tt bitmap} udává bitmapu platnosti počínaje prvním dnem
 	platnosti. Každý den odpovídá jednomu bitu.
 \end{itemize}
@@ -278,6 +293,7 @@ struktura není v současné době využívána. Má tyto položky:
 	\item {\tt time} udává čas v sekundách potřebný na přestup z výchozí do
 	cílové zastávky
 \end{itemize}
+
 \subsection{Vyhledávací graf}
 Vyhledávací graf je uložen v PBF ve zprávě {\tt Graph}, která obsahuje tyto
 položky:
@@ -291,10 +307,9 @@ položky:
 \begin{itemize}
 	\item {\tt idx} udává číslo vrcholu
 	\item {\tt osmid} udává OSM id vrcholu
-	\item {\tt lat} a {\tt lon} udávají zeměpisnou šířku a délku vrcholu v
-	UTM
+	\item {\tt lat} a {\tt lon} udávají zeměpisné souřadnce vrcholu v UTM
 	\item {\tt type} udává typ vrcholu
-	\item {\tt height} udává nadmořskou výšku vrcholu
+	\item {\tt height} udává nadmořskou výšku vrcholu v metrech
 	\item {\tt stop\_id} pokud je vrchol zastávka, pak udává GTFS id
 	zastávky (\TODO ověřit) 
 \end{itemize} 
@@ -324,14 +339,15 @@ Pro samotné hledání potřebujeme haldu, kterou budeme používat pro Dijkstr�
 algoritmus. Halda je implementována pomocí struktury {\tt mmqueue\_t}, která
 obsahuje následující položky:
 \begin{itemize}
-	\item {\tt pool} odkazuje na memory pool pro alokaci nových vrcholů
-	vkládaných do fronty 
+	\item {\tt pool} odkazuje na memory pool pro alokaci struktur pro
+		zpracovávané vrcholy 
 	\item {\tt graph} odkazuje na vyhledávací graf popsaný výše
-	\item {\tt vert} odkazuje na aktuální vrchol 
+	\item {\tt vert} odkazuje na strukturu pro aktuální vrchol 
 	\item {\tt vertlut} obsahuje pro každý vrchol grafu pole odkazů na
-	vrcholy v haldě, které patří k danému vrcholu
-	\item {\tt heap} obsahuje odkazy na jednotlivé vrcholy v haldě
-	\item {\tt n\_heap} udává počet vrcholů v haldě
+	jeho strutkury vzniklé při vyhledávání
+	\item {\tt heap} obsahuje odkazy na struktury pro vrcholy, které jsou
+		aktuálně v haldě
+	\item {\tt n\_heap} udává počet prvků v haldě
 \end{itemize}
 Každý vrchol v haldě je popsán pomocí struktury {\tt mmdijnode\_t}, která
 obsahuje následující položky:
@@ -435,7 +451,7 @@ obsahuje následující položky:
 Uvnitř vyhledávací knihovny je výsledek vyhledávání reprezentován typem {\tt
 search\_result\_t}, který je svou strukturou velmi podobný výše popsanému PBF.
 
-Vyhledané trasy je možné uložit do formátu GPX\cite{GPX}. V naší aplikaci používáme pouze trasy, každá
+Vyhledané trasy je možné uložit jako GPX\cite{GPX}. V naší aplikaci používáme pouze trasy, každá
 nalezená vyhledaná trasa odpovídá jedné trase v GPX, tato trasa je rozdělena na
 pěší segmenty a segmenty MHD. Typ segmentu je uložen u každého segmentu v sekci
 {\tt <extensions>} v tagu {\tt <type>}. Každá trasa má ve své sekci {\tt

@@ -8,7 +8,7 @@ tedy všechny zastávky, kam se umíme bez přestupu dostat z dané zastávky. V
 tyto zastávky přidáme do fronty Dijkstrova algoritmu s časem dosažení rovným
 času příjezdu do dané stanice. 
 
-Během běhu algoritmu počítáme pro každou cestu její penaltu -- čím větší má
+Při běhu algoritmu počítáme pro každou cestu její penaltu -- čím větší má
 cesta penaltu, tím horší pro nás je. Samotný Dijkstrův algoritmus bere vrcholy
 podle času dosažení. Po nalezení nejrychlejší cesty se nezastaví, ale počítá
 dokud nezpracovává vrchol o nějaký koeficient horší, než je nejkratší cesta. 
@@ -24,8 +24,7 @@ náročné na paměť i čas. Pro redukci stavového prostoru uvažujeme uspoř�
 každý vrchol, kde spojení $A$ je horší než spojení $B$, pokud $A$ má pozdější
 čas dosažení vrcholu a vyšší penaltu než $B$. V takovém případě spojení $A$ do
 fronty otevřených vrcholů vůbec nepřidáváme, případně ho zahodíme, když na něj
-ve frontě narazíme. Takovéto situaci říkáme, že spojení $B$ majorizuje spojení
-$A$
+ve frontě narazíme. Takovéto situaci říkáme, že spojení $B$ majorizuje spojení~$A$
 
 \section{Redukce duplicitních tras}
 I přes uvažování pouze nemajorizovaných spojení získáme mnoho spojení, které se
@@ -35,8 +34,10 @@ duplicity ignorovat. Základním předpokladem, který učiníme, budiž to, že
 se dvě spojení liší v použitém spoji MHD, tak chceme obě zobrazit. Dále se tedy
 zabýváme jen spojeními, které mají shodné části využívající MHD. Jako duplicitní
 spojení bychom rádi označili taková spojení, která vedou celou cestu blízko
-sebe. Takovéto pravidlo je ale časově náročné implementovat, použijeme
-zjednodušenou variantu, kdy vezmeme pouze pěší části spojení a porovnáváme vždy
+sebe.Takovéto pravidlo je ale časově náročné implementovat, proto místo něj použijeme
+zjednodušenou variantu.
+
+Vezmeme pouze pěší části spojení a porovnáváme vždy
 odpovídající pěší části proti sobě. Procházíme hrany a hledáme, kde se liší.
 Zapamatujeme si index první takovéto hrany. Pak projdeme úsek od konce a opět
 hledáme první hranu, kde se liší. Tímto máme ohraničený úsek, kde se cesty liší.

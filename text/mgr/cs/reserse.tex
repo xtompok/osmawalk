@@ -1,4 +1,4 @@
-\chapter{Rešerše}
+\chapter{Reprezentace sítí MHD}
 Data o různých cestních sítích obvykle ukládáme ve formě grafu, ve kterém pak
 vyhledáváme jednotlivé trasy pomocí prohledávání grafu, na které existuje mnoho
 známých algoritmů. Pokud ale potřebujeme udržovat kromě dat o cestní síti data o
@@ -6,25 +6,6 @@ jízdních řádech, stává se situace mnohem složitější, protože zatímco
 můžeme jít kdykoli, cestovat hromadnou dopravou můžeme pouze tehdy, když zrovna
 jede nějaký spoj. Pro reprezentaci sítí hromadné dopravy se vyvinuly různé
 způsoby, dále představíme nejobvyklejší z nich.
-
-\section{Time-dependent modely}
-Time-dependent modely \cite{time-dependent} se snaží odstranit problém s
-velikostí grafu hromadné dopravy. Místo toho, abychom měli pro každý spoj
-zvláštní hranu, sdružíme spoje do linek, kde všechny spoje jedné linky mají
-stejnou posloupnost zastávek. Vrcholy tentokrát budou jen jeden pro každou
-zastávku. Hrany mezi zastávkami budou jedna pro každou linku, která danou
-dvojici zastávek spojuje. V takovémto grafu již nemůžeme vyhledávat pomocí
-běžného průchodu grafu, potřebujeme mít upravenou funkci, která vyhledá v
-jednotlivých časech odjezdu pro každou linku nejbližší od okamžiku příjezdu do
-zastávky. Tento přístup nevytváří grafy s velkým počtem vrcholů a hran, navíc je
-tato reprezentace snáze připojitelná do vyhledávacího grafu pro obyčejnou cestní
-síť. U této varianty také existuje varianta, která má jeden staniční vrchol a
-pro každou linku projíždějící danou stanicí linkový vrchol. Tyto vrcholy jsou
-pak propojeny přestupovými hranami a umožňují realističtější modelování
-rozsáhlejších stanic a přestupů v rámci nich. Ani tento model však nevyužívá
-všech vlastností spojů MHD, jako je například to, že spoj má danou trasu a že
-když na něj někde nastoupíme, tak snadno můžeme do fronty přidat všechny
-průjezdní stanice.  
 
 \section{Time expanded modely}
 Time-expanded modely \cite{time-expanded} jsou konstruovány tak, aby ceny hran
@@ -49,8 +30,31 @@ odjezdovému vrcholu. Zastávkové vrcholy jsou spojeny hranami do posloupnosti
 stejně jako v původním grafu. Z příjezdového vrcholu vedou hrany do nejbližšího
 zastávkového vrcholu, do kterého se stihne pěší přesun a do všech dřívějších
 odjezdových vrcholů, do kterých se stihne pěší přesun. Ze zastávkového vrcholu
-vede navíc hrana do odpovídajícího odjezdového vrcholu. 
+vede navíc hrana do odpovídajícího odjezdového vrcholu. Všechny přestupní hrany
+mohou být ohodnocené potřebným časem na přestup mezi linkami. 
 \TODO obrázek
+
+\section{Time-dependent modely}
+Time-dependent modely \cite{time-dependent}\TODO skloňování se snaží odstranit problém s
+velikostí grafu hromadné dopravy. Místo toho, abychom měli pro každý spoj
+zvláštní hranu, sdružíme spoje do linek, kde všechny spoje jedné linky mají
+stejnou posloupnost zastávek. Vrcholy tentokrát budou jen jeden pro každou
+zastávku. Hrany mezi zastávkami budou jedna pro každou linku, která danou
+dvojici zastávek spojuje. V takovémto grafu již nemůžeme vyhledávat pomocí
+běžného průchodu grafem, potřebujeme mít upravenou funkci, která vyhledá v
+jednotlivých časech odjezdu pro každou linku nejbližší od okamžiku příjezdu do
+zastávky. Tento přístup nevytváří grafy s velkým počtem vrcholů a hran, navíc je
+tato reprezentace snáze připojitelná do vyhledávacího grafu pro obyčejnou cestní
+síť.
+
+Existuje také varianta, která má jeden staniční vrchol a
+pro každou linku projíždějící danou stanicí linkový vrchol. Tyto vrcholy jsou
+pak propojeny přestupovými hranami a umožňují realističtější modelování
+rozsáhlejších stanic a přestupů v rámci nich. Ani tento model však nevyužívá
+všech vlastností spojů MHD, jako je například to, že spoj má danou trasu a že
+když na něj někde nastoupíme, tak snadno můžeme do dalšího vyhledávání přidat všechny
+průjezdní stanice.  
+
 \section{Contraction hierarchy}
 Contraction hierarchy \cite{CH} je způsob předzpracování dat tak, aby následné
 vyhledávání nemuselo procházet celý graf. U cestní sítě tomu odpovídá obvyklý
@@ -76,14 +80,14 @@ není tento model vhodný.
 \section{RAPTOR}
 RAPTOR (Round-Based Public Transport Routing) \citep*{RAPTOR} je oproti
 time-dependent modelům založen na zcela odlišných myšlenkách a při svém běhu
-nevyužívá Dijkstrův algoritmus. RAPTOR se snaží využít co nejvíce vlastností,
+nevyužívá algoritmy pro procházení grafu. RAPTOR se snaží využít co nejvíce vlastností,
 kterými se odlišuje síť veřejné dopravy od obyčejné cestní sítě. Také umožňuje
 snadno optimalizovat na počet přestupů.
 
-Algoritmus pracuje po kolech. Každé kolo zanmená nástup do dalšího dopravního
+Algoritmus pracuje po kolech. Každé kolo znamená nástup do dalšího dopravního
 prostředku, celkově je tedy počet kol o 1 větší než maximální počet přestupů.
 Algoritmus pracuje s linkami. Každá linka má několik spojů, což jsou konkrétní
-vozidla, která všechna projíždí stejnou posloupnost zastávek. Každý spoj má
+vozidla, která všechna projíždí stejnou posloupnost zastávek ve stejném směru. Každý spoj má
 uloženy časy odjezdu z jednotlivých zastávek, předpokládáme, že se dva spoje
 jedné linky na trase nepředjíždí. Pro každou zastávku si pro každé kolo
 pamatujeme, zda a kdy je dosažitelná pomocí kterého kola. Nedosažitelnost
@@ -91,25 +95,25 @@ zastávky reprezentujeme pomocí nastavení času příjezdu v daném kole na $\
 
 Na začátku jsou všechny zastávky ve všech kolech nedosažitelné. Nastavíme
 výchozí zastávce čas dosažení v prvním kole na zadaný čas odjezdu a spustíme
-algoritmus. Ten postupně prochzí linky po jejich zastávkách a pokud narazí na
+algoritmus. Ten postupně prochází linky po jejich zastávkách a pokud narazí na
 dosažitelnou zastávku, tak najde nejbližší spoj linky, který z dané zastávky
 odjíždí po čase dosažitelnosti a tímto spojem se \uv{vydá} a průběžně upravuje
 časy dosažitelnosti na dalších zastávkách. Pokud po cestě nalezne další
-dosažitelnou zastávku, jako spoj z této zastávky vybere ten z původního spoje a
-spoje navazujícího na původní čas dosažitelnosti, který odjíždí dříve a takto
+dosažitelnou zastávku, jako spoj z této zastávky vybere z původního spoje a
+spoje navazujícího na původní čas dosažitelnosti ten, který odjíždí dříve. Takto
 pokračuje až do konce linky. Po průchodu všech linek se všechny časy
 dosažitelnosti zkopírují do dalšího kola a algoritmus se znovu spustí. Po
 stanoveném počtu kol algoritmus skončí a u jednotlivých zastávek je pro každé
-kolo (odpovídající počtu přestupů - 1) uloženo, zda je s daným počtem přestupů
+kolo (odpovídající počtu přestupů $- 1$) uloženo, zda je s daným počtem přestupů
 dosažitelná a v jakém čase. K jednotlivým časům u zastávek je vhodné si uložit
-ilinku, která způsobila úpravu na daný čas, abychom byli schopni zrekonstruovat
+linku, která způsobila úpravu na daný čas, abychom byli schopni zrekonstruovat
 spojení využité k dosažení dané zastávky. 
 
-Tento algoritus je snadno implementovatelný a při vhodně zvolených datových
+Tento algoritmus je snadno implementovatelný a při vhodně zvolených datových
 strukturách velmi rychlý a vhodně využívající keš. 
 
 \subsection{Uložení dat}
-Pro rychlý výpočet a efektivní využití cache je potřeba mít vhodně uložená data.
+Pro rychlý výpočet a efektivní využití keše je potřeba mít vhodně uložená data.
 Data stejného typu jsou vždy uložená v poli za sebou. Pokud různé objekty mají
 každý mít seznam stejného typu, jsou všechna data od všech objektů držena v
 jednom poli a každý objekt si drží počet svých prvků a odkaz na první z nich.

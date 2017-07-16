@@ -3,7 +3,7 @@
 
 \section{Příprava mapových dat}
 Nejprve jsou stažena aktuální data pro Českou republiku, která jsou k dispozici
-s denními aktualizacemi\footnote{\url{osm.kyblsoft.cz/archiv/}}. Z těchto dat je
+s denními aktualizacemi.\footnote{\url{osm.kyblsoft.cz/archiv/}} Z těchto dat je
 na základě nastavení vyříznut obdélník, který pokrývá zpracovávanou oblast. Poté
 začneme data zpracovávat.
 
@@ -41,8 +41,8 @@ níže.
 Pro další zpracování potřebujeme znát nejen cestní síť, ale i překážky, přes
 které se nedá projít, jako jsou například domy, ploty a dálnice. V tomto místě
 se musíme vypořádat s multipolygony. Protože multipolygony, které klasifikujeme
-jako bariéry, jsou z velké části budovy, která má více částí nebo má nádvoří,
-nebo jiné překážky, uvnitř kterých se neočekává, že by byla velká plocha, bereme
+jako bariéry, jsou většinou budovy, které mají více částí nebo mají nádvoří,
+nebo jiné překážky, uvnitř kterých neočekáváme velkou plochu, bereme
 jako překážku jejich vnější obrys, případně obrysy. To nám sice způsobí, že
 nebudeme moci vytvářet na vnitřních prostranstvích zkratky, ale to nám nevadí,
 protože jednak mají vnitřní prostranství obvykle velmi malou plochu a nevede do
@@ -104,7 +104,7 @@ Zastávky mají dle specifikace GTFS jako ID použit obecný string. Data pro
 pražskou MHD mají toto ID rozdělené na na část reprezentující zastávku a část
 reprezentující konkrétní zastávkové stojany. Pro další zpracování je vhodné
 zvolit číselný identifikátor, jednotlivé zastávky jsou očíslovány čísly od 0 do
-počet zastávek - 1 a veškeré odkazy na konkrétní zastávky ve zpracovaných datech
+počet zastávek $- 1$ a veškeré odkazy na konkrétní zastávky ve zpracovaných datech
 používají právě tato čísla. Původní identifikátor je u zastávky stále uložen
 kvůli následnému párování (viz níže), ale již se pro vazbu mezi daty nepoužívá.
 \TODO: co z toho do implementace?
@@ -176,11 +176,13 @@ vozidlo, což například u tramvají je bod na kolejích, které ale pro pěš�
 plánování nepoužíváme, tudíž je potřeba najít vhodný blízký bod v cestní síti.
 
 Zvláštní pozornost je potřeba věnovat u párování zastávek metra. V současné
-chvíli je metro v Praze zmapované dvěma způsoby. První způsob (viz Obrázek \ref{fig:metro-detail}) je novější a
+chvíli je metro v Praze zmapované dvěma způsoby. První způsob (viz obrázek 
+\ref{fig:metro-detail}) je novější a
 přesnější, jsou při něm zmapována nástupiště a eskalátorové tunely. Při tomto
 podrobném mapování jsou také přidána ID stanic, tudíž je možné stanice jednoduše
 spárovat a hledat cestu od hrany nástupiště. Častějším způsobem je ale starší
-způsob (viz Obrázek \ref{fig:metro-hrube}), kdy je stanice metra pouze bod, od kterého vede eskalátorový tunel na
+způsob (viz obrázek \ref{fig:metro-hrube}), kdy je stanice metra pouze bod, od
+kterého vede eskalátorový tunel na
 povrch. Tento eskalátorový tunel je pouze virtuální spojka, neodpovídá reálné
 poloze podzemních tras. Takovéto stanice rovněž nemají přiřazená ID. U těchto
 stanic používáme polohu z GTFS a zkratky spojující zastávku s cestní sítí
@@ -191,7 +193,7 @@ přestupech.
 
 \begin{figure}
   \centering
-    \includegraphics[width=0.5\textwidth]{../img/andel.pdf}
+    \includegraphics[height=0.99\textheight]{../img/andel.pdf}
   \caption{Detailně zmapovaná stanice metra}
   \label{fig:metro-detail}
 \end{figure}
