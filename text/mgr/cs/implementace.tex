@@ -2,60 +2,60 @@
 \label{ch:implementace}
 \section{Příprava mapových dat}
 \label{ch:implementace:OSM}
-Počáteční fáze přípravy dat je shodná s přípravou data v bakalářské práci --
+Počáteční fáze přípravy dat je shodná s~přípravou data v~bakalářské práci --
 pomocí shellového skriptu je nalezeno poslední vydání OSM dat pro Českou
-republiku, tato data jsou stažena, rozbalena a pomocí programu osmconvert je z
-nich vyříznuta definovaná oblast. Současně jsou stažena i výšková data z
-projektu SRTM. V případě potřeby generování vyhledávacích dat pro jiné město
+republiku, tato data jsou stažena, rozbalena a pomocí programu osmconvert je
+z~nich vyříznuta definovaná oblast. Současně jsou stažena i výšková data
+z~projektu SRTM. V~případě potřeby generování vyhledávacích dat pro jiné město
 nebo jinou zemi je potřeba tento skript upravit, pro jiné české město stačí
 přepsat hranice výřezu, jiný stát by potřeboval i vlastní zdroj dat OSM a
 upravit souřadnice pro stahování SRTM. 
 
 Další pokračování přípravy
-dat je sice sémanticky stejné, jako bylo v bakalářské práci, ale mechanizmus
+dat je sice sémanticky stejné, jako bylo v~bakalářské práci, ale mechanizmus
 přípravy byl kompletně změněn. Data jsou nejprve klasifikována; pro tento účel
-byl vytvořen kód v jazyce C, který dle dodané konfigurace přiřadí typ hranám a
-nově i vrcholům. Jazyk C jsme zvolili z důvodu rychlosti a paměťové efektivity,
+byl vytvořen kód v~jazyce C, který dle dodané konfigurace přiřadí typ hranám a
+nově i vrcholům. Jazyk C jsme zvolili z~důvodu rychlosti a paměťové efektivity,
 velkou roli také hrála znalost jazyka autorem. Ve většině programů, které jsme
 napsali je také využívána knihovna LibUCW\cite{LibUCW}, která poskytuje velké
-množství algoritmů, datových struktur a obvyklých konstrukcí v C a je
-naprogramována s ohledem na maximální výkon.
+množství algoritmů, datových struktur a obvyklých konstrukcí v~C a je
+naprogramována s~ohledem na maximální výkon.
 
 Výsledek klasifikace je uložen do formátu PBF jako objekt Premap. Tento objekt
-je následně nahrán do databáze PostgreSQL s nadstavbou PostGIS pomocí kombinace
-shellového skriptu a programu v C, který čte Premap a vytváří z něj CSV.
-Zkoušeli jsme různé varianty vkládání do databáze, protože jde o velké množství
-dat a tento způsob se ukázal nejefektivnější z jednoduchých způsobů vkládání. 
+je následně nahrán do databáze PostgreSQL s~nadstavbou PostGIS pomocí kombinace
+shellového skriptu a programu v~C, který čte Premap a vytváří z~něj CSV.
+Zkoušeli jsme různé varianty vkládání do databáze, protože jde o~velké množství
+dat a tento způsob se ukázal nejefektivnější z~jednoduchých způsobů vkládání. 
 
 Pro další zpracování jsme využili databázi, protože příprava dat je velmi
-podobná práci s databází -- zpracováváme velké množství nezávislých objektů či
+podobná práci s~databází -- zpracováváme velké množství nezávislých objektů či
 jejich dvojic, na což jsou databázové systémy vhodné a dobře připravené. Využití
-nadstavby PostGIS pak zjendnodušuje geometrické operace s prvky, protože tyto
+nadstavby PostGIS pak zjendnodušuje geometrické operace s~prvky, protože tyto
 operace má již připravené jako funkce. Samotný přepis do PostgreSQL byl vykonán
-v rámci studentského fakultního grantu, dokumentace k němu níže uvedená vznikla
-až v rámci diplomové práce. Také ty části přípravy dat, které operují se
-zastávkami, byly implementovány až v rámci diplomové práce.
+v~rámci studentského fakultního grantu, dokumentace k~němu níže uvedená vznikla
+až v~rámci diplomové práce. Také ty části přípravy dat, které operují se
+zastávkami, byly implementovány až v~rámci diplomové práce.
 
-Další zpracování provádíme v databázi pomocí databázových dotazů a tvorby nových
-pomocných tabulek. Oproti zpracování v C, které bylo uvedeno v bakalářské práci,
-jsme zpracováním v databázi získali možnost připravovat data i pro velká města
-na běžném počítači. Původní verze programu měla totiž všechna data v paměti, což
+Další zpracování provádíme v~databázi pomocí databázových dotazů a tvorby nových
+pomocných tabulek. Oproti zpracování v~C, které bylo uvedeno v~bakalářské práci,
+jsme zpracováním v~databázi získali možnost připravovat data i pro velká města
+na běžném počítači. Původní verze programu měla totiž všechna data v~paměti, což
 pro Prahu znamenalo až desítky gigabajtů dat a přepsání programu tak, aby byl
 prostorově úspornější by bylo poměrně náročné, byla proto raději zvolena jiná
 platforma, která poskytuje několik výhod:
 \begin{itemize}
-	\item Výměna paměti za čas -- v PostgreSQL si snadno můžeme podle
+	\item Výměna paměti za čas -- v~PostgreSQL si snadno můžeme podle
 	dostupné paměti stroje zvolit množství paměti, kterou databáze bude
-	využívat. Na strojích s menší velikostí operační paměti se data budou
+	využívat. Na strojích s~menší velikostí operační paměti se data budou
 	připravovat déle, ale zvládnou se připravit. Stejně tak i výkonnější
 	stroje mohou být využity na maximum a čas zpracování bude nižší. Všechna
 	tato nastavení jsou pouze nastavení databázového systému, na kódu práce
 	se nic nemění
 	\item Abstrakce -- použitím databázového systému nás odstíní od většiny
 	implementačních detailů původní práce a zůstane nám kratší a výstižnější
-	kód, který popisuje přípravu dat. Na druhou stranu s použitím
+	kód, který popisuje přípravu dat. Na druhou stranu s~použitím
 	databázového systému vzniká nutnost tvorby indexů, aby databáze
-	pracovala efektivně. Některé jsou přímočaré, u jiných je potřeba zkoumat
+	pracovala efektivně. Některé jsou přímočaré, u~jiných je potřeba zkoumat
 	různá řešení, ale použitím nevhodného indexu neztratíme kvalitu dat, jen
 	rychlost výpočtu. 
 	\item Snadná rozšiřitelnost -- protože jsme se díky abstrakci oprostili
@@ -64,52 +64,52 @@ platforma, která poskytuje několik výhod:
 \end{itemize}
 
 \subsection{Rozdělení dlouhých cest}
-Rozdělení příliš dlouhých úseků cest jsme implementovali pomocí funkce v jazyku
-plpgsql, který je integrován v databázovém systému. Funkce dostane id cesty ke
+Rozdělení příliš dlouhých úseků cest jsme implementovali pomocí funkce v~jazyku
+plpgsql, který je integrován v~databázovém systému. Funkce dostane id cesty ke
 zpracování a maximální délku segmentu jako parametry. Pak postupně prochází
-jednotlivé segmenty mezi body cesty a v případě, že narazí na segment delší, než
+jednotlivé segmenty mezi body cesty a v~případě, že narazí na segment delší, než
 je maximální délka segmentu, tak ho postupně od začátku dělí na úseky maximální
 povolené délky a přidává do tabulky uzlů uzly, které vznikly dělením. Všechny
-uzly (jak původní, tak nově vzniklé) funkce průběžně vrací v tom pořadí, v jakém
-se vyskytují na cestě. Z tabulky, která váže uzly k cestám, jsou pak odebrány
+uzly (jak původní, tak nově vzniklé) funkce průběžně vrací v~tom pořadí, v~jakém
+se vyskytují na cestě. Z~tabulky, která váže uzly k~cestám, jsou pak odebrány
 staré vazby cest, které byly děleny, a jsou nahrazeny novými vazbami včetně
 vložených bodů. Tabulka po této operaci zůstává konzistentní a lze ji použít pro
 tvorbu geometrií cest. Dělí se jen pochozí cesty, dělit překážky a
-neklasifikované cesty nemá smysl, protože se u nich absence dlouhých úseků
+neklasifikované cesty nemá smysl, protože se u~nich absence dlouhých úseků
 nevyužívá.
 
 \subsection{Tvorba geometrií}
 Abychom mohli využívat nadstavby PostGIS pro zodpovídání prostorových dotazů,
-musíme nejprve objektům přiřadit geometrie. V datech OSM máme určené pozice bodů
-a u složitějších objektů seznam bodů, ze kterých se objekty skládají a jejich
-pořadí. Z těchto informací sestavíme pomocí prostředků PostGISu geometrie
-jednotlivých objektů a k objektům si je uložíme. Jak jsme již zmínili dříve,
-používáme pouze uzly, cesty a z relací multipolygony. Z multipolygonů bereme
+musíme nejprve objektům přiřadit geometrie. V~datech OSM máme určené pozice bodů
+a u~složitějších objektů seznam bodů, ze kterých se objekty skládají a jejich
+pořadí. Z~těchto informací sestavíme pomocí prostředků PostGISu geometrie
+jednotlivých objektů a k~objektům si je uložíme. Jak jsme již zmínili dříve,
+používáme pouze uzly, cesty a z~relací multipolygony. Z~multipolygonů bereme
 pouze vnější okraj, což zařídíme snadno pomocí prostředků PostGISu, který přímo
 podporuje multipolygony a umí určit jejich vnější okraj.
  
 \subsection{Příprava překážek}
 Jako překážky bereme všechny objekty, které klasifikací získaly typ překážka.
-U uzavřených cest je potřeba rozhodnout, zda se jedná o obvod nebo i vnitřní
-oblast. V rámci klasifikace se u každé cesty na základě kritérií rozhodne,
+U~uzavřených cest je potřeba rozhodnout, zda se jedná o~obvod nebo i vnitřní
+oblast. V~rámci klasifikace se u~každé cesty na základě kritérií rozhodne,
 jestli by daná cesta měla být plochou a tato informace je využívána právě při
 přípravě překážek. Součástí tvorby překážek také musí být ošetření nesprávných
 geometrií, které vznikají jednak na okrajích mapy, kde některé cesty nejsou
 kompletní, protože obsahují body mimo výřez, jednak uvnitř mapy vlivem chybných
 editací od uživatelů, kde vznikají špatně uzavřené polygony, dva uzly na stejném
-místě a další chyby, které nesmí vést k selhání přípravy dat.
+místě a další chyby, které nesmí vést k~selhání přípravy dat.
 
 \subsection{Tvorba zkratek}
-Tvorba zkratek je stejně jako v bakalářské práci i zde nejsložitější a
+Tvorba zkratek je stejně jako v~bakalářské práci i zde nejsložitější a
 nejnáročnější částí přípravy dat. Nejprve je nutné zvolit body, mezi kterými je
 možné zkratky vytvářet. Protože musí spojovat nějaké pochozí cesty, nejprve
 vybereme všechny vrcholy, které jsou na nějakých pochozích cestách. Zkratky
-nelze vytvářet uvnitř překážek ani v podzemí, tyto vrcholy posléze z výběru
+nelze vytvářet uvnitř překážek ani v~podzemí, tyto vrcholy posléze z~výběru
 odebereme a získáme všechny kandidáty na začátky a konce zkratek. 
 
-Nyní bychom potřebovali najít všechny dvojice bodů, které jsou k sobě blíže než
-30\,m (Konstanta byla zvolena empiricky z mapových dat, aby zkratky doplňovaly
-potřebné pěší vazby a zároveň nebyly zbytečně dlouhé.) a z nich vybrat některé,
+Nyní bychom potřebovali najít všechny dvojice bodů, které jsou k~sobě blíže než
+30\,m (Konstanta byla zvolena empiricky z~mapových dat, aby zkratky doplňovaly
+potřebné pěší vazby a zároveň nebyly zbytečně dlouhé.) a z~nich vybrat některé,
 ze kterých se stanou zkratky. Takováto přímočará implementace je ale příliš
 pomalá, protože vrcholů je velké množství a funkce pro počítání vzdálenosti je
 výpočetně náročná, vede to tedy na dlouhý výpočetní čas.
@@ -118,78 +118,78 @@ Abychom tento problém obešli, využili jsme toho, že zkratky jsou lokální a
 tedy třeba porovnávat dvojice bodů, které jsou od sebe příliš vzdáleny. Použili
 jsme techniku proložených čtvercových sítích, kde mapový výřez rozdělíme
 čtvercovou sítí na čtverce $100\times100$\,metrů, čtverce očíslujeme a každému
-bodu přiřadíme číslo čtverce, ve kterém leží. Poté čtvercovou síť posuneme o
-50\,metrů v jednom směru, v druhém směru a uhlopříčně a akci pokaždé opakujeme.
-U každého bodu si nyní pamatujeme čísla čtyř čtverců, ve kterých bod leží. 
-Pokud nyní vezmeme libovolné 2 body, které jsou k sobě blíže než 50\,m, tak
+bodu přiřadíme číslo čtverce, ve kterém leží. Poté čtvercovou síť posuneme
+o~50\,metrů v~jednom směru, v~druhém směru a uhlopříčně a akci pokaždé opakujeme.
+U~každého bodu si nyní pamatujeme čísla čtyř čtverců, ve kterých bod leží. 
+Pokud nyní vezmeme libovolné 2 body, které jsou k~sobě blíže než 50\,m, tak
 budou mít společný některý čtverec. Pro důkaz si představme první čtverec jako
-fixní. Pokud jsou oba body v něm, jsme hotovi. Pokud v něm oba nejsou, pak jeden
-leží uvnitř v nějakém kvadrantu a druhý vně ve stejném či sousedním kvadrantu.
-Pro každou dvojici kvadrantů můžeme vybrat čtverec z ostatních posunutí, který
+fixní. Pokud jsou oba body v~něm, jsme hotovi. Pokud v~něm oba nejsou, pak jeden
+leží uvnitř v~nějakém kvadrantu a druhý vně ve stejném či sousedním kvadrantu.
+Pro každou dvojici kvadrantů můžeme vybrat čtverec z~ostatních posunutí, který
 oba kvadranty pokrývá. Toto je možné pouze pro čtverce, jejichž hrana je dlouhá
 alespoň dvojnásobek maximální vzádlenosti dvojice bodů, pokud bychom tedy chtěli
 vytvářet zkratky delší než 50 metrů, museli bychom odpovídajícím způsobem
 zvětšit i čtverce.
 
 Protože platí předchozí tvrzení, můžeme nyní vzít vždy jen ty dvojice bodů,
-které sdílí jeden ze čtverců. Takto jednak získáme méně dvojic, u kterých je
+které sdílí jeden ze čtverců. Takto jednak získáme méně dvojic, u~kterých je
 potřeba testovat vzájemná vzdálenost, jednak se takovýto dotaz dá snadno
 zrychlit použitím indexů, protože se porovnávají dvě čísla na rovnost. 
 
 Když máme všechny blízké dvojice bodů, jako kandidáty na zkratky uvážíme
-všechny úsečky mezi blízkými dvojicemi, které neprotínají žádnou překážku. Z
-takovýchto dvojic pak vybíráme zkratky, které skutečně použijeme. Děláme
+všechny úsečky mezi blízkými dvojicemi, které neprotínají žádnou překážku.
+Z~takovýchto dvojic pak vybíráme zkratky, které skutečně použijeme. Děláme
 tak pomocí grafu, kde hrany jsou zkratky a vrcholy konce zkratek. Každou zkratku
-pak přidáme s pravděpodobností $5/\delta$, kde $\delta$ je stupeň konce
-zkratky s vyšším stupněm v grafu. Tento výběr vede k situaci, že z každého
-vrcholu vede v průměru maximálně 5 zkratek, což je empiricky zjištěná konstanta
-na základě analýzy mapových dat a experimentů s generováním zkratek.
+pak přidáme s~pravděpodobností $5/\delta$, kde $\delta$ je stupeň konce
+zkratky s~vyšším stupněm v~grafu. Tento výběr vede k~situaci, že z~každého
+vrcholu vede v~průměru maximálně 5 zkratek, což je empiricky zjištěná konstanta
+na základě analýzy mapových dat a experimentů s~generováním zkratek.
 
 \section{Příprava jízdních řádů}
 \label{ch:implementace:GTFS}
 Jízdní řády jsou nejprve staženy pomocí shellového skriptu a nahrány do
 PostgreSQL databáze, jejíž schéma odpovídá formátu GTFS. Průchod přes databázi
 jsme zvolili, poněvadž nám pak dává možnost ptát se pouze na část dat,
-aniž bychom museli držet celá data v paměti. Výhledově je také možné přesunout
+aniž bychom museli držet celá data v~paměti. Výhledově je také možné přesunout
 celé předzpracování do databáze, což by ušetřilo paměť nutnou pro předzpracování
-v současné implementaci.
+v~současné implementaci.
 
-Zpracování jízdních řádů dále pokračuje skriptem v jazyce Python, který nejprve
+Zpracování jízdních řádů dále pokračuje skriptem v~jazyce Python, který nejprve
 převede zastávky a platnosti jízdních řádů do výstupního formátu PBF a následně
-rozdělí linky na sublinky, přiřadí k nim spoje a sestaví soubor {\tt tt.bin}
+rozdělí linky na sublinky, přiřadí k~nim spoje a sestaví soubor {\tt tt.bin}
 obsahující jízdní řády pro hledání spojení. Dále vytvoří {\tt routes.bin}
-obsahující informace o linkách, v současné době není využíván a {\tt
-stopslut.csv} obsahující údaje nutné pro propojení dat z GTFS s daty z OSM: id
-zastávky v GTFS, id zastávky v připravených datech, jméno zastávky, její
+obsahující informace o~linkách, v~současné době není využíván a {\tt
+stopslut.csv} obsahující údaje nutné pro propojení dat z~GTFS s~daty z~OSM: id
+zastávky v~GTFS, id zastávky v~připravených datech, jméno zastávky, její
 souřadnice a informaci, jestli je zastávka podzemní. Pro rozdělování linek na
 sublinky je potřebné pro každý spoj zkoumat, jestli je součástí nějaké již známé
 sublinky, nebo tvoří sublinku novou, která ještě není známá. Pokud je sublinka
-již známá, pouze se k ní přidá další spoj, v opačném případě se vytvoří nová
+již známá, pouze se k~ní přidá další spoj, v~opačném případě se vytvoří nová
 sublinka. Tuto logiku řeší třída {\tt Subroute}. Zpracování jízdních řádů je
 poměrně náročné na paměť, při dalších úpravách kódu by bylo vhodné algoritmus
-přepsat efektivněji či využít toho, že jsou data již v databázi a přepsat
+přepsat efektivněji či využít toho, že jsou data již v~databázi a přepsat
 přípravu data pomocí databázových funkcí.  
 
 Data jízdních řádů jsou již připravena pro použití ke hledání, dále zpracováváme
 pouze propojovací soubor {\tt stopslut.csv}. Ten nejprve nahrajeme do databáze
-jako novou tabulku. Poté zjistíme, které zastávkové stojany mají ID v OSM a tuto
-informaci si u zastávek uložíme. Protože následně budeme opět hledat zkratky,
-uložíme si pro každou zastávku i údaj o tom, ve kterých dvou čtvercích leží.  
+jako novou tabulku. Poté zjistíme, které zastávkové stojany mají ID v~OSM a tuto
+informaci si u~zastávek uložíme. Protože následně budeme opět hledat zkratky,
+uložíme si pro každou zastávku i údaj o~tom, ve kterých dvou čtvercích leží.  
 Následuje generování zkratek mezi zastávkami a pochozími cestami. Toto se děje
-zvlášť pro povrchové a zvlášť pro podzemní zastávky, povrchové spojujeme s body
-na povrchu, podzemní s body v podzemí. Z nalezených zkratek opět vyloučíme ty,
+zvlášť pro povrchové a zvlášť pro podzemní zastávky, povrchové spojujeme s~body
+na povrchu, podzemní s~body v~podzemí. Z~nalezených zkratek opět vyloučíme ty,
 které kříží nějakou překážku a nakonec přidáme vazby stanic metra, které jsou
-detailně zmapované v OSM s body zastavení v mapě. Na tuto vazbu používáme
+detailně zmapované v~OSM s~body zastavení v~mapě. Na tuto vazbu používáme
 speciální typ hrany, abychom tyto detailní vazby odlišili od obecných zkratek,
 které nemusí vždy být možné. 
 
-Nyní již máme v databázi připravená všechna data potřebná pro tvorbu
-vyhledávacího grafu. Data z tabulek jsou exportována do CSV a pak je pomocí
-jednoduchého programu v C vytvořen výstupní soubor PBF s vyhledávacím grafem a
-údaji o vazbě na jízdní řád. V tomto kroku je také kontrolována dosažitelnost
+Nyní již máme v~databázi připravená všechna data potřebná pro tvorbu
+vyhledávacího grafu. Data z~tabulek jsou exportována do CSV a pak je pomocí
+jednoduchého programu v~C vytvořen výstupní soubor PBF s~vyhledávacím grafem a
+údaji o~vazbě na jízdní řád. V~tomto kroku je také kontrolována dosažitelnost
 všech vrcholů grafu a je vybrána největší souvislá komponenta, která obsahuje
-alespoň polovinu vrcholů. Samotné vyhledávání pak hledá vždy v souvislém grafu.
-(\TODO zmínit i v obecném popisu) Protože při změně jízdních řádů dochází ke změnám
+alespoň polovinu vrcholů. Samotné vyhledávání pak hledá vždy v~souvislém grafu.
+(\TODO zmínit i v~obecném popisu) Protože při změně jízdních řádů dochází ke změnám
 očíslování zastávek, je potřeba přegenerovat i tu část generování vyhledávacího
 grafu, která zajišťuje párování zastávek. Tato část není výpočetně náročná, je
 proto možné ji spouštět při každé změně jízdních řádů. Naopak není přegenerování
@@ -198,34 +198,34 @@ nutné, při aktualizaci mapových dat není třeba přegenerovávat jízdní ř
 \section{Vyhledávání}
 \label{ch:implementace:vyhledavani}
 Vyhledávací část jsme navrhli jako knihovnu, která umožňuje snadnou integraci do
-jiných projektů. Knihovna je napsána v jazyce C s využitím knihovny LibUCW.
-Spolu s knihovnou jsme napsali i jednoduchý demonstrační program, který umožňuje
-vyhledávání z příkazové řádky. K pohodlnému interaktivnímu hledání jsme
-rozšířili webovou aplikaci, která umožňuje hledání spojení na mapě spolu s
-vizualizací jednotlivých nalezených tras a umožňuje jejich export do formátu
+jiných projektů. Knihovna je napsána v~jazyce C s~využitím knihovny LibUCW.
+Spolu s~knihovnou jsme napsali i jednoduchý demonstrační program, který umožňuje
+vyhledávání z~příkazové řádky. K~pohodlnému interaktivnímu hledání jsme
+rozšířili webovou aplikaci, která umožňuje hledání spojení na mapě spolu
+s~vizualizací jednotlivých nalezených tras a umožňuje jejich export do formátu
 GPX.
 
-Pro běh Dijkstrova algoritmu potřebujeme udržovat rozpracované vrcholy v haldě.
+Pro běh Dijkstrova algoritmu potřebujeme udržovat rozpracované vrcholy v~haldě.
 Protože vrcholy vložené do haldy budeme potřebovat i po jejich zpracování,
 abychom dokázali zrekonstruovat nalezené trasy, ukládáme si je stranou a do
 haldy vkládáme jen pointery na tyto struktury. Protože během hledání vzniká
-těchto struktur velké množství, z důvodu efektivity při alokaci a snadného
+těchto struktur velké množství, z~důvodu efektivity při alokaci a snadného
 uvolňování po nalezení tras je ukládáme do memory-poolu, který poskytuje
 knihovna LibUCW. Takto můžeme snadno alokovat velké množství položek a pak
 všechny naráz na konci uvolnit.
 
-Protože při vyhledávání zkoumáme nejen čas příjezdu, ale i penaltu, může se v
-haldě vyskytunout jeden grafový vrchol vícekrát s různými časy a penaltami.
+Protože při vyhledávání zkoumáme nejen čas příjezdu, ale i penaltu, může se
+v~haldě vyskytunout jeden grafový vrchol vícekrát s~různými časy a penaltami.
 
 \subsection{Vyhledávání přes půlnoc}
-Vyhledávání v MHD ve večerních hodinách přidává další problém, který je potřeba
+Vyhledávání v~MHD ve večerních hodinách přidává další problém, který je potřeba
 vyřešit. Pokud vyhledáváme na konci dne, může se stát, že budeme cestovat přes
-půlnoc. Pak je třeba, v současném formátu jízdních řádů, hledat jednak v
-jízdních řádech pro končící den, kde jsou zaznamenány trasy těch spojů, které
-začínají před půlnocí, ale do cílové zastávky přijedou až po půlnoci, jednak v
-jízdních řádech pro den následující, kde jsou uvedeny spoje vyjíždějící až po
-půlnoci. V naší implementaci si rovnou připravíme jízdní řád pro současný a
-příští den a v případě, že zpracováváme vrchol, který má čas příjezdu až po
+půlnoc. Pak je třeba, v~současném formátu jízdních řádů, hledat jednak
+v~jízdních řádech pro končící den, kde jsou zaznamenány trasy těch spojů, které
+začínají před půlnocí, ale do cílové zastávky přijedou až po půlnoci, jednak
+v~jízdních řádech pro den následující, kde jsou uvedeny spoje vyjíždějící až po
+půlnoci. V~naší implementaci si rovnou připravíme jízdní řád pro současný a
+příští den a v~případě, že zpracováváme vrchol, který má čas příjezdu až po
 půlnoci, použijeme oba jízdní řády, jinak pouze ten pro současný den.
 \subsection{Výběr povolených prostředků}
 \TODO vynechání linek včetně implementace
@@ -236,26 +236,26 @@ trase nastat. Protože požadavky na preferenci různých typů tras mohou být 
 složité a obtížně parametrizovatelné, jsou funkce pro výpočet penalty napsané
 přímo ve zdrojovém kódu a je na uživatelích, aby si je případně upravili dle
 svých potřeb. Při dalším rozšiřování projektu by bylo možné udělat výpočet
-penalty pomocí pluginu v nějakém skriptovacím jazyce, aby bylo ho možné za běhu
-upravovat. Funkce pro výpočet penalt se nachází v souboru {\tt penalty.c} a jsou následující: 
+penalty pomocí pluginu v~nějakém skriptovacím jazyce, aby bylo ho možné za běhu
+upravovat. Funkce pro výpočet penalt se nachází v~souboru {\tt penalty.c} a jsou následující: 
 \begin{itemize}
 	\item {\tt calcChangePenalty(Graph\_\_Graph * graph, struct config\_t conf,
 	struct ptedge\_t * toEdge, struct mmdijnode\_t * point, uint64\_t time)}
-	slouží k výpočtu penalty za změnu typu hrany. Obvykle se využívá k
-	penalizaci přestupů při cestě MHD.
+	slouží k~výpočtu penalty za změnu typu hrany. Obvykle se využívá
+k~penalizaci přestupů při cestě MHD.
 	Argumenty funkce jsou následující:
 	\begin{itemize}
 		\item {\tt graph} odkazuje na vyhledávací graf
 		\item {\tt conf} popisuje konfiguraci vyhledávání od uživatele
 		\item {\tt toEdge} odkazuje na následující hranu, která bude MHD   
 		\item {\tt point} odkazuje jednak na aktuální bod, ve kterém se
-		nacházíme, jednak tento bod obsahuje i informace o předchozí
+		nacházíme, jednak tento bod obsahuje i informace o~předchozí
 		hraně.
-		\item {\tt time} udává čas čekání v daném vrcholu
+		\item {\tt time} udává čas čekání v~daném vrcholu
 	\end{itemize}
 	\item {\tt calcPointPenalty(Graph\_\_Graph * graph,struct config\_t conf,
-	Graph\_\_Vertex *vert)} slouží k výpočtu penalty v daném bodě. Lze ji
-	použít například k penalizaci přecházení na semaforech. Argumenty
+	Graph\_\_Vertex *vert)} slouží k~výpočtu penalty v~daném bodě. Lze ji
+	použít například k~penalizaci přecházení na semaforech. Argumenty
 	funkce jsou následující:
 	\begin{itemize}
 		\item {\tt graph} odkazuje na vyhledávací graf
@@ -263,7 +263,7 @@ upravovat. Funkce pro výpočet penalt se nachází v souboru {\tt penalty.c} a 
 		\item {\tt vert} odkazuje na vrchol, ve kterém počítáme penaltu
 	\end{itemize}
 	\item {\tt calcWalkPenalty(Graph\_\_Graph * graph, struct config\_t
-	conf, Graph\_\_Edge * edge)} slouží k výpočtu penalty za pěší úsek.
+	conf, Graph\_\_Edge * edge)} slouží k~výpočtu penalty za pěší úsek.
 	Argumenty funkce jsou následující:
 	\begin{itemize}
 		\item {\tt graph} odkazuje na vyhledávací graf
@@ -271,7 +271,7 @@ upravovat. Funkce pro výpočet penalt se nachází v souboru {\tt penalty.c} a 
 		\item {\tt edge} odkazuje na hranu, pro kterou počítáme penaltu
 	\end{itemize}
 	\item {\tt calcTransportPenalty(Graph\_\_Graph * graph, struct config\_t
-	conf, struct stop\_route * r,time\_t arrival)} slouží k výpočtu penalty
+	conf, struct stop\_route * r,time\_t arrival)} slouží k~výpočtu penalty
 	za úsek projetý MHD. Argumenty funkce jsou následující:
 	\begin{itemize}
 		\item {\tt graph} odkazuje na vyhledávací graf
@@ -283,71 +283,71 @@ upravovat. Funkce pro výpočet penalt se nachází v souboru {\tt penalty.c} a 
 
 \subsection{Knihovna algoritmu RAPTOR}
 Knihovnu implementující algoritmus RAPTOR jsme navrhli jako oddělenou knihovnu,
-stejně tak skripty zajišťující přípravu dat z jízdních řádů jsou také oddělené,
+stejně tak skripty zajišťující přípravu dat z~jízdních řádů jsou také oddělené,
 tudíž lze snadno implementovat vyhledávač využívající pouze algoritmus RAPTOR
-bez závislostí na zbytku vyhledávacího kódu. V rámci přípravných prací jsme
+bez závislostí na zbytku vyhledávacího kódu. V~rámci přípravných prací jsme
 takový implementovali, (\TODO nazvy souboru, ...). Tento vyhledávač ale
 nevyužívá žádné pěší přesuny, ani mezi zastávkami stejného jména, pro praktické
 vyhledávání není tedy příliš vhodný, sloužil pro testování správnosti úprav
 jízdních řádů.(\TODO kdyby byl čas, doladit?)
 
-Knihovnu jsme implementovali jako sdílenou knihovnu v jazyce C, tudíž je snadno
+Knihovnu jsme implementovali jako sdílenou knihovnu v~jazyce C, tudíž je snadno
 navázatelná na zbytek vyhledávacího algoritmu. Knihovna obsahuje 3 hlavní
 funkce -- {\tt gen\_tt\_for\_date}, {\tt search\_con} a {\tt
 search\_stop\_cons}. Funkce {\tt search\_con} implementuje celý algortimus
-RAPTOR, v naší práci se dále nevyužívá.
+RAPTOR, v~naší práci se dále nevyužívá.
 
 Funkce {\tt gen\_tt\_for\_date} zajišťuje přípravu vyhledávacích dat pro
-konkrétní den z celého jízdního řádu. K vyhledávání spojení by bylo možné použít
+konkrétní den z~celého jízdního řádu. K~vyhledávání spojení by bylo možné použít
 přímo jízdní řád pro celé období, ale pak by při každém zkoumání možných spojů
 ze zastávky bylo potřeba ošetřovat případy, kdy daný spoj linky nejede či daná
-linka není konkrétní den vůbec v provozu. Pro co nejjednodušší zpracování
+linka není konkrétní den vůbec v~provozu. Pro co nejjednodušší zpracování
 konkrétní zastávky při vyhledávání jsme se rozhodli si pro vyhledávání připravit
-konkrétní jízdní řád na daný den, který obsahuje jen linky a spoje, které v daný
-den jedou. V současnosti se jízdní řád generuje pro každý den použitý v
-konkrétním hledání, ale bylo by možné si kešovat jízdní řády pro nejpoužívanější
+konkrétní jízdní řád na daný den, který obsahuje jen linky a spoje, které v~daný
+den jedou. V~současnosti se jízdní řád generuje pro každý den použitý
+v~konkrétním hledání, ale bylo by možné si kešovat jízdní řády pro nejpoužívanější
 dny, což by stále příliš nezhoršovalo nároky na paměť a ušetřil by se čas při
-hledání. Jízdní řád pro konkrétní den obsahuje všechny zastávky z celkového
+hledání. Jízdní řád pro konkrétní den obsahuje všechny zastávky z~celkového
 jízdního řádu, neobsluhované zastávky mají prázdnou množinu linek. Formát
-jízdního řádu pro konkrétní den je uveden v sekci \ref{ch:formaty-dat:vyhledavani}.
+jízdního řádu pro konkrétní den je uveden v~sekci \ref{ch:formaty-dat:vyhledavani}.
 
-Funkce {\tt search\_stop\_conns} slouží k hledání zastávek dosažitelných bez
-přestupu z dané zastávky v daný čas. Funkce projde všechny linky, které daný den
-z dané zastávky jedou, najde první spoj, který odjíždí po čase příchodu na danou
-zastávku a všechny zastávky tohoto spoje uloží jako dosažitelné s časem příjezdu
+Funkce {\tt search\_stop\_conns} slouží k~hledání zastávek dosažitelných bez
+přestupu z~dané zastávky v~daný čas. Funkce projde všechny linky, které daný den
+z~dané zastávky jedou, najde první spoj, který odjíždí po čase příchodu na danou
+zastávku a všechny zastávky tohoto spoje uloží jako dosažitelné s~časem příjezdu
 podle nalezeného spoje. Funkce vrátí seznam linek a pro každou dosažitelné
-zastávky s časem příjezdu. Přesný formát dat je uveden v sekci Formáty dat
+zastávky s~časem příjezdu. Přesný formát dat je uveden v~sekci Formáty dat
 \ref{ch:formaty-dat:vyhledavani}.
 
 \subsection{Webová aplikace}
 \label{ch:implementace:webapp}
-Webová aplikace je napsaná v Pythonu ve webovém frameworku Flask\cite{Flask}.
-Python jsme zvolili z důvodu snadné interakce se sdílenými knihovnami pro C a
-rychlosti vývoje aplikací v něm. Flask pak je jednoduchým webovým frameworkem,
+Webová aplikace je napsaná v~Pythonu ve webovém frameworku Flask\cite{Flask}.
+Python jsme zvolili z~důvodu snadné interakce se sdílenými knihovnami pro C a
+rychlosti vývoje aplikací v~něm. Flask pak je jednoduchým webovým frameworkem,
 který se osvědčil na jiných projektech. Webová aplikace má dvě části -- backend,
-který zajišťuje hledání cesty a frontend, který předává informace o zvolených
+který zajišťuje hledání cesty a frontend, který předává informace o~zvolených
 bodech backendu, zobrazuje mapu a výsledky vyhledávání. 
 
 \subsubsection{Backend}
-Backend se kromě renderování hlavní stránky z připraveného templatu stará o
-hledání tras a jejich předávání frontendu. Když je ve frontendu zvolen výchozí a
+Backend se kromě renderování hlavní stránky z~připraveného templatu stará
+o~hledání tras a jejich předávání frontendu. Když je ve frontendu zvolen výchozí a
 cílový bod, je vyvolán požadavek {\tt GET
 /search?flon=<flon>\&flat=<flat>\&tlon=<tlon>\&tlat=<tlat>}, kde {\tt flon} a
 {\tt flat} je zeměpisná délka a šířka výchozího bodu a {\tt tlon} a {\tt tlat}
 je zeměpisná délka a šířka cílového bodu. Souřadnice výchozího a cílového bodu
 jsou předány vyhledávací knihovně a počká se na vrácení výsledku hledání. Tento
-výsledek je ve formátu PBF, jak je specifikováno v sekci \ref{ch:formaty-dat:vysledky}.
+výsledek je ve formátu PBF, jak je specifikováno v~sekci \ref{ch:formaty-dat:vysledky}.
 Protože knihovna Leaflet vyžaduje pro zobrazení prostorových dat formát
 GeoJSON\cite{GeoJSON}, je potřeba nalezené trasy převést do tohoto formátu. Při
-tomto převodu jsou současně spojeny všechny navazující hrany stejného typu (v
-případě MHD i stejného spoje) do jedné lomené linie a také jsou přidány časy
-příchodů na zastávku a odjezdu spoje MHD v případě nástupu do MHD a časy
-příjezdů na zastávku v případě výstupu z MHD. Všechna tato geografická data jsou
-pak zabalena jako FeatureCollection do formátu GeoJSON a spolu s informacemi o
-čase, pěší vzdálenosti a penaltě zabalena do pole všech tras, které je předáno
-frontendu ke zpracování. Přesný formát předávaných dat je popsán v sekci \ref{ch:formaty-dat:vysledky}
+tomto převodu jsou současně spojeny všechny navazující hrany stejného typu
+(v~případě MHD i stejného spoje) do jedné lomené linie a také jsou přidány časy
+příchodů na zastávku a odjezdu spoje MHD v~případě nástupu do MHD a časy
+příjezdů na zastávku v~případě výstupu z~MHD. Všechna tato geografická data jsou
+pak zabalena jako FeatureCollection do formátu GeoJSON a spolu s~informacemi
+o~čase, pěší vzdálenosti a penaltě zabalena do pole všech tras, které je předáno
+frontendu ke zpracování. Přesný formát předávaných dat je popsán v~sekci \ref{ch:formaty-dat:vysledky}
 \subsubsection{Frontend}
-Frontend je napsán v JavaScriptu s použitím knihovny Leaflet pro operace s
-mapou. Jako mapový podklad je použita mapa od
+Frontend je napsán v~JavaScriptu s~použitím knihovny Leaflet pro operace
+s~mapou. Jako mapový podklad je použita mapa od
 MapBoxu\footnote{\url{https://www.mapbox.com/}}, přes kterou
 jsou vykreslovány jednotlivé nalezené trasy. (\TODO dopsat, ale jak konkrétně?)
