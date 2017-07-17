@@ -221,7 +221,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 			struct stop_conns * conns;
 		//	printf("%p\n",queue);
 		//	printf("Id: \n",queue->vert->stop->id);
-			conns = search_stop_conns(curtt,queue->vert->stop->id,queue->vert->arrival%(2*DAY_SECS));
+			conns = search_stop_conns(curtt,queue->vert->stop->id,queue->vert->arrival-date);
 			for (int ridx = 0; ridx < conns->n_routes; ridx++){
 				struct stop_route * r;
 				r = conns->routes+ridx;
@@ -261,15 +261,19 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 
 					penalty += calcPointPenalty(graph,data.conf,graph->vertices[nd->idx]);
 					int wait;
-					wait = r->departure - (queue->vert->arrival%DAY_SECS);
+					wait = r->departure - (queue->vert->arrival-date);
 					penalty += calcChangePenalty(graph,data.conf,e->ptedge,queue->vert,wait);	
-					addNodeToQueue(queue,queue->vert,graph->vertices[nd->idx],r->stops[sidx].to,e,curdate+arrival,queue->vert->penalty + penalty);
+					if (penalty < PENALTY_INFINITY){ 
+						addNodeToQueue(queue,queue->vert,graph->vertices[nd->idx],r->stops[sidx].to,e,date+arrival,queue->vert->penalty + penalty);
+					} else {
+						free(e);
+					}
 				}
 					
 			}
 			free_conns(conns);
 			// If after midnight, process connections for the next day
-			if (queue->vert->arrival - curdate > DAY_SECS){
+			if (queue->vert->arrival - date > DAY_SECS){
 				conns = search_stop_conns(nexttt,queue->vert->stop->id,queue->vert->arrival%DAY_SECS);
 				for (int ridx = 0; ridx < conns->n_routes; ridx++){
 					struct stop_route * r;
@@ -313,7 +317,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 						wait = r->departure - (queue->vert->arrival%DAY_SECS);
 						penalty += calcChangePenalty(graph,data.conf,e->ptedge,queue->vert,wait);	
 						addNodeToQueue(queue,queue->vert,graph->vertices[nd->idx],r->stops[sidx].to,e,
-							curdate+DAY_SECS+arrival,queue->vert->penalty + penalty);
+							date+DAY_SECS+arrival,queue->vert->penalty + penalty);
 					}
 						
 				}

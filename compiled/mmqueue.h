@@ -21,11 +21,16 @@ struct edge_t {
 	};
 };
 
+struct search_state_t{
+	int vehicles;
+};
+
 struct mmdijnode_t {
 	struct mmdijnode_t * prev;
 	Graph__Vertex * osmvert;
 	Stop * stop;
 	struct edge_t * edge;
+	struct search_state_t state;
 	bool reached;
 	bool completed;
 	bool majorized;

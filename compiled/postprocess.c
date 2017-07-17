@@ -19,10 +19,23 @@ struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mm
 	int residx;
 	residx = 0;
 	for (int i=0;i<n_routes;i++){
+		printf("Processing route %d\n",i);
 		node = queue->vertlut[toIdx][i];
 		if (node->majorized){
 			printf("Majorized, skipping\n");
 			continue;
+		}
+		char equivalent;
+		equivalent = 0;
+		for (int j=0;j<residx;j++){
+			if (equivWays(queue->vertlut[toIdx][j],queue->vertlut[toIdx][i])){
+				printf("Equivalent with %d, skipping\n",j);
+				equivalent = 1;
+				break;	
+			}
+		}
+		if (equivalent){
+			continue;	
 		}
 		routes[residx].time = node->arrival;
 		routes[residx].penalty = node->penalty;
@@ -89,8 +102,9 @@ void writeGPXForResult(struct search_result_t * res){
 }
 void printMMRoutes(struct search_data_t * data,struct search_result_t * res){
 	for (int r=0;r<res->n_routes;r++){
-		printf("------------------------");
+		printf("------------------------\n");
 		printf("Route %d:\n",r);
+		printf("------------------------\n");
 		for (int s=0;s<res->routes[r].n_points;s++){
 			struct point_t * pt;
 			struct point_t * prevpt;
@@ -114,7 +128,7 @@ void printMMRoutes(struct search_data_t * data,struct search_result_t * res){
 				printf("To: %s at %s by %s\n",pt->stop->name,timestr,pt->edge->ptedge->route->name);
 				free(timestr);
 			}
-			printf("Time: %lld, penalty: %f\n",pt->arrival,pt->penalty);
+			//printf("Time: %lld, penalty: %f\n",pt->arrival,pt->penalty);
 		}
 	}
 	

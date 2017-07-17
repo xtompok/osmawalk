@@ -2,6 +2,8 @@
 
 #include "config.h"
 
+#define GTFS_ROUTE_TYPES 8
+
 // Loading 
 struct config_t parseConfigFile(char * filename){
 	struct config_t conf;
@@ -15,6 +17,12 @@ struct config_t parseConfigFile(char * filename){
 		conf.ratios[i]=-1;
 		conf.penalties[i]=1;
 	}
+	conf.pt_fixed_penalties = calloc(sizeof(double),GTFS_ROUTE_TYPES);
+	conf.pt_time_penalties = calloc(sizeof(double),GTFS_ROUTE_TYPES);
+
+	conf.pt_max_vehicles = 100;
+	conf.pt_geton_penalty = 0;
+	conf.pt_min_wait = 0;
 	
 
 	yaml_parser_t parser;
@@ -45,6 +53,7 @@ struct config_t parseConfigFile(char * filename){
 
 			yaml_node_t * key;
 			key = yaml_document_get_node(&document,section->key);
+			printf("Key: %s\n",(char *)key->data.scalar.value);
 			if (strcmp((char *)key->data.scalar.value,"speeds")==0){
 				//printf("Parsing speeds\n");
 				yaml_node_t * speedsMap;
@@ -142,6 +151,111 @@ struct config_t parseConfigFile(char * filename){
 					} 
 				}
 				
+			} else if (strcmp((char *)key->data.scalar.value,"pt-time-penalties")==0){
+				printf("Parsing public transport time penalties\n");
+				yaml_node_t * map;
+				map = yaml_document_get_node(&document,section->value);
+				if (map->type != YAML_MAPPING_NODE){
+					printf("PT time penalties are not mapping\n");
+					break;
+				}
+				yaml_node_pair_t * pair;
+				for (pair=map->data.mapping.pairs.start;
+						pair < map->data.mapping.pairs.top;pair++){
+					yaml_node_t * key;
+					yaml_node_t * value;
+					key = yaml_document_get_node(&document,pair->key);
+					value = yaml_document_get_node(&document,pair->value);
+					if (strcmp((char *)key->data.scalar.value,"tram")==0){
+						conf.pt_time_penalties[0] = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"metro")==0){
+						conf.pt_time_penalties[1] = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"rail")==0){
+						conf.pt_time_penalties[2] = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"bus")==0){
+						conf.pt_time_penalties[3] = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"ferry")==0){
+						conf.pt_time_penalties[4] = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"cable-car")==0){
+						conf.pt_time_penalties[5] = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"gondola")==0){
+						conf.pt_time_penalties[6] = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"funicular")==0){
+						conf.pt_time_penalties[7] = atof((char *)value->data.scalar.value);	
+					}
+				}
+			} else if (strcmp((char *)key->data.scalar.value,"pt-fixed-penalties")==0){
+				printf("Parsing public transport fixed penalties\n");
+				yaml_node_t * map;
+				map = yaml_document_get_node(&document,section->value);
+				if (map->type != YAML_MAPPING_NODE){
+					printf("PT fixed penalties are not mapping\n");
+					break;
+				}
+				yaml_node_pair_t * pair;
+				for (pair=map->data.mapping.pairs.start;
+						pair < map->data.mapping.pairs.top;pair++){
+					yaml_node_t * key;
+					yaml_node_t * value;
+					key = yaml_document_get_node(&document,pair->key);
+					value = yaml_document_get_node(&document,pair->value);
+					if (strcmp((char *)key->data.scalar.value,"tram")==0){
+						conf.pt_fixed_penalties[0] = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"metro")==0){
+						conf.pt_fixed_penalties[1] = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"rail")==0){
+						conf.pt_fixed_penalties[2] = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"bus")==0){
+						conf.pt_fixed_penalties[3] = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"ferry")==0){
+						conf.pt_fixed_penalties[4] = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"cable-car")==0){
+						conf.pt_fixed_penalties[5] = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"gondola")==0){
+						conf.pt_fixed_penalties[6] = atof((char *)value->data.scalar.value);	
+					} else if (strcmp((char *)key->data.scalar.value,"funicular")==0){
+						conf.pt_fixed_penalties[7] = atof((char *)value->data.scalar.value);	
+					}
+				}
+			} else if (strcmp((char *)key->data.scalar.value,"line-penalties")==0){
+				printf("Parsing public transport line penalties\n");
+				yaml_node_t * map;
+				map = yaml_document_get_node(&document,section->value);
+				if (map->type != YAML_MAPPING_NODE){
+					printf("PT line penalties are not mapping\n");
+					break;
+				}
+				conf.pt_n_line_penalties = map->data.mapping.pairs.top-map->data.mapping.pairs.start;
+				conf.pt_line_penalties = calloc(sizeof(struct line_config_t),conf.pt_n_line_penalties);
+				yaml_node_pair_t * pair;
+				int i=0;
+				for (pair=map->data.mapping.pairs.start;
+						pair < map->data.mapping.pairs.top;pair++){
+					yaml_node_t * key;
+					yaml_node_t * value;
+					key = yaml_document_get_node(&document,pair->key);
+					value = yaml_document_get_node(&document,pair->value);
+					conf.pt_line_penalties[i].name = malloc(strlen((char *)key->data.scalar.value)+1);
+					strcpy(conf.pt_line_penalties[i].name,(char *)key->data.scalar.value);
+					if (strcmp((char *)key->data.scalar.value,"inf")==0){
+						conf.pt_line_penalties[i].penalty = PENALTY_INFINITY;
+					} else {
+						conf.pt_line_penalties[i].penalty = atof((char *)value->data.scalar.value);
+					}	
+					i++;
+				}
+			} else if (strcmp((char *)key->data.scalar.value,"max-vehicles")==0){
+				yaml_node_t * value;
+				value = yaml_document_get_node(&document,section->value);
+				conf.pt_max_vehicles = atol((char *)value->data.scalar.value);
+			} else if (strcmp((char *)key->data.scalar.value,"geton-penalty")==0){
+				yaml_node_t * value;
+				value = yaml_document_get_node(&document,section->value);
+				conf.pt_geton_penalty = atol((char *)value->data.scalar.value);
+			} else if (strcmp((char *)key->data.scalar.value,"min-wait")==0){
+				yaml_node_t * value;
+				value = yaml_document_get_node(&document,section->value);
+				conf.pt_min_wait = atol((char *)value->data.scalar.value);
 			} else
 			{
 				printf("Unsupported section: %s\n",key->data.scalar.value);

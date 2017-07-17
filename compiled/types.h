@@ -76,6 +76,13 @@ struct map_t {
 #define ROUTE_TYPE_WALK 1
 #define ROUTE_TYPE_PT 2
 
+#define PENALTY_INFINITY 1000000
+
+struct line_config_t{
+	char * name;
+	double penalty;	
+};
+
 /*!
  * @struct config_t
  * @abstract Struct for representing configuration file.
@@ -97,6 +104,13 @@ struct config_t {
 	double * penalties;
 	double upscale;
 	double downscale;
+	double * pt_fixed_penalties;
+	double * pt_time_penalties;
+	int pt_n_line_penalties;	
+	struct line_config_t * pt_line_penalties;	
+	int pt_max_vehicles;
+	double pt_geton_penalty;
+	double pt_min_wait;
 //	double maxslope;
 //	double upslopescale;
 //	double downslopescale;

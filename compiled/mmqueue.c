@@ -49,6 +49,7 @@ void addFirstNodeToQueue(struct mmqueue_t * q,Graph__Vertex * v, Stop * s, uint6
 	node->edge = NULL;
 	node->arrival = time;
 	node->penalty = 0;
+	node->state.vehicles = 0;
 	
 	// Add to vertlut
 	struct mmdijnode_t ** vertlutItem;
@@ -108,7 +109,11 @@ void addNodeToQueue(struct mmqueue_t * q,
 	node->edge = e;
 	node->arrival = arrival;
 	node->penalty = penalty;
-
+	node->state.vehicles = node->prev->state.vehicles;
+	if (e->edge_type == EDGE_TYPE_PT){
+		node->state.vehicles++;
+	}
+	/*
 	for (int j=0;j<GARY_SIZE(vertnodes);j++){
 		if (vertnodes[j]->majorized){
 			continue;
@@ -122,7 +127,7 @@ void addNodeToQueue(struct mmqueue_t * q,
 			}
 		}
 	}
-	
+	*/
 	// Add to vertlut
 	struct mmdijnode_t  ** vertlutItem;
 	vertlutItem = GARY_PUSH(q->vertlut[v->idx]);
