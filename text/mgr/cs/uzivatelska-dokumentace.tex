@@ -1,31 +1,32 @@
 \chapter{Uživatelská dokumentace}
 \section{Příprava dat}
 Pro přípravu dat je nejprve nutné nainstalovat potřebné externí knihovny do
-systému nebo do adresáře ext-lib. Poté je nutné zkompilovat všechny zdrojové
-kódy zavoláním {\tt make} v adresáři compiled. Dále je nutné vytvořit databáze
-pro přípravu dat. Pro mapová data je potřeba vytvořit databázi osmawalk-prepare,
-pro jízdní řády je potřeba vytvořit databázi (\TODO název). Pak je již možné
-přistoupit k samotné přípravě dat. Pokud je vše správně nastavené, stačí spustit
-skript {\tt prepare.sh} (\TODO implementovat) v kořenovém adresáři projektu a po několika hodinách
+systému nebo do adresáře {\tt ext-lib}. Poté je nutné zkompilovat všechny zdrojové
+kódy zavoláním {\tt make} v~adresáři {\tt compiled}. Dále je nutné vytvořit databáze
+pro přípravu dat. Pro mapová data je potřeba vytvořit databázi {\tt
+osmawalk-prepare},
+pro jízdní řády je potřeba vytvořit databázi {\tt gtfs\_praha}. Pak je již možné
+přistoupit k~samotné přípravě dat. Pokud je vše správně nastavené, stačí spustit
+skript {\tt prepare.sh} (\TODO implementovat) v~kořenovém adresáři projektu a po několika hodinách
 budou data připravena. Pokud skript selže, dále popíšeme činnosti, které skript
-dělá, aby bylo možné jednotlivé fáze spouštět ručně a hledat, kde nastala chyba.
+provádí, aby bylo možné jednotlivé fáze spouštět ručně a hledat, kde nastala chyba.
 
 \begin{enumerate}
 \item {\tt osm/prepare.sh} slouží ke stažení dat OSM, SRTM, spojení jednotlivých
-dílů dat SRTM a tvorbu výřezu z dat OSM. Výstupem je soubor {\tt osm/praha.osm}
-s výřezem z dat OSM a soubor {\tt heights.bin} se spojenými daty SRTM pro daný
+dílů dat SRTM a tvorbu výřezu z~dat OSM. Výstupem je soubor {\tt osm/praha.osm}
+s~výřezem z~dat OSM a soubor {\tt heights.bin} se spojenými daty SRTM pro daný
 výřez. 
 \item {\tt compiled/parse} slouží ke klasifikaci dat OSM, určení typů objektů,
-určení vrcholů na mostech a pod zemí a přiřazení nadmořské výšky k uzlům.
+určení vrcholů na mostech a pod zemí a přiřazení nadmořské výšky k~uzlům.
 Výstupem jsou soubory {\tt data/nodes-stage1}, {\tt data/ways-stage1} a {\tt
-data/mp-stage1} s jednotlivými objekty. Formát uložení je popsán v sekci Formáty
+data/mp-stage1} s~jednotlivými objekty. Formát uložení je popsán v~sekci Formáty
 dat\ref{ch:formaty:priprava}.
-\item {\tt todb.sh} slouží k nahrání klasifikovaných dat do databáze. 
-\item {\tt postgis/process.sh} řídí úpravy dat v databázi, uvnitř obsahuje
-volání jednotlivých kroků popsaných v kapitole \ref{ch:implementace}.
+\item {\tt todb.sh} slouží k~nahrání klasifikovaných dat do databáze. 
+\item {\tt postgis/process.sh} řídí úpravy dat v~databázi, uvnitř obsahuje
+volání jednotlivých kroků popsaných v~kapitole \ref{ch:implementace}.
 Výstupem jsou soubory {\tt data/\dots.csv} obsahující vrcholy a hrany dat
 připravených pro vyhledávání. 
-\item {\tt compiled/csvtograph} Vytváří vyhledávací graf a vybírá v něm největší
+\item {\tt compiled/csvtograph} Vytváří vyhledávací graf a vybírá v~něm největší
 souvislou komponentu, kterou uloží pro hledání jako soubor {\tt
 data/postgis-graph.pbf}.
 \end{enumerate}
@@ -34,35 +35,35 @@ data/postgis-graph.pbf}.
 \section{Konzolová aplikace}
 Konzolová aplikace slouží převážně pro testování, zda vyhledávací knihovna
 pracuje stabilně, ale dá se použít i pro jednoduché hledání. Aplikaci spustíme
-v adresáři compiled příkzem {\tt ./search <flat> <flon> <tlat> <tlon> [time]},
+v~adresáři compiled příkzem {\tt ./search <flat> <flon> <tlat> <tlon> [time]},
 kde {\tt flat} a {\tt flon} určují zeměpisnou šířku a délku výchozího bodu, {\tt
 tlat} a {\tt tlon} souřadnice cílového bodu a {\tt time} unixový timestamp času,
 od kterého hledat(\TODO implementovat). Pokud není čas uveden, hledá se od
 okamžiku spuštění.  Aplikace najde trasy a na standradní výstup vypíše ke každé
-trase použité spoje MHD. Navíc v aktuálním adresáři vytvoří soubory {\tt
+trase použité spoje MHD. Navíc v~aktuálním adresáři vytvoří soubory {\tt
 track<num>.gpx}, kde {\tt num} značí číslo trasy, které obsahují jednotlivé
 nalezené trasy.
  
 \section{Webová aplikace}
 Webovou aplikaci je možné vyzkoušet na (\TODO odkaz) nebo si ji spustit lokálně
-pomocí příkazu {\tt python wsgi.py} v adresáři webapp. V případě, že knihovna
-libraptor.so není umístěná tam, kde systém hledá sdílené knihovny, je potřeba ji
+pomocí příkazu {\tt python wsgi.py} v~adresáři {\tt webapp}. V~případě, že knihovna
+{\tt libraptor.so} není umístěná tam, kde systém hledá sdílené knihovny, je potřeba ji
 do této cesty buď přesunout, nebo zavolat příkaz {\tt export
-LD\_LIBRARY\_PATH=<cesta k libraptor.so>}. Po spuštění aplikace je možné si
-otevřít prohlížeč na stránce, která se vypíše během spouštění aplikace. I v
-případě, že spoušíme aplikaci lokálně, je potřeba mít k dispozici připojení k
-internetu, protože mapové podklady a javascriptové knihovny se načítají ze
+LD\_LIBRARY\_PATH=<cesta k~libraptor.so>}. Po spuštění aplikace je možné si
+otevřít prohlížeč na stránce, která se vypíše během spouštění aplikace.
+I~v~případě, že spoušíme aplikaci lokálně, je potřeba mít k~dispozici připojení
+k~internetu, protože mapové podklady a javascriptové knihovny se načítají ze
 serverů třetích stran.
 
-Po otevření webové aplikace je zobrazené hlavní okno s mapou. Interakce s mapou,
+Po otevření webové aplikace je zobrazené hlavní okno s~mapou. Interakce s~mapou,
 kromě základního posouvání a zvětšování, probíhá klinutím na bod. Prvním
 kliknutím je zvolen výchozí bod, ze kterého hledat, druhým kliknutím je zvolen
 cílový bod do kterého se hledá trasa. Volbou cílového bodu je odeslán požadavek
-na vyhledání trasy. Po vyhledání jsou v levém sloupci zobrazená shrnutí
-jednotlivých nalezených tras v pořadí podle času příjezdu do cíle a první trasa
-je zobrazena v mapě. Zobrazení nebo skrytí jednotlivých tras se provede
-kliknutím na její souhrn v levém sloupci. Jednotlivé části trasy jsou obarveny
+na vyhledání trasy. Po vyhledání jsou v~levém sloupci zobrazená shrnutí
+jednotlivých nalezených tras v~pořadí podle času příjezdu do cíle a první trasa
+je zobrazena v~mapě. Zobrazení nebo skrytí jednotlivých tras se provede
+kliknutím na její souhrn v~levém sloupci. Jednotlivé části trasy jsou obarveny
 podle typů hran, po kterých vedou a dále jsou zvýrazněna místa přestupu na MHD.
-Detailní informace o MHD lze zobrazit kliknutím na ikonu u přestupní zastávky
+Detailní informace o~MHD lze zobrazit kliknutím na ikonu u~přestupní zastávky
 nebo na hranu spoje MHD. Jednotlivé trasy lze exportovat do GPX kliknutím na
-ikonu diskety v souhrnu trasy (\TODO implementovat). 
+ikonu diskety v~souhrnu trasy (\TODO implementovat). 

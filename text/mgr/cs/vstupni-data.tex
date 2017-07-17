@@ -2,15 +2,15 @@
 
 Zdrojová data pro vyhledávač pochází ze dvou zdrojů. Prvním zdrojem jsou mapová
 data, která obsahují silnice, cesty, budovy a další mapové prvky. Druhým zdrojem
-jsou data o jízdních řádech, která obsahují linky, zastávky a spoje.
+jsou data o~jízdních řádech, která obsahují linky, zastávky a spoje.
 
 \section{Mapová data}
-Mapová data jsou použita z projektu OpenStreetMap\cite{OSM} (OSM). Tato data neobsahují
-informace o nadmořské výšce jednotlivých bodů, k doplnění nadmořské výšky jsou
-použita data z projektu Shuttle Radar Topography Mission (SRTM), která jsou
-lineárně interpolována pro získání nadmořských výšek jednotlivých bodů v mapě.
+Mapová data jsou použita z~projektu OpenStreetMap\cite{OSM} (OSM). Tato data neobsahují
+informace o~nadmořské výšce jednotlivých bodů; k~doplnění nadmořské výšky jsou
+použita data z~projektu NASA Shuttle Radar Topography Mission (SRTM), která jsou
+lineárně interpolována pro získání nadmořských výšek jednotlivých bodů v~mapě.
 
-O datech OSM a jejich problémech jsme již rozsáhle pojednávali v bakalářské
+O~datech OSM a jejich problémech jsme již rozsáhle pojednávali v~bakalářské
 práci\cite{bakalarka}, níže citujeme obecný úvod a popis základních primitiv. 
 \newcommand{\tuc}{\bf}
 \subsection{Projekt OpenStreetMap}
@@ -59,7 +59,7 @@ vždy musí dohromady tvořit jednu nebo několik uzavřených částí tvoříc
 plochy resp. díry v~ploše.
 
 \section{Výšková data}
-O výškových datech jsme také pojednávali v bakalářské práci, opět
+O~výškových datech jsme také pojednávali v~bakalářské práci, opět
 citujeme\cite{bakalarka}:
 Abychom mohli správně odhadnout náročnost pěší trasy, musíme znát i informace
 o~nadmořské výšce jednotlivých bodů. Stejně tak jako většina jiných projektů jsme
@@ -76,29 +76,29 @@ do tabulek po jednom stupni, přičemž sousední tabulky se vždy jedním sloup
 nebo řádkem překrývají. Každá tabulka má tedy 1201 sloupců a 1201 řádků, kde
 řádky odpovídají zeměpisné šířce a sloupce zeměpisné délce.
 
-Nadmořské výšky jsou kódovány celými 16bitovými čísly v~big-endian udávajícími
+Nadmořské výšky jsou kódovány celými 16bitovými čísly v~big endian udávajícími
 nadmořskou výšku v~metrech. Pokud se v~některém místě nepodařilo výšku změřit,
-je udávána jako $-32768$. Tabulka je kódována jako binární soubor, v~němž
+je udávána jako $-32768$. Tabulka je kódována jako binární soubor, v~němž jsou
 jednotlivé řádky zapsány za sebou.
 
 \section{Jízdní řády}
-Data o jízdních řádech jsou očekávána ve formátu General Transit Feed
+Data o~jízdních řádech jsou očekávána ve formátu General Transit Feed
 Specification (GTFS) \cite{GTFS}, který je dobře specifikovaný a široce používaný ve světě.
-Konkrétně pro testování byla použita data o pražské integrované dopravě od IPR
-Praha\footnote{\url{http://opendata.iprpraha.cz/DPP/JR/jrdata.zip}}. Tato data
-obsahují metro, tramvaje, autobusy a přívozy v Praze a okolí, bohužel neobsahují
+Konkrétně pro testování byla použita data o~pražské integrované dopravě od IPR
+Praha.\footnote{\url{http://opendata.iprpraha.cz/DPP/JR/jrdata.zip}} Tato data
+obsahují metro, tramvaje, autobusy a přívozy v~Praze a okolí, bohužel neobsahují
 integrované vlakové spoje.
 
 GTFS je distribuováno jako archiv ZIP obsahující jednotlivé tabulky ve formátu
 CSV. Význam jednotlivých tabulek je následující:
 \begin{itemize}
-\item {\em agency.txt} obsahuje informace o dopravcích na jednotlivých linkách.
-V našem vyhledávání není používán.
-\item {\em stops.txt} obsahuje informace o zastávkách. Zastávky jsou dvou typů.
+\item {\em agency.txt} obsahuje informace o~dopravcích na jednotlivých linkách.
+V~našem vyhledávání není používán.
+\item {\em stops.txt} obsahuje informace o~zastávkách. Zastávky jsou dvou typů.
 Prvním typem je zastávkový stojan, který reprezentuje fyzické místo, kde
 zastavuje nějaký spoj některé linky. Druhým typem je \uv{stanice}, která udává
 oblast několika stojanů, obvykle stejného jména. Nemusí mít fyzickou
-reprezentaci a slouží pro zobrazování v mapě a svázání logicky blízkých stojanů.
+reprezentaci a slouží pro zobrazování v~mapě a svázání logicky blízkých stojanů.
 Protože stanice pro náš vyhledávač nenese důležitou informaci, využíváme pouze
 zastávkové stojany. Pro vyhledávání spojení využíváme
 následující položky:
@@ -106,26 +106,26 @@ následující položky:
 	\item {\tt stop\_id} -- jednoznačný identifikátor zastávky
 	\item {\tt stop\_name} -- název zastávky
 	\item {\tt stop\_lat, stop\_lon} -- poloha zastávky
-	\item {\tt location\_type} -- informace, zda jde o stojan, nebo stanici
+	\item {\tt location\_type} -- informace, zda jde o~stojan, nebo stanici
 \end{itemize}
-\item {\em routes.txt} obsahuje informace o linkovém vedení. Pro vyhledávání
+\item {\em routes.txt} obsahuje informace o~linkovém vedení. Pro vyhledávání
 spojení využíváme následující položky:
 \begin{itemize}
 	\item {\tt route\_id} -- jednoznačný identifikátor linky
-	\item {\tt route\_short\_name} -- krátký název linky, v Praze označení linky
+	\item {\tt route\_short\_name} -- krátký název linky, v~Praze označení linky
 	\item {\tt route\_type} -- typ dopravního prostředku linky, například autobus, loď, metro
 \end{itemize}
-\item {\em trips.txt} obsahuje informace o spojích. Tato tabulka slouží ke
+\item {\em trips.txt} obsahuje informace o~spojích. Tato tabulka slouží ke
 svázání spoje (cesty konkrétního dopravního prostředku po posloupnosti zastávek
-v daný čas), linky a množiny dní, kdy daný spoj jezdí. Pro vyhledávání využíváme
+v~daný čas), linky a množiny dní, kdy daný spoj jezdí. Pro vyhledávání využíváme
 následující položky:
 \begin{itemize}
 	\item {\tt route\_id} -- identifikátor linky
 	\item {\tt service\_id} -- identifikátor jízdních dní spoje
 	\item {\tt trip\_id} -- jednoznačný identifikátor spoje
 \end{itemize}
-\item {\em stop\_times.txt} obsahuje informace o časech zastavení jednotlivých
-spojů v jednotlivých zastávkách. Pro vyhledávání spojení používáme následující
+\item {\em stop\_times.txt} obsahuje informace o~časech zastavení jednotlivých
+spojů v~jednotlivých zastávkách. Pro vyhledávání spojení používáme následující
 položky:
 \begin{itemize}
 	\item {\tt trip\_id} -- identifikátor spoje
@@ -136,17 +136,17 @@ položky:
 	bylo nezáporné, celočíselné a po trase spoje se zvyšovalo, zvyšování po
 	1 ani počítání od 0 není nutné.
 \end{itemize}
-\item {\em calendar.txt} obsahuje informace o tom, které dny v týdnu jezdí které
+\item {\em calendar.txt} obsahuje informace o~tom, které dny v~týdnu jezdí které
 spoje. Pro vyhledávání spojení používáme následující položky:
 \begin{itemize}
 	\item {\tt service\_id} -- identifikátor jízdních dní spoje
-	\item {\tt monday \dots sunday} -- informace, zda spoj jede daný den. 
+	\item {\tt monday \dots{} sunday} -- informace, zda spoj jede daný den. 
 	\item {\tt start\_date} -- první den platnosti jízdního řádu pro daný
 	spoj
 	\item {\tt end\_date} -- poslední den platnosti jízdního řádu pro daný
-	spoj (tento den ještě v rámci platnosti).
+	spoj (tento den ještě v~rámci platnosti).
 \end{itemize}
-\item {\em calendar\_dates.txt} obshauje výjimky z pravidelnosti spojů,
+\item {\em calendar\_dates.txt} obshauje výjimky z~pravidelnosti spojů,
 například státní svátky či jiná omezení. Obsahuje změny oproti souboru {\tt
 calendar.txt}. Může být použit i samostatně bez souboru {\tt
 calendar.txt}, pak obsahuje všechny jízdní dny daného spoje. Pro vyhledávání

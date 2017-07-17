@@ -1,63 +1,67 @@
 \chapter{Formáty dat}
 \label{ch:formaty-dat}
-V rámci přípravy dat a vyhledávání tras jednak používáme interní struktury
+V~rámci přípravy dat a vyhledávání tras jednak používáme interní struktury
 jednotlivých programovacích jazyků, jednak některé standardní formáty nezávislé
-na programovacím jazyku. Tyto formáty představíme v následující sekci, v dalších
+na programovacím jazyku. Tyto formáty představíme v~následující sekci, v~dalších
 sekcích se již jen budeme věnovat obsahu jednotlivých struktur.
 
 \section{Používané formáty dat}
 
 \subsection{Protocol Buffers}
-Protocol Buffers\cite{PBF} (PBF) je způsob uložení strukturovaných dat. Byl navržen
-Googlem a je používán v případech, kdy potřebujeme přenést po síti zprávy s
-danou strukturou. Formát podoporuje různé datové typy (integer různých přesností
-a znaménkovosti, čísla s plovoucí řádovou čárkou, stringy, \dots) a
+Protocol Buffers (PBF) \cite{PBF} je způsob uložení strukturovaných dat. Byl navržen
+Googlem a je používán v~případech, kdy potřebujeme přenést po síti zprávy
+s~danou strukturou. Formát podoporuje různé datové typy (integer různých přesností
+a znaménkovosti, čísla s~plovoucí řádovou čárkou, řetězce znaků, \dots) a
 strukturování zpráv. Komunikace probíhá ve fázích naplnění zprávy, její
 zabalení, odeslání, přijmutí a rozbalení. Při zabalení jsou data zkompirmována
 jednoduchým algoritmem, aby například malá čísla nezabírala zbytečně mnoho
-místa. Existují PBF verze 2 a verze 3. V naší práci používáme verzi 2, protože v
-době psaní bakalářské práce, kterou v naší práci rozšiřujeme, nebyly PBF verze 3
-ještě k dispozici a verze 3 nepřináší novinky, které by motivovaly k přechodu.
+místa. Existují PBF verze 2 a verze 3. V~naší práci používáme verzi 2, protože
+v~době psaní bakalářské práce, kterou v~naší práci rozšiřujeme, nebyly PBF verze 3
+ještě k~dispozici a verze 3 nepřináší novinky, které by motivovaly k~přechodu.
 
 Základní jednotkou PBF je zpráva, která obsahuje několik položek. Položkou může
 být základní datový typ nebo jiná zpráva, položky mohou být povinné, volitelné,
-nebo opakované. Každá položka má jméno, typ a číslo, které ho identifikuje v
-binární podobě zprávy. Zprávy se popisují pomocí vlastního jazyka, ze kterého se
+nebo opakované. Každá položka má jméno, typ a číslo, které ho identifikuje
+v~binární podobě zprávy. Zprávy se popisují pomocí vlastního jazyka, ze kterého se
 pak pomocí kompilátoru vytvoří vazby do jednotlivých programovacích jazyků. 
-Podrobnou dokumentaci včetně tutoriálů lze najít na stránkách projektu.
+Podrobnou dokumentaci včetně tutoriálů lze najít na stránkách projektu. \cite{PBF}
 
 \subsection{JavaScript Object Notation}
 JavaScript Object Notation\cite{JSON} (JSON) je formát navržený pro předávání dat ve
 webových aplikacích. Díky své jednoduchosti a čitelné reprezentaci je hojně
 využíván nejen ve webových projektech, ale často i jako konfigurační jazyk.
-Vychází z Javascriptu, datové typy v něm jsou kromě primitivních typů slovník --
-neuspořádaný seznam dvojic klíč--hodnota a pole -- uspořádaná posloupnost
-položek. Formát zpráv není dopředu dán a podpora v programovacích jazycích je
+Vychází z~Javascriptu, datové typy v~něm jsou kromě primitivních typů slovník --
+neuspořádaný seznam dvojic klíč-hodnota a pole -- uspořádaná posloupnost
+položek. Formát zpráv není dopředu dán a podpora v~programovacích jazycích je
 přímo integrovaná nebo dodaná pomocí knihovny. 
 
 \subsection{GeoJSON}
 GeoJSON\cite{GeoJSON} je, jak již název napovídá, nadstavba formátu JSON pro přenos
-geografických informací. Z hlediska syntaxe se jedná o korektní JSON, který má
+geografických informací. Z~hlediska syntaxe se jedná o~korektní JSON, který má
 ale předepsanou strukturu a názvy položek. Umožňuje ukládat body, linie, plochy,
-multipolygony a další objekty spolu s jejich atributy a je nativně podporován
+multipolygony a další objekty spolu s~jejich atributy a je nativně podporován
 většinou JavaScriptových knihoven pro zobrazování mapových dat.
 
 \subsection{XML}
 XML \cite{XML} je značkovací formát používaný pro přenos strukturovaných dat
-mezi aplikacemi. Jedná se o textový formát, ve kterém jsou uložena strukturovaná
+mezi aplikacemi. Jedná se o~textový formát, ve kterém jsou uložena strukturovaná
 data ve formě entit uspořádaných do stromové struktury. Každá entita má jméno a
 může mít parametry. 
 
 \subsection{GPX}
-Formát GPX\cite{GPX} je určen pro výměnu polohových dat mezi různými zařízeními s GPS,
+Formát GPX\cite{GPX} je určen pro výměnu polohových dat mezi různými zařízeními s~GPS,
 popřípadě mobilními a jinými aplikacemi. Data jsou uložena ve formátu XML, jsou
 dělena na cesty, trasy a významné body. Každá cesta, trasa i významný bod může
-mít uložené některé informace v předdefinovaných atributech, případně libovolné
-další informace uvnitř tagu {\tt <extensions>}. 
+mít uložené některé informace v~předdefinovaných atributech, případně libovolné
+další informace uvnitř elementu {\tt <extensions>}. 
+
+\subsection{Unixový čas}
+Unixový čas je standardní způsob reprezentace data a času na Unixových
+systémech. Je obvykle ukládán v~sekundách od půlnoci 1.\,1.\,1970 UTC.
 
 \section{Systémy zeměpisných souřadnic}
-Zeměpisné souřadnice jsou v rámci práce používány ve dvou souřadnicových
-systémech -- UTM a WGS84. Při klasifikaci dat z OSM jsou jejich souřadnice
+Zeměpisné souřadnice jsou v~rámci práce používány ve dvou souřadnicových
+systémech -- UTM a WGS84. Při klasifikaci dat z~OSM jsou jejich souřadnice
 převedeny do UTM a tak jsou dále uchovávány. Při přípravě výsledků vyhledávání
 jsou body na trasách převedeny zpět do WGS84 a takto jsou vráceny. Veškerá data
 předávaná knihovně či vrácená knihovnou jsou ve WGS84.
@@ -66,15 +70,27 @@ World Geodetic System 1984 (WGS84) \cite{WGS84} je geodetický standard
 definující souřadnicový systém a referenční elipsoid pro popis polohy objektů na
 povrchu Země. Využívá polárních souřadnic, zeměpisná šířka se určuje od rovníku,
 zeměpisná délka od \uv{IERS Reference Meridian}. Výhodou je pokrytí celého
-povrchu Země jedním systémem, vzhledem k použití elipsoidu a polárních souřadnic
+povrchu Země jedním systémem, vzhledem k~použití elipsoidu a polárních souřadnic
 je obtížné počítat vzdálenosti mezi dvěma body.
 \subsection{UTM}
 Univerzální transverzální Mercatorův systém souřadnic (UTM) \cite{UTM} je způsob
 určování polohy na povrchu země založený na mřížkách. Povrch země je rozdělen na
 60 zón a každá zóna je pak robrazena pomocí trasverzálního Mercatorova
-zobrazení. Souřadnice v rámci jedné zóny jsou pak udávány v metrech, lze proto
+zobrazení. Souřadnice v~rámci jedné zóny jsou pak udávány v~metrech, lze proto
 snadno počítat vzdálenosti. Pozice bodu na Zemi se udává pomocí čísla zóny a
 pozice uvnitř ní. 
+
+\section{Terminologie}
+V~následujícím popisu struktur používáme u~jednotlivých položek různá slovesa
+podle typu položky. Jedná se o~následující:
+\begin{itemize}
+	\item \uv{udává} značí, že položka je jednoduchého datového typu a je
+		uložena přímo ve struktuře
+	\item \uv{odkazuje} značí, že se jedná o~odkaz na danou položku či jeho
+		ekvivalent
+	\item \uv{popisuje}, případně \uv{obsahuje popis} značí, že položka je
+		složený typ a je přímo uložena v~popisované struktuře
+\end{itemize}
 
 \section{Formáty používané při přípravě dat}
 \label{ch:formaty-dat:priprava}
@@ -82,21 +98,21 @@ pozice uvnitř ní.
 Program {\tt parse} přečte data OSM, klasifikuje je a vytvoří 3 soubory
 reprezentující mapová data -- ({\tt nodes-stage1}, {\tt ways-stage1} a {\tt
 mp-stage1}), které udržují po řadě
-informace o uzlech, cestách a multipolygonech. Jednotlivé datové prvky jsou
+informace o~uzlech, cestách a multipolygonech. Jednotlivé datové prvky jsou
 uloženy jako zprávy ve formátu PBF popsaném níže, soubor je tvořen vždy délkou
 zprávy a samotnou zprávou řazenými za sebe. 
 
 Zpráva pro uzel obsahuje tyto položky:
 \begin{itemize}
 	\item {\tt id} udává OSM id uzlu 
-	\item {\tt lat} a {\tt lon} udávají zeměpisné souřadnice uzlu v UTM
-	\item {\tt height} udává nadmořskou výšku uzlu
+	\item {\tt lat} a {\tt lon} udávají zeměpisné souřadnice uzlu v~UTM
+	\item {\tt height} udává nadmořskou výšku uzlu v~metrech
 	\item {\tt type} udává typ uzlu
 	\item {\tt inside} udává, zda je uzel uvnitř nějaké překážky
-	\item {\tt inTunnel} udává, zda je uzel v podzemí
+	\item {\tt inTunnel} udává, zda je uzel v~podzemí
 	\item {\tt onBridge} udává, zda je uzel na mostě
 	\item {\tt stop} udává, zda je uzel zastávka
-	\item {\tt ref} udává hodnotu tagu {\tt ref} u uzlu, používá se pro
+	\item {\tt ref} udává hodnotu tagu {\tt ref} u~uzlu, používá se pro
 	párování zastávek MHD
 \end{itemize}  
 Zpráva pro cestu obsahuje tyto položky:
@@ -106,30 +122,29 @@ Zpráva pro cestu obsahuje tyto položky:
 	cesta skládá
 	\item {\tt area} udává, zda je daná cesta plocha 
 	\item {\tt type} udává typ cesty (implicitně {\tt WAY}) 
-	\item {\tt bordertype} má udávat typ ohraničující cesty u nějaké
-	oblasti, v současné době se nepoužívá
+	\item {\tt bordertype} má udávat typ ohraničující cesty u~nějaké
+	oblasti, v~současné době se nepoužívá
 	\item {\tt crossing} má udávat, jaký typ cesty zpracovávaná cesta kříží,
-	v současné době se nepoužívá  
+	v~současné době se nepoužívá  
 	\item {\tt bridge} udává, zda je cesta na mostě
-	\item {\tt tunnel} udává, zda je cesta v podzemí
+	\item {\tt tunnel} udává, zda je cesta v~podzemí
 \end{itemize} 
 Zpráva pro multipolygon obsahuje tyto položky:
 \begin{itemize}
 	\item {\tt id} udává OSM id multipolygonu
 	\item {\tt refs} udává, posloupnost cest, ze kterých se multipolygon
 	skládá
-	\item {\tt roles} udává pro každou cestu z předchozí posloupnosti její
+	\item {\tt roles} udává pro každou cestu z~předchozí posloupnosti její
 	roli (zda je vnější či vnitřní)
 	\item {\tt type} udává typ multipolygonu
 \end{itemize}  
-\subsection{Výstupní data z databáze}
+\subsection{Výstupní data z~databáze}
 Po zpracování dat pomocí PostgreSQL a PostGISu jsou upravená data vyexportována
 do CSV. Vrcholy jsou vyexportovány do souboru {\tt nodes.csv}, který obsahuje
 následující položky:
 \begin{itemize}
 	\item {\tt id} udává OSM id vrcholu
-	\item {\tt lat} a {\tt lon} udávají zeměpisnou šířku a délku vrcholu v
-	UTM
+	\item {\tt lat} a {\tt lon} udávají zeměpisné souřadnice vrcholu v~UTM
 	\item {\tt height} udává nadmořskou výšku vrcholu
 	\item {\tt type} udává typ vrcholu
 \end{itemize} 
@@ -138,8 +153,8 @@ položky:
 \begin{itemize}
 	\item {\tt id} udává OSM id hrany
 	\item {\tt type} udává typ hrany
-	\item {\tt from} udává výchozí vrchol hrany
-	\item {\tt to} udává cílový vrchol hrany
+	\item {\tt from} udává id výchozího vrcholu hrany
+	\item {\tt to} udává id cílového vrcholu hrany
 \end{itemize} 
 Hrany jsou uvažovány jako obousměrné.
 Zkratky jsou vyexportovány do souboru {\tt direct.csv}, který obsahuje
@@ -152,24 +167,24 @@ Zastávky jsou vyexportovány do souboru {\tt stops.csv}, který obsahuje
 následující položky:
 \begin{itemize}
 	\item {\tt id} udává OSM id zastávky
-	\item {\tt stop\_id} udává id zastávky v GTFS
-	\item {\tt raptor\_id} udává id zastávky v algoritmu RAPTOR
-	\item {\tt lat} a {\tt lon} udávají zeměpisné souřadnice zastávky v UTM
+	\item {\tt stop\_id} udává id zastávky v~GTFS
+	\item {\tt raptor\_id} udává id zastávky v~algoritmu RAPTOR
+	\item {\tt lat} a {\tt lon} udávají zeměpisné souřadnice zastávky v~UTM
 \end{itemize} 
-Zkratky propojující zastávky se zbytkem grafu jsou vyexporotvány do souboru {\tt
+Zkratky propojující zastávky se zbytkem grafu jsou vyexportovány do souboru {\tt
 stops-direct.csv}, který obsahuje následující položky:
 \begin{itemize}
 	\item {\tt sid} udává id zastávky
-	\item {\tt nid} udává id vrcholu v grafu
+	\item {\tt nid} udává id vrcholu v~grafu
 	\item {\tt objtype} udává typ zkratky
 \end{itemize} 
 \section{Formáty používané při vyhledávání tras}
 \label{ch:formaty-dat:vyhledavani}
 \subsection{Formát jízdních řádů}
 Jízdní řády jsou po zpracování uloženy ve zprávě {\tt Timetable}. Způsob
-provázání dat v jednotlivých položkách je popsán v kapitole Implementace (\TODO
+provázání dat v~jednotlivých položkách je popsán v~kapitole Implementace (\TODO
 ref). Zpráva má následující položky:
-\TODO zjistit, zda v popisu implementace je způsob ukládání dat
+\TODO zjistit, zda v~popisu implementace je způsob ukládání dat
 \begin{itemize}
 	\item {\tt routes} obsahuje popis linek
 	\item {\tt stop\_times} obsahuje časy zastavení spojů 
@@ -178,15 +193,15 @@ ref). Zpráva má následující položky:
 	jede a které ne 
 	\item {\tt route\_stops} udává, která linka má jaké zastávky 
 	\item {\tt stops} obsahuje popis zastávek
-	\item {\tt transfers} obsahuje popis pěších přestupů, v práci není
-	používá 
+	\item {\tt transfers} obsahuje popis pěších přestupů, v~práci není
+	používána 
 	\item {\tt stop\_routes} udává, které linky jedou přes jakou zastávku
 \end{itemize} 
-Každá linka je reprezentována zprávou typu {\tt Route} s následujícími
+Každá linka je reprezentována zprávou typu {\tt Route} s~následujícími
 položkami:
 \begin{itemize}
 	\item {\tt id} udává RAPTOR id linky 
-	\item {\tt nstops} udává počet zastávke linky
+	\item {\tt nstops} udává počet zastávek linky
 	\item {\tt ntrips} udává počet spojů linky
 	\item {\tt stopsidx} udává index do pole {\tt route\_stops}, kde
 	začínají zastávky linky
@@ -197,21 +212,21 @@ položkami:
 	\item {\tt name} udává název linky
 	\item {\tt type} udává typ dopravního prostředku
 \end{itemize}
-Každá zastávka je reprezentována zprávou typu {\tt Stop} s následujícími
+Každá zastávka je reprezentována zprávou typu {\tt Stop} s~následujícími
 položkami:
 \begin{itemize}
 	\item {\tt id} udává RAPTOR id zastávky
 	\item {\tt nroutes} udává počet linek projíždějících zastávkou
 	\item {\tt ntransfers} udává počet pěších přestupů ze zastávky
-	-\item {\tt routeidx} udává index do pole {\tt stop\_routes}, kde
+	\item {\tt routeidx} udává index do pole {\tt stop\_routes}, kde
 	začínají linky dané zastávky
 	\item {\tt transferidx} udává index do pole {\tt transfers}, kde
 	začínají přestupy ze zastávky
 	\item {\tt name} udává jméno zastávky
-	\item {\tt underground} udává, zda je zastávka v podzemí
+	\item {\tt underground} udává, zda je zastávka v~podzemí
 \end{itemize}
-Každé zastavení spoje je reprezentováno zprávou typu {\tt StopTime} s
-následujícími položkami:
+Každé zastavení spoje je reprezentováno zprávou typu {\tt StopTime}
+s~následujícími položkami:
 \begin{itemize}
 	\item {\tt arrival} udává čas příjezdu do zastávky
 	\item {\tt departure} udává čas odjezdu ze zastávky
@@ -219,13 +234,13 @@ následujícími položkami:
 Každá množina dní, kdy některý spoj jede, je reprezentována pomocí zprávy typu
 {\tt Validity}, která má následující položky:
 \begin{itemize}
-	\item {\tt start} udává UNIX timestamp prvního dne platnosti 
-	\item {\tt end} udává UNIX timestamp posledního dne platnosti
+	\item {\tt start} udává Unixový čas prvního dne platnosti 
+	\item {\tt end} udává Unixový čas posledního dne platnosti
 	\item {\tt bitmap} udává bitmapu platnosti počínaje prvním dnem
 	platnosti. Každý den odpovídá jednomu bitu.
 \end{itemize}
 Pokud bychom měli nějaké pěší přestupy, byly by reprezentovány zprávou typu {\tt
-Transfer} s následujícími položkami:
+Transfer} s~následujícími položkami:
 \begin{itemize}
 	\item {\tt from} udává počáteční zastávku
 	\item {\tt to} udává koncovou zastávku
@@ -233,37 +248,37 @@ Transfer} s následujícími položkami:
 \end{itemize}
 \subsection{Jízdní řád pro konkrétní den}
 Pro samotné vyhledávání si vždy nejprve připravíme jízdní řád pro tento
-konkrétní den. Jízdní řád je reprezentován strukturou {\tt timetable} v C s následujícími
+konkrétní den. Jízdní řád je reprezentován strukturou {\tt timetable} v~C s~následujícími
 položkami:
 \begin{itemize}
 	\item {\tt nroutes} udává počet linek
 	\item {\tt routes} obsahuje popis linek
-	\item {\tt st\_times} obsahuje popis zastavení spojů v zastávkách
+	\item {\tt st\_times} obsahuje popis zastavení spojů v~zastávkách
 	\item {\tt transfers} obsahuje popis pěších přestupů
 	\item {\tt nstops} udává počet zastávek
 	\item {\tt stops} obsahuje popis zastávek
 	\item {\tt rt\_stops} obsahuje odkazy na zastávky pro linky 
 	\item {\tt st\_routes} obsahuje odkazy na linky pro zastávky
 \end{itemize}
-Každá linka je popsána strukturou {\tt route} s následujícími položkami:
+Každá linka je popsána strukturou {\tt route} s~následujícími položkami:
 \begin{itemize}
-	\item {\tt pbroute} odkazuje na linku v původním jízdním řádu
+	\item {\tt pbroute} odkazuje na linku v~původním jízdním řádu
 	\item {\tt nstops} udává počet zastávek linky
 	\item {\tt ntrips} udává počet spojů linky
 	\item {\tt stops} odkazuje na začátek odkazů na zastávky dané linky
-	\item {\tt trips} odkazuje na začátek zastavení spojů linky v zastávkách 
+	\item {\tt trips} odkazuje na začátek zastavení spojů linky v~zastávkách 
 	\item {\tt name} udává jméno linky
 \end{itemize}
-Každé zastavení spoje v zastávce je popsáno strukuturou {\tt st\_time}
+Každé zastavení spoje v~zastávce je popsáno strukuturou {\tt st\_time}
 \begin{itemize}
 	\item {\tt arrival} udává čas příjezdu spoje do zastávky
 	\item {\tt departure} udává čas odjezdu spoje ze zastávky
 \end{itemize}
-Každá zastávka je popsána strukturou {\tt stop} s následujícími položkami
+Každá zastávka je popsána strukturou {\tt stop} s~následujícími položkami
 \begin{itemize}
-	\item {\tt pbstop} odkazuje na zastávku v původním jízdním řádu
+	\item {\tt pbstop} odkazuje na zastávku v~původním jízdním řádu
 	\item {\tt nroutes} udává počet linek projíždějících zastávkou daný den
-	\item {\tt ntransfers} udává počet pěších přestupů z dané zastávky
+	\item {\tt ntransfers} udává počet pěších přestupů z~dané zastávky
 	\item {\tt routes} odkazuje na začátek odkazů na linky projíždějící
 	zastávkou 
 	\item {\tt transfers} odkazuje na začátek pěších přestupů pro danou
@@ -271,15 +286,16 @@ Každá zastávka je popsána strukturou {\tt stop} s následujícími položkam
 	\item {\tt name} udává název zastávky
 \end{itemize}
 Každý pěší přestup mezi zastávkami je popsán strukturou {\tt transfer}. Tato
-struktura není v současné době využívána. Má tyto položky:
+struktura není v~současné době využívána. Má tyto položky:
 \begin{itemize}
 	\item {\tt from} odkazuje na výchozí zastávku
 	\item {\tt to} odkazuje na cílovou zastávku
-	\item {\tt time} udává čas v sekundách potřebný na přestup z výchozí do
+	\item {\tt time} udává čas v~sekundách potřebný na přestup z~výchozí do
 	cílové zastávky
 \end{itemize}
+
 \subsection{Vyhledávací graf}
-Vyhledávací graf je uložen v PBF ve zprávě {\tt Graph}, která obsahuje tyto
+Vyhledávací graf je uložen v~PBF ve zprávě {\tt Graph}, která obsahuje tyto
 položky:
 \begin{itemize}
 	\item {\tt vertices} obsahuje popis vrcholů grafu
@@ -291,10 +307,9 @@ položky:
 \begin{itemize}
 	\item {\tt idx} udává číslo vrcholu
 	\item {\tt osmid} udává OSM id vrcholu
-	\item {\tt lat} a {\tt lon} udávají zeměpisnou šířku a délku vrcholu v
-	UTM
+	\item {\tt lat} a {\tt lon} udávají zeměpisné souřadnce vrcholu v~UTM
 	\item {\tt type} udává typ vrcholu
-	\item {\tt height} udává nadmořskou výšku vrcholu
+	\item {\tt height} udává nadmořskou výšku vrcholu v~metrech
 	\item {\tt stop\_id} pokud je vrchol zastávka, pak udává GTFS id
 	zastávky (\TODO ověřit) 
 \end{itemize} 
@@ -315,8 +330,8 @@ položky:
 \begin{itemize}
 	\item {\tt idx} udává číslo zastávkového vrcholu
 	\item {\tt osmid} udává OSM id zastávkového vrcholu 
-	\item {\tt raptor\_id} udává pořadí zastávky v algoritmu RAPTOR
-	\item {\tt stop\_id} udává id zastávky v GTFS
+	\item {\tt raptor\_id} udává pořadí zastávky v~algoritmu RAPTOR
+	\item {\tt stop\_id} udává id zastávky v~GTFS
 \end{itemize} 
 
 \subsection{Struktury používané při hledání trasy}
@@ -324,23 +339,24 @@ Pro samotné hledání potřebujeme haldu, kterou budeme používat pro Dijkstr�
 algoritmus. Halda je implementována pomocí struktury {\tt mmqueue\_t}, která
 obsahuje následující položky:
 \begin{itemize}
-	\item {\tt pool} odkazuje na memory pool pro alokaci nových vrcholů
-	vkládaných do fronty 
+	\item {\tt pool} odkazuje na memory pool pro alokaci struktur pro
+		zpracovávané vrcholy 
 	\item {\tt graph} odkazuje na vyhledávací graf popsaný výše
-	\item {\tt vert} odkazuje na aktuální vrchol 
+	\item {\tt vert} odkazuje na strukturu pro aktuální vrchol 
 	\item {\tt vertlut} obsahuje pro každý vrchol grafu pole odkazů na
-	vrcholy v haldě, které patří k danému vrcholu
-	\item {\tt heap} obsahuje odkazy na jednotlivé vrcholy v haldě
-	\item {\tt n\_heap} udává počet vrcholů v haldě
+	jeho strutkury vzniklé při vyhledávání
+	\item {\tt heap} obsahuje odkazy na struktury pro vrcholy, které jsou
+		aktuálně v~haldě
+	\item {\tt n\_heap} udává počet prvků v~haldě
 \end{itemize}
-Každý vrchol v haldě je popsán pomocí struktury {\tt mmdijnode\_t}, která
+Každý vrchol v~haldě je popsán pomocí struktury {\tt mmdijnode\_t}, která
 obsahuje následující položky:
 \begin{itemize}
 	\item {\tt prev} odkazuje na předchozí vrchol na trase
-	\item {\tt osmvert} pokud je vrchol z OSM, odkazuje na vrchol ve
+	\item {\tt osmvert} pokud je vrchol z~OSM, odkazuje na vrchol ve
 	vyhledávacím grafu 
-	\item {\tt stop} pokud je vrchol zastávka, odkazuje na zastávku v
-	jízdním řádu pro celou platnost
+	\item {\tt stop} pokud je vrchol zastávka, odkazuje na zastávku
+v~jízdním řádu pro celou platnost
 	\item {\tt edge} popisuje hranu, která vede do zpracovávaného vrcholu 
 	\item {\tt reached} indikuje, zda již byl vrchol dosažen
 	\item {\tt completed} indikuje, zda již byl vrchol uzavřen
@@ -349,7 +365,7 @@ obsahuje následující položky:
 	\item {\tt arrival} udává čas příjezdu do vrcholu
 	\item {\tt penalty} udává penaltu trasy až do současného vrcholu včetně
 \end{itemize}
-Protože přicházející hrana může být jak hranou z OSM, tak hranou MHD, je
+Protože přicházející hrana může být jak hranou z~OSM, tak hranou MHD, je
 reprezentována pomocí struktury {\tt edge\_t}, která obsahuje následující
 položky:
 \begin{itemize}
@@ -361,39 +377,39 @@ položky:
 Hrany pomocí MHD jsou popsány strukturou {\tt ptedge\_t}, která obsahuje
 následující položky: 
 \begin{itemize}
-	\item {\tt departure} udává čas odjezdu z výchozí zastávky v sekundách
+	\item {\tt departure} udává čas odjezdu z~výchozí zastávky v~sekundách
 	od začátku dne jízdního řádu
-	\item {\tt route} odkazuje na linku v jízdním řádu
+	\item {\tt route} odkazuje na linku v~jízdním řádu
 \end{itemize}
 
-Pro reprezentaci nalezených spojení MHD z dané zastávky slouží struktura {\tt
+Pro reprezentaci nalezených spojení MHD z~dané zastávky slouží struktura {\tt
 stop\_conns}, která má následující položky:
 \begin{itemize}
-	\item {\tt n\_routes} udává počet linek jedoucích z dané zastávky
-	\item {\tt routes} popisuje linky jedoucí z dané zastávky
+	\item {\tt n\_routes} udává počet linek jedoucích z~dané zastávky
+	\item {\tt routes} popisuje linky jedoucí z~dané zastávky
 \end{itemize}
 Každá linka je popsána pomocí struktury {\tt stop\_route}, která obsahuje
 následující položky 
 \begin{itemize}
-	\item {\tt departure} udává čas odjezdu linky ze zastávky, v sekundách
+	\item {\tt departure} udává čas odjezdu linky ze zastávky, v~sekundách
 	od počátku dne jízdního řádu 
-	\item {\tt pbroute} odkazuje na linku v původním jízdním řádu
+	\item {\tt pbroute} odkazuje na linku v~původním jízdním řádu
 	\item {\tt n\_stops} udává počet zastávek na dané lince směrem na
 	konečnou
 	\item {\tt stops} popisuje jednotlivá zastavení na lince
 \end{itemize}
-Jednotlivá zastavení spoje v zastávkách po cestě jsou popsána pomocí struktury
+Jednotlivá zastavení spoje v~zastávkách po cestě jsou popsána pomocí struktury
 {\tt stop\_arr}, která bsahuje následující položky:
 \begin{itemize}
 	\item {\tt to} odkazuje na zastávku, kde spoj stojí
-	\item {\tt arrival} udává čas příjezdu \TODO v jakém formátu
+	\item {\tt arrival} udává čas příjezdu \TODO v~jakém formátu
 \end{itemize}
  
 \TODO jaké jsou další struktury pro hledání
 
 \subsection{Výsledky vyhledávání}
 \label{ch:formaty-dat:vysledky}
-Výsledky vyhledávání jsou z knihovny předávány jako zabalená zpráva PBF. Zpráva
+Výsledky vyhledávání jsou z~knihovny předávány jako zabalená zpráva PBF. Zpráva
 obsahuje pouze jednu opakovanou položku typu {\tt Route}, která obsahuje všechny
 nalezené trasy. Každá trasa pak má následující položky: 
 \begin{itemize}
@@ -402,51 +418,51 @@ nalezené trasy. Každá trasa pak má následující položky:
 	\item {\tt penalty} udává penaltu trasy
 	\item {\tt point} obsahuje jednotlivé body trasy
 \end{itemize}
-Jednotlivé body trasy jsou spolu s hranou, která do nich vede, popsány zprávou
-{\tt Point} s následujícími položkami: 
+Jednotlivé body trasy jsou spolu s~hranou, která do nich vede, popsány zprávou
+{\tt Point} s~následujícími položkami: 
 \begin{itemize}
-	\item {\tt lat} a {\tt lon} udávají zeměpisnou šířku a délku bodu v
-	systému WGS-84
+	\item {\tt lat} a {\tt lon} udávají zeměpisnou šířku a délku bodu
+v~systému WGS-84
 	\item {\tt height} udává nadmořskou výšku bodu
-	\item {\tt departure} pokud je hrana MHD, pak udává čas odjezdu z místa
+	\item {\tt departure} pokud je hrana MHD, pak udává čas odjezdu z~místa
 	nástupu
 	\item {\tt arrival} udává čas příchodu/příjezdu do bodu 
-	\item {\tt osmvert} pokud je bod z OSM, pak obsahuje informace o vrcholu
-	z OSM, je to zpráva typu {\tt graph.Vertex}, která je popsána výše
-	\item {\tt stop} pokud je bod zastávka, pak obsahuje informace o vrcholu z GTFS
-	\item {\tt edgetype} udává, zda jde o pěší hranu, nebo přesun MHD
-	\item {\tt walkedge} pokud je hrana chůze, pak obsahuje informace o
-	hraně z OSM, je to zpráva typu {\tt graph.Edge}, která je popsána výše
-	\item {\tt ptedge} pokud je hrana MHD, pak obsahuje informace o hraně z
-	GTFS.
+	\item {\tt osmvert} pokud je bod z~OSM, pak obsahuje informace o~vrcholu
+	z~OSM, je to zpráva typu {\tt graph.Vertex}, která je popsána výše
+	\item {\tt stop} pokud je bod zastávka, pak obsahuje informace o~vrcholu z~GTFS
+	\item {\tt edgetype} udává, zda jde o~pěší hranu, nebo přesun MHD
+	\item {\tt walkedge} pokud je hrana chůze, pak obsahuje informace
+o~hraně z~OSM, je to zpráva typu {\tt graph.Edge}, která je popsána výše
+	\item {\tt ptedge} pokud je hrana MHD, pak obsahuje informace o~hraně
+z~GTFS.
 \end{itemize}
-Informace o zastávce jsou uloženy ve zprávě {\tt Stop}, která má následující
+Informace o~zastávce jsou uloženy ve zprávě {\tt Stop}, která má následující
 položky:
 \begin{itemize}
 	\item {\tt name} udává název zastávky
-	\item {\tt id} udává kód zastávky tak, jak je v GTFS
+	\item {\tt id} udává kód zastávky tak, jak je v~GTFS
 \end{itemize}
-Informace o hraně využívající MHD jsou uloženy ve zprávě {\tt PTEdge}, která
+Informace o~hraně využívající MHD jsou uloženy ve zprávě {\tt PTEdge}, která
 obsahuje následující položky:
 \begin{itemize}
 	\item {\tt name} udává název linky
-	\item {\tt id} udává id linky tak, jak je v GTFS
+	\item {\tt id} udává id linky tak, jak je v~GTFS
 \end{itemize}
 Uvnitř vyhledávací knihovny je výsledek vyhledávání reprezentován typem {\tt
 search\_result\_t}, který je svou strukturou velmi podobný výše popsanému PBF.
 
-Vyhledané trasy je možné uložit do formátu GPX\cite{GPX}. V naší aplikaci používáme pouze trasy, každá
-nalezená vyhledaná trasa odpovídá jedné trase v GPX, tato trasa je rozdělena na
-pěší segmenty a segmenty MHD. Typ segmentu je uložen u každého segmentu v sekci
-{\tt <extensions>} v tagu {\tt <type>}. Každá trasa má ve své sekci {\tt
-<extensions>} uložený čas příjezdu, pěší vzdálenost a penaltu postupně v tazích
+Vyhledané trasy je možné uložit jako GPX\cite{GPX}. V~naší aplikaci používáme pouze trasy, každá
+nalezená vyhledaná trasa odpovídá jedné trase v~GPX, tato trasa je rozdělena na
+pěší segmenty a segmenty MHD. Typ segmentu je uložen u~každého segmentu v~sekci
+{\tt <extensions>} v~tagu {\tt <type>}. Každá trasa má ve své sekci {\tt
+<extensions>} uložený čas příjezdu, pěší vzdálenost a penaltu postupně v~tazích
 {\tt <arrival>}, {\tt <len>} a {\tt <penalty>}.
 
 \section{Formáty používané ve webové aplikaci}
 \subsection{Výsledky vyhledávání}
-Výsledky vyhledávání jsou předávány z backendu do frontendu webové aplikace
+Výsledky vyhledávání jsou předávány z~backendu do frontendu webové aplikace
 (viz \ref{ch:implementace:webapp}) pomocí formátu JSON. Ten je tvořen polem vyhledaných
-tras, kde každá trasa je slovník s následujícími klíči:
+tras, kde každá trasa je slovník s~následujícími klíči:
 \begin{itemize}
 	\item {\tt time} udávající čas příjezdu do cíle
 	\item {\tt dist} udávající celkovou pěší vzdálenost na nalezené trase
@@ -455,17 +471,17 @@ tras, kde každá trasa je slovník s následujícími klíči:
 \end{itemize}
 Grafická reprezentace nalezené trasy je reprezentována ve formátu GeoJSON a
 obsahuje lomené linie jednotlivých typů popisující průběh cesty a bodové prvky
-pro nástup a výstup z prostředku MHD.
+pro nástup a výstup z~prostředku MHD.
 
 Liniové prvky jsou reprezentovány typem LineString, více sousedících hran
-stejného typu je vždy spojeno v jeden úsek typu LineString. Hrany reprezentující různé
+stejného typu je vždy spojeno v~jeden úsek typu LineString. Hrany reprezentující různé
 spoje MHD se do jednoho úseku nespojují. Úseky mají následující atributy: 
 \begin{itemize}
 	\item {\tt type} udávající typ úseku (dle číslování objtype)
 	\item {\tt name} udávající jméno linky, atribut je přítomen pouze, pokud
-	jde o úsek typu MHD
+	jde o~úsek typu MHD
 \end{itemize}
-Bodové prvky jsou reprezentovány pomocí typu Point s následujícími atributy: 
+Bodové prvky jsou reprezentovány pomocí typu Point s~následujícími atributy: 
 \begin{itemize}
 	\item {\tt type} udávající typ bodu, zde vždy číslo reprezentující objtype PUBLIC\_TRANSPORT  	
 	\item {\tt name} udávající jméno zastávky
