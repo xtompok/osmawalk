@@ -14,7 +14,7 @@ LIBSEARCH_SRC=writegpx.c postprocess.c utils.c hashes.c mmqueue.c config.c penal
 LIBSEARCH_OBJ=$(LIBSEARCH_SRC:.c=.o)
 LIBSEARCH_LIB=libsearch.so
 
-SEARCH_SRC=writegpx.c include/graph.pb-c.c
+SEARCH_SRC=writegpx.c include/graph.pb-c.c $(LIBSEARCH_LIB)
 SEARCH_OBJ=$(SEARCH_SRC:.c=.o)
 SEARCH_LDFLAGS=-lsearch -L. -Wl,-rpath,'$$ORIGIN' -Wl,-rpath,'$$ORIGIN/$(RAPTORPATH)'
 SEARCH_EXE=search
