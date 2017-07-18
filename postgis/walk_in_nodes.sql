@@ -40,6 +40,16 @@ ALTER TABLE walk_tunnel_nodes ADD UNIQUE (id);
 ALTER TABLE walk_tunnel_nodes ADD CONSTRAINT walk_tunnel_nodesfk FOREIGN KEY (id) REFERENCES nodes(id) MATCH FULL;
 CREATE INDEX ON walk_tunnel_nodes(id);
  
+DROP TABLE IF EXISTS walk_bridge_nodes;
+CREATE TABLE walk_bridge_nodes AS
+	SELECT DISTINCT n.id FROM nodes AS n
+	INNER JOIN ways_refs AS wr ON n.id = wr.ref
+	INNER JOIN ways AS w ON w.id = wr.id
+	WHERE w.bridge = true;
+ALTER TABLE walk_bridge_nodes ADD UNIQUE (id);
+ALTER TABLE walk_bridge_nodes ADD CONSTRAINT walk_bridge_nodesfk FOREIGN KEY (id) REFERENCES nodes(id) MATCH FULL;
+CREATE INDEX ON walk_bridge_nodes(id);
+
 
 
 
@@ -51,3 +61,7 @@ WHERE nodes.id = walk_in_nodes.nid
 UPDATE nodes SET inTunnel = true
 FROM walk_tunnel_nodes
 WHERE nodes.id = walk_tunnel_nodes.id;
+
+UPDATE nodes SET onBridge = true
+FROM walk_bridge_nodes
+WHERE nodes.id = walk_bridge_nodes.id;

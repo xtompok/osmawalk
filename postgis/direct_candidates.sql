@@ -3,7 +3,7 @@ ANALYZE nodes;
 DROP TABLE IF EXISTS direct_walk_in_nodes;
 CREATE TABLE direct_walk_in_nodes AS (
 	SELECT id,loc,square00,square01,square10,square11 FROM nodes
-	WHERE walk = true AND inside = false AND inTunnel = false
+	WHERE walk = true AND inside = false AND inTunnel = false AND onBridge = false
 );
 
 DROP TABLE IF EXISTS direct_underground_nodes;
