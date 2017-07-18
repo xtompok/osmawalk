@@ -30,10 +30,61 @@ připravených pro vyhledávání.
 souvislou komponentu, kterou uloží pro hledání jako soubor {\tt
 data/postgis-graph.pbf}.
 \end{enumerate}
-\TODO priprava jizdnich radu
+
+Pro přípravu jízdních řádů stačí v adresáři {\tt ext-lib/mmpf/raptor} spustit
+skript {\tt update-gtfs.sh}. Tento skript stáhne aktuální jízdní řády, nahraje
+je do databáze a spustí skript {\tt prepare.py}, který připraví soubor {\tt
+tt.bin} s jízdními řády. 
+
+Při přípravě dat je potřeba vždy nejprve aktualizovat jízdní řády a pak teprve
+aktualizovat mapu. Při přípravě mapových dat dochází i k párování zastávek MHD a
+je proto potřeba již mít vygenerované soubory sloužící ke spojení obou datových
+souborů.
 
 \section{Konfigurační soubor}
-\TODO konfigurace
+Pro konfiguraci vyhledávání slouží soubor {\tt config/speeds.yaml}. Tento soubor
+má formát YAML a skládá se z několika úrovní asociativních polí. Kořenové pole
+obsahuje jako klíče jednotlivé kategorie, které jsou nastavovány a jako hodnoty
+buď přímo nastavení, nebo další mapování uchovávající nastavení. Kategorie
+nastavení jsou následující:
+\begin{itemize}
+	\item {\tt speeds} udává absolutní rychlosti pěších přesunů. Hodnotou je mapování
+	typ cesty $\rightarrow$ rychlost v km/h.
+	\item {\tt ratios} udává rychlosti pěších přesunů jako násobek rychlosti
+	pohybu po cestě typu {\tt WAY}. Hodnotou je stejné mapování jako u {\tt
+	speeds} V případě, že je definována rychlost obojím způsobem, má
+	přednost absolutní rychlost před poměrnou.
+	\item {\tt penalties} udává penaltu za jednotlivé druhy cest. Hodnotou
+	je mapování typ cesty $\rightarrow$ penalta. Penalta se násobí počtem
+	sekund strávených procházením hrany. 
+	\item {\tt heights} udává koeficient délkového prodloužení v závislosti
+	na změně výšky. Hodnotou je mapování s klíči {\tt upscale} a {\tt
+	downscale}  Pokud je cesta do kopce, je prodloužena o {\em rozdíl
+	výšky}$\times${\tt upscale} metrů, pokud je z kopce, o {\em rozdíl
+	výšky}$\times${\tt downscale}. Cesta může být i zkrácena, pokud by
+	celková délka byla záporná, je uvažována jako nulová.
+	\item {\tt pt-time-penalties} udává penalty za typ dopravního prostředku
+	násobené dobou strávenou v dopravním prostředku v sekundách. Hodnotou je
+	mapování typ prostředku$\rightarrow$penalta, kde typ prostředku je brán
+	z GTFS a psán malými písmeny, např. {\tt tram}, {\tt ferry} nebo {\tt
+	bus}.
+	\item {\tt pt-fixes-penalties} udává fixní penalty za typ dopravního
+	prostředku. Počítá se pro každou cestu daným typem prostředku jednou
+	nezávisle na délce cesty. Hodnotou je stejné mapování jako u {\tt
+	pt-time-penalties}.
+	\item {\tt line-penalties} udává penaltu za použití dané linky. Penalta
+	se počítá jednou za každé použití dané linky. Hodnotou je mapování jméno
+	linky$\rightarrow$penalta. 
+	\item {\tt max-vehicles} udává maximální počet spojů MHD použitých po
+	cestě. Hodnotou je číslo udávající tento počet.
+	\item {\tt geton-penalty} udává penaltu za nástup do spoje MHD. Je to
+	fixní penalta za každý nástup. Hodnotou je číslo udávají penaltu.
+	\item {\tt min-wait} udává minimální čas od příchodu /
+	příjezdu na zastávku do odjezdu spoje. Hodnotou je čas v sekundách.
+\end{itemize}
+U kategorií, které udávají penaltu, lze místo čísla napsat inf, což znamená
+nekonečnou penaltu, tedy pokud nějaké částečná trasa dostane takovouto penaltu,
+tak už se dále nepokračuje ve vyhledávání zbytku trasy.
 
 \section{Konzolová aplikace}
 Konzolová aplikace slouží převážně pro testování, zda vyhledávací knihovna
@@ -41,11 +92,10 @@ pracuje stabilně, ale dá se použít i pro jednoduché hledání. Aplikaci spu
 v~adresáři compiled příkzem {\tt ./search <flat> <flon> <tlat> <tlon> [time]},
 kde {\tt flat} a {\tt flon} určují zeměpisnou šířku a délku výchozího bodu, {\tt
 tlat} a {\tt tlon} souřadnice cílového bodu a {\tt time} unixový timestamp času,
-od kterého hledat(\TODO implementovat). Pokud není čas uveden, hledá se od
+od kterého hledat. Pokud není čas uveden, hledá se od
 okamžiku spuštění.  Aplikace najde trasy a na standradní výstup vypíše ke každé
-trase použité spoje MHD. Navíc v~aktuálním adresáři vytvoří soubory {\tt
-track<num>.gpx}, kde {\tt num} značí číslo trasy, které obsahují jednotlivé
-nalezené trasy.
+trase použité spoje MHD. Navíc v~aktuálním adresáři vytvoří soubor {\tt
+track.gpx}, který obsahuje jednotlivé nalezené trasy.
  
 \section{Webová aplikace}
 Webovou aplikaci je možné vyzkoušet na (\TODO odkaz) nebo si ji spustit lokálně
@@ -68,5 +118,5 @@ je zobrazena v~mapě. Zobrazení nebo skrytí jednotlivých tras se provede
 kliknutím na její souhrn v~levém sloupci. Jednotlivé části trasy jsou obarveny
 podle typů hran, po kterých vedou a dále jsou zvýrazněna místa přestupu na MHD.
 Detailní informace o~MHD lze zobrazit kliknutím na ikonu u~přestupní zastávky
-nebo na hranu spoje MHD. Jednotlivé trasy lze exportovat do GPX kliknutím na
-ikonu diskety v~souhrnu trasy (\TODO implementovat). 
+nebo na hranu spoje MHD. Trasy lze exportovat do GPX kliknutím na tlačítko
+\uv{Stáhnout jako GPX} v hlavičce stránky.
