@@ -1,3 +1,7 @@
+IGNORE:
+        1:
+            barrier: bollard	
+            foot: yes
 BARRIER: 
         0:
             barrier : "*"
