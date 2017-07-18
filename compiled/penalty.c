@@ -24,7 +24,7 @@ double calcChangePenalty(Graph__Graph * graph, struct config_t conf, struct pted
 }
 double calcPointPenalty(Graph__Graph * graph,struct config_t conf, Graph__Vertex * vert){
 	if (vert->type == OBJTYPE__BARRIER){
-		return DBL_MAX;	
+		return PENALTY_INFINITY;	
 	}
 	if (vert->type == OBJTYPE__TRAFFIC_LIGHTS){
 		return 40;	

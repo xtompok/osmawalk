@@ -40,7 +40,7 @@ struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mm
 		routes[residx].time = node->arrival;
 		routes[residx].penalty = node->penalty;
 		routes[residx].dist = 0;
-		printf("Route %d: time: %f, penalty: %f\n",residx,routes[residx].time,routes[residx].dist); 
+		printf("Route %d: time: %f, penalty: %f\n",residx,routes[residx].time,routes[residx].penalty); 
 		struct point_t * points;
 		GARY_INIT(points,0);
 		int memdepart;

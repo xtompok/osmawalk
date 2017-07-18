@@ -252,9 +252,9 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 						continue;
 					}
 					struct edge_t * e;
-					e = malloc(sizeof(struct edge_t));
+					e = mp_alloc(queue->pool,sizeof(struct edge_t));
 					e->edge_type = EDGE_TYPE_PT;
-					e->ptedge = malloc(sizeof(struct ptedge_t));
+					e->ptedge = mp_alloc(queue->pool,sizeof(struct ptedge_t));
 					e->ptedge->route = r->pbroute;
 					e->ptedge->departure = r->departure;
 					// TODO: Add stop properties
@@ -265,8 +265,6 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 					penalty += calcChangePenalty(graph,data.conf,e->ptedge,queue->vert,wait);	
 					if (penalty < PENALTY_INFINITY){ 
 						addNodeToQueue(queue,queue->vert,graph->vertices[nd->idx],r->stops[sidx].to,e,date+arrival,queue->vert->penalty + penalty);
-					} else {
-						free(e);
 					}
 				}
 					
@@ -305,9 +303,9 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 							continue;
 						}
 						struct edge_t * e;
-						e = malloc(sizeof(struct edge_t));
+						e = mp_alloc(queue->pool,sizeof(struct edge_t));
 						e->edge_type = EDGE_TYPE_PT;
-						e->ptedge = malloc(sizeof(struct ptedge_t));
+						e->ptedge = mp_alloc(queue->pool,sizeof(struct ptedge_t));
 						e->ptedge->route = r->pbroute;
 						e->ptedge->departure = r->departure;
 						// TODO: Add stop properties
@@ -316,8 +314,10 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 						int wait;
 						wait = r->departure - (queue->vert->arrival%DAY_SECS);
 						penalty += calcChangePenalty(graph,data.conf,e->ptedge,queue->vert,wait);	
+						if (penalty < PENALTY_INFINITY){
 						addNodeToQueue(queue,queue->vert,graph->vertices[nd->idx],r->stops[sidx].to,e,
 							date+DAY_SECS+arrival,queue->vert->penalty + penalty);
+						}
 					}
 						
 				}
@@ -348,7 +348,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 
 
 			struct edge_t * e;
-			e = malloc(sizeof(struct edge_t));
+			e = mp_alloc(queue->pool,sizeof(struct edge_t));
 			e->edge_type = EDGE_TYPE_WALK;
 			e->osmedge = way;
 
@@ -363,8 +363,9 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 			if (stop != NULL){
 				printf("stop id: %d\n",stop->id);			
 			}*/
-			addNodeToQueue(queue,queue->vert,graph->vertices[wayend],stop,e,queue->vert->arrival + time,queue->vert->penalty + penalty);
-
+			if (penalty < PENALTY_INFINITY){
+				addNodeToQueue(queue,queue->vert,graph->vertices[wayend],stop,e,queue->vert->arrival + time,queue->vert->penalty + penalty);
+			} 
 		}
 
 

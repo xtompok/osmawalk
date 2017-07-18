@@ -25,17 +25,6 @@ void prepareMMNode(struct mmdijnode_t * node){
 	node->reached = 1;
 	node->completed = 0;
 	node->majorized = 0;
-/*
-	struct mmdijnode_t * prev;
-	Graph__Vertex * osmvert;
-	struct stop * stop;
-	struct edge_t * edge;
-	bool reached;
-	bool completed;
-	bool majorized;
-	time_t arrival;
-	double penalty;
-	*/
 } 
 
 void addFirstNodeToQueue(struct mmqueue_t * q,Graph__Vertex * v, Stop * s, uint64_t time){
@@ -82,6 +71,7 @@ void addNodeToQueue(struct mmqueue_t * q,
 	// Check if it majorizes some nodes in queue and mark them as majorized
 	struct mmdijnode_t ** vertnodes;
 	vertnodes = q->vertlut[v->idx];
+	//printf("VN: %p %d\n",vertnodes,GARY_SIZE(vertnodes));
 	for (int j=0;j<GARY_SIZE(vertnodes);j++){
 		struct mmdijnode_t * anode;
 		anode = vertnodes[j];
@@ -89,7 +79,6 @@ void addNodeToQueue(struct mmqueue_t * q,
 			continue;
 		}
 		if ((arrival >= anode->arrival)&&(penalty >= anode->penalty)){
-			free(e);
 			return;
 		}
 		if ((arrival <= anode->arrival)&&(penalty <= anode->penalty)){
@@ -167,12 +156,12 @@ struct mmqueue_t * createMMQueue(Graph__Graph * graph){
 	q->graph = graph;
 	
 
-	GARY_INIT_SPACE(q->heap,graph->n_vertices/3);
+	GARY_INIT_SPACE(q->heap,graph->n_vertices/4);
 	GARY_PUSH(q->heap);	// First item is unused
 
 	q->vertlut = calloc(sizeof(struct mmdijnode_t **),graph->n_vertices);
 	for (int i=0;i<graph->n_vertices;i++){
-		GARY_INIT(q->vertlut[i],0);	
+		GARY_INIT_SPACE(q->vertlut[i],10);	
 	}
 
 	
@@ -182,20 +171,6 @@ struct mmqueue_t * createMMQueue(Graph__Graph * graph){
 } 
 void freeMMQueue(struct mmqueue_t * queue,int n_vertices){
 	GARY_FREE(queue->heap);
-	for (int i=0;i<n_vertices;i++){
-		for (int j=0;j<GARY_SIZE(queue->vertlut[i]);j++){
-			struct mmdijnode_t * node;
-			node = queue->vertlut[i][j];	
-			if (node->edge == NULL){
-				continue;	
-			}
-			if (node->edge->edge_type == EDGE_TYPE_PT){
-				free(node->edge->ptedge);	
-			}
-			free(node->edge);
-		}
-		GARY_FREE(queue->vertlut[i]);	
-	}
 	free(queue->vertlut);
 	//GARY_FREE(queue->dijArray);
 	mp_delete(queue->pool);
@@ -265,6 +240,8 @@ char equivWays(struct mmdijnode_t * way1, struct mmdijnode_t * way2){
 		frompt2++;
 	}
 
+	printf("From1: %d, to1: %d, from2: %d, to2: %d\n",frompt1,topt1,frompt2, topt2);
+
 	n1 = way1;
 	n2 = way2;
 	for (int i=0;i<(frompt1 + (topt1-frompt1)/2);i++){
@@ -276,6 +253,9 @@ char equivWays(struct mmdijnode_t * way1, struct mmdijnode_t * way2){
 	double dlon = n1->osmvert->lon - n2->osmvert->lon;
 	double dlat = n1->osmvert->lat - n2->osmvert->lat;
 	double dist = sqrt(dlon*dlon + dlat*dlat);
+	free(buf1);
+	free(buf2);
+
 	printf("Distance: %f\n",dist);
 	if (dist < 100){
 		printf("Equivalent\n");
