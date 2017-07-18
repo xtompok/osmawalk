@@ -62,9 +62,13 @@ double calcTime(Graph__Graph * graph, struct config_t conf,Graph__Edge * edge){
 	fromHeight = graph->vertices[edge->vfrom]->height;
 	toHeight = graph->vertices[edge->vto]->height;
 	int dh = toHeight-fromHeight;
-	//return (edge->dist+abs(dh)*(dh>0?conf.upscale:conf.downscale))/speed;
-	if (edge->dist > 100){
+	double time = (edge->dist+abs(dh)*(dh>0?conf.upscale:conf.downscale))/speed;
+	if (time > 0){
+		return time;	
+	}
+	return 0;
+	/*if (edge->dist > 100){
 		printf("Dist too big");
 	}
-	return (edge->dist)/speed;
+	return (edge->dist)/speed;*/
 }
