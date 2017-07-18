@@ -2,83 +2,10 @@
 \label{ch:formaty-dat}
 V~rámci přípravy dat a vyhledávání tras jednak používáme interní struktury
 jednotlivých programovacích jazyků, jednak některé standardní formáty nezávislé
-na programovacím jazyku. Tyto formáty představíme v~následující sekci, v~dalších
-sekcích se již jen budeme věnovat obsahu jednotlivých struktur.
+na programovacím jazyku. Standardní formáty jsme představili v kapitole
+\ref{ch:zdrojova-data}, v~této kapitole se již jen budeme věnovat obsahu
+jednotlivých struktur.
 
-\section{Používané formáty dat}
-
-\subsection{Protocol Buffers}
-Protocol Buffers (PBF) \cite{PBF} je způsob uložení strukturovaných dat. Byl navržen
-Googlem a je používán v~případech, kdy potřebujeme přenést po síti zprávy
-s~danou strukturou. Formát podoporuje různé datové typy (integer různých přesností
-a znaménkovosti, čísla s~plovoucí řádovou čárkou, řetězce znaků, \dots) a
-strukturování zpráv. Komunikace probíhá ve fázích naplnění zprávy, její
-zabalení, odeslání, přijmutí a rozbalení. Při zabalení jsou data zkompirmována
-jednoduchým algoritmem, aby například malá čísla nezabírala zbytečně mnoho
-místa. Existují PBF verze 2 a verze 3. V~naší práci používáme verzi 2, protože
-v~době psaní bakalářské práce, kterou v~naší práci rozšiřujeme, nebyly PBF verze 3
-ještě k~dispozici a verze 3 nepřináší novinky, které by motivovaly k~přechodu.
-
-Základní jednotkou PBF je zpráva, která obsahuje několik položek. Položkou může
-být základní datový typ nebo jiná zpráva, položky mohou být povinné, volitelné,
-nebo opakované. Každá položka má jméno, typ a číslo, které ho identifikuje
-v~binární podobě zprávy. Zprávy se popisují pomocí vlastního jazyka, ze kterého se
-pak pomocí kompilátoru vytvoří vazby do jednotlivých programovacích jazyků. 
-Podrobnou dokumentaci včetně tutoriálů lze najít na stránkách projektu. \cite{PBF}
-
-\subsection{JavaScript Object Notation}
-JavaScript Object Notation\cite{JSON} (JSON) je formát navržený pro předávání dat ve
-webových aplikacích. Díky své jednoduchosti a čitelné reprezentaci je hojně
-využíván nejen ve webových projektech, ale často i jako konfigurační jazyk.
-Vychází z~Javascriptu, datové typy v~něm jsou kromě primitivních typů slovník --
-neuspořádaný seznam dvojic klíč-hodnota a pole -- uspořádaná posloupnost
-položek. Formát zpráv není dopředu dán a podpora v~programovacích jazycích je
-přímo integrovaná nebo dodaná pomocí knihovny. 
-
-\subsection{GeoJSON}
-GeoJSON\cite{GeoJSON} je, jak již název napovídá, nadstavba formátu JSON pro přenos
-geografických informací. Z~hlediska syntaxe se jedná o~korektní JSON, který má
-ale předepsanou strukturu a názvy položek. Umožňuje ukládat body, linie, plochy,
-multipolygony a další objekty spolu s~jejich atributy a je nativně podporován
-většinou JavaScriptových knihoven pro zobrazování mapových dat.
-
-\subsection{XML}
-XML \cite{XML} je značkovací formát používaný pro přenos strukturovaných dat
-mezi aplikacemi. Jedná se o~textový formát, ve kterém jsou uložena strukturovaná
-data ve formě entit uspořádaných do stromové struktury. Každá entita má jméno a
-může mít parametry. 
-
-\subsection{GPX}
-Formát GPX\cite{GPX} je určen pro výměnu polohových dat mezi různými zařízeními s~GPS,
-popřípadě mobilními a jinými aplikacemi. Data jsou uložena ve formátu XML, jsou
-dělena na cesty, trasy a významné body. Každá cesta, trasa i významný bod může
-mít uložené některé informace v~předdefinovaných atributech, případně libovolné
-další informace uvnitř elementu {\tt <extensions>}. 
-
-\subsection{Unixový čas}
-Unixový čas je standardní způsob reprezentace data a času na Unixových
-systémech. Je obvykle ukládán v~sekundách od půlnoci 1.\,1.\,1970 UTC.
-
-\section{Systémy zeměpisných souřadnic}
-Zeměpisné souřadnice jsou v~rámci práce používány ve dvou souřadnicových
-systémech -- UTM a WGS84. Při klasifikaci dat z~OSM jsou jejich souřadnice
-převedeny do UTM a tak jsou dále uchovávány. Při přípravě výsledků vyhledávání
-jsou body na trasách převedeny zpět do WGS84 a takto jsou vráceny. Veškerá data
-předávaná knihovně či vrácená knihovnou jsou ve WGS84.
-\subsection{WGS84}
-World Geodetic System 1984 (WGS84) \cite{WGS84} je geodetický standard
-definující souřadnicový systém a referenční elipsoid pro popis polohy objektů na
-povrchu Země. Využívá polárních souřadnic, zeměpisná šířka se určuje od rovníku,
-zeměpisná délka od \uv{IERS Reference Meridian}. Výhodou je pokrytí celého
-povrchu Země jedním systémem, vzhledem k~použití elipsoidu a polárních souřadnic
-je obtížné počítat vzdálenosti mezi dvěma body.
-\subsection{UTM}
-Univerzální transverzální Mercatorův systém souřadnic (UTM) \cite{UTM} je způsob
-určování polohy na povrchu země založený na mřížkách. Povrch země je rozdělen na
-60 zón a každá zóna je pak robrazena pomocí trasverzálního Mercatorova
-zobrazení. Souřadnice v~rámci jedné zóny jsou pak udávány v~metrech, lze proto
-snadno počítat vzdálenosti. Pozice bodu na Zemi se udává pomocí čísla zóny a
-pozice uvnitř ní. 
 
 \section{Terminologie}
 V~následujícím popisu struktur používáme u~jednotlivých položek různá slovesa

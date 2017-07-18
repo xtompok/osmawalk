@@ -8,6 +8,74 @@ tedy všechny zastávky, kam se umíme bez přestupu dostat z~dané zastávky. V
 tyto zastávky přidáme do fronty Dijkstrova algoritmu s~časem dosažení rovným
 času příjezdu do dané stanice. 
 
+\section{Penalty}
+Samotná nejrychlejší cesta v síti pěších cest a MHD není vždy ta, kterou chceme
+při reálném cestování použít. Navíc vyhledávačů, které takovou cestu i pro
+pražskou síť hledají, existuje několik funkčních a široce používaných. Naším
+cílem bylo, aby si uživatel mohl parametry nalezené cesty určovat dle svých
+preferencí. Proto jsme se snažili navrhnout systém penalt tak, aby se v něm dalo
+vyjádřit co nejvíce běžných situací, kterým bychom se chtěli ve vyhledaném
+spojení vyhnout. 
+
+Systém penalt funguje tak, že za každou událost na trase si uživatel může zvolit
+nějakou penaltu, která říká, jak moc nerad by danou událost měl na vyhledané
+trase. Současně existuje daná mez přípustnosti trasy. Pokud penalta nějaké
+částečně vyhledané trasy překročí tuto mez, není již dále pokračováno ve
+vyhledávání dál z této trasy. Tímto zajišťujeme možnost mít jak \uv{měkká}, tak
+\uv{tvrdá} kritéria pro hledanou trasu. Také je vhodné mít penalty konstantní a
+závislé na době trvání. Například za deště je pro nás čekání na zastávce bez
+přístřešku tím horší, čím déle čekáme, zatímco pokud nám vadí cesta eskalátorem
+na metro, tak když už ji jednou podnikneme, na délce jízdy metrem už nám
+nezáleží.
+
+Důležité je také rozmyslet, jaké všechny události chceme mít možnost
+penalizovat:
+\begin{itemize}
+	\item {\em typ cesty} -- Toto je přímočará myšlenka implementovaná již v
+	původním vyhledávání pěších tras. Můžeme jednak penalizovat chůzi po
+	silnici, čímž dáme preferenci vyhledávání po chodnících, jednak můžeme
+	penalizovat chůzi po nezpevněných pěšinách, například v zimním období či
+	po dešti.
+	\item {\em typ průchozího vrcholu} -- Touto událostí je například čekání
+	na semaforech, které jsou reprezentovány bodovým znakem na přechodu přes
+	silnici. Tvrdým kritériem je například zavřená brána, která spojuje dvě
+	volně přístupné oblasti.
+\end{itemize}
+Další události již souvisí s cestováním MHD a přestupy:
+\begin{itemize}
+	\item {\em počet přestupů} -- V našem případě používáme počet použitých
+	vozidel, protože můžeme hledat i pouze pěší trasu. Obvyklé kritérium
+	používané i běžnými vyhledávači.
+	\item {\em čas na přestup} -- V základní formě jednoduché
+	tvrdé kritérium, které udává minimální čas strávený na zastávce mezi
+	příchodem / příjezdem a odjezdem. Toto kritérium lze výrazněji rozšířit
+	různými směry. Jednak je možné uvažovat, jak jsme se na zastávku dostali
+	a čím z ní odjíždíme (metro je přesné a spolehlivé, pokud jsme přišli
+	pěšky, můžeme popoběhnout, pokud jedeme autobusem, radši si necháme
+	větší rezervu), jednak je možné místo fixního času zavést funkci
+	závislou na době čekání a tím například preferovat krátká, ale ne moc
+	krátká čekání. 
+	\item {\em nástup} -- Nejen čas na přestup je možné penalizovat, i
+	samotný nástup do vozidla může být penalizován. Základní možností je
+	fixní penalta za nástup, která je měkkou variantou omezení počtu
+	přestupů. Dále je možné penalizovat určité dopravní prostředky či přestupní
+	místa, například zastávky bez přístřešku za deště. 
+	\item {\em linka} -- Kromě penalizací dopravních prostředků je také
+	vhodné mít možnost penalizovat i linky. Pokud víme, že některá
+	autobusová linka je vlivem dlouhé trasy přes město nespolehlivá, můžeme
+	ji přiřadit velkou penaltu nebo ji rovnou vyřadit z vyhledávání. 
+\end{itemize}
+
+Další možností rozšíření systému penalt je zapojení denní doby do výpočtu
+penalty. Ve večerních hodinách můžeme například penalizovat podchody a jiná
+potenciálně nebezpečná místa.
+
+Všechny výše uvedené možnosti jsme při návrhu systému penalt zohlednili.
+Základní penalty je možné určit pomocí konfiguračního souboru, pokročilé je
+potřeba přidat do kódu sloužícího pro výpočet penalt. Více viz kapitola
+\ref{ch:implementace}.
+
+\section{Průběh hledání}
 Při běhu algoritmu počítáme pro každou cestu její penaltu -- čím větší má
 cesta penaltu, tím horší pro nás je. Samotný Dijkstrův algoritmus bere vrcholy
 podle času dosažení. Po nalezení nejrychlejší cesty se nezastaví, ale počítá
