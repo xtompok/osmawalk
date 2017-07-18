@@ -55,6 +55,9 @@ int main (int argc, char ** argv){
 	double flat;
 	double tlon;
 	double tlat;
+	uint64_t atime;
+
+	atime = 0;
 
 	if (argc==8){
 		data = prepareData(argv[1],argv[2],argv[3]);
@@ -68,6 +71,13 @@ int main (int argc, char ** argv){
 		flon = atof(argv[2]);
 		tlat = atof(argv[3]);
 		tlon = atof(argv[4]);
+	}else if (argc==6){
+		data = prepareData(configFileName,dataFileName,timetableFileName); 
+		flat = atof(argv[1]);
+		flon = atof(argv[2]);
+		tlat = atof(argv[3]);
+		tlon = atof(argv[4]);
+		atime = atoll(argv[5]); 
 	}else{
 		data = prepareData(configFileName,dataFileName,timetableFileName); 
 		for (double flon=14; flon < 15; flon += 0.5){
@@ -76,7 +86,7 @@ int main (int argc, char ** argv){
 		for (double tlat=49; tlat < 51; tlat += 0.5){
 		struct pbf_data_t result;
 
-		result = findPath(data,flat,flon,tlat,tlon);
+		result = findPath(data,flat,flon,tlat,tlon,0);
 
 		freePackedPBF(result);
 		}}}}
@@ -88,7 +98,7 @@ int main (int argc, char ** argv){
 	printMapBBox(*data);
 
 	struct pbf_data_t result;
-	result = findPath(data,flat,flon,tlat,tlon);
+	result = findPath(data,flat,flon,tlat,tlon,atime);
 
 	freePackedPBF(result);
 	freeData(data);

@@ -139,7 +139,7 @@ def do_search():
 
 	print "From lon: {}, from lat: {}, to lon: {}, to lat: {}".format(flon,flat,tlon,tlat)
 	print "./search {} {} {} {}".format(flat,flon,tlat,tlon) 
-	path = findPath(data,flat,flon,tlat,tlon)
+	path = findPath(data,flat,flon,tlat,tlon,0)
 	print "Result size {}B".format(path.len)
 	pbf = "".join(map(chr,path.data[:path.len]))
 	freePackedPBF(path)
@@ -169,7 +169,7 @@ def make_gpx():
 		print "Error: {}".format(error)
 
 	print "From lon: {}, from lat: {}, to lon: {}, to lat: {}".format(flon,flat,tlon,tlat)
-	path = findPath(data,flat,flon,tlat,tlon)
+	path = findPath(data,flat,flon,tlat,tlon,0)
 
 
 	pbf = "".join(map(chr,path.data[:path.len]))

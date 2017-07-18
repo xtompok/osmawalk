@@ -35,7 +35,7 @@ prepareData.restype = c_void_p
 
 findPath = libsearch.findPath
 findPath.restype = PBFResult
-findPath.argtypes = (c_void_p,c_double,c_double,c_double,c_double) 
+findPath.argtypes = (c_void_p,c_double,c_double,c_double,c_double,c_uint64) 
 
 
 freePackedPBF = libsearch.freePackedPBF

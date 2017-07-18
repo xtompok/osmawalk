@@ -77,10 +77,11 @@ void freeData(struct search_data_t * data);
  * @param fromLon Starting point longitude
  * @param toLat End point latitude
  * @param toLon End point longitude
+ * @param atime UNIX timestamp to search from
  * @result Structure for handli search result
  */
 struct pbf_data_t findPath(struct search_data_t * data,
-		double fromLat, double fromLon, double toLat, double toLon);
+		double fromLat, double fromLon, double toLat, double toLon, uint64_t atime);
 
 struct search_result_t findTransfer(struct search_data_t * data,
 		char * from, char * to);

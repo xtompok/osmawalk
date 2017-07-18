@@ -499,7 +499,7 @@ struct search_route_t findTransfer(struct search_data_t * data, char * from, cha
 
 }*/
 
-struct pbf_data_t findPath(struct search_data_t * data,double fromLat, double fromLon, double toLat, double toLon){
+struct pbf_data_t findPath(struct search_data_t * data,double fromLat, double fromLon, double toLat, double toLon,uint64_t atime){
 	wgs2utm(*data,&fromLon,&fromLat);
 	int fromIdx;
 	fromIdx = findNearestVertex(data->graph,fromLon,fromLat);
@@ -522,12 +522,10 @@ struct pbf_data_t findPath(struct search_data_t * data,double fromLat, double fr
 	//findWay(*data, dijArray,fromIdx, toIdx);
 
 	struct mmqueue_t * queue;
-	queue = findMMWay(*data,fromIdx,toIdx,time(NULL)+tz_offset_second(time(NULL)));
-	printf("Equivalences: \n");
-	for (int i=0;i< GARY_SIZE(queue->vertlut[toIdx]);i++){
-		equivWays(queue->vertlut[toIdx][0],queue->vertlut[toIdx][i]);
-			
+	if (atime == 0){
+		atime = time(NULL)+tz_offset_second(time(NULL));
 	}
+	queue = findMMWay(*data,fromIdx,toIdx,atime);
 	struct search_result_t result;
 	result = processFoundMMRoutes(*data,queue,fromIdx,toIdx);
 	writeGPXForResult(&result);
