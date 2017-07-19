@@ -21,7 +21,7 @@ ratios:
         DIRECT: 0.8
         GENERATED: 1
 penalties:
-        HIGHWAY: 2
+        HIGHWAY: 1
         DIRECT: 1
 heights:
         upscale: 0
@@ -45,7 +45,7 @@ pt-fixed-penalties:
         gondola: 0
         funicular: 0
 line-penalties: 
-        201: inf
-max-vehicles: 0
-geton-penalty: 100
+        201: 0
+max-vehicles: 10
+geton-penalty: 0
 min-wait: 30

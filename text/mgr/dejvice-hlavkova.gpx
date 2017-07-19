@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<gpx version="1.1"
+    creator="Osmawalk - https://github.com/xtompok/osmawalk"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.topografix.com/GPX/1/1"
+    xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+<trk>
+<name>0</name>
+<extensions>
+<arrival> 7:00:00</arrival>
+<len>458.314516</len>
+<penalty>1712.795169</penalty>
+</extensions>
+<trkseg>
+<extensions>
+<type>1</type>
+</extensions>
+    <trkpt lat="50.102294" lon="14.393325">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.102359" lon="14.393508">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.102428" lon="14.393733">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.102582" lon="14.394053">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.102594" lon="14.394114">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.102604" lon="14.394162">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.102625" lon="14.394378">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.102629" lon="14.394484">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.102722" lon="14.394869">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.102925" lon="14.395054">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.103111" lon="14.395009">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.103380" lon="14.394974">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.103484" lon="14.394913">
+        <ele>0.000000</ele>
+    </trkpt>
+</trkseg>
+<trkseg>
+<extensions>
+<type>2</type>
+</extensions>
+    <trkpt lat="50.103484" lon="14.394913">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.097296" lon="14.404872">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.088200" lon="14.415322">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.076145" lon="14.413999">
+        <ele>0.000000</ele>
+    </trkpt>
+</trkseg>
+<trkseg>
+<extensions>
+<type>1</type>
+</extensions>
+    <trkpt lat="50.076145" lon="14.413999">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.075922" lon="14.414202">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.075840" lon="14.414182">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.075773" lon="14.414563">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.075759" lon="14.414709">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.075740" lon="14.414798">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.075724" lon="14.414873">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.075754" lon="14.415290">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.075764" lon="14.415436">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.075770" lon="14.415512">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.075693" lon="14.415548">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.075622" lon="14.415580">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.075584" lon="14.415597">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.075324" lon="14.415712">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.075065" lon="14.415827">
+        <ele>0.000000</ele>
+    </trkpt>
+    <trkpt lat="50.075102" lon="14.416242">
+        <ele>0.000000</ele>
+    </trkpt>
+</trkseg>
+</trk>
+</gpx>

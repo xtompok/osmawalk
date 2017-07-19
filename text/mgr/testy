@@ -1,0 +1,128 @@
+standard:
+From: Kuchyňka at 13:25:00
+To: Nádraží Holešovice at 13:28:00 by 201
+From: Nádraží Holešovice at 13:32:55
+To: Vyšehrad at 13:42:45 by C
+
+bez201: (201: inf)
+From: Pelc Tyrolka at 13:21:00
+To: Povltavská at 13:23:00 by 112
+From: Trojská at 13:33:00
+To: Palackého náměstí (nábřeží) at 13:53:00 by 17
+From: Palackého náměstí (nábřeží) at 13:56:00
+To: Albertov at 13:59:00 by 14
+
+bus-penalta: (fixed 100, time 10)
+------------------------
+Route 0:
+------------------------
+From: Kuchyňka at 13:25:00
+To: Jankovcova at 13:26:00 by 201
+From: Nádraží Holešovice at 13:32:55
+To: Vyšehrad at 13:42:45 by C
+------------------------
+Route 1:
+------------------------
+From: Trojská at 13:33:00
+To: Palackého náměstí (nábřeží) at 13:53:00 by 17
+From: Palackého náměstí (nábřeží) at 13:56:00
+To: Albertov at 13:59:00 by 14
+------------------------
+Route 2:
+------------------------
+From: Trojská at 13:33:00
+To: Palackého náměstí (nábřeží) at 13:53:00 by 17
+From: Palackého náměstí (nábřeží) at 13:56:00
+To: Albertov at 13:59:00 by 14
+------------------------
+Route 3:
+------------------------
+From: Trojská at 13:33:00
+To: Palackého náměstí (nábřeží) at 13:53:00 by 17
+From: Palackého náměstí (nábřeží) at 13:56:00
+To: Albertov at 13:59:00 by 14
+
+jeden-spoj: 
+------------------------
+Route 0:
+------------------------
+From: Nádraží Holešovice at 13:35:00
+To: Výtoň at 13:54:00 by 17
+
+kolo:
+speeds:
+        WAY: 20
+        PARK: 10
+        GREEN: 10
+        FOREST: 10
+        PAVED: 20
+        UNPAVED: 15
+        STEPS: 2
+        HIGHWAY: 25
+        DIRECT: 20
+        GENERATED: 20
+heights:
+        upscale: 10
+        downscale: -10
+geton-penalty: 100
+
+pesi-penalty:
+penalties:
+        WAY: 100
+        PARK: 100
+        GREEN: 100
+        FOREST: 100
+        PAVED: 100
+        UNPAVED: 100
+        STEPS: 100
+        HIGHWAY: 100
+        DIRECT: 100
+        GENERATED: 100
+
+------------------------
+Route 0:
+------------------------
+From: Kuchyňka at 13:25:00
+To: Nádraží Holešovice at 13:28:00 by 201
+From: Nádraží Holešovice at 13:32:55
+To: Vyšehrad at 13:42:45 by C
+------------------------
+Route 1:
+------------------------
+From: Trojská at 13:33:00
+To: Palackého náměstí (nábřeží) at 13:53:00 by 17
+From: Palackého náměstí (nábřeží) at 13:56:00
+To: Albertov at 13:59:00 by 14
+------------------------
+Route 2:
+------------------------
+From: Trojská at 13:33:00
+To: Palackého náměstí (nábřeží) at 13:53:00 by 17
+From: Palackého náměstí (nábřeží) at 13:56:00
+To: Albertov at 13:59:00 by 14
+------------------------
+Route 3:
+------------------------
+From: Trojská at 13:33:00
+To: Palackého náměstí (nábřeží) at 13:53:00 by 17
+From: Palackého náměstí (nábřeží) at 13:56:00
+To: Albertov at 13:59:00 by 14
+------------------------
+Route 4:
+------------------------
+From: Trojská at 13:33:00
+To: Palackého náměstí (nábřeží) at 13:53:00 by 17
+From: Palackého náměstí (nábřeží) at 13:56:00
+To: Albertov at 13:59:00 by 14
+------------------------
+Route 5:
+------------------------
+From: Trojská at 13:33:00
+To: Výtoň at 13:54:00 by 17
+------------------------
+Route 6:
+------------------------
+From: Trojská at 13:33:00
+To: Výtoň at 13:54:00 by 17
+Len: 54773
+
