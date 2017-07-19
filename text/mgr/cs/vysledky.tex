@@ -1,5 +1,41 @@
 \chapter{Výsledky}
-- vysledky
-  - porovnani s~existujicimi vyhledavaci
-  - ukazky vyhod vlastnich penalt
-  - co s~rychlosti
+Pro zhodnocení výsledků našeho vyhledávače jsme provedli dva druhy testů. V
+rámci prvního jsme porovnávali výsledky našeho vyhledávače s ostatními veřejně
+dostupnými vyhledávači spojení. V druhém testu jsme na pevně dané trase a času
+zkoumali, jaký vliv na nalezené trasy má různé nastavení penalt a rychlostí
+chůze. Aplikaci jsme také profilovali, abychom zjistili, v jakých částech se
+tráví nejvíce času a měly by se optimalizovat jako první.
+
+\section{Porovnání s jinými vyhledávači}
+Výsledky našeho vyhledávače jsme porovnávali s veřejně dostupnými vyhledávači
+spojení po Praze: IDOS\footnote{\url{http://idos.cz}},
+Mapy.cz\footnote{\url{http://mapy.cz}} a Google
+Maps\footnote{\url{http://maps.google.com}}. 
+
+IDOS je nejstarší a nejznámější vyhledávač spojení. Jako jediný z vyhledávačů
+nepodporuje hledání pěších tras, vyhledává pouze v jízdních řádech, přestupy
+mezi zastávkami řeší pomocí tabulky, která obsahuje dvojice zastávek a čas
+přesunu mezi nimi. Jako vstup je možné zadat adresu, ale vyhledávač nalezne
+pouze nejbližší zastávky podle vzdušné vzdálenosti a hledá z nich / do nich. 
+Na druhou stranu umožňuje široké možnosti nastavení vyhledávání spojů -- volbu
+minimálních časů na přestup, typů dopravních prostředků, počtu přestupů, \dots
+
+Mapy.cz a Google Maps jsou původně mapové služby, které do svých vyhledávačů
+přidaly možnost vyhledávání kromě pěších cest i spojení MHD. Protože se jedná
+primárně o mapové služby, vyhledávače neumožňují žádné (Mapy.cz) nebo jen velmi
+omezené (Google Maps) přizpůsobení. 
+
+Při porovnávání vyhledaných spojení jsme všude nechali výchozí nastavení a náš
+vyhledávač jsme nastavili tak, jak si myslíme, že jsou nastaveny ostatní
+vyhledávače, aby byly výsledky porovnatelné. Konkrétní nastavení je výchozí
+nastavení {\tt config/speeds.yaml} v příloze. Přestupy nebyly nijak
+penalizovány, na zastávce bylo nutné mít aspoň 30\,s čas mezi příchodem /
+příjezdem a odjezdem.
+
+Testovali jsme následující trasy, které známe i z reálného provozu. Jednotlivé
+trasy zkoumaly různé aspekty vyhledávačů:
+\begin{itemize}
+
+\end{itemize}
+\section{Porovnání různých nastavení}
+\section{Profilování}
