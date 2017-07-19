@@ -109,9 +109,8 @@ stops-direct.csv}, který obsahuje následující položky:
 \label{ch:formaty-dat:vyhledavani}
 \subsection{Formát jízdních řádů}
 Jízdní řády jsou po zpracování uloženy ve zprávě {\tt Timetable}. Způsob
-provázání dat v~jednotlivých položkách je popsán v~kapitole Implementace (\TODO
-ref). Zpráva má následující položky:
-\TODO zjistit, zda v~popisu implementace je způsob ukládání dat
+provázání dat v~jednotlivých položkách je popsán v~kapitole
+\ref{ch:reserse:raptor-data}. Zpráva má následující položky:
 \begin{itemize}
 	\item {\tt routes} obsahuje popis linek
 	\item {\tt stop\_times} obsahuje časy zastavení spojů 
@@ -238,7 +237,7 @@ položky:
 	\item {\tt type} udává typ vrcholu
 	\item {\tt height} udává nadmořskou výšku vrcholu v~metrech
 	\item {\tt stop\_id} pokud je vrchol zastávka, pak udává GTFS id
-	zastávky (\TODO ověřit) 
+	zastávky 
 \end{itemize} 
 Každá hrana je popsána pomocí zprávy {\tt Edge}, která obsahuje následující
 položky: 
@@ -285,10 +284,13 @@ obsahuje následující položky:
 	\item {\tt stop} pokud je vrchol zastávka, odkazuje na zastávku
 v~jízdním řádu pro celou platnost
 	\item {\tt edge} popisuje hranu, která vede do zpracovávaného vrcholu 
+	\item {\tt state} popisuje stavové informace o částečně nalezené trase,
+	v současné době obsahuje pouze položku {\tt vehicles} udávající počet
+	použitých spojů dosud po trase
+	\item {\tt heapidx} pokud je položka v haldě, udává index položky v poli
+	reprezentujícím haldu
 	\item {\tt reached} indikuje, zda již byl vrchol dosažen
 	\item {\tt completed} indikuje, zda již byl vrchol uzavřen
-	\item {\tt majorized} indikuje, zda při přidávání jiných vrcholů byl
-	tento vrchol majorizován
 	\item {\tt arrival} udává čas příjezdu do vrcholu
 	\item {\tt penalty} udává penaltu trasy až do současného vrcholu včetně
 \end{itemize}
@@ -326,14 +328,13 @@ následující položky
 	\item {\tt stops} popisuje jednotlivá zastavení na lince
 \end{itemize}
 Jednotlivá zastavení spoje v~zastávkách po cestě jsou popsána pomocí struktury
-{\tt stop\_arr}, která bsahuje následující položky:
+{\tt stop\_arr}, která obsahuje následující položky:
 \begin{itemize}
 	\item {\tt to} odkazuje na zastávku, kde spoj stojí
-	\item {\tt arrival} udává čas příjezdu \TODO v~jakém formátu
+	\item {\tt arrival} udává čas příjezdu v sekundách od půlnoci dne, pro
+	který byl vygenerován jízdní řád
 \end{itemize}
  
-\TODO jaké jsou další struktury pro hledání
-
 \subsection{Výsledky vyhledávání}
 \label{ch:formaty-dat:vysledky}
 Výsledky vyhledávání jsou z~knihovny předávány jako zabalená zpráva PBF. Zpráva
@@ -524,3 +525,4 @@ Položka {\tt <features>} se nahradí za následující:
 	}
 }
 \end{code}
+\TODO obrázek

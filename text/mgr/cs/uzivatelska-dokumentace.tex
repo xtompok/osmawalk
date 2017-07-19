@@ -7,7 +7,7 @@ pro přípravu dat. Pro mapová data je potřeba vytvořit databázi {\tt
 osmawalk-prepare},
 pro jízdní řády je potřeba vytvořit databázi {\tt gtfs\_praha}. Pak je již možné
 přistoupit k~samotné přípravě dat. Pokud je vše správně nastavené, stačí spustit
-skript {\tt prepare.sh} (\TODO implementovat) v~kořenovém adresáři projektu a po několika hodinách
+skript {\tt prepare.sh} v~kořenovém adresáři projektu a po několika hodinách
 budou data připravena. Pokud skript selže, dále popíšeme činnosti, které skript
 provádí, aby bylo možné jednotlivé fáze spouštět ručně a hledat, kde nastala chyba.
 
@@ -98,7 +98,7 @@ trase použité spoje MHD. Navíc v~aktuálním adresáři vytvoří soubor {\tt
 track.gpx}, který obsahuje jednotlivé nalezené trasy.
  
 \section{Webová aplikace}
-Webovou aplikaci je možné vyzkoušet na (\TODO odkaz) nebo si ji spustit lokálně
+Webovou aplikaci je možné vyzkoušet na \url{http://mhd.bezva.org} nebo si ji spustit lokálně
 pomocí příkazu {\tt python wsgi.py} v~adresáři {\tt webapp}. V~případě, že knihovna
 {\tt libraptor.so} není umístěná tam, kde systém hledá sdílené knihovny, je potřeba ji
 do této cesty buď přesunout, nebo zavolat příkaz {\tt export
