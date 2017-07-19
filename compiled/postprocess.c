@@ -21,10 +21,6 @@ struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mm
 	for (int i=0;i<n_routes;i++){
 		printf("Processing route %d\n",i);
 		node = queue->vertlut[toIdx][i];
-		if (node->majorized){
-			printf("Majorized, skipping\n");
-			continue;
-		}
 		char equivalent;
 		equivalent = 0;
 		for (int j=0;j<residx;j++){

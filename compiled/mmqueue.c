@@ -13,18 +13,20 @@
 
 
 #define DIJ_CMP(x,y) (x->arrival < y->arrival)
+#define DIJ_SWAP(heap,a,b,t) (heap[a]->heapidx=b,heap[b]->heapidx=a,t=heap[a], heap[a]=heap[b], heap[b]=t)
 
 #define MMHEAP_INSERT(elem) \
-	HEAP_INSERT(struct mmdijnode_t *,q->heap,q->n_heap,DIJ_CMP,HEAP_SWAP,(elem))
+	HEAP_INSERT(struct mmdijnode_t *,q->heap,q->n_heap,DIJ_CMP,DIJ_SWAP,(elem))
 #define MMHEAP_DELETE_MIN() \
-	HEAP_DELETE_MIN(struct mmdijnode_t *,q->heap,q->n_heap,DIJ_CMP,HEAP_SWAP)
+	HEAP_DELETE_MIN(struct mmdijnode_t *,q->heap,q->n_heap,DIJ_CMP,DIJ_SWAP)
+#define MMHEAP_DELETE(idx) \
+	HEAP_DELETE(struct mmdijnode_t *,q->heap,q->n_heap,DIJ_CMP,DIJ_SWAP,(idx))
 #define MMHEAP_DECREASE(elem,val) \
-	HEAP_DECREASE(q->heap,q->n_heap,DIJ_CMP,HEAP_SWAP,(elem),(val))
+	HEAP_DECREASE(q->heap,q->n_heap,DIJ_CMP,DIJ_SWAP,(elem),(val))
 
 void prepareMMNode(struct mmdijnode_t * node){
 	node->reached = 1;
 	node->completed = 0;
-	node->majorized = 0;
 } 
 
 void addFirstNodeToQueue(struct mmqueue_t * q,Graph__Vertex * v, Stop * s, uint64_t time){
@@ -75,14 +77,13 @@ void addNodeToQueue(struct mmqueue_t * q,
 	for (int j=0;j<GARY_SIZE(vertnodes);j++){
 		struct mmdijnode_t * anode;
 		anode = vertnodes[j];
-		if (anode->majorized){
-			continue;
-		}
 		if ((arrival >= anode->arrival)&&(penalty >= anode->penalty)){
 			return;
 		}
 		if ((arrival <= anode->arrival)&&(penalty <= anode->penalty)){
-			anode->majorized=1;
+			MMHEAP_DELETE(anode->heapidx);
+			vertnodes[j] = vertnodes[GARY_SIZE(vertnodes)-1];
+			GARY_POP(vertnodes);
 		}
 	}
 
@@ -98,7 +99,7 @@ void addNodeToQueue(struct mmqueue_t * q,
 	node->edge = e;
 	node->arrival = arrival;
 	node->penalty = penalty;
-	node->state.vehicles = node->prev->state.vehicles;
+	node->state = node->prev->state;
 	if (e->edge_type == EDGE_TYPE_PT){
 		node->state.vehicles++;
 	}
@@ -123,7 +124,9 @@ void addNodeToQueue(struct mmqueue_t * q,
 	*vertlutItem = node;
 
 	// Add to heap
+	//printf("ELEM\n");
 	GARY_PUSH(q->heap);
+	node->heapidx = q->n_heap;
 	MMHEAP_INSERT(node);
 }
 
@@ -139,11 +142,7 @@ struct mmdijnode_t * getQueueMin(struct mmqueue_t * q){
 	if (!q->vert->reached){
 		err(1,"Found unreached vertex, exitting\n");
 	}
-
-	if (q->vert->majorized){
-		return NULL;	
-	}
-
+	
 	return q->vert;
 }
 

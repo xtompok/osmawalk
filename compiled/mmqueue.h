@@ -27,13 +27,14 @@ struct search_state_t{
 
 struct mmdijnode_t {
 	struct mmdijnode_t * prev;
+	struct mmdijnode_t * nextlut;
 	Graph__Vertex * osmvert;
 	Stop * stop;
 	struct edge_t * edge;
 	struct search_state_t state;
+	int heapidx;
 	bool reached;
 	bool completed;
-	bool majorized;
 	time_t arrival;
 	double penalty;
 };
