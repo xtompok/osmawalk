@@ -217,6 +217,16 @@ všechny naráz na konci uvolnit.
 Protože při vyhledávání zkoumáme nejen čas příjezdu, ale i penaltu, může se
 v~haldě vyskytunout jeden grafový vrchol vícekrát s~různými časy a penaltami.
 
+\subsection{Majorizace vrcholů}
+Při vyhledávání trasy často při zpracovávání hrany narazíme na situaci, kdy
+právě zpracovávaná hrana zajistí do cílového vrcholu dřívější příchod s nižší
+penaltou než nějaká jiná hrana, kterou jsme již do haldy přidali dříve. Měření
+na datech pro Prahu ukazují, že 20\,\% přidaných položek do haldy je v průběhu
+algoritmu majorizováno. V případě, že aktuální hrana majorizuje nějakou položku
+v haldě, pak tuto položku z haldy smažeme a smažeme ji i ze seznamu u vrcholu,
+ke kterému náleží, protože se tato položka nebude vyskytovat v žádné nalezené
+trase.
+
 \subsection{Vyhledávání přes půlnoc}
 Vyhledávání v~MHD ve večerních hodinách přidává další problém, který je potřeba
 vyřešit. Pokud vyhledáváme na konci dne, může se stát, že budeme cestovat přes
