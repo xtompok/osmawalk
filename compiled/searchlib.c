@@ -243,7 +243,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 					double penalty;
 					penalty = 0;
 					
-					penalty += calcTransportPenalty(graph,data.conf,r,arrival);
+					penalty += calcTransportPenalty(graph,&(data.conf),r,arrival);
 					
 					struct nodesIdxNode * nd;
 					nd = nodesIdx_find2(osmid);
@@ -259,10 +259,10 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 					e->ptedge->departure = r->departure;
 					// TODO: Add stop properties
 
-					penalty += calcPointPenalty(graph,data.conf,graph->vertices[nd->idx]);
+					penalty += calcPointPenalty(graph,&(data.conf),graph->vertices[nd->idx]);
 					int wait;
 					wait = r->departure - (queue->vert->arrival-date);
-					penalty += calcChangePenalty(graph,data.conf,e->ptedge,queue->vert,wait);	
+					penalty += calcChangePenalty(graph,&(data.conf),e->ptedge,queue->vert,wait);	
 					if (penalty < PENALTY_INFINITY){ 
 						addNodeToQueue(queue,queue->vert,graph->vertices[nd->idx],r->stops[sidx].to,e,date+arrival,queue->vert->penalty + penalty);
 					}
@@ -294,7 +294,7 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 						double penalty;
 						penalty = 0;
 						
-						penalty += calcTransportPenalty(graph,data.conf,r,arrival);
+						penalty += calcTransportPenalty(graph,&(data.conf),r,arrival);
 						
 						struct nodesIdxNode * nd;
 						nd = nodesIdx_find2(osmid);
@@ -310,10 +310,10 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 						e->ptedge->departure = r->departure;
 						// TODO: Add stop properties
 
-						penalty += calcPointPenalty(graph,data.conf,graph->vertices[nd->idx]);
+						penalty += calcPointPenalty(graph,&(data.conf),graph->vertices[nd->idx]);
 						int wait;
 						wait = r->departure - (queue->vert->arrival%DAY_SECS);
-						penalty += calcChangePenalty(graph,data.conf,e->ptedge,queue->vert,wait);	
+						penalty += calcChangePenalty(graph,&(data.conf),e->ptedge,queue->vert,wait);	
 						if (penalty < PENALTY_INFINITY){
 						addNodeToQueue(queue,queue->vert,graph->vertices[nd->idx],r->stops[sidx].to,e,
 							date+DAY_SECS+arrival,queue->vert->penalty + penalty);
@@ -338,13 +338,13 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 			double penalty;
 			penalty = 0;
 			
-			penalty += calcPointPenalty(graph,data.conf,graph->vertices[wayend]);
-			penalty += calcWalkPenalty(graph,data.conf,way);
+			penalty += calcPointPenalty(graph,&(data.conf),graph->vertices[wayend]);
+			penalty += calcWalkPenalty(graph,&(data.conf),way);
 			//penalty += calcChangePenalty(graph,data.conf,q->vert->fromEdgeType,way);	
 
 
 			int time;
-			time = calcTime(graph,data.conf,way);
+			time = calcTime(graph,&(data.conf),way);
 
 
 			struct edge_t * e;
