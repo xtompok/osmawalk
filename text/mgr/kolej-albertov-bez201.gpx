@@ -7,7 +7,7 @@
 <trk>
 <name>0</name>
 <extensions>
-<arrival>14:00:00</arrival>
+<arrival>13:56:38</arrival>
 <len>2451.477794</len>
 <penalty>2598.456045</penalty>
 </extensions>
@@ -549,7 +549,7 @@
 <trk>
 <name>1</name>
 <extensions>
-<arrival> 0:00:00</arrival>
+<arrival>14:00:48</arrival>
 <len>2245.420152</len>
 <penalty>2557.821075</penalty>
 </extensions>
@@ -1162,7 +1162,7 @@
 <trk>
 <name>2</name>
 <extensions>
-<arrival> 1:00:00</arrival>
+<arrival>14:00:49</arrival>
 <len>2244.584463</len>
 <penalty>2557.068955</penalty>
 </extensions>
@@ -1775,7 +1775,7 @@
 <trk>
 <name>3</name>
 <extensions>
-<arrival>20:00:00</arrival>
+<arrival>14:01:08</arrival>
 <len>2061.152858</len>
 <penalty>2533.728525</penalty>
 </extensions>
@@ -2138,7 +2138,7 @@
 <trk>
 <name>4</name>
 <extensions>
-<arrival>21:00:00</arrival>
+<arrival>14:01:09</arrival>
 <len>2061.137588</len>
 <penalty>2532.714783</penalty>
 </extensions>
@@ -2498,7 +2498,7 @@
 <trk>
 <name>5</name>
 <extensions>
-<arrival>23:00:00</arrival>
+<arrival>14:01:11</arrival>
 <len>2061.435691</len>
 <penalty>2530.983075</penalty>
 </extensions>
@@ -2852,7 +2852,7 @@
 <trk>
 <name>6</name>
 <extensions>
-<arrival>22:00:00</arrival>
+<arrival>14:01:10</arrival>
 <len>2061.227911</len>
 <penalty>2531.796073</penalty>
 </extensions>
@@ -3209,7 +3209,7 @@
 <trk>
 <name>7</name>
 <extensions>
-<arrival> 1:00:00</arrival>
+<arrival>14:01:37</arrival>
 <len>2087.691908</len>
 <penalty>2529.473941</penalty>
 </extensions>
@@ -3584,7 +3584,7 @@
 <trk>
 <name>8</name>
 <extensions>
-<arrival> 2:00:00</arrival>
+<arrival>14:01:38</arrival>
 <len>2087.542240</len>
 <penalty>2528.339239</penalty>
 </extensions>
@@ -3956,7 +3956,7 @@
 <trk>
 <name>9</name>
 <extensions>
-<arrival> 3:00:00</arrival>
+<arrival>14:01:39</arrival>
 <len>2087.526970</len>
 <penalty>2527.325497</penalty>
 </extensions>
@@ -4325,7 +4325,7 @@
 <trk>
 <name>10</name>
 <extensions>
-<arrival> 5:00:00</arrival>
+<arrival>14:01:41</arrival>
 <len>2087.825073</len>
 <penalty>2525.593789</penalty>
 </extensions>
@@ -4688,7 +4688,7 @@
 <trk>
 <name>11</name>
 <extensions>
-<arrival> 4:00:00</arrival>
+<arrival>14:01:40</arrival>
 <len>2087.617293</len>
 <penalty>2526.406787</penalty>
 </extensions>
@@ -5054,7 +5054,7 @@
 <trk>
 <name>12</name>
 <extensions>
-<arrival> 2:00:00</arrival>
+<arrival>14:05:14</arrival>
 <len>1836.433716</len>
 <penalty>2494.120005</penalty>
 </extensions>
@@ -5412,7 +5412,7 @@
 <trk>
 <name>13</name>
 <extensions>
-<arrival> 3:00:00</arrival>
+<arrival>14:05:15</arrival>
 <len>1835.598027</len>
 <penalty>2493.367885</penalty>
 </extensions>
@@ -5770,7 +5770,7 @@
 <trk>
 <name>14</name>
 <extensions>
-<arrival> 2:00:00</arrival>
+<arrival>14:07:14</arrival>
 <len>1831.737843</len>
 <penalty>2434.074925</penalty>
 </extensions>
@@ -6144,7 +6144,7 @@
 <trk>
 <name>15</name>
 <extensions>
-<arrival> 3:00:00</arrival>
+<arrival>14:07:15</arrival>
 <len>1830.902154</len>
 <penalty>2433.322805</penalty>
 </extensions>
@@ -6518,7 +6518,7 @@
 <trk>
 <name>16</name>
 <extensions>
-<arrival>14:00:00</arrival>
+<arrival>14:08:14</arrival>
 <len>1939.782507</len>
 <penalty>2242.167844</penalty>
 </extensions>
@@ -7038,7 +7038,7 @@
 <trk>
 <name>17</name>
 <extensions>
-<arrival>15:00:00</arrival>
+<arrival>14:08:15</arrival>
 <len>1938.946818</len>
 <penalty>2241.415724</penalty>
 </extensions>
@@ -7558,7 +7558,7 @@
 <trk>
 <name>18</name>
 <extensions>
-<arrival>19:00:00</arrival>
+<arrival>14:08:43</arrival>
 <len>1254.889821</len>
 <penalty>1906.294554</penalty>
 </extensions>
@@ -7794,7 +7794,7 @@
 <trk>
 <name>19</name>
 <extensions>
-<arrival>20:00:00</arrival>
+<arrival>14:08:44</arrival>
 <len>1254.054132</len>
 <penalty>1905.542434</penalty>
 </extensions>
@@ -8030,7 +8030,7 @@
 <trk>
 <name>20</name>
 <extensions>
-<arrival> 0:00:00</arrival>
+<arrival>14:08:48</arrival>
 <len>1258.388617</len>
 <penalty>1867.443470</penalty>
 </extensions>
@@ -8257,7 +8257,7 @@
 <trk>
 <name>21</name>
 <extensions>
-<arrival> 1:00:00</arrival>
+<arrival>14:08:49</arrival>
 <len>1257.552927</len>
 <penalty>1866.691350</penalty>
 </extensions>
@@ -8484,7 +8484,7 @@
 <trk>
 <name>22</name>
 <extensions>
-<arrival>18:00:00</arrival>
+<arrival>14:15:54</arrival>
 <len>1432.575817</len>
 <penalty>1853.243633</penalty>
 </extensions>
@@ -8792,7 +8792,7 @@
 <trk>
 <name>23</name>
 <extensions>
-<arrival>19:00:00</arrival>
+<arrival>14:15:55</arrival>
 <len>1431.740128</len>
 <penalty>1852.491513</penalty>
 </extensions>
@@ -9100,7 +9100,7 @@
 <trk>
 <name>24</name>
 <extensions>
-<arrival>20:00:00</arrival>
+<arrival>14:15:56</arrival>
 <len>1432.472461</len>
 <penalty>1847.330908</penalty>
 </extensions>
@@ -9390,7 +9390,7 @@
 <trk>
 <name>25</name>
 <extensions>
-<arrival>21:00:00</arrival>
+<arrival>14:15:57</arrival>
 <len>1431.636772</len>
 <penalty>1846.578787</penalty>
 </extensions>
@@ -9680,7 +9680,7 @@
 <trk>
 <name>26</name>
 <extensions>
-<arrival>22:00:00</arrival>
+<arrival>14:15:58</arrival>
 <len>1428.289058</len>
 <penalty>1845.933970</penalty>
 </extensions>
