@@ -176,4 +176,41 @@ navrhovanou trasu činí velmi nepohodlnou.
 Pěší přesun po jakémkoli typu cesty je penalizován 100 za každou sekundu
 strávenou pěším přesunem.
 
+Při tomto hledání je dobře vidět princip majorizovaných tras. Je nalezena
+nejrychlejší trasa, ale protože obsahuje dlouhé pěší přesuny, má vysokou
+penaltu. Proto se projeví i cesty časově výrazně delší, které ale využívají více
+přesunů pomocí MHD a tedy mají nížší penaltu a nejsou majorizovány. Celkem
+vyhledávač nalezl čtyři základní cesty a pak další, které se však od těchto
+základních liší jen drobnými detaily.
 \section{Profilování}
+Jak jsme ověřili v předchozí části, vyhledávač dává výsledky srovnatelné s
+ostatními dostupnými vyhledávači spojení a má široké možnosti konfigurace.
+Rychlost vyhledávání spojení je však nízká, středně dlouhá spojení přes střed
+města hledá v jednotkách sekund, při specifických konfiguracích (například pouze
+pěší vyhledávání) jsou ale časy výrazně delší, dosahují i desítek sekund.
+Ačkoliv rychlost nebyla našim hlavním cílem, pro praktické nasazení je nezbytné,
+aby vyhledávač pracoval co nejrychleji. 
+
+Abychom zjistili, kde se při hledání tráví největší čas, profilovali jsme
+vyhledávač pomocí aplikace {\tt perf}. Abychom eliminovali vliv načítání mapy a
+jízdního řádu, což se při běžném vylhedávání děje jen jednou při spuštění webové
+aplikace, vytvořili jsme testovací scénář pro konzolovou aplikaci. Ta si nejprve
+načetla mapová data a data jízdních řádů a potom postupně hledala různá spojení
+mezi předem zvolenými body. Nasbíraná data jsme pak analyzovali a na jejich
+základě provedli některé optimalizace, například vyhazování majorizovaných
+položek z haldy a seznamu vrcholů.
+
+Z naměřených dat vyplývá, že místo, kde by se mělo optimalizovat nejdříve, je
+cyklus porovnávající, zda právě přidávaná položka do haldy není majorizována či
+naopak majorizuje nějakou jinou položku, která už v haldě je. Ve standardním
+nastavení se v tomto cylku stráví okolo 25\,\% času, při hledání pouze pěších
+tras je to až 50\,\%. Dalším místem v pořadí je načítání pěší hrany při
+zpracovávání vrcholu a zjišťování, který její konec máme uvažovat. Zde si
+myslíme, že dochází ke zpomalení převážně z důvodu přístupu na náhodné místo v
+paměti, protože hran je mnoho a nejsou nijak setříděné. Překvapivě velký čas je
+zabrán počítáním penalty bodu. I když se jedná o funkci obsahující pouze 2
+podmínky, tráví se zde 6\,\% celkového času, což nám přišlo zvláštní, ale nemáme
+pro to jasný důvod. Posledním významným časem je hledání minima v haldě, což je
+ale logaritmická operace a proto nás 7\,\% stráveného času příliš nepřekvapí.
+
+

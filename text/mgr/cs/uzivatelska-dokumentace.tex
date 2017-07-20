@@ -20,7 +20,9 @@ výřez.
 určení vrcholů na mostech a pod zemí a přiřazení nadmořské výšky k~uzlům.
 Výstupem jsou soubory {\tt data/nodes-stage1}, {\tt data/ways-stage1} a {\tt
 data/mp-stage1} s~jednotlivými objekty. Formát uložení je popsán v~sekci Formáty
-dat\ref{ch:formaty:priprava}.
+dat\ref{ch:formaty:priprava}. Nastavení klasifikátoru je v souboru {\tt
+config/waytypes.yaml} pro cesty a {\tt config/nodetypes.yaml} pro body. Formát
+konfiguračních souborů je popsán v bakalářské práci \cite{bakalarka}.
 \item {\tt todb.sh} slouží k~nahrání klasifikovaných dat do databáze. 
 \item {\tt postgis/process.sh} řídí úpravy dat v~databázi, uvnitř obsahuje
 volání jednotlivých kroků popsaných v~kapitole \ref{ch:implementace}.
