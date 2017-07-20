@@ -5,8 +5,9 @@ DROP TABLE IF EXISTS stops_cand_col;
 CREATE TABLE stops_cand_col AS
 	SELECT dc.sid AS sid, dc.nid AS nid, dc.geom AS geom, b.geom AS cgeomm, dc.objtype AS objtype
 	FROM stops_direct_cand AS dc
+	INNER JOIN stops AS s ON sid = s.id
 	CROSS JOIN barriers AS b
-	WHERE ST_IsValid(b.geom)  AND (dc.geom && b.geom) AND (ST_Intersects(ST_MakeValid(dc.geom),b.geom))
+	WHERE (NOT s.underground) AND ST_IsValid(b.geom)  AND (dc.geom && b.geom) AND (ST_Intersects(ST_MakeValid(dc.geom),b.geom))
 ;
 
 DROP TABLE IF EXISTS stops_direct_ok;

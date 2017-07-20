@@ -4,7 +4,7 @@ CREATE TABLE walk_nodes AS
 	FROM ways AS w
 	INNER JOIN ways_refs AS wr ON wr.id=w.id
 	INNER JOIN nodes AS n ON wr.ref= n.id
-	WHERE w.type != 0 AND w.type != 30
+	WHERE w.type != 0 AND w.type != 30 AND w.type != 256
 ;
 ALTER TABLE walk_nodes ADD UNIQUE (id);
 ALTER TABLE walk_nodes ADD CONSTRAINT walk_nodesfk FOREIGN KEY (id) REFERENCES nodes(id) MATCH FULL;

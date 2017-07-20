@@ -238,7 +238,7 @@ void writeGpxFile(struct search_result_t * result,char * filename){
 			continue;	
 		}
 		char * arr = malloc(10);
-		arr = prt_time(((int)(rt->time))%24*3600);
+		arr = prt_time(((int)(rt->time))%(24*3600));
 		writeGpxStartTrack(OUT,i,arr,rt->dist,rt->points[rt->n_points-1].penalty);
 		free(arr);
 		int memtype;

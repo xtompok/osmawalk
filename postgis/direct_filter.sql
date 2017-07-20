@@ -5,7 +5,7 @@ CREATE TABLE direct AS
 		FROM direct_ok 
 		GROUP BY id1
 	)
-	SELECT id1, id2, geom FROM
+	SELECT id1, id2, 50 AS objtype, geom FROM
 	direct_ok AS dir
 	INNER JOIN degs AS d1 ON d1.id = dir.id1
 	INNER JOIN degs AS d2 ON d2.id = dir.id2

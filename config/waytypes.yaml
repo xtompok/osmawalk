@@ -28,6 +28,7 @@ BARRIER:
                 - riverbank
                 - canal
                 - weir
+                - stream
             building: "*"
             "building:part": yes
             landuse:
