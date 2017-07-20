@@ -126,3 +126,722 @@ From: Trojská at 13:33:00
 To: Výtoň at 13:54:00 by 17
 Len: 54773
 
+=====================================================================================
+Standard:
+------------------------
+Route 0:
+------------------------
+From: Kuchyňka at 13:25:00
+To: Nádraží Holešovice at 13:28:00 by 201
+From: Nádraží Holešovice at 13:32:55
+To: I. P. Pavlova at 13:40:45 by C
+------------------------
+Route 1:
+------------------------
+From: Kuchyňka at 13:25:00
+To: Nádraží Holešovice at 13:28:00 by 201
+From: Nádraží Holešovice at 13:32:55
+To: Florenc - C at 13:36:10 by C
+From: Florenc - B at 13:41:30
+To: Karlovo náměstí at 13:46:40 by B
+From: Palackého náměstí at 13:52:00
+To: Albertov at 13:56:00 by 18
+------------------------
+Route 2:
+------------------------
+From: Kuchyňka at 13:25:00
+To: Nádraží Holešovice at 13:28:00 by 201
+From: Nádraží Holešovice at 13:32:55
+To: Florenc - C at 13:36:10 by C
+From: Florenc - B at 13:41:30
+To: Karlovo náměstí at 13:46:40 by B
+From: Palackého náměstí at 13:52:00
+To: Albertov at 13:56:00 by 18
+------------------------
+Route 3:
+------------------------
+From: Kuchyňka at 13:25:00
+To: Nádraží Holešovice at 13:28:00 by 201
+From: Nádraží Holešovice at 13:31:00
+To: Masarykovo nádraží at 13:43:00 by 6
+From: Masarykovo nádraží at 13:44:00
+To: Albertov at 13:59:00 by 14
+------------------------
+Route 4:
+------------------------
+From: Kuchyňka at 13:25:00
+To: Nádraží Holešovice at 13:28:00 by 201
+From: Nádraží Holešovice at 13:31:00
+To: Masarykovo nádraží at 13:43:00 by 6
+From: Masarykovo nádraží at 13:44:00
+To: Albertov at 13:59:00 by 14
+------------------------
+Route 5:
+------------------------
+From: Kuchyňka at 13:25:00
+To: Nádraží Holešovice at 13:28:00 by 201
+From: Nádraží Holešovice at 13:31:00
+To: Masarykovo nádraží at 13:43:00 by 6
+From: Masarykovo nádraží at 13:44:00
+To: Albertov at 13:59:00 by 14
+Len: 35323
+
+
+bez201: (201:inf)
+------------------------
+Route 0:
+------------------------
+From: Nádraží Holešovice at 13:32:55
+To: I. P. Pavlova at 13:40:45 by C
+------------------------
+Route 1:
+------------------------
+From: Nádraží Holešovice at 13:32:55
+To: Florenc - C at 13:36:10 by C
+From: Florenc - B at 13:41:30
+To: Karlovo náměstí at 13:46:40 by B
+From: Palackého náměstí at 13:52:00
+To: Albertov at 13:56:00 by 18
+------------------------
+Route 2:
+------------------------
+From: Nádraží Holešovice at 13:32:55
+To: Florenc - C at 13:36:10 by C
+From: Florenc - B at 13:41:30
+To: Karlovo náměstí at 13:46:40 by B
+From: Palackého náměstí at 13:52:00
+To: Albertov at 13:56:00 by 18
+------------------------
+Route 3:
+------------------------
+From: Trojská at 13:28:00
+To: Nádraží Holešovice at 13:32:00 by 112
+From: Nádraží Holešovice at 13:37:25
+To: I. P. Pavlova at 13:45:15 by C
+------------------------
+Route 4:
+------------------------
+From: Trojská at 13:28:00
+To: Nádraží Holešovice at 13:32:00 by 112
+From: Nádraží Holešovice at 13:37:25
+To: I. P. Pavlova at 13:45:15 by C
+------------------------
+Route 5:
+------------------------
+From: Trojská at 13:28:00
+To: Nádraží Holešovice at 13:32:00 by 112
+From: Nádraží Holešovice at 13:37:25
+To: I. P. Pavlova at 13:45:15 by C
+------------------------
+Route 6:
+------------------------
+From: Trojská at 13:28:00
+To: Nádraží Holešovice at 13:32:00 by 112
+From: Nádraží Holešovice at 13:37:25
+To: I. P. Pavlova at 13:45:15 by C
+------------------------
+Route 7:
+------------------------
+From: Trojská at 13:28:00
+To: Nádraží Holešovice at 13:32:00 by 112
+From: Nádraží Holešovice at 13:37:25
+To: I. P. Pavlova at 13:45:15 by C
+------------------------
+Route 8:
+------------------------
+From: Trojská at 13:28:00
+To: Nádraží Holešovice at 13:32:00 by 112
+From: Nádraží Holešovice at 13:37:25
+To: I. P. Pavlova at 13:45:15 by C
+------------------------
+Route 9:
+------------------------
+From: Trojská at 13:28:00
+To: Nádraží Holešovice at 13:32:00 by 112
+From: Nádraží Holešovice at 13:37:25
+To: I. P. Pavlova at 13:45:15 by C
+------------------------
+Route 10:
+------------------------
+From: Trojská at 13:28:00
+To: Nádraží Holešovice at 13:32:00 by 112
+From: Nádraží Holešovice at 13:37:25
+To: I. P. Pavlova at 13:45:15 by C
+------------------------
+Route 11:
+------------------------
+From: Trojská at 13:28:00
+To: Nádraží Holešovice at 13:32:00 by 112
+From: Nádraží Holešovice at 13:37:25
+To: I. P. Pavlova at 13:45:15 by C
+------------------------
+Route 12:
+------------------------
+From: Trojská at 13:28:00
+To: Nádraží Holešovice at 13:32:00 by 112
+From: Nádraží Holešovice at 13:37:25
+To: Vyšehrad at 13:47:15 by C
+From: Svatoplukova at 13:58:00
+To: Albertov at 14:00:00 by 14
+------------------------
+Route 13:
+------------------------
+From: Trojská at 13:28:00
+To: Nádraží Holešovice at 13:32:00 by 112
+From: Nádraží Holešovice at 13:37:25
+To: Vyšehrad at 13:47:15 by C
+From: Svatoplukova at 13:58:00
+To: Albertov at 14:00:00 by 14
+------------------------
+Route 14:
+------------------------
+From: Trojská at 13:28:00
+To: Nádraží Holešovice at 13:32:00 by 112
+From: Nádraží Holešovice at 13:37:25
+To: Vyšehrad at 13:47:15 by C
+From: Svatoplukova at 13:55:00
+To: Divadlo Na Fidlovačce at 13:56:00 by 24
+From: Divadlo Na Fidlovačce at 13:58:00
+To: Albertov at 14:02:00 by 17
+------------------------
+Route 15:
+------------------------
+From: Trojská at 13:28:00
+To: Nádraží Holešovice at 13:32:00 by 112
+From: Nádraží Holešovice at 13:37:25
+To: Vyšehrad at 13:47:15 by C
+From: Svatoplukova at 13:55:00
+To: Divadlo Na Fidlovačce at 13:56:00 by 24
+From: Divadlo Na Fidlovačce at 13:58:00
+To: Albertov at 14:02:00 by 17
+------------------------
+Route 16:
+------------------------
+From: Nádraží Holešovice at 13:32:55
+To: Vltavská at 13:34:15 by C
+From: Vltavská at 13:38:00
+To: Ostrčilovo náměstí at 14:00:00 by 14
+From: Ostrčilovo náměstí at 14:02:00
+To: Albertov at 14:03:00 by 24
+------------------------
+Route 17:
+------------------------
+From: Nádraží Holešovice at 13:32:55
+To: Vltavská at 13:34:15 by C
+From: Vltavská at 13:38:00
+To: Ostrčilovo náměstí at 14:00:00 by 14
+From: Ostrčilovo náměstí at 14:02:00
+To: Albertov at 14:03:00 by 24
+------------------------
+Route 18:
+------------------------
+From: Trojská at 13:33:00
+To: Nábřeží Kapitána Jaroše at 13:41:00 by 17
+From: Nábřeží Kapitána Jaroše at 13:42:00
+To: Masarykovo nádraží at 13:48:00 by 26
+From: Masarykovo nádraží at 13:49:00
+To: Albertov at 14:04:00 by 24
+------------------------
+Route 19:
+------------------------
+From: Trojská at 13:33:00
+To: Nábřeží Kapitána Jaroše at 13:41:00 by 17
+From: Nábřeží Kapitána Jaroše at 13:42:00
+To: Masarykovo nádraží at 13:48:00 by 26
+From: Masarykovo nádraží at 13:49:00
+To: Albertov at 14:04:00 by 24
+------------------------
+Route 20:
+------------------------
+From: Trojská at 13:33:00
+To: Nábřeží Kapitána Jaroše at 13:41:00 by 17
+From: Nábřeží Kapitána Jaroše at 13:42:00
+To: Masarykovo nádraží at 13:48:00 by 26
+From: Masarykovo nádraží at 13:49:00
+To: Albertov at 14:04:00 by 24
+------------------------
+Route 21:
+------------------------
+From: Trojská at 13:33:00
+To: Nábřeží Kapitána Jaroše at 13:41:00 by 17
+From: Nábřeží Kapitána Jaroše at 13:42:00
+To: Masarykovo nádraží at 13:48:00 by 26
+From: Masarykovo nádraží at 13:49:00
+To: Albertov at 14:04:00 by 24
+------------------------
+Route 22:
+------------------------
+From: Jankovcova at 13:31:00
+To: Maniny at 13:37:00 by 156
+From: Maniny at 13:39:00
+To: Masarykovo nádraží at 13:55:00 by 6
+From: Masarykovo nádraží at 13:56:00
+To: Albertov at 14:11:00 by 14
+------------------------
+Route 23:
+------------------------
+From: Jankovcova at 13:31:00
+To: Maniny at 13:37:00 by 156
+From: Maniny at 13:39:00
+To: Masarykovo nádraží at 13:55:00 by 6
+From: Masarykovo nádraží at 13:56:00
+To: Albertov at 14:11:00 by 14
+------------------------
+Route 24:
+------------------------
+From: Jankovcova at 13:31:00
+To: Maniny at 13:37:00 by 156
+From: Maniny at 13:39:00
+To: Masarykovo nádraží at 13:55:00 by 6
+From: Masarykovo nádraží at 13:56:00
+To: Albertov at 14:11:00 by 14
+------------------------
+Route 25:
+------------------------
+From: Jankovcova at 13:31:00
+To: Maniny at 13:37:00 by 156
+From: Maniny at 13:39:00
+To: Masarykovo nádraží at 13:55:00 by 6
+From: Masarykovo nádraží at 13:56:00
+To: Albertov at 14:11:00 by 14
+------------------------
+Route 26:
+------------------------
+From: Jankovcova at 13:31:00
+To: Maniny at 13:37:00 by 156
+From: Maniny at 13:39:00
+To: Masarykovo nádraží at 13:55:00 by 6
+From: Masarykovo nádraží at 13:56:00
+To: Albertov at 14:11:00 by 14
+
+bus-penalta: (fixed 100, time 10)
+------------------------
+Route 0:
+------------------------
+From: Nádraží Holešovice at 13:32:55
+To: I. P. Pavlova at 13:40:45 by C
+------------------------
+Route 1:
+------------------------
+From: Nádraží Holešovice at 13:32:55
+To: Florenc - C at 13:36:10 by C
+From: Florenc - B at 13:41:30
+To: Karlovo náměstí at 13:46:40 by B
+From: Palackého náměstí at 13:52:00
+To: Albertov at 13:56:00 by 18
+------------------------
+Route 2:
+------------------------
+From: Nádraží Holešovice at 13:32:55
+To: Florenc - C at 13:36:10 by C
+From: Florenc - B at 13:41:30
+To: Karlovo náměstí at 13:46:40 by B
+From: Palackého náměstí at 13:52:00
+To: Albertov at 13:56:00 by 18
+------------------------
+Route 3:
+------------------------
+From: Trojská at 13:33:00
+To: Palackého náměstí (nábřeží) at 13:53:00 by 17
+From: Palackého náměstí (nábřeží) at 13:56:00
+To: Albertov at 13:59:00 by 14
+------------------------
+Route 4:
+------------------------
+From: Trojská at 13:33:00
+To: Palackého náměstí (nábřeží) at 13:53:00 by 17
+From: Palackého náměstí (nábřeží) at 13:56:00
+To: Albertov at 13:59:00 by 14
+------------------------
+Route 5:
+------------------------
+From: Trojská at 13:33:00
+To: Palackého náměstí (nábřeží) at 13:53:00 by 17
+From: Palackého náměstí (nábřeží) at 13:56:00
+To: Albertov at 13:59:00 by 14
+------------------------
+Route 6:
+------------------------
+From: Trojská at 13:33:00
+To: Palackého náměstí (nábřeží) at 13:53:00 by 17
+From: Palackého náměstí (nábřeží) at 13:56:00
+To: Albertov at 13:59:00 by 14
+------------------------
+Route 7:
+------------------------
+From: Trojská at 13:33:00
+To: Palackého náměstí (nábřeží) at 13:53:00 by 17
+From: Palackého náměstí (nábřeží) at 13:56:00
+To: Albertov at 13:59:00 by 14
+------------------------
+Route 8:
+------------------------
+From: Trojská at 13:33:00
+To: Palackého náměstí (nábřeží) at 13:53:00 by 17
+From: Palackého náměstí (nábřeží) at 13:56:00
+To: Albertov at 13:59:00 by 14
+------------------------
+Route 9:
+------------------------
+From: Trojská at 13:33:00
+To: Nábřeží Kapitána Jaroše at 13:41:00 by 17
+From: Nábřeží Kapitána Jaroše at 13:42:00
+To: Masarykovo nádraží at 13:48:00 by 26
+From: Masarykovo nádraží at 13:49:00
+To: Albertov at 14:04:00 by 24
+------------------------
+Route 10:
+------------------------
+From: Trojská at 13:33:00
+To: Nábřeží Kapitána Jaroše at 13:41:00 by 17
+From: Nábřeží Kapitána Jaroše at 13:42:00
+To: Masarykovo nádraží at 13:48:00 by 26
+From: Masarykovo nádraží at 13:49:00
+To: Albertov at 14:04:00 by 24
+------------------------
+Route 11:
+------------------------
+From: Trojská at 13:33:00
+To: Nábřeží Kapitána Jaroše at 13:41:00 by 17
+From: Nábřeží Kapitána Jaroše at 13:42:00
+To: Masarykovo nádraží at 13:48:00 by 26
+From: Masarykovo nádraží at 13:49:00
+To: Albertov at 14:04:00 by 24
+------------------------
+Route 12:
+------------------------
+From: Trojská at 13:33:00
+To: Nábřeží Kapitána Jaroše at 13:41:00 by 17
+From: Nábřeží Kapitána Jaroše at 13:42:00
+To: Masarykovo nádraží at 13:48:00 by 26
+From: Masarykovo nádraží at 13:49:00
+To: Albertov at 14:04:00 by 24
+
+jeden-spoj:
+------------------------
+Route 0:
+------------------------
+From: Trojská at 13:33:00
+To: Výtoň at 13:54:00 by 17
+------------------------
+Route 1:
+------------------------
+From: Trojská at 13:33:00
+To: Výtoň at 13:54:00 by 17
+
+
+kolo:
+------------------------
+Route 0:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: Hlavní nádraží at 13:19:55 by C
+------------------------
+Route 1:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: Muzeum - C at 13:21:05 by C
+------------------------
+Route 2:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: Muzeum - C at 13:21:05 by C
+------------------------
+Route 3:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: Muzeum - C at 13:21:05 by C
+------------------------
+Route 4:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: Muzeum - C at 13:21:05 by C
+------------------------
+Route 5:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: Muzeum - C at 13:21:05 by C
+------------------------
+Route 6:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: Muzeum - C at 13:21:05 by C
+------------------------
+Route 7:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: Muzeum - C at 13:21:05 by C
+------------------------
+Route 8:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: Muzeum - C at 13:21:05 by C
+------------------------
+Route 9:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: Muzeum - C at 13:21:05 by C
+------------------------
+Route 10:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 11:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 12:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 13:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 14:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 15:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 16:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 17:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 18:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 19:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 20:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 21:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 22:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 23:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 24:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 25:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 26:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 27:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+------------------------
+Route 28:
+------------------------
+From: Nádraží Holešovice at 13:14:55
+To: I. P. Pavlova at 13:22:45 by C
+
+
+===============================================
+Kolej - Bubeneč
+------------------------
+Route 0:
+------------------------
+------------------------
+Route 1:
+------------------------
+From: Kuchyňka at 13:25:00
+To: Nádraží Holešovice at 13:28:00 by 201
+From: Nádraží Holešovice at 13:31:00
+To: Strossmayerovo náměstí at 13:36:00 by 6
+From: Strossmayerovo náměstí at 13:39:00
+To: Hradčanská at 13:47:00 by 26
+From: Hradčanská at 14:00:00
+To: Goetheho at 14:03:00 by 131
+------------------------
+Route 2:
+------------------------
+From: Kuchyňka at 13:25:00
+To: Nádraží Holešovice at 13:28:00 by 201
+From: Nádraží Holešovice at 13:31:00
+To: Strossmayerovo náměstí at 13:36:00 by 6
+From: Strossmayerovo náměstí at 13:39:00
+To: Hradčanská at 13:47:00 by 26
+From: Hradčanská at 14:00:00
+To: Goetheho at 14:03:00 by 131
+------------------------
+Route 3:
+------------------------
+From: Kuchyňka at 13:25:00
+To: Nádraží Holešovice at 13:28:00 by 201
+From: Nádraží Holešovice at 13:31:00
+To: Strossmayerovo náměstí at 13:36:00 by 6
+From: Strossmayerovo náměstí at 13:39:00
+To: Hradčanská at 13:47:00 by 26
+From: Hradčanská at 14:00:00
+To: Goetheho at 14:03:00 by 131
+------------------------
+Route 4:
+------------------------
+From: Kuchyňka at 13:25:00
+To: Nádraží Holešovice at 13:28:00 by 201
+From: Nádraží Holešovice at 13:31:00
+To: Strossmayerovo náměstí at 13:36:00 by 6
+From: Strossmayerovo náměstí at 13:39:00
+To: Vítězné náměstí at 13:50:00 by 26
+From: Dejvická at 13:55:00
+To: Nádraží Podbaba at 13:59:00 by 160
+------------------------
+Route 5:
+------------------------
+From: Kuchyňka at 13:25:00
+To: Nádraží Holešovice at 13:28:00 by 201
+From: Nádraží Holešovice at 13:31:00
+To: Strossmayerovo náměstí at 13:36:00 by 6
+From: Strossmayerovo náměstí at 13:39:00
+To: Vítězné náměstí at 13:50:00 by 26
+From: Dejvická at 13:55:00
+To: Nádraží Podbaba at 13:59:00 by 160
+------------------------
+Route 6:
+------------------------
+From: Kuchyňka at 13:25:00
+To: Nádraží Holešovice at 13:28:00 by 201
+From: Nádraží Holešovice at 13:31:00
+To: Dlouhá třída at 13:38:00 by 6
+From: Dlouhá třída at 13:42:00
+To: Nádraží Podbaba at 14:02:00 by 8
+------------------------
+Route 7:
+------------------------
+From: Kuchyňka at 13:25:00
+To: Nádraží Holešovice at 13:28:00 by 201
+From: Nádraží Holešovice at 13:31:00
+To: Dlouhá třída at 13:38:00 by 6
+From: Dlouhá třída at 13:42:00
+To: Nádraží Podbaba at 14:02:00 by 8
+
+
+FEL - Hlávkova:
+------------------------
+Route 0:
+------------------------
+From: Dejvická at 13:16:15
+To: Malostranská at 13:19:05 by A
+From: Malostranská at 13:23:00
+To: Moráň at 13:34:00 by 2
+------------------------
+Route 1:
+------------------------
+From: Lotyšská at 13:18:00
+To: Moráň at 13:38:00 by 18
+Len: 7613
+
+Kovanecká - Omská:
+------------------------
+Route 0:
+------------------------
+From: Divadlo Gong at 13:21:00
+To: Orionka at 13:39:00 by 16
+From: Orionka at 13:42:00
+To: Bělocerkevská at 13:47:00 by 136
+------------------------
+Route 1:
+------------------------
+From: Divadlo Gong at 13:21:00
+To: Mezi Hřbitovy at 13:32:00 by 16
+From: Mezi Hřbitovy at 13:36:00
+To: Nad Primaskou at 13:42:00 by 26
+From: Nad Primaskou at 13:43:00
+To: Slavia at 13:49:00 by 7
+From: Slavia at 13:52:00
+To: Kubánské náměstí at 13:53:00 by 22
+------------------------
+Route 2:
+------------------------
+From: Divadlo Gong at 13:21:00
+To: Mezi Hřbitovy at 13:32:00 by 16
+From: Mezi Hřbitovy at 13:36:00
+To: Nad Primaskou at 13:42:00 by 26
+From: Nad Primaskou at 13:43:00
+To: Slavia at 13:49:00 by 7
+From: Slavia at 13:52:00
+To: Kubánské náměstí at 13:53:00 by 22
+------------------------
+Route 3:
+------------------------
+From: Balabenka at 13:19:00
+To: Palmovka at 13:21:00 by 25
+From: Palmovka at 13:23:00
+To: Karlovo náměstí at 13:45:00 by 24
+From: Karlovo náměstí at 13:46:00
+To: Kubánské náměstí at 14:05:00 by 22
+------------------------
+Route 4:
+------------------------
+From: Balabenka at 13:19:00
+To: Palmovka at 13:21:00 by 25
+From: Palmovka at 13:23:00
+To: Karlovo náměstí at 13:45:00 by 24
+From: Karlovo náměstí at 13:46:00
+To: Kubánské náměstí at 14:05:00 by 22
+------------------------
+Route 5:
+------------------------
+From: Balabenka at 13:19:00
+To: Palmovka at 13:21:00 by 25
+From: Palmovka at 13:23:00
+To: Kubánské náměstí at 14:06:00 by 24
+------------------------
+Route 6:
+------------------------
+From: Balabenka at 13:19:00
+To: Palmovka at 13:21:00 by 25
+From: Palmovka at 13:23:00
+To: Kubánské náměstí at 14:06:00 by 24
+------------------------
+Route 7:
+------------------------
+From: Ocelářská at 13:19:00
+To: Kubánské náměstí at 14:11:00 by 6
+------------------------
+Route 8:
+------------------------
+From: Ocelářská at 13:19:00
+To: Kubánské náměstí at 14:11:00 by 6
