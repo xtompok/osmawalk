@@ -23,6 +23,7 @@ struct config_t parseConfigFile(char * filename){
 	conf.pt_max_vehicles = 100;
 	conf.pt_geton_penalty = 0;
 	conf.pt_min_wait = 0;
+	conf.pt_n_line_penalties = 0;
 	
 
 	yaml_parser_t parser;
