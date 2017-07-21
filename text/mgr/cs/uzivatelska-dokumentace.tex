@@ -91,11 +91,11 @@ tak už se dále nepokračuje ve vyhledávání zbytku trasy.
 \section{Konzolová aplikace}
 Konzolová aplikace slouží převážně pro testování, zda vyhledávací knihovna
 pracuje stabilně, ale dá se použít i pro jednoduché hledání. Aplikaci spustíme
-v~adresáři compiled příkzem {\tt ./search <flat> <flon> <tlat> <tlon> [time]},
+v~adresáři compiled příkazem {\tt ./search <flat> <flon> <tlat> <tlon> [time]},
 kde {\tt flat} a {\tt flon} určují zeměpisnou šířku a délku výchozího bodu, {\tt
 tlat} a {\tt tlon} souřadnice cílového bodu a {\tt time} unixový timestamp času,
 od kterého hledat. Pokud není čas uveden, hledá se od
-okamžiku spuštění.  Aplikace najde trasy a na standradní výstup vypíše ke každé
+okamžiku spuštění.  Aplikace najde trasy a na standardní výstup vypíše ke každé
 trase použité spoje MHD. Navíc v~aktuálním adresáři vytvoří soubor {\tt
 track.gpx}, který obsahuje jednotlivé nalezené trasy.
  
@@ -106,12 +106,12 @@ pomocí příkazu {\tt python wsgi.py} v~adresáři {\tt webapp}. V~případě, 
 do této cesty buď přesunout, nebo zavolat příkaz {\tt export
 LD\_LIBRARY\_PATH=<cesta k~libraptor.so>}. Po spuštění aplikace je možné si
 otevřít prohlížeč na stránce, která se vypíše během spouštění aplikace.
-I~v~případě, že spoušíme aplikaci lokálně, je potřeba mít k~dispozici připojení
+I~v~případě, že spouštíme aplikaci lokálně, je potřeba mít k~dispozici připojení
 k~internetu, protože mapové podklady a javascriptové knihovny se načítají ze
 serverů třetích stran.
 
 Po otevření webové aplikace je zobrazené hlavní okno s~mapou. Interakce s~mapou,
-kromě základního posouvání a zvětšování, probíhá klinutím na bod. Prvním
+kromě základního posouvání a zvětšování, probíhá kliknutím na bod. Prvním
 kliknutím je zvolen výchozí bod, ze kterého hledat, druhým kliknutím je zvolen
 cílový bod do kterého se hledá trasa. Volbou cílového bodu je odeslán požadavek
 na vyhledání trasy. Po vyhledání jsou v~levém sloupci zobrazená shrnutí

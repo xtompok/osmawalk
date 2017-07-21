@@ -30,7 +30,7 @@ dat a tento způsob se ukázal nejefektivnější z~jednoduchých způsobů vkl�
 Pro další zpracování jsme využili databázi, protože příprava dat je velmi
 podobná práci s~databází -- zpracováváme velké množství nezávislých objektů či
 jejich dvojic, na což jsou databázové systémy vhodné a dobře připravené. Využití
-nadstavby PostGIS pak zjendnodušuje geometrické operace s~prvky, protože tyto
+nadstavby PostGIS pak zjednodušuje geometrické operace s~prvky, protože tyto
 operace má již připravené jako funkce. Samotný přepis do PostgreSQL byl vykonán
 v~rámci studentského fakultního grantu, dokumentace k~němu níže uvedená vznikla
 až v~rámci diplomové práce. Také ty části přípravy dat, které operují se
@@ -119,7 +119,7 @@ tedy třeba porovnávat dvojice bodů, které jsou od sebe příliš vzdáleny. 
 jsme techniku proložených čtvercových sítích, kde mapový výřez rozdělíme
 čtvercovou sítí na čtverce $100\times100$\,metrů, čtverce očíslujeme a každému
 bodu přiřadíme číslo čtverce, ve kterém leží. Poté čtvercovou síť posuneme
-o~50\,metrů v~jednom směru, v~druhém směru a uhlopříčně a akci pokaždé opakujeme.
+o~50\,metrů v~jednom směru, v~druhém směru a úhlopříčné a akci pokaždé opakujeme.
 U~každého bodu si nyní pamatujeme čísla čtyř čtverců, ve kterých bod leží. 
 Pokud nyní vezmeme libovolné 2 body, které jsou k~sobě blíže než 50\,m, tak
 budou mít společný některý čtverec. Pro důkaz si představme první čtverec jako
@@ -127,7 +127,7 @@ fixní. Pokud jsou oba body v~něm, jsme hotovi. Pokud v~něm oba nejsou, pak je
 leží uvnitř v~nějakém kvadrantu a druhý vně ve stejném či sousedním kvadrantu.
 Pro každou dvojici kvadrantů můžeme vybrat čtverec z~ostatních posunutí, který
 oba kvadranty pokrývá. Toto je možné pouze pro čtverce, jejichž hrana je dlouhá
-alespoň dvojnásobek maximální vzádlenosti dvojice bodů, pokud bychom tedy chtěli
+alespoň dvojnásobek maximální vzdálenosti dvojice bodů, pokud bychom tedy chtěli
 vytvářet zkratky delší než 50 metrů, museli bychom odpovídajícím způsobem
 zvětšit i čtverce.
 
@@ -189,7 +189,7 @@ jednoduchého programu v~C vytvořen výstupní soubor PBF s~vyhledávacím graf
 údaji o~vazbě na jízdní řád. V~tomto kroku je také kontrolována dosažitelnost
 všech vrcholů grafu a je vybrána největší souvislá komponenta, která obsahuje
 alespoň polovinu vrcholů. Samotné vyhledávání pak hledá vždy v~souvislém grafu.
-(\TODO zmínit i v~obecném popisu) Protože při změně jízdních řádů dochází ke změnám
+Protože při změně jízdních řádů dochází ke změnám
 očíslování zastávek, je potřeba přegenerovat i tu část generování vyhledávacího
 grafu, která zajišťuje párování zastávek. Tato část není výpočetně náročná, je
 proto možné ji spouštět při každé změně jízdních řádů. Naopak není přegenerování
@@ -215,7 +215,7 @@ knihovna LibUCW. Takto můžeme snadno alokovat velké množství položek a pak
 všechny naráz na konci uvolnit.
 
 Protože při vyhledávání zkoumáme nejen čas příjezdu, ale i penaltu, může se
-v~haldě vyskytunout jeden grafový vrchol vícekrát s~různými časy a penaltami.
+v~haldě vyskytnout jeden grafový vrchol vícekrát s~různými časy a penaltami.
 
 \subsection{Majorizace vrcholů}
 Při vyhledávání trasy často při zpracovávání hrany narazíme na situaci, kdy
@@ -307,7 +307,7 @@ nalezeného částečného spojení, jsme stanovili na 1\,000\,000. Tuto konstan
 kódu reprezentuje makro {\tt PENALTY\_INFINITY}.
 
 \subsection{Konfigurační soubor}
-Pro konfiguraci vylhedávání slouží soubor {\tt config/speeds.yaml}, ve kterém
+Pro konfiguraci vyhledávaní slouží soubor {\tt config/speeds.yaml}, ve kterém
 jsou uvedeny jednak rychlosti pěší chůze, jednak se zde konfigurují připravené
 penalty. Detailní popis konfiguračních parametrů je uveden v kapitole
 \ref{ch:uzivatelska-dokumentace}, nyní se budeme zabývat implementací. Pokud
@@ -316,15 +316,15 @@ například typ objektu nebo typ dopravního prostředku, je připraveno pole
 pokrývající všechny možné hodnoty tohoto výčtu a jsou do něj dosazeny výchozí
 hodnoty, pro konstantní parametry 0, pro parametry sloužící jako koeficienty 1.
 Následně jsou tyto výchozí hodnoty přepsány hodnotami uvedenými v konfiguraci.
-
-\TODO rychlosti, ostatni parametry
+Pro penalty za linky je vytvořeno pole struktur {\tt line\_config\_t}, ve
+kterých je pak uložena dvojice linka$\rightarrow$penalta. 
 
 \subsection{Knihovna algoritmu RAPTOR}
 Knihovnu implementující algoritmus RAPTOR jsme navrhli jako oddělenou knihovnu,
 stejně tak skripty zajišťující přípravu dat z~jízdních řádů jsou také oddělené,
 tudíž lze snadno implementovat vyhledávač využívající pouze algoritmus RAPTOR
-bez závislostí na zbytku vyhledávacího kódu. V~rámci přípravných prací jsme
-takový implementovali, (\TODO nazvy souboru, ...). Tento vyhledávač ale
+bez závislostí na zbytku vyhledávacího kódu a v~rámci přípravných prací jsme
+takový implementovali. Tento vyhledávač ale
 nevyužívá žádné pěší přesuny, ani mezi zastávkami stejného jména, pro praktické
 vyhledávání není tedy příliš vhodný, sloužil pro testování správnosti úprav
 jízdních řádů.
@@ -332,7 +332,7 @@ jízdních řádů.
 Knihovnu jsme implementovali jako sdílenou knihovnu v~jazyce C, tudíž je snadno
 navázatelná na zbytek vyhledávacího algoritmu. Knihovna obsahuje 3 hlavní
 funkce -- {\tt gen\_tt\_for\_date}, {\tt search\_con} a {\tt
-search\_stop\_cons}. Funkce {\tt search\_con} implementuje celý algortimus
+search\_stop\_cons}. Funkce {\tt search\_con} implementuje celý algoritmus
 RAPTOR, v~naší práci se dále nevyužívá.
 
 Funkce {\tt gen\_tt\_for\_date} zajišťuje přípravu vyhledávacích dat pro
@@ -388,4 +388,7 @@ frontendu ke zpracování. Přesný formát předávaných dat je popsán v~sekc
 Frontend je napsán v~JavaScriptu s~použitím knihovny Leaflet pro operace
 s~mapou. Jako mapový podklad je použita mapa od
 MapBoxu\footnote{\url{https://www.mapbox.com/}}, přes kterou
-jsou vykreslovány jednotlivé nalezené trasy. (\TODO dopsat, ale jak konkrétně?)
+jsou vykreslovány jednotlivé nalezené trasy. Při nalezení trasy je také
+dynamicky vytvořena tabulka s informacemi o jednotlivých trasách. Klikáním na
+trasy je možné je zobrazovat a skrývat. Komunikace s backendem je řešena
+asynchronně pomocí callbacků.

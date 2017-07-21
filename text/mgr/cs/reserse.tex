@@ -35,7 +35,7 @@ vede navíc hrana do odpovídajícího odjezdového vrcholu. Všechny přestupn�
 mohou být ohodnocené potřebným časem na přestup mezi linkami. 
 \begin{figure}[h]
   \centering
-    \includegraphics[scale=1.5]{../img/time-expanded.pdf}
+    \includegraphics[width=\textwidth]{../img/time-expanded.pdf}
   \caption{Příjezdové (žlutě), odjezdové (červeně) a zastávkové (modře) vrcholy.
   Všimněte si, že z příjezdu 1 lze stihnout odjezd 1, ale jen proto, že jsou
   blízko sebe, obecný spoj odjíždějící ze zastávky v čase odjezd 1 bychom
@@ -73,7 +73,7 @@ opět přecházíme na místní silnice, abychom dosáhli cíle. U~cestní sít�
 příprava dat provádí obdobně -- jsou nalezeny významné body, přes které
 přecházíme na silnice vyšších tříd a cesty na dlouhé vzdálenosti jsou pak
 rozděleny na hledání cesty do významných bodů a hledání cesty mezi nimi. Tato
-hierarchie může mít i několik stupňů a cesty mezi výzmanými body jsou často
+hierarchie může mít i několik stupňů a cesty mezi významnými body jsou často
 předpočítány.
 
 Obdobně se dá vytvořit podobná hierarchie i u~hledání spojení MHD, kdy si
@@ -82,7 +82,7 @@ mezilehlé zastávky, kde stejně nemůžeme na nic přestoupit. Problém této
 reprezentace pro nás je s~přidáváním pěších tras, protože je potřeba mít všechny dopředu
 spočítané. Předvýpočet je stejně tak problematický i u~cestní sítě, protože
 předpokládá pevné nastavení cestovních rychlostí a preferencí cest, na základě
-kterých jsou nalezeny ulzové body a vypočítány zkratky. Náš cíl je umožnit
+kterých jsou nalezeny uzlové body a vypočítány zkratky. Náš cíl je umožnit
 uživateli tyto parametry si zvolit při hledání dle svých potřeb, proto pro nás
 není tento model vhodný. 
 

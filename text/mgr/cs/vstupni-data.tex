@@ -165,10 +165,10 @@ spojení používáme následující položky:
 \subsection{Protocol Buffers}
 Protocol Buffers (PBF)\cite{PBF} je způsob uložení strukturovaných dat. Byl navržen
 Googlem a je používán v~případech, kdy potřebujeme přenést po síti zprávy
-s~danou strukturou. Formát podoporuje různé datové typy (integer různých přesností
+s~danou strukturou. Formát podporuje různé datové typy (integer různých přesností
 a znaménkovosti, čísla s~plovoucí řádovou čárkou, řetězce znaků, \dots) a
 strukturování zpráv. Komunikace probíhá ve fázích naplnění zprávy, její
-zabalení, odeslání, přijmutí a rozbalení. Při zabalení jsou data zkompirmována
+zabalení, odeslání, přijmutí a rozbalení. Při zabalení jsou data zkomprimovaná
 jednoduchým algoritmem, aby například malá čísla nezabírala zbytečně mnoho
 místa. Existují PBF verze 2 a verze 3. V~naší práci používáme verzi 2, protože
 v~době psaní bakalářské práce, kterou v~naší práci rozšiřujeme, nebyly PBF verze 3
@@ -230,11 +230,11 @@ je obtížné počítat vzdálenosti mezi dvěma body.
 \subsection{UTM}
 Univerzální příčný Mercatorův systém souřadnic (UTM)\cite{UTM} je způsob
 určování polohy na povrchu země založený na mřížkách. Povrch země je rozdělen na
-60 zón a každá zóna je pak robrazena pomocí trasverzálního Mercatorova
+60 zón a každá zóna je pak zobrazena pomocí příčného Mercatorova
 zobrazení. Souřadnice v~rámci jedné zóny jsou pak udávány v~metrech, lze proto
 snadno počítat vzdálenosti. Pozice bodu na Zemi se udává pomocí čísla zóny a
 pozice uvnitř ní. Díky tomu, že UTM kvůli rozdělení na zóny zobrazuje vždy úzký
-pás Země, nevzniká velké zkreslení vlivem válocového zobrazení. Praha a většina
+pás Země, nevzniká velké zkreslení vlivem válcového zobrazení. Praha a většina
 dalších měst se také nenachází v polárních oblastech, kde je zkreslení velké,
 nebo se používá jiný systém souřadnic.
 

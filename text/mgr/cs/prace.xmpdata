@@ -2,6 +2,11 @@
 
 \Author{Tomáš Pokorný}
 \Title{Plánovač spojení ve městě}
-\Keywords{klíčová slova\sep další taková\sep ještě jiná}
-\Subject{Abstrakt práce}
+\Keywords{vyhledávač spojení\sep jízdní řád\sep penalta} 
+\Subject{Cestování po městě je součástí každodenního života mnoha lidí. Zvolit správnou
+kombinaci pěší chůze a cestování hromadnou dopravou bývá náročné, obzvlášť v
+neznámých částech města. Zpracovali jsme veřejně dostupná data a vytvořili
+vyhledávač kombinovaných tras pěšky a hromadnou dopravou. Vyhledávač byl navržen
+s důrazem na možnost přizpůsobit hledané trasy preferencím uživatelů a lze jej
+použit i jako webovou aplikaci nebo sdílenou knihovnu.}
 \Publisher{Univerzita Karlova}
