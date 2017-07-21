@@ -84,7 +84,7 @@ jednotlivé řádky zapsány za sebou.
 
 \section{Jízdní řády}
 Data o~jízdních řádech jsou očekávána ve formátu General Transit Feed
-Specification (GTFS) \cite{GTFS}, který je dobře specifikovaný a široce používaný ve světě.
+Specification (GTFS)\cite{GTFS}, který je dobře specifikovaný a široce používaný ve světě.
 Konkrétně pro testování byla použita data o~pražské integrované dopravě od IPR
 Praha.\footnote{\url{http://opendata.iprpraha.cz/DPP/JR/jrdata.zip}} Tato data
 obsahují metro, tramvaje, autobusy a přívozy v~Praze a okolí, bohužel neobsahují
@@ -163,7 +163,7 @@ spojení používáme následující položky:
 \section{Používané formáty dat}
 
 \subsection{Protocol Buffers}
-Protocol Buffers (PBF) \cite{PBF} je způsob uložení strukturovaných dat. Byl navržen
+Protocol Buffers (PBF)\cite{PBF} je způsob uložení strukturovaných dat. Byl navržen
 Googlem a je používán v~případech, kdy potřebujeme přenést po síti zprávy
 s~danou strukturou. Formát podoporuje různé datové typy (integer různých přesností
 a znaménkovosti, čísla s~plovoucí řádovou čárkou, řetězce znaků, \dots) a
@@ -179,7 +179,7 @@ být základní datový typ nebo jiná zpráva, položky mohou být povinné, vo
 nebo opakované. Každá položka má jméno, typ a číslo, které ho identifikuje
 v~binární podobě zprávy. Zprávy se popisují pomocí vlastního jazyka, ze kterého se
 pak pomocí kompilátoru vytvoří vazby do jednotlivých programovacích jazyků. 
-Podrobnou dokumentaci včetně tutoriálů lze najít na stránkách projektu. \cite{PBF}
+Podrobnou dokumentaci včetně tutoriálů lze najít na stránkách projektu.\cite{PBF}
 
 \subsection{JavaScript Object Notation}
 JavaScript Object Notation\cite{JSON} (JSON) je formát navržený pro předávání dat ve
@@ -221,14 +221,14 @@ převedeny do UTM a tak jsou dále uchovávány. Při přípravě výsledků vyh
 jsou body na trasách převedeny zpět do WGS84 a takto jsou vráceny. Veškerá data
 předávaná knihovně či vrácená knihovnou jsou ve WGS84.
 \subsection{WGS84}
-World Geodetic System 1984 (WGS84) \cite{WGS84} je geodetický standard
+World Geodetic System 1984 (WGS84)\cite{WGS84} je geodetický standard
 definující souřadnicový systém a referenční elipsoid pro popis polohy objektů na
 povrchu Země. Využívá polárních souřadnic, zeměpisná šířka se určuje od rovníku,
 zeměpisná délka od \uv{IERS Reference Meridian}. Výhodou je pokrytí celého
 povrchu Země jedním systémem, vzhledem k~použití elipsoidu a polárních souřadnic
 je obtížné počítat vzdálenosti mezi dvěma body.
 \subsection{UTM}
-Univerzální příčný Mercatorův systém souřadnic (UTM) \cite{UTM} je způsob
+Univerzální příčný Mercatorův systém souřadnic (UTM)\cite{UTM} je způsob
 určování polohy na povrchu země založený na mřížkách. Povrch země je rozdělen na
 60 zón a každá zóna je pak robrazena pomocí trasverzálního Mercatorova
 zobrazení. Souřadnice v~rámci jedné zóny jsou pak udávány v~metrech, lze proto

@@ -8,7 +8,7 @@ jede nějaký spoj. Pro reprezentaci sítí hromadné dopravy se vyvinuly různ�
 způsoby, dále představíme nejobvyklejší z~nich.
 
 \section{Time expanded modely}
-Time-expanded modely \cite{time-expanded} jsou konstruovány tak, aby ceny hran
+Time-expanded modely\cite{time-expanded} jsou konstruovány tak, aby ceny hran
 byly konstantní a šlo na takovýto graf použít běžné vyhledávání v~grafu.
 V~těchto modelech jsou jako vrcholy dvojice (zastávka, čas odjezdu) a (zastávka,
 čas příjezdu) pro každý čas odjezdu a příjezdu z~každé zastávky. Hrany pak
@@ -35,7 +35,7 @@ mohou být ohodnocené potřebným časem na přestup mezi linkami.
 \TODO obrázek
 
 \section{Time-dependent modely}
-Time-dependent modely \cite{time-dependent}\TODO skloňování se snaží odstranit problém
+Time-dependent modely\cite{time-dependent} se snaží odstranit problém
 s~velikostí grafu hromadné dopravy. Místo toho, abychom měli pro každý spoj
 zvláštní hranu, sdružíme spoje do linek, kde všechny spoje jedné linky mají
 stejnou posloupnost zastávek. Vrcholy tentokrát budou jen jeden pro každou
@@ -56,7 +56,7 @@ když na něj někde nastoupíme, tak snadno můžeme do dalšího vyhledáván�
 průjezdní stanice.  
 
 \section{Contraction hierarchy}
-Contraction hierarchy \cite{CH} je způsob předzpracování dat tak, aby následné
+Contraction hierarchy\cite{CH} je způsob předzpracování dat tak, aby následné
 vyhledávání nemuselo procházet celý graf. U~cestní sítě tomu odpovídá obvyklý
 postup při cestování -- nejprve cestujeme po místních silnicích, abychom se
 dostali na silnice první třídy a dálnice, po těch pak dojedeme blízko cíle, kde
@@ -78,7 +78,7 @@ uživateli tyto parametry si zvolit při hledání dle svých potřeb, proto pro
 není tento model vhodný. 
 
 \section{RAPTOR}
-RAPTOR (Round-Based Public Transport Routing) \citep*{RAPTOR} je oproti
+RAPTOR (Round-Based Public Transport Routing)\cite{RAPTOR} je oproti
 time-dependent modelům založen na zcela odlišných myšlenkách a při svém běhu
 nevyužívá algoritmy pro procházení grafu. RAPTOR se snaží využít co nejvíce vlastností,
 kterými se odlišuje síť veřejné dopravy od obyčejné cestní sítě. Také umožňuje

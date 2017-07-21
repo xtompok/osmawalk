@@ -389,7 +389,7 @@ pěší segmenty a segmenty MHD. Typ segmentu je uložen u~každého segmentu v~
 \section{Formáty používané ve webové aplikaci}
 \subsection{Výsledky vyhledávání}
 Výsledky vyhledávání jsou předávány z~backendu do frontendu webové aplikace
-(viz \ref{ch:implementace:webapp}) pomocí formátu JSON. Ten je tvořen polem vyhledaných
+(viz \ref{ch:implementace:webapp}) pomocí formátu JSON\cite{JSON}. Ten je tvořen polem vyhledaných
 tras, kde každá trasa je slovník s~následujícími klíči:
 \begin{itemize}
 	\item {\tt time} udávající čas příjezdu do cíle
@@ -397,7 +397,8 @@ tras, kde každá trasa je slovník s~následujícími klíči:
 	\item {\tt penalty} udávající penaltu vyhledané trasy
 	\item {\tt geojson} obsahující grafickou reprezentaci nalezené trasy. 
 \end{itemize}
-Grafická reprezentace nalezené trasy je reprezentována ve formátu GeoJSON a
+Grafická reprezentace nalezené trasy je reprezentována ve formátu
+GeoJSON\cite{GeoJSON} a
 obsahuje lomené linie jednotlivých typů popisující průběh cesty a bodové prvky
 pro nástup a výstup z~prostředku MHD.
 
