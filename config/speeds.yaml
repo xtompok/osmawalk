@@ -27,14 +27,14 @@ heights:
         upscale: 0
         downscale: 0
 pt-time-penalties:
-        tram: 1
-        metro: 1
-        rail: 1
-        bus: 1
-        ferry: 1
-        cable-car: 1
-        gondola: 1
-        funicular: 1
+        tram: 0
+        metro: 0
+        rail: 0
+        bus: 0
+        ferry: 0
+        cable-car: 0
+        gondola: 0
+        funicular: 0
 pt-fixed-penalties:
         tram: 0
         metro: 0
@@ -44,8 +44,7 @@ pt-fixed-penalties:
         cable-car: 0
         gondola: 0
         funicular: 0
-line-penalties: 
-        201: 0
+# line-penalties: 
 max-vehicles: 10
 geton-penalty: 0
 min-wait: 30
