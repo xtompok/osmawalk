@@ -1,13 +1,121 @@
 \chapter*{Závěr}
 \addcontentsline{toc}{chapter}{Závěr}
 
-zrychleni - potencialova heuristika, viz MJ - skripta z GA
+\section{Zhodnocení}
+Úlohou práce bylo zpracovat veřejně dostupná mapová data a data o jízdních
+řádech a vytvořit z nich formát vhodný pro vyhledávání spojení kombinujících
+pěší přesuny a přesuny hromadnou dopravou. Součástí práce měl být také
+vyhledávač, který bude umožňovat nad připravenými daty vyhledávat spojení a bude
+možné ho parametrizovat.
 
-skriptovani vypoctu penalt
+Cíl práce se nám podařilo splnit, pro práci s mapovými daty jsme využili
+dřívější bakalářskou práci, kterou jsme dále rozšířili a datový formát
+připravili na propojení s daty z jízdních řádů. Pro ukládání dat z jízdních
+řádů jsme navrhli formát vycházející z potřeb algoritmu RAPTOR pro hledání v
+sítích hromadné dopravy. Připravili jsme skripty pro automatický převod dat
+jízdních řádů do našeho formátu a implementovali algoritmus RAPTOR jako sdílenou
+knihovnu, kterou je možné použít v jiných projektech nezávisle na zbytku naší
+práce. 
 
-Další možné rozšíření systému penalt by mohlo být například posuzování intervalů
-linek, kdy bychom mohli preferovat častěji jedoucí linky. 
+Provázali jsme data z jízdních řádů s mapovými daty a vypořádali jsme se s
+různou kvalitou zmapování zastávek veřejné dopravy v mapě. Nad výslednými daty
+jsme pak implementovali vyhledávač spojení, který je možné používat jako
+sdílenou knihovnu nebo konzolovou či webovou aplikaci. Navrhli jsme systém
+hodnocení nalezených tras pomocí penalt a umožnili jsme uživatelům snadno
+nastavovat různé penalty pomocí konfiguračního souboru. 
 
-posun odchodu podle prvniho MHD
+\section{Výsledky}
+Spojení nalezená naším vyhledávačem jsou plně srovnatelná se spojeními
+nalezenými současnými vyhledávači spojení a na rozdíl od nich můžeme zároveň
+využívat možnosti plánovat kvalitní pěší přesuny a nastavovat si parametry
+vyhledávače dle svých požadavků. Problémem zůstává nízká rychlost vyhledávání
+spojení, víme však, na která místa se zaměřit v dalších optimalizacích. Návrh
+aplikace a převedení přípravy dat do PostgreSQL se osvědčilo a umožnilo snadnou
+kontrolu výstupních dat pomocí geografického informačního systému. Rozdělení
+přípravy dat do modulů a možnost živého náhledu na zpracovávaná data výrazně
+zrychlilo a usnadnilo vyhledávání a odstraňování chyb.
 
-okolí cest
+\section{Náměty pro další rozvoj}
+Aplikace je v současné době plně použitelná pro hledání spojení lokálním
+uživatelem. Pro použití jako serverová aplikace by kromě zrychlení vyhledávání
+bylo nutné i připravit pro uživatele možnost nahrát si vlastní vyhledávací
+profily a na straně knihovny se naučit sdílet neměnná mapová data a jízdní řády
+mezi více vlákny pro úsporu paměti. 
+
+Zajímavou možností by také bylo upravit vyhledávač do podoby webové aplikace,
+optimálně i s offline daty, a to buď jako samostanou aplikaci, nebo jako plugin
+do některé ze současných mapových aplikací, například OsmAnd.
+
+\subsection{Příprava dat}
+Příprava mapových dat je již odladěný proces, který je rychlý a nenáročný na
+operační paměť, případné změny by tudíž mířily k dalšímu vylepšování
+připravovaných dat. Jednou z možností, jak již bylo naznačeno v kapitole
+\ref{ch:vysledky}, by bylo zkoumat okolí cest a mít u hran v grafu uložen typ
+okolí -- jestli se nacházíme uvnitř zástavby, v parku či u velké silnice. Mohly
+by tak být penalizovány trasy podle \uv{krásy}.
+
+Přípravu dat jízdních řádů by bylo vhodné přepsat buď jako databázovou aplikaci,
+když svá data stejně bere z databáze, nebo jako samostatnou aplikaci v
+kompilovaném jazyce, která by byla paměťově úspornější. Do výstupního formátu
+jízdních řádů by bylo vhodné přidat různé atributy, které se obvykle u spojů
+vyskytují: nízkopodlažnost vozidla, název konečné a další informace, které by
+uživatelům usnadnily cestování.
+
+\subsection{Zrychlení vyhledávání}
+Pro jiné než lokální použití na počítači je nutné zrychlit vyhledávač spojení.
+Zrychlovat vyhledávání je v současné době možné jak úpravou kódu na
+efektivnější, tak změnami v samotném vyhledávacím algoritmu. Jako první se
+nabízí třídit položky u jednotlivých vrcholů, aby bylo možné majorizace hledat
+binárním vyhledáváním místo průchodu celým polem. Z principu majorizace totiž u
+položek setříděných podle času vzestupně klesá penalta, protože v opačném
+případě by položka s větším časem a penaltou byla majorizována. Tento přístup by
+přinesl složitost do přidávání nových položek, ale zrychlil by rozhodování, zda
+položku budeme vůbec přidávat. 
+
+Další možnost zrychlení je přímo ve vyhledávacím algoritmu, kdy můžeme zkoušet
+různé jiné typy hald či se pomocí vhodné heuristiky snažit hledat více směrem k
+cíli, jak je uvedeno v \cite{mj-ga}.
+
+\subsection{Vylepšení vyhledávání}
+Mimo zrychlení jsme během práce narazili na různé možnosti, jak zlepšit kvalitu
+vyhledávání. Koncept majorizovaných spojení, jak jsme ho navrhli, dává poměrně
+dobré výsledky, ale může se snadno stát, že dojde k majorizaci některých
+spojení, které bychom chtěli zachovat. Typická situace je několik možných
+začátků trasy, které všechny vedou na stejný spoj. U nástupního vrcholu do
+tohoto spoje se pak sejde několik částečných tras a z principu penalt bude dále
+pokračovat jen jeden z nich a to ten s nejmenší penaltou a ostatní se zahodí,
+protože mají všechny stejný čas odjezdu. Možným řešením je nemajorizovat jinou
+částečnou trasu, která se liší použitými spoji, bylo by však potřeba zjistit,
+zda pak vyhledaných spojení nebude příliš mnoho.  
+
+Obdobným problémem je preference častějších spojení, kdy bývá výhodné jít na
+zastávku, odkud jezdí spoje často a případný ujetý nebo zpožděný spoj nám
+nezkazí celý zbytek cesty. K tomuto problému je možné přistupovat dvěma způsoby,
+jednak lze pro každou vyhledanou trasu zkoumat alternativy v případě ujetí
+jednotlivých spojů po cestě, jednak lze frekvenci spojení nějakým způsobem
+zanést do systému penalt a preferovat tak frekventovanější trasy před ostatními. 
+
+Systém penalt lze rozšiřovat mnoha dalšími způsoby, například zavést směrové
+penalty. Mezi takové by mohla patřit penalta za chůzi do schodů, ale směrové
+penalty dávají smysl u spojů MHD, kdy poblíž konečné mohou být spoje směrem na
+konečnou často zpožděné, zatímco spoje z konečné bývají spolehlivé a jedou včas.
+Dalším vylepšením penaltového systému by byla konfigurace pomocí vhodného
+skriptovacího jazyka na místo konfiguračního souboru, kdy by bylo možné si
+výpočet penalt přizpůsobit přesně podle svých potřeb a nebylo by pak potřeba
+znovu překládat celý program. Tato úprava by ale mohla mít negativní dopad na
+rychlost vyhledávání.
+
+Kombinované vyhledávání pěších tras s přesuny hromadnou dopravou má ještě jedno
+specifikum a tím je čas nutného odchodu z výchozího místa. Pokud jdeme několik
+stovek metrů na autobus, který jezdí jednou za půl hodiny, pak není třeba
+vycházet hned po nalezení spoje, ale stačí nám vyjít například až za 10 minut a
+do cíle dorazíme ve stejný čas. Tato situace je řešitelná poměrně snadno
+posunutím pěší části trasy před prvním přejezdem MHD tak, aby pěší trasa na spoj
+MHD akorát navazovala. Problém je ale obecnější, pokud autobus s půlhodinovým
+intervalem používáme až na konci cesty, pak nestačí jen posunout první pěší
+část, ale mohli bychom jet i pozdější tramvají a tudíž by bylo potřeba i změnit
+některé spoje na trase či celou část trasy. Problém se dá (neefektivně) řešit
+postupným hledáním v pozdějších časech, pokud na cestě narazíme na spoj s
+velkým intervalem, ale pro efektivnější řešení by bylo potřeba nastudovat
+potřebnou literaturu, provést měření a pravděpodobně by se jednalo o velký zásah
+do vyhledávacího algoritmu.
