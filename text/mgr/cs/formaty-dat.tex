@@ -379,7 +379,7 @@ obsahuje následující položky:
 Výsledek vyhledávání je interně reprezentován typem {\tt
 search\_result\_t}, který je svou strukturou velmi podobný výše popsanému PBF.
 
-Vyhledané trasy je možné uložit jako GPX\cite{GPX}. V~naší aplikaci používáme pouze trasy, každá
+Vyhledané trasy je možné uložit jako GPX \cite{GPX}. V~naší aplikaci používáme pouze trasy, každá
 nalezená vyhledaná trasa odpovídá jedné trase v~GPX, tato trasa je rozdělena na
 pěší segmenty a segmenty MHD. Typ segmentu je uložen u~každého segmentu v~sekci
 {\tt <extensions>} v~tagu {\tt <type>}. Každá trasa má ve své sekci {\tt
@@ -389,7 +389,7 @@ pěší segmenty a segmenty MHD. Typ segmentu je uložen u~každého segmentu v~
 \section{Formáty používané ve webové aplikaci}
 \subsection{Výsledky vyhledávání}
 Výsledky vyhledávání jsou předávány z~backendu do frontendu webové aplikace
-(viz \ref{ch:implementace:webapp}) pomocí formátu JSON\cite{JSON}. Ten je tvořen polem vyhledaných
+(viz \ref{ch:implementace:webapp}) pomocí formátu JSON \cite{JSON}. Ten je tvořen polem vyhledaných
 tras, kde každá trasa je slovník s~následujícími klíči:
 \begin{itemize}
 	\item {\tt time} udávající čas příjezdu do cíle
@@ -398,7 +398,7 @@ tras, kde každá trasa je slovník s~následujícími klíči:
 	\item {\tt geojson} obsahující grafickou reprezentaci nalezené trasy. 
 \end{itemize}
 Grafická reprezentace nalezené trasy je reprezentována ve formátu
-GeoJSON\cite{GeoJSON} a
+GeoJSON \cite{GeoJSON} a
 obsahuje lomené linie jednotlivých typů popisující průběh cesty a bodové prvky
 pro nástup a výstup z~prostředku MHD.
 

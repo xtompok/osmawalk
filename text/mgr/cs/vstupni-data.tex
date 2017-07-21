@@ -6,16 +6,16 @@ data, která obsahují silnice, cesty, budovy a další mapové prvky. Druhým z
 jsou data o~jízdních řádech, která obsahují linky, zastávky a spoje.
 
 \section{Mapová data}
-Mapová data jsou použita z~projektu OpenStreetMap\cite{OSM} (OSM). Tato data neobsahují
+Mapová data jsou použita z~projektu OpenStreetMap \cite{OSM} (OSM). Tato data neobsahují
 informace o~nadmořské výšce jednotlivých bodů; k~doplnění nadmořské výšky jsou
 použita data z~projektu NASA Shuttle Radar Topography Mission (SRTM), která jsou
 lineárně interpolována pro získání nadmořských výšek jednotlivých bodů v~mapě.
 
 O~datech OSM a jejich problémech jsme již rozsáhle pojednávali v~bakalářské
-práci\cite{bakalarka}, níže citujeme obecný úvod a popis základních primitiv. 
+práci \cite{bakalarka}, níže citujeme obecný úvod a popis základních primitiv. 
 \newcommand{\tuc}{\bf}
 \subsection{Projekt OpenStreetMap}
-Projekt OpenStreetMap\cite{OSM} vznikl v~Anglii v~roce 2004 a jeho prvotním cílem bylo
+Projekt OpenStreetMap \cite{OSM} vznikl v~Anglii v~roce 2004 a jeho prvotním cílem bylo
 vytvořit volně dostupná geografická data pro Velkou Británii. Iniciativa se
 postupně rozrostla do celého světa a dnes mapu pomáhá tvořit přes milion
 dobrovolníků. Česká republika je dnes poměrně kvalitně pokryta a zvláště velká
@@ -61,10 +61,10 @@ plochy resp. díry v~ploše.
 
 \section{Výšková data}
 O~výškových datech jsme také pojednávali v~bakalářské práci, opět
-citujeme\cite{bakalarka}:
+citujeme \cite{bakalarka}:
 Abychom mohli správně odhadnout náročnost pěší trasy, musíme znát i informace
 o~nadmořské výšce jednotlivých bodů. Stejně tak jako většina jiných projektů jsme
-použili data SRTM\cite{SRTM}, což jsou volně dostupná výšková data pro celý
+použili data SRTM \cite{SRTM}, což jsou volně dostupná výšková data pro celý
 svět.
 
 Shuttle Radar Topography Mission byl projekt NASA, kdy při letu raketoplánu
@@ -84,7 +84,7 @@ jednotlivé řádky zapsány za sebou.
 
 \section{Jízdní řády}
 Data o~jízdních řádech jsou očekávána ve formátu General Transit Feed
-Specification (GTFS)\cite{GTFS}, který je dobře specifikovaný a široce používaný ve světě.
+Specification (GTFS) \cite{GTFS}, který je dobře specifikovaný a široce používaný ve světě.
 Konkrétně pro testování byla použita data o~pražské integrované dopravě od IPR
 Praha.\footnote{\url{http://opendata.iprpraha.cz/DPP/JR/jrdata.zip}} Tato data
 obsahují metro, tramvaje, autobusy a přívozy v~Praze a okolí, bohužel neobsahují
@@ -163,7 +163,7 @@ spojení používáme následující položky:
 \section{Používané formáty dat}
 
 \subsection{Protocol Buffers}
-Protocol Buffers (PBF)\cite{PBF} je způsob uložení strukturovaných dat. Byl navržen
+Protocol Buffers (PBF) \cite{PBF} je způsob uložení strukturovaných dat. Byl navržen
 Googlem a je používán v~případech, kdy potřebujeme přenést po síti zprávy
 s~danou strukturou. Formát podporuje různé datové typy (integer různých přesností
 a znaménkovosti, čísla s~plovoucí řádovou čárkou, řetězce znaků, \dots) a
@@ -179,10 +179,10 @@ být základní datový typ nebo jiná zpráva, položky mohou být povinné, vo
 nebo opakované. Každá položka má jméno, typ a číslo, které ho identifikuje
 v~binární podobě zprávy. Zprávy se popisují pomocí vlastního jazyka, ze kterého se
 pak pomocí kompilátoru vytvoří vazby do jednotlivých programovacích jazyků. 
-Podrobnou dokumentaci včetně tutoriálů lze najít na stránkách projektu.\cite{PBF}
+Podrobnou dokumentaci včetně tutoriálů lze najít na stránkách projektu. \cite{PBF}
 
 \subsection{JavaScript Object Notation}
-JavaScript Object Notation\cite{JSON} (JSON) je formát navržený pro předávání dat ve
+JavaScript Object Notation \cite{JSON} (JSON) je formát navržený pro předávání dat ve
 webových aplikacích. Díky své jednoduchosti a čitelné reprezentaci je hojně
 využíván nejen ve webových projektech, ale často i jako konfigurační jazyk.
 Vychází z~Javascriptu, datové typy v~něm jsou kromě primitivních typů slovník --
@@ -191,7 +191,7 @@ položek. Formát zpráv není dopředu dán a podpora v~programovacích jazycí
 přímo integrovaná nebo dodaná pomocí knihovny. 
 
 \subsection{GeoJSON}
-GeoJSON\cite{GeoJSON} je, jak již název napovídá, nadstavba formátu JSON pro přenos
+GeoJSON \cite{GeoJSON} je, jak již název napovídá, nadstavba formátu JSON pro přenos
 geografických informací. Z~hlediska syntaxe se jedná o~korektní JSON, který má
 ale předepsanou strukturu a názvy položek. Umožňuje ukládat body, linie, plochy,
 multipolygony a další objekty spolu s~jejich atributy a je nativně podporován
@@ -204,7 +204,7 @@ data ve formě entit uspořádaných do stromové struktury. Každá entita má 
 může mít parametry. 
 
 \subsection{GPX}
-Formát GPX\cite{GPX} je určen pro výměnu polohových dat mezi různými zařízeními s~GPS,
+Formát GPX \cite{GPX} je určen pro výměnu polohových dat mezi různými zařízeními s~GPS,
 popřípadě mobilními a jinými aplikacemi. Data jsou uložena ve formátu XML, jsou
 dělena na cesty, trasy a významné body. Každá cesta, trasa i významný bod může
 mít uložené některé informace v~předdefinovaných atributech, případně libovolné
@@ -221,14 +221,14 @@ převedeny do UTM a tak jsou dále uchovávány. Při přípravě výsledků vyh
 jsou body na trasách převedeny zpět do WGS84 a takto jsou vráceny. Veškerá data
 předávaná knihovně či vrácená knihovnou jsou ve WGS84.
 \subsection{WGS84}
-World Geodetic System 1984 (WGS84)\cite{WGS84} je geodetický standard
+World Geodetic System 1984 (WGS84) \cite{WGS84} je geodetický standard
 definující souřadnicový systém a referenční elipsoid pro popis polohy objektů na
 povrchu Země. Využívá polárních souřadnic, zeměpisná šířka se určuje od rovníku,
 zeměpisná délka od \uv{IERS Reference Meridian}. Výhodou je pokrytí celého
 povrchu Země jedním systémem, vzhledem k~použití elipsoidu a polárních souřadnic
 je obtížné počítat vzdálenosti mezi dvěma body.
 \subsection{UTM}
-Univerzální příčný Mercatorův systém souřadnic (UTM)\cite{UTM} je způsob
+Univerzální příčný Mercatorův systém souřadnic (UTM) \cite{UTM} je způsob
 určování polohy na povrchu země založený na mřížkách. Povrch země je rozdělen na
 60 zón a každá zóna je pak zobrazena pomocí příčného Mercatorova
 zobrazení. Souřadnice v~rámci jedné zóny jsou pak udávány v~metrech, lze proto

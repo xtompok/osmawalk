@@ -17,7 +17,7 @@ přípravy byl kompletně změněn. Data jsou nejprve klasifikována; pro tento 
 byl vytvořen kód v~jazyce C, který dle dodané konfigurace přiřadí typ hranám a
 nově i vrcholům. Jazyk C jsme zvolili z~důvodu rychlosti a paměťové efektivity,
 velkou roli také hrála znalost jazyka autorem. Ve většině programů, které jsme
-napsali je také využívána knihovna LibUCW\cite{LibUCW}, která poskytuje velké
+napsali je také využívána knihovna LibUCW \cite{LibUCW}, která poskytuje velké
 množství algoritmů, datových struktur a obvyklých konstrukcí v~C a je
 naprogramována s~ohledem na maximální výkon.
 
@@ -380,7 +380,7 @@ zastávky s~časem příjezdu. Přesný formát dat je uveden v~sekci Formáty d
 
 \subsection{Webová aplikace}
 \label{ch:implementace:webapp}
-Webová aplikace je napsaná v~Pythonu ve webovém frameworku Flask\cite{Flask}.
+Webová aplikace je napsaná v~Pythonu ve webovém frameworku Flask \cite{Flask}.
 Python jsme zvolili z~důvodu snadné interakce se sdílenými knihovnami pro C a
 rychlosti vývoje aplikací v~něm. Flask pak je jednoduchým webovým frameworkem,
 který se osvědčil na jiných projektech. Webová aplikace má dvě části -- backend,
@@ -401,7 +401,7 @@ je zeměpisná délka a šířka cílového bodu. Souřadnice výchozího a cíl
 jsou předány vyhledávací knihovně a počká se na vrácení výsledku hledání. Tento
 výsledek je ve formátu PBF, jak je specifikováno v~sekci \ref{ch:formaty-dat:vysledky}.
 Protože knihovna Leaflet vyžaduje pro zobrazení prostorových dat formát
-GeoJSON\cite{GeoJSON}, je potřeba nalezené trasy převést do tohoto formátu. Při
+GeoJSON \cite{GeoJSON}, je potřeba nalezené trasy převést do tohoto formátu. Při
 tomto převodu jsou současně spojeny všechny navazující hrany stejného typu
 (v~případě MHD i stejného spoje) do jedné lomené linie a také jsou přidány časy
 příchodů na zastávku a odjezdu spoje MHD v~případě nástupu do MHD a časy

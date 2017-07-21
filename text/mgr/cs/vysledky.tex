@@ -353,12 +353,12 @@ Kubánské náměstí&13:53&&\\\hline
 
 V~tomto spojení se opět projevila výhoda vyhledávačů, které mají mapové
 podklady, protože v~dané relaci je dle zkušeností výhodné nesnažit se dojet co
-nejblíže, ale jít pěšky už ze Želivského a projít skrz vinohradskou nemocnici.
+nejblíže, ale jít pěšky už ze Želivského a projít skrz Vinohradskou nemocnici.
 Mapy.cz zde daly přednost jízdě bez přestupů, ale bohužel zvolily špatnou
 tramvaj, protože linka č. 6 objíždí celé město a cesta jí proto trvá neúměrně
 dlouho. IDOS hledal spojení na Kubánské náměstí, což se pro vhodnou volbu
 přestupů ukázalo jako poměrně dobrá volba. Google Maps našly cestu skrz
-vinohradskou nemocnici, náš vyhledávač místo toho zvolil cestu přes Orionku
+Vinohradskou nemocnici, náš vyhledávač místo toho zvolil cestu přes Orionku
 která byla jen o~něco delší. Alternativní spojení byly zajímavé jak u~Google
 Maps, kde spojení vedlo dokonce až přes Anděl, tak i u~našeho
 vyhledávače, který přejel zastávku Kubánské náměstí, aby se pak do ní vrátil
@@ -463,7 +463,7 @@ spojení.
 \clearpage
 \section{Porovnání různých nastavení}
 Pro porovnání různých nastavení našeho vyhledávače jsme zvolili trasu Kolej
-17.listopadu -- Albertov, protože tato trasa poskytuje několik různých
+17.\,listopadu -- Albertov, protože tato trasa poskytuje několik různých
 alternativ spojení, tudíž jsme předpokládali, že se tyto alternativy projeví
 v~nalezených trasách. Všechna spojení byla hledána od stejného času, pracovní den
 v~brzkém odpoledni, tudíž by měl být eliminován vliv návazností, které fungují
@@ -643,7 +643,8 @@ Ačkoliv rychlost nebyla našim hlavním cílem, pro praktické nasazení je nez
 aby vyhledávač pracoval co nejrychleji. 
 
 Abychom zjistili, kde se při hledání tráví největší čas, profilovali jsme
-vyhledávač pomocí aplikace {\tt perf}. Abychom eliminovali vliv načítání mapy a
+vyhledávač pomocí aplikace {\tt
+perf}.\footnote{\url{https://perf.wiki.kernel.org/index.php/Main_Page}} Abychom eliminovali vliv načítání mapy a
 jízdního řádu, což se při běžném vylhedávání děje jen jednou při spuštění webové
 aplikace, vytvořili jsme testovací scénář pro konzolovou aplikaci. Ta si nejprve
 načetla mapová data a data jízdních řádů a potom postupně hledala různá spojení
@@ -654,7 +655,7 @@ položek z~haldy a seznamu vrcholů.
 Z~naměřených dat vyplývá, že místo, kde by se mělo optimalizovat nejdříve, je
 cyklus porovnávající, zda právě přidávaná položka do haldy není majorizována či
 naopak majorizuje nějakou jinou položku, která už v~haldě je. Ve standardním
-nastavení se v~tomto cylku stráví okolo 25\,\% času, při hledání pouze pěších
+nastavení se v~tomto cyklu stráví okolo 25\,\% času, při hledání pouze pěších
 tras je to až 50\,\%. Dalším místem v~pořadí je načítání pěší hrany při
 zpracovávání vrcholu a zjišťování, který její konec máme uvažovat. Zde si
 myslíme, že dochází ke zpomalení převážně z~důvodu přístupu na náhodné místo
