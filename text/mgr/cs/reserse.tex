@@ -29,10 +29,19 @@ vrcholy příjezdům do zastávky. Zastávkové vrcholy odpovídají každý jed
 odjezdovému vrcholu. Zastávkové vrcholy jsou spojeny hranami do posloupnosti
 stejně jako v~původním grafu. Z~příjezdového vrcholu vedou hrany do nejbližšího
 zastávkového vrcholu, do kterého se stihne pěší přesun a do všech dřívějších
-odjezdových vrcholů, do kterých se stihne pěší přesun. Ze zastávkového vrcholu
+odjezdových vrcholů, do kterých se stihne pěší přesun, viz obr.
+\ref{fig:time-expanded}. Ze zastávkového vrcholu
 vede navíc hrana do odpovídajícího odjezdového vrcholu. Všechny přestupní hrany
 mohou být ohodnocené potřebným časem na přestup mezi linkami. 
-\TODO obrázek
+\begin{figure}[h]
+  \centering
+    \includegraphics[scale=1.5]{../img/time-expanded.pdf}
+  \caption{Příjezdové (žlutě), odjezdové (červeně) a zastávkové (modře) vrcholy.
+  Všimněte si, že z příjezdu 1 lze stihnout odjezd 1, ale jen proto, že jsou
+  blízko sebe, obecný spoj odjíždějící ze zastávky v čase odjezd 1 bychom
+  nestihli.}
+  \label{fig:time-expanded}
+\end{figure}
 
 \section{Time-dependent modely}
 Time-dependent modely\cite{time-dependent} se snaží odstranit problém
