@@ -37,8 +37,8 @@ mohou být ohodnocené potřebným časem na přestup mezi linkami.
   \centering
     \includegraphics[width=\textwidth]{../img/time-expanded.pdf}
   \caption{Příjezdové (žlutě), odjezdové (červeně) a zastávkové (modře) vrcholy.
-  Všimněte si, že z příjezdu 1 lze stihnout odjezd 1, ale jen proto, že jsou
-  blízko sebe, obecný spoj odjíždějící ze zastávky v čase odjezd 1 bychom
+  Všimněte si, že z~příjezdu 1 lze stihnout odjezd 1, ale jen proto, že jsou
+  blízko sebe, obecný spoj odjíždějící ze zastávky v~čase odjezd 1 bychom
   nestihli.}
   \label{fig:time-expanded}
 \end{figure}
@@ -108,7 +108,7 @@ algoritmus. Ten postupně prochází linky po jejich zastávkách a pokud naraz�
 dosažitelnou zastávku, tak najde nejbližší spoj linky, který z~dané zastávky
 odjíždí po čase dosažitelnosti a tímto spojem se \uv{vydá} a průběžně upravuje
 časy dosažitelnosti na dalších zastávkách. Pokud po cestě nalezne další
-dosažitelnou zastávku, vybírá spoj z této zastávky z~původního spoje a
+dosažitelnou zastávku, vybírá spoj z~této zastávky z~původního spoje a
 spoje navazujícího na původní čas dosažitelnosti ten, který odjíždí dříve. Takto
 pokračuje až do konce linky. Po průchodu všech linek se všechny časy
 dosažitelnosti zkopírují do dalšího kola a algoritmus se znovu spustí. Po

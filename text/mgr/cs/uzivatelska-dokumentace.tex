@@ -21,9 +21,9 @@ výřez.
 určení vrcholů na mostech a pod zemí a přiřazení nadmořské výšky k~uzlům.
 Výstupem jsou soubory {\tt data/nodes-stage1}, {\tt data/ways-stage1} a {\tt
 data/mp-stage1} s~jednotlivými objekty. Formát uložení je popsán v~sekci Formáty
-dat\ref{ch:formaty:priprava}. Nastavení klasifikátoru je v souboru {\tt
+dat\ref{ch:formaty:priprava}. Nastavení klasifikátoru je v~souboru {\tt
 config/waytypes.yaml} pro cesty a {\tt config/nodetypes.yaml} pro body. Formát
-konfiguračních souborů je popsán v bakalářské práci \cite{bakalarka}.
+konfiguračních souborů je popsán v~bakalářské práci \cite{bakalarka}.
 \item {\tt todb.sh} slouží k~nahrání klasifikovaných dat do databáze. 
 \item {\tt postgis/process.sh} řídí úpravy dat v~databázi, uvnitř obsahuje
 volání jednotlivých kroků popsaných v~kapitole \ref{ch:implementace}.
@@ -34,46 +34,46 @@ souvislou komponentu, kterou uloží pro hledání jako soubor {\tt
 data/postgis-graph.pbf}.
 \end{enumerate}
 
-Pro přípravu jízdních řádů stačí v adresáři {\tt ext-lib/mmpf/raptor} spustit
+Pro přípravu jízdních řádů stačí v~adresáři {\tt ext-lib/mmpf/raptor} spustit
 skript {\tt update-gtfs.sh}. Tento skript stáhne aktuální jízdní řády, nahraje
 je do databáze a spustí skript {\tt prepare.py}, který připraví soubor {\tt
-tt.bin} s jízdními řády. 
+tt.bin} s~jízdními řády. 
 
 Při přípravě dat je potřeba vždy nejprve aktualizovat jízdní řády a pak teprve
-aktualizovat mapu. Při přípravě mapových dat dochází i k párování zastávek MHD a
+aktualizovat mapu. Při přípravě mapových dat dochází i k~párování zastávek MHD a
 je proto potřeba již mít vygenerované soubory sloužící ke spojení obou datových
 souborů.
 
 \section{Konfigurační soubor}
 Pro konfiguraci vyhledávání slouží soubor {\tt config/speeds.yaml}. Tento soubor
-má formát YAML a skládá se z několika úrovní asociativních polí. Kořenové pole
+má formát YAML a skládá se z~několika úrovní asociativních polí. Kořenové pole
 obsahuje jako klíče jednotlivé kategorie, které jsou nastavovány a jako hodnoty
 buď přímo nastavení, nebo další mapování uchovávající nastavení. Kategorie
 nastavení jsou následující:
 \begin{itemize}
 	\item {\tt speeds} udává absolutní rychlosti pěších přesunů. Hodnotou je mapování
-	typ cesty $\rightarrow$ rychlost v km/h.
+	typ cesty $\rightarrow$ rychlost v~km/h.
 	\item {\tt ratios} udává rychlosti pěších přesunů jako násobek rychlosti
-	pohybu po cestě typu {\tt WAY}. Hodnotou je stejné mapování jako u {\tt
-	speeds} V případě, že je definována rychlost obojím způsobem, má
+	pohybu po cestě typu {\tt WAY}. Hodnotou je stejné mapování jako u~{\tt
+	speeds} V~případě, že je definována rychlost obojím způsobem, má
 	přednost absolutní rychlost před poměrnou.
 	\item {\tt penalties} udává penaltu za jednotlivé druhy cest. Hodnotou
 	je mapování typ cesty $\rightarrow$ penalta. Penalta se násobí počtem
 	sekund strávených procházením hrany. 
-	\item {\tt heights} udává koeficient délkového prodloužení v závislosti
-	na změně výšky. Hodnotou je mapování s klíči {\tt upscale} a {\tt
-	downscale}.  Pokud je cesta do kopce, je prodloužena o {\tt <rozdíl
-	výšky>}$\times${\tt upscale} metrů, pokud je z kopce, o {\tt <rozdíl
+	\item {\tt heights} udává koeficient délkového prodloužení v~závislosti
+	na změně výšky. Hodnotou je mapování s~klíči {\tt upscale} a {\tt
+	downscale}.  Pokud je cesta do kopce, je prodloužena o~{\tt <rozdíl
+	výšky>}$\times${\tt upscale} metrů, pokud je z~kopce, o~{\tt <rozdíl
 	výšky>}$\times${\tt downscale}. Cesta může být i zkrácena, pokud by
 	celková délka byla záporná, je uvažována jako nulová.
 	\item {\tt pt-time-penalties} udává penalty za typ dopravního prostředku
-	násobené dobou strávenou v dopravním prostředku v sekundách. Hodnotou je
+	násobené dobou strávenou v~dopravním prostředku v~sekundách. Hodnotou je
 	mapování typ prostředku $\rightarrow$ penalta, kde typ prostředku je brán
-	z GTFS a psán malými písmeny, např. {\tt tram}, {\tt ferry} nebo {\tt
+	z~GTFS a psán malými písmeny, např. {\tt tram}, {\tt ferry} nebo {\tt
 	bus}.
 	\item {\tt pt-fixes-penalties} udává fixní penalty za typ dopravního
 	prostředku. Počítá se pro každou cestu daným typem prostředku jednou
-	nezávisle na délce cesty. Hodnotou je stejné mapování jako u {\tt
+	nezávisle na délce cesty. Hodnotou je stejné mapování jako u~{\tt
 	pt-time-penalties}.
 	\item {\tt line-penalties} udává penaltu za použití dané linky. Penalta
 	se počítá jednou za každé použití dané linky. Hodnotou je mapování jméno
@@ -83,9 +83,9 @@ nastavení jsou následující:
 	\item {\tt geton-penalty} udává penaltu za nástup do spoje MHD. Je to
 	fixní penalta za každý nástup. Hodnotou je číslo udávají penaltu.
 	\item {\tt min-wait} udává minimální čas od příchodu /
-	příjezdu na zastávku do odjezdu spoje. Hodnotou je čas v sekundách.
+	příjezdu na zastávku do odjezdu spoje. Hodnotou je čas v~sekundách.
 \end{itemize}
-U kategorií, které udávají penaltu, lze místo čísla napsat {\tt inf}, což znamená
+U~kategorií, které udávají penaltu, lze místo čísla napsat {\tt inf}, což znamená
 nekonečnou penaltu, tedy pokud nějaké částečná trasa dostane takovouto penaltu,
 tak už se dále nepokračuje ve vyhledávání zbytku trasy.
 
@@ -122,4 +122,4 @@ kliknutím na její souhrn v~levém sloupci. Jednotlivé části trasy jsou obar
 podle typů hran, po kterých vedou a dále jsou zvýrazněna místa přestupu na MHD.
 Detailní informace o~MHD lze zobrazit kliknutím na ikonu u~přestupní zastávky
 nebo na hranu spoje MHD. Trasy lze exportovat do GPX kliknutím na tlačítko
-\uv{Stáhnout jako GPX} v hlavičce stránky.
+\uv{Stáhnout jako GPX} v~hlavičce stránky.

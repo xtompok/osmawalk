@@ -219,12 +219,12 @@ v~haldě vyskytnout jeden grafový vrchol vícekrát s~různými časy a penalta
 
 \subsection{Majorizace vrcholů}
 Při vyhledávání trasy často při zpracovávání hrany narazíme na situaci, kdy
-právě zpracovávaná hrana zajistí do cílového vrcholu dřívější příchod s nižší
+právě zpracovávaná hrana zajistí do cílového vrcholu dřívější příchod s~nižší
 penaltou než nějaká jiná hrana, kterou jsme již do haldy přidali dříve. Měření
-na datech pro Prahu ukazují, že 20\,\% přidaných položek do haldy je v průběhu
-algoritmu majorizováno. V případě, že aktuální hrana majorizuje nějakou položku
-v haldě, pak tuto položku z haldy smažeme a smažeme ji i ze seznamu u vrcholu,
-ke kterému náleží, protože se tato položka nebude vyskytovat v žádné nalezené
+na datech pro Prahu ukazují, že 20\,\% přidaných položek do haldy je v~průběhu
+algoritmu majorizováno. V~případě, že aktuální hrana majorizuje nějakou položku
+v~haldě, pak tuto položku z~haldy smažeme a smažeme ji i ze seznamu u~vrcholu,
+ke kterému náleží, protože se tato položka nebude vyskytovat v~žádné nalezené
 trase.
 
 \subsection{Vyhledávání přes půlnoc}
@@ -242,19 +242,19 @@ půlnoci, použijeme oba jízdní řády, jinak pouze ten pro současný den.
 Aby bylo možné hledat co nejvhodnější trasy pro různé požadavky, implementovali
 jsme obecné funkce pro výpočet penalty pro jednotlivé události, které mohou na
 trase nastat. Pro základní parametrizaci spojení jsme implementovali několik
-různých druhů penalt, které si uživatel může zvolit v konfiguračním souboru.
-Jejich popis je uveden v kapitole \ref{ch:uzivatelska-dokumentace}.  
+různých druhů penalt, které si uživatel může zvolit v~konfiguračním souboru.
+Jejich popis je uveden v~kapitole \ref{ch:uzivatelska-dokumentace}.  
 
 Protože požadavky na preferenci různých typů tras mohou být velmi
 různorodé a je těžké je obecně parametrizovat, očekáváme, že si uživatel
 případně upraví funkce pro výpočet penalt podle svých potřeb. Funkce jsme proto
 vyčlenili do souboru {\tt penalty.c} a popis jejich parametrů uvádíme níže.
 Funkce vždy vrací hodnotu typu {\tt double}, která reprezentuje penaltu
-spočítanou v dané funkci. Protože penalty také mohou být závislé na předchozí
+spočítanou v~dané funkci. Protože penalty také mohou být závislé na předchozí
 vyhledané trase, je ve struktuře {\tt mmdijnode\_t} připravena podstruktura
-{\tt state}, do které je možné si ukládat stavové informace o dosud vyhledané
-části trasy. Tato struktura se vždy při vytváření nového záznamu zkopíruje z
-předka, tudíž se stavové informace propagují podél vyhledávané cesty. V současné
+{\tt state}, do které je možné si ukládat stavové informace o~dosud vyhledané
+části trasy. Tato struktura se vždy při vytváření nového záznamu zkopíruje
+z~předka, tudíž se stavové informace propagují podél vyhledávané cesty. V~současné
 době obsahuje pouze položku {\tt vehicles}, která udává počet nástupů do vozidla
 po cestě a používá se při omezení počtu přestupů. 
 
@@ -302,20 +302,20 @@ k~penalizaci přestupů při cestě MHD.
 	\end{itemize}
 \end{itemize}
 
-Maximální penaltu, po jejímž dosažení se již dále nepokračuje v rozšiřování
-nalezeného částečného spojení, jsme stanovili na 1\,000\,000. Tuto konstantu v
-kódu reprezentuje makro {\tt PENALTY\_INFINITY}.
+Maximální penaltu, po jejímž dosažení se již dále nepokračuje v~rozšiřování
+nalezeného částečného spojení, jsme stanovili na 1\,000\,000. Tuto konstantu
+v~kódu reprezentuje makro {\tt PENALTY\_INFINITY}.
 
 \subsection{Konfigurační soubor}
 Pro konfiguraci vyhledávaní slouží soubor {\tt config/speeds.yaml}, ve kterém
 jsou uvedeny jednak rychlosti pěší chůze, jednak se zde konfigurují připravené
-penalty. Detailní popis konfiguračních parametrů je uveden v kapitole
+penalty. Detailní popis konfiguračních parametrů je uveden v~kapitole
 \ref{ch:uzivatelska-dokumentace}, nyní se budeme zabývat implementací. Pokud
 nějaké rychlosti či penalty udávají hodnoty pro parametr nějakého výčtu,
 například typ objektu nebo typ dopravního prostředku, je připraveno pole
 pokrývající všechny možné hodnoty tohoto výčtu a jsou do něj dosazeny výchozí
 hodnoty, pro konstantní parametry 0, pro parametry sloužící jako koeficienty 1.
-Následně jsou tyto výchozí hodnoty přepsány hodnotami uvedenými v konfiguraci.
+Následně jsou tyto výchozí hodnoty přepsány hodnotami uvedenými v~konfiguraci.
 Pro penalty za linky je vytvořeno pole struktur {\tt line\_config\_t}, ve
 kterých je pak uložena dvojice linka$\rightarrow$penalta. 
 
@@ -389,6 +389,6 @@ Frontend je napsán v~JavaScriptu s~použitím knihovny Leaflet pro operace
 s~mapou. Jako mapový podklad je použita mapa od
 MapBoxu\footnote{\url{https://www.mapbox.com/}}, přes kterou
 jsou vykreslovány jednotlivé nalezené trasy. Při nalezení trasy je také
-dynamicky vytvořena tabulka s informacemi o jednotlivých trasách. Klikáním na
-trasy je možné je zobrazovat a skrývat. Komunikace s backendem je řešena
+dynamicky vytvořena tabulka s~informacemi o~jednotlivých trasách. Klikáním na
+trasy je možné je zobrazovat a skrývat. Komunikace s~backendem je řešena
 asynchronně pomocí callbacků.

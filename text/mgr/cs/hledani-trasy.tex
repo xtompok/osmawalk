@@ -9,11 +9,11 @@ tyto zastávky přidáme do fronty Dijkstrova algoritmu s~časem dosažení rovn
 času příjezdu do dané stanice. 
 
 \section{Penalty}
-Samotná nejrychlejší cesta v síti pěších cest a MHD není vždy ta, kterou chceme
+Samotná nejrychlejší cesta v~síti pěších cest a MHD není vždy ta, kterou chceme
 při reálném cestování použít. Navíc vyhledávačů, které takovou cestu i pro
 pražskou síť hledají, existuje několik funkčních a široce používaných. Naším
 cílem bylo, aby si uživatel mohl parametry nalezené cesty určovat dle svých
-preferencí. Proto jsme se snažili navrhnout systém penalt tak, aby se v něm dalo
+preferencí. Proto jsme se snažili navrhnout systém penalt tak, aby se v~něm dalo
 vyjádřit co nejvíce běžných situací, kterým bychom se chtěli ve vyhledaném
 spojení vyhnout. 
 
@@ -21,7 +21,7 @@ Systém penalt funguje tak, že za každou událost na trase si uživatel může
 nějakou penaltu, která říká, jak moc nerad by danou událost měl na vyhledané
 trase. Současně existuje daná mez přípustnosti trasy. Pokud penalta nějaké
 částečně vyhledané trasy překročí tuto mez, není již dále pokračováno ve
-vyhledávání dál z této trasy. Tímto zajišťujeme možnost mít jak \uv{měkká}, tak
+vyhledávání dál z~této trasy. Tímto zajišťujeme možnost mít jak \uv{měkká}, tak
 \uv{tvrdá} kritéria pro hledanou trasu. Také je vhodné mít penalty konstantní a
 závislé na době trvání. Například za deště je pro nás čekání na zastávce bez
 přístřešku tím horší, čím déle čekáme, zatímco pokud nám vadí cesta eskalátorem
@@ -31,26 +31,26 @@ nezáleží.
 Důležité je také rozmyslet, jaké všechny události chceme mít možnost
 penalizovat:
 \begin{itemize}
-	\item {\em typ cesty} -- Toto je přímočará myšlenka implementovaná již v
-	původním vyhledávání pěších tras. Můžeme jednak penalizovat chůzi po
+	\item {\em typ cesty} -- Toto je přímočará myšlenka implementovaná již
+v~původním vyhledávání pěších tras. Můžeme jednak penalizovat chůzi po
 	silnici, čímž dáme preferenci vyhledávání po chodnících, jednak můžeme
-	penalizovat chůzi po nezpevněných pěšinách, například v zimním období či
+	penalizovat chůzi po nezpevněných pěšinách, například v~zimním období či
 	po dešti.
 	\item {\em typ průchozího vrcholu} -- Touto událostí je například čekání
 	na semaforech, které jsou reprezentovány bodovým znakem na přechodu přes
 	silnici. Tvrdým kritériem je například zavřená brána, která spojuje dvě
 	volně přístupné oblasti.
 \end{itemize}
-Další události již souvisí s cestováním MHD a přestupy:
+Další události již souvisí s~cestováním MHD a přestupy:
 \begin{itemize}
-	\item {\em počet přestupů} -- V našem případě používáme počet použitých
+	\item {\em počet přestupů} -- V~našem případě používáme počet použitých
 	vozidel, protože můžeme hledat i pouze pěší trasu. Obvyklé kritérium
 	používané i běžnými vyhledávači.
-	\item {\em čas na přestup} -- V základní formě jednoduché
+	\item {\em čas na přestup} -- V~základní formě jednoduché
 	tvrdé kritérium, které udává minimální čas strávený na zastávce mezi
 	příchodem / příjezdem a odjezdem. Toto kritérium lze výrazněji rozšířit
 	různými směry. Jednak je možné uvažovat, jak jsme se na zastávku dostali
-	a čím z ní odjíždíme (metro je přesné a spolehlivé, pokud jsme přišli
+	a čím z~ní odjíždíme (metro je přesné a spolehlivé, pokud jsme přišli
 	pěšky, můžeme popoběhnout, pokud jedeme autobusem, radši si necháme
 	větší rezervu), jednak je možné místo fixního času zavést funkci
 	závislou na době čekání a tím například preferovat krátká, ale ne moc
@@ -63,7 +63,7 @@ Další události již souvisí s cestováním MHD a přestupy:
 	\item {\em linka} -- Kromě penalizací dopravních prostředků je také
 	vhodné mít možnost penalizovat i linky. Pokud víme, že některá
 	autobusová linka je vlivem dlouhé trasy přes město nespolehlivá, můžeme
-	ji přiřadit velkou penaltu nebo ji rovnou vyřadit z vyhledávání. 
+	ji přiřadit velkou penaltu nebo ji rovnou vyřadit z~vyhledávání. 
 \end{itemize}
 
 Další možností rozšíření systému penalt je zapojení denní doby do výpočtu
