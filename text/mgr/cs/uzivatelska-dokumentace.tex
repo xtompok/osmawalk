@@ -1,6 +1,7 @@
 \chapter{Uživatelská dokumentace}
 \section{Příprava dat}
-Pro přípravu dat je nejprve nutné nainstalovat potřebné externí knihovny do
+Pro přípravu dat je nejprve nutné nainstalovat potřebné externí knihovny (viz
+soubor {\tt Install}) do
 systému nebo do adresáře {\tt ext-lib}. Poté je nutné zkompilovat všechny zdrojové
 kódy zavoláním {\tt make} v~adresáři {\tt compiled}. Dále je nutné vytvořit databáze
 pro přípravu dat. Pro mapová data je potřeba vytvořit databázi {\tt
@@ -61,13 +62,13 @@ nastavení jsou následující:
 	sekund strávených procházením hrany. 
 	\item {\tt heights} udává koeficient délkového prodloužení v závislosti
 	na změně výšky. Hodnotou je mapování s klíči {\tt upscale} a {\tt
-	downscale}  Pokud je cesta do kopce, je prodloužena o {\em rozdíl
-	výšky}$\times${\tt upscale} metrů, pokud je z kopce, o {\em rozdíl
-	výšky}$\times${\tt downscale}. Cesta může být i zkrácena, pokud by
+	downscale}.  Pokud je cesta do kopce, je prodloužena o {\tt <rozdíl
+	výšky>}$\times${\tt upscale} metrů, pokud je z kopce, o {\tt <rozdíl
+	výšky>}$\times${\tt downscale}. Cesta může být i zkrácena, pokud by
 	celková délka byla záporná, je uvažována jako nulová.
 	\item {\tt pt-time-penalties} udává penalty za typ dopravního prostředku
 	násobené dobou strávenou v dopravním prostředku v sekundách. Hodnotou je
-	mapování typ prostředku$\rightarrow$penalta, kde typ prostředku je brán
+	mapování typ prostředku $\rightarrow$ penalta, kde typ prostředku je brán
 	z GTFS a psán malými písmeny, např. {\tt tram}, {\tt ferry} nebo {\tt
 	bus}.
 	\item {\tt pt-fixes-penalties} udává fixní penalty za typ dopravního
@@ -76,7 +77,7 @@ nastavení jsou následující:
 	pt-time-penalties}.
 	\item {\tt line-penalties} udává penaltu za použití dané linky. Penalta
 	se počítá jednou za každé použití dané linky. Hodnotou je mapování jméno
-	linky$\rightarrow$penalta. 
+	linky $\rightarrow$ penalta. 
 	\item {\tt max-vehicles} udává maximální počet spojů MHD použitých po
 	cestě. Hodnotou je číslo udávající tento počet.
 	\item {\tt geton-penalty} udává penaltu za nástup do spoje MHD. Je to
@@ -84,7 +85,7 @@ nastavení jsou následující:
 	\item {\tt min-wait} udává minimální čas od příchodu /
 	příjezdu na zastávku do odjezdu spoje. Hodnotou je čas v sekundách.
 \end{itemize}
-U kategorií, které udávají penaltu, lze místo čísla napsat inf, což znamená
+U kategorií, které udávají penaltu, lze místo čísla napsat {\tt inf}, což znamená
 nekonečnou penaltu, tedy pokud nějaké částečná trasa dostane takovouto penaltu,
 tak už se dále nepokračuje ve vyhledávání zbytku trasy.
 

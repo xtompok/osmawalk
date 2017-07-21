@@ -108,15 +108,15 @@ nelze vytvářet uvnitř překážek ani v~podzemí, tyto vrcholy posléze z~vý
 odebereme a získáme všechny kandidáty na začátky a konce zkratek. 
 
 Nyní bychom potřebovali najít všechny dvojice bodů, které jsou k~sobě blíže než
-30\,m (Konstanta byla zvolena empiricky z~mapových dat, aby zkratky doplňovaly
-potřebné pěší vazby a zároveň nebyly zbytečně dlouhé.) a z~nich vybrat některé,
+30\,m\footnote{Konstanta byla zvolena empiricky z~mapových dat, aby zkratky doplňovaly
+potřebné pěší vazby a zároveň nebyly zbytečně dlouhé.} a z~nich vybrat některé,
 ze kterých se stanou zkratky. Takováto přímočará implementace je ale příliš
 pomalá, protože vrcholů je velké množství a funkce pro počítání vzdálenosti je
 výpočetně náročná, vede to tedy na dlouhý výpočetní čas.
 
 Abychom tento problém obešli, využili jsme toho, že zkratky jsou lokální a není
 tedy třeba porovnávat dvojice bodů, které jsou od sebe příliš vzdáleny. Použili
-jsme techniku proložených čtvercových sítích, kde mapový výřez rozdělíme
+jsme techniku proložených čtvercových sítí, kde mapový výřez rozdělíme
 čtvercovou sítí na čtverce $100\times100$\,metrů, čtverce očíslujeme a každému
 bodu přiřadíme číslo čtverce, ve kterém leží. Poté čtvercovou síť posuneme
 o~50\,metrů v~jednom směru, v~druhém směru a úhlopříčné a akci pokaždé opakujeme.
@@ -188,12 +188,12 @@ vyhledávacího grafu. Data z~tabulek jsou exportována do CSV a pak je pomocí
 jednoduchého programu v~C vytvořen výstupní soubor PBF s~vyhledávacím grafem a
 údaji o~vazbě na jízdní řád. V~tomto kroku je také kontrolována dosažitelnost
 všech vrcholů grafu a je vybrána největší souvislá komponenta, která obsahuje
-alespoň polovinu vrcholů. Samotné vyhledávání pak hledá vždy v~souvislém grafu.
+alespoň polovinu vrcholů. Samotné vyhledávání pak probíhá vždy v~souvislém grafu.
 Protože při změně jízdních řádů dochází ke změnám
 očíslování zastávek, je potřeba přegenerovat i tu část generování vyhledávacího
 grafu, která zajišťuje párování zastávek. Tato část není výpočetně náročná, je
-proto možné ji spouštět při každé změně jízdních řádů. Naopak není přegenerování
-nutné, při aktualizaci mapových dat není třeba přegenerovávat jízdní řády. 
+proto možné ji spouštět při každé změně jízdních řádů. Při aktualizaci mapových
+dat jízdní řády není třeba přegenerovávat. 
 
 \section{Vyhledávání}
 \label{ch:implementace:vyhledavani}
@@ -324,7 +324,7 @@ Knihovnu implementující algoritmus RAPTOR jsme navrhli jako oddělenou knihovn
 stejně tak skripty zajišťující přípravu dat z~jízdních řádů jsou také oddělené,
 tudíž lze snadno implementovat vyhledávač využívající pouze algoritmus RAPTOR
 bez závislostí na zbytku vyhledávacího kódu a v~rámci přípravných prací jsme
-takový implementovali. Tento vyhledávač ale
+takový vyhledávač implementovali. Tento vyhledávač ale
 nevyužívá žádné pěší přesuny, ani mezi zastávkami stejného jména, pro praktické
 vyhledávání není tedy příliš vhodný, sloužil pro testování správnosti úprav
 jízdních řádů.

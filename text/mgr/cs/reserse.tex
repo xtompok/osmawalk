@@ -5,7 +5,7 @@ známých algoritmů. Pokud ale potřebujeme udržovat kromě dat o~cestní sít
 o~jízdních řádech, stává se situace mnohem složitější, protože zatímco po cestách
 můžeme jít kdykoli, cestovat hromadnou dopravou můžeme pouze tehdy, když zrovna
 jede nějaký spoj. Pro reprezentaci sítí hromadné dopravy se vyvinuly různé
-způsoby, dále představíme nejobvyklejší z~nich.
+způsoby, dále představíme nejčastější z~nich.
 
 \section{Time expanded modely}
 Time-expanded modely\cite{time-expanded} jsou konstruovány tak, aby ceny hran
@@ -83,7 +83,7 @@ reprezentace pro nás je s~přidáváním pěších tras, protože je potřeba m
 spočítané. Předvýpočet je stejně tak problematický i u~cestní sítě, protože
 předpokládá pevné nastavení cestovních rychlostí a preferencí cest, na základě
 kterých jsou nalezeny uzlové body a vypočítány zkratky. Náš cíl je umožnit
-uživateli tyto parametry si zvolit při hledání dle svých potřeb, proto pro nás
+uživateli si zvolit tyto parametry při hledání dle svých potřeb, proto pro nás
 není tento model vhodný. 
 
 \section{RAPTOR}
@@ -108,7 +108,7 @@ algoritmus. Ten postupně prochází linky po jejich zastávkách a pokud naraz�
 dosažitelnou zastávku, tak najde nejbližší spoj linky, který z~dané zastávky
 odjíždí po čase dosažitelnosti a tímto spojem se \uv{vydá} a průběžně upravuje
 časy dosažitelnosti na dalších zastávkách. Pokud po cestě nalezne další
-dosažitelnou zastávku, jako spoj z~této zastávky vybere z~původního spoje a
+dosažitelnou zastávku, vybírá spoj z této zastávky z~původního spoje a
 spoje navazujícího na původní čas dosažitelnosti ten, který odjíždí dříve. Takto
 pokračuje až do konce linky. Po průchodu všech linek se všechny časy
 dosažitelnosti zkopírují do dalšího kola a algoritmus se znovu spustí. Po

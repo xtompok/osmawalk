@@ -92,10 +92,11 @@ náročné na paměť i čas. Pro redukci stavového prostoru uvažujeme uspoř�
 každý vrchol, kde spojení $A$ je horší než spojení $B$, pokud $A$ má pozdější
 čas dosažení vrcholu a vyšší penaltu než $B$. V~takovém případě spojení $A$ do
 fronty otevřených vrcholů vůbec nepřidáváme, případně ho zahodíme, když na něj
-ve frontě narazíme. Takovéto situaci říkáme, že spojení $B$ majorizuje spojení~$A$
+ve frontě narazíme. Takovéto situaci říkáme, že {\em spojení $B$ majorizuje
+spojení~$A$}.
 
 \section{Redukce duplicitních tras}
-I~přes uvažování pouze nemajorizovaných spojení získáme mnoho spojení, které se
+I~přes uvažování pouze nemajorizovaných spojení získáme mnoho spojení, která se
 liší jen drobnými změnami v~pěších částech trasy. Pro skutečnou cestu podle
 nalezeného spojení nemají tyto drobné rozdíly význam, proto se snažíme takovéto
 duplicity ignorovat. Základním předpokladem, který učiníme, budiž to, že pokud
