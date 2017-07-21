@@ -2,16 +2,21 @@
 
 #50.10694/14.44523
 #50.10161/14.45732
-MINLAT=50.07
-MINLON=14.40
-MAXLAT=50.10
-MAXLON=14.43
+MINLAT=50.06
+MINLON=14.39
+MAXLAT=50.12
+MAXLON=14.52
+
+#MINLAT=50.09
+#MINLON=14.39
+#MAXLAT=50.12
+#MAXLON=14.45
 
 # Prague
-MINLAT=49.9416
-MINLON=14.22409
-MAXLAT=50.17743
-MAXLON=14.706787
+#MINLAT=49.9416
+#MINLON=14.22409
+#MAXLAT=50.17743
+#MAXLON=14.706787
 
 # Czech Republic
 #MINLAT=48.5
@@ -54,7 +59,7 @@ then
 	posledni=`curl "http://osm.kyblsoft.cz/archiv/last_dates.txt" | grep gz | cut -d"	" -f2`
 	echo "Posledni data z $posledni, stahuji..."
 
-	curl "http://osm.kyblsoft.cz/archiv/czech_republic-${posledni}.osm.gz" | gunzip > czech_republic.osm
+	wget "http://osm.kyblsoft.cz/archiv/czech_republic-${posledni}.osm.gz" -O - | gunzip > czech_republic.osm
 fi
 
 if [ $DOWNLOAD_HGT = 1 ]
