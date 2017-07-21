@@ -1,4 +1,5 @@
 \chapter{Uživatelská dokumentace}
+\label{ch:uzivatelska-dokumentace}
 \section{Příprava dat}
 Pro přípravu dat je nejprve nutné nainstalovat potřebné externí knihovny (viz
 soubor {\tt Install}) do
@@ -14,23 +15,23 @@ provádí, aby bylo možné jednotlivé fáze spouštět ručně a hledat, kde n
 
 \begin{enumerate}
 \item {\tt osm/prepare.sh} slouží ke stažení dat OSM, SRTM, spojení jednotlivých
-dílů dat SRTM a tvorbu výřezu z~dat OSM. Výstupem je soubor {\tt osm/praha.osm}
+dílů dat SRTM a tvorbu výřezu z~dat OSM. Výstupem skriptu je soubor {\tt osm/praha.osm}
 s~výřezem z~dat OSM a soubor {\tt heights.bin} se spojenými daty SRTM pro daný
 výřez. 
 \item {\tt compiled/parse} slouží ke klasifikaci dat OSM, určení typů objektů,
 určení vrcholů na mostech a pod zemí a přiřazení nadmořské výšky k~uzlům.
 Výstupem jsou soubory {\tt data/nodes-stage1}, {\tt data/ways-stage1} a {\tt
-data/mp-stage1} s~jednotlivými objekty. Formát uložení je popsán v~sekci Formáty
-dat\ref{ch:formaty:priprava}. Nastavení klasifikátoru je v~souboru {\tt
+data/mp-stage1} s~jednotlivými objekty. Formát uložení je popsán v~sekci
+\ref{ch:formaty:priprava}. Nastavení klasifikátoru je v~souboru {\tt
 config/waytypes.yaml} pro cesty a {\tt config/nodetypes.yaml} pro body. Formát
 konfiguračních souborů je popsán v~bakalářské práci \cite{bakalarka}.
 \item {\tt todb.sh} slouží k~nahrání klasifikovaných dat do databáze. 
 \item {\tt postgis/process.sh} řídí úpravy dat v~databázi, uvnitř obsahuje
 volání jednotlivých kroků popsaných v~kapitole \ref{ch:implementace}.
-Výstupem jsou soubory {\tt data/\dots.csv} obsahující vrcholy a hrany dat
+Výstupem skriptu jsou soubory {\tt data/\dots.csv} obsahující vrcholy a hrany dat
 připravených pro vyhledávání. 
-\item {\tt compiled/csvtograph} Vytváří vyhledávací graf a vybírá v~něm největší
-souvislou komponentu, kterou uloží pro hledání jako soubor {\tt
+\item {\tt compiled/csvtograph} vytváří vyhledávací graf a vybírá v~něm největší
+souvislou komponentu, kterou uloží pro použití vyhledávačem jako soubor {\tt
 data/postgis-graph.pbf}.
 \end{enumerate}
 
@@ -61,7 +62,7 @@ nastavení jsou následující:
 	je mapování typ cesty $\rightarrow$ penalta. Penalta se násobí počtem
 	sekund strávených procházením hrany. 
 	\item {\tt heights} udává koeficient délkového prodloužení v~závislosti
-	na změně výšky. Hodnotou je mapování s~klíči {\tt upscale} a {\tt
+	na změně nadmořské výšky. Hodnotou je mapování s~klíči {\tt upscale} a {\tt
 	downscale}.  Pokud je cesta do kopce, je prodloužena o~{\tt <rozdíl
 	výšky>}$\times${\tt upscale} metrů, pokud je z~kopce, o~{\tt <rozdíl
 	výšky>}$\times${\tt downscale}. Cesta může být i zkrácena, pokud by
@@ -92,8 +93,8 @@ tak už se dále nepokračuje ve vyhledávání zbytku trasy.
 \section{Konzolová aplikace}
 Konzolová aplikace slouží převážně pro testování, zda vyhledávací knihovna
 pracuje stabilně, ale dá se použít i pro jednoduché hledání. Aplikaci spustíme
-v~adresáři compiled příkazem {\tt ./search <flat> <flon> <tlat> <tlon> [time]},
-kde {\tt flat} a {\tt flon} určují zeměpisnou šířku a délku výchozího bodu, {\tt
+v~adresáři {\tt compiled} příkazem {\tt ./search <flat> <flon> <tlat> <tlon>
+[time]}.\\ {\tt flat} a {\tt flon} určují zeměpisnou šířku a délku výchozího bodu, {\tt
 tlat} a {\tt tlon} souřadnice cílového bodu a {\tt time} unixový timestamp času,
 od kterého hledat. Pokud není čas uveden, hledá se od
 okamžiku spuštění.  Aplikace najde trasy a na standardní výstup vypíše ke každé

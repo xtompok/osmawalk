@@ -260,8 +260,16 @@ po cestě a používá se při omezení počtu přestupů.
 
 Funkce pro výpočet penalt jsou následující:
 \begin{itemize}
-	\item {\tt calcChangePenalty(Graph\_\_Graph * graph, struct config\_t conf,
-	struct ptedge\_t * toEdge, struct mmdijnode\_t * point, uint64\_t time)}
+	%\item {\tt calcChangePenalty(Graph\_\_Graph * graph, struct config\_t conf,
+	%struct ptedge\_t * toEdge, struct mmdijnode\_t * point, uint64\_t time)}
+%    \hspace*{-0.5cm}    
+    \item \begin{verbatim}calcChangePenalty(Graph__Graph * graph, 
+                        struct config_t conf,
+                        struct ptedge_t * toEdge, 
+                        struct mmdijnode_t * point, 
+                        uint64_t time) 
+    \end{verbatim}
+    \vspace*{-0.5cm}
 	slouží k~výpočtu penalty za změnu typu hrany. Obvykle se využívá
 k~penalizaci přestupů při cestě MHD.
 	Argumenty funkce jsou následující:
@@ -274,8 +282,12 @@ k~penalizaci přestupů při cestě MHD.
 		hraně.
 		\item {\tt time} udává čas čekání v~daném vrcholu
 	\end{itemize}
-	\item {\tt calcPointPenalty(Graph\_\_Graph * graph,struct config\_t conf,
-	Graph\_\_Vertex *vert)} slouží k~výpočtu penalty v~daném bodě. Lze ji
+	\item \begin{verbatim}calcPointPenalty(Graph__Graph * graph,
+                    struct config_t conf,
+                    Graph__Vertex *vert)
+    \end{verbatim}
+    \vspace*{-0.5cm}
+    slouží k~výpočtu penalty v~daném bodě. Lze ji
 	použít například k~penalizaci přecházení na semaforech. Argumenty
 	funkce jsou následující:
 	\begin{itemize}
@@ -283,16 +295,25 @@ k~penalizaci přestupů při cestě MHD.
 		\item {\tt conf} popisuje konfiguraci vyhledávání od uživatele
 		\item {\tt vert} odkazuje na vrchol, ve kterém počítáme penaltu
 	\end{itemize}
-	\item {\tt calcWalkPenalty(Graph\_\_Graph * graph, struct config\_t
-	conf, Graph\_\_Edge * edge)} slouží k~výpočtu penalty za pěší úsek.
+	\item \begin{verbatim}calcWalkPenalty(Graph__Graph * graph,
+                 struct config_t conf,
+                 Graph__Edge * edge)
+    \end{verbatim}
+    \vspace*{-0.5cm}
+    slouží k~výpočtu penalty za pěší úsek.
 	Argumenty funkce jsou následující:
 	\begin{itemize}
 		\item {\tt graph} odkazuje na vyhledávací graf
 		\item {\tt conf} popisuje konfiguraci vyhledávání od uživatele
 		\item {\tt edge} odkazuje na hranu, pro kterou počítáme penaltu
 	\end{itemize}
-	\item {\tt calcTransportPenalty(Graph\_\_Graph * graph, struct config\_t
-	conf, struct stop\_route * r,time\_t arrival)} slouží k~výpočtu penalty
+	\item \begin{verbatim}calcTransportPenalty(Graph__Graph * graph,
+                     struct config_t conf,
+                     struct stop_route * r,
+                     time_t arrival)
+    \end{verbatim}
+    \vspace*{-0.5cm}
+    slouží k~výpočtu penalty
 	za úsek projetý MHD. Argumenty funkce jsou následující:
 	\begin{itemize}
 		\item {\tt graph} odkazuje na vyhledávací graf
@@ -369,8 +390,12 @@ bodech backendu, zobrazuje mapu a výsledky vyhledávání.
 \subsubsection{Backend}
 Backend se kromě renderování hlavní stránky z~připraveného templatu stará
 o~hledání tras a jejich předávání frontendu. Když je ve frontendu zvolen výchozí a
-cílový bod, je vyvolán požadavek {\tt GET
-/search?flon=<flon>\&flat=<flat>\&tlon=<tlon>\&tlat=<tlat>}, kde {\tt flon} a
+cílový bod, je vyvolán požadavek\\[0mm]
+\begin{center}
+\vspace*{-0.5cm}
+ {\tt GET /search?flon=<flon>\&flat=<flat>\&tlon=<tlon>\&tlat=<tlat>},\\[0mm]
+\end{center}
+kde {\tt flon} a
 {\tt flat} je zeměpisná délka a šířka výchozího bodu a {\tt tlon} a {\tt tlat}
 je zeměpisná délka a šířka cílového bodu. Souřadnice výchozího a cílového bodu
 jsou předány vyhledávací knihovně a počká se na vrácení výsledku hledání. Tento

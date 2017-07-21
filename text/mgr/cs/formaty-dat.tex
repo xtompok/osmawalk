@@ -20,7 +20,7 @@ podle typu položky. Jedná se o~následující:
 \end{itemize}
 
 \section{Formáty používané při přípravě dat}
-\label{ch:formaty-dat:priprava}
+\label{ch:formaty:priprava}
 \subsection{Přípravný formát pro databázi}
 Program {\tt parse} přečte data OSM, klasifikuje je a vytvoří 3 soubory
 reprezentující mapová data -- ({\tt nodes-stage1}, {\tt ways-stage1} a {\tt
@@ -376,7 +376,7 @@ obsahuje následující položky:
 	\item {\tt name} udává název linky
 	\item {\tt id} udává id linky tak, jak je v~GTFS
 \end{itemize}
-Uvnitř vyhledávací knihovny je výsledek vyhledávání reprezentován typem {\tt
+Výsledek vyhledávání je interně reprezentován typem {\tt
 search\_result\_t}, který je svou strukturou velmi podobný výše popsanému PBF.
 
 Vyhledané trasy je možné uložit jako GPX\cite{GPX}. V~naší aplikaci používáme pouze trasy, každá
@@ -412,7 +412,7 @@ spoje MHD se do jednoho úseku nespojují. Úseky mají následující atributy:
 \end{itemize}
 Bodové prvky jsou reprezentovány pomocí typu Point s~následujícími atributy: 
 \begin{itemize}
-	\item {\tt type} udávající typ bodu, zde vždy číslo reprezentující objtype PUBLIC\_TRANSPORT  	
+	\item {\tt type} udávající typ bodu, zde vždy číslo, které reprezentuje objtype PUBLIC\_TRANSPORT  	
 	\item {\tt name} udávající jméno zastávky
 	\item {\tt subtype} udávající operaci na zastávce ({\tt departure} pro
 	nástup, {\tt arrival} pro výstup)
