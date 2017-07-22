@@ -58,6 +58,8 @@
 # Profiler output
 gmon.out
 gmon-praha.out
+perf.data
+perf.data.old
 
 # Programs output
 /compiled/track.gpx
@@ -74,10 +76,13 @@ gmon-praha.out
 /osm/heights.txt
 *.hgt
 *.hgt.zip
+/osm/heights.bin
 
 # Others
 /text/jakpsat
 /compiled/tree.[ch]
 
+# GPX files
 track_*.gpx
+track.gpx
 
