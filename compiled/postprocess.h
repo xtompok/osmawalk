@@ -10,6 +10,7 @@ struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mm
 void writeGPXForResult(struct search_result_t * res);
 
 void printMMRoutes(struct search_data_t * data,struct search_result_t * res);
+void printMetroDetails(struct search_route_t * res);
 
 struct pbf_data_t generatePBF(struct search_result_t * result);
 void freeUnpackedPBF(Result__Result * result);

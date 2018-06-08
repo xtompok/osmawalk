@@ -83,6 +83,9 @@ void freeData(struct search_data_t * data);
 struct pbf_data_t findPath(struct search_data_t * data,
 		double fromLat, double fromLon, double toLat, double toLon, uint64_t atime);
 
+struct search_result_t findPathToMetro(struct search_data_t * data,
+		double fromLat, double fromLon, uint64_t atime);
+
 struct search_result_t findTransfer(struct search_data_t * data,
 		char * from, char * to);
 

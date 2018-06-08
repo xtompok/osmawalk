@@ -2,6 +2,7 @@
 
 #include <err.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include <ucw/heap.h>
 #include <ucw/gary.h>
@@ -13,7 +14,9 @@
 
 
 #define DIJ_CMP(x,y) (x->arrival < y->arrival)
-#define DIJ_SWAP(heap,a,b,t) (heap[a]->heapidx=b,heap[b]->heapidx=a,t=heap[a], heap[a]=heap[b], heap[b]=t)
+#define DIJ_SWAP(heap,a,b,t) \
+	(/*assert(heap[a]->heapidx == a), assert(heap[b]->heapidx == b),*/\
+	heap[a]->heapidx=b,heap[b]->heapidx=a,t=heap[a], heap[a]=heap[b], heap[b]=t)
 
 #define MMHEAP_INSERT(elem) \
 	HEAP_INSERT(struct mmdijnode_t *,q->heap,q->n_heap,DIJ_CMP,DIJ_SWAP,(elem))
@@ -49,8 +52,9 @@ void addFirstNodeToQueue(struct mmqueue_t * q,Graph__Vertex * v, Stop * s, uint6
 
 	// Add to heap
 	GARY_PUSH(q->heap);
+	node->heapidx = q->n_heap+1;
 	MMHEAP_INSERT(node);
-	q->vert = q->heap[0];
+	q->vert = q->heap[1];
 }
 void freeEdge(struct edge_t * e){
 	if (e->edge_type == EDGE_TYPE_PT){
@@ -81,9 +85,18 @@ void addNodeToQueue(struct mmqueue_t * q,
 			return;
 		}
 		if ((arrival <= anode->arrival)&&(penalty <= anode->penalty)){
-			MMHEAP_DELETE(anode->heapidx);
-			vertnodes[j] = vertnodes[GARY_SIZE(vertnodes)-1];
-			GARY_POP(vertnodes);
+		// Note: probably fixed bug
+		//	if (anode->heapidx > q->n_heap || anode->heapidx == 0){
+		//		printf("Error, heapidx greater than heap: %d %d\n",anode->heapidx,q->n_heap);
+					
+		//	}else {
+			if (anode->heapidx > 0){
+				MMHEAP_DELETE(anode->heapidx);
+				anode->heapidx = -1;
+				vertnodes[j] = vertnodes[GARY_SIZE(vertnodes)-1];
+				GARY_POP(vertnodes);
+			}
+		//	}
 		}
 	}
 
@@ -126,7 +139,7 @@ void addNodeToQueue(struct mmqueue_t * q,
 	// Add to heap
 	//printf("ELEM\n");
 	GARY_PUSH(q->heap);
-	node->heapidx = q->n_heap;
+	node->heapidx = q->n_heap+1;
 	MMHEAP_INSERT(node);
 }
 
@@ -137,6 +150,7 @@ struct mmdijnode_t * getQueueMin(struct mmqueue_t * q){
 
 	MMHEAP_DELETE_MIN();
 	q->vert = q->heap[q->n_heap+1];
+	q->vert->heapidx = -1;
 	GARY_POP(q->heap);
 
 	if (!q->vert->reached){
@@ -170,6 +184,9 @@ struct mmqueue_t * createMMQueue(Graph__Graph * graph){
 } 
 void freeMMQueue(struct mmqueue_t * queue,int n_vertices){
 	GARY_FREE(queue->heap);
+	for (int i=0;i<n_vertices;i++){
+		GARY_FREE(queue->vertlut[i]);	
+	}
 	free(queue->vertlut);
 	//GARY_FREE(queue->dijArray);
 	mp_delete(queue->pool);
@@ -195,18 +212,18 @@ char equivWays(struct mmdijnode_t * way1, struct mmdijnode_t * way2){
 	}
 	// One way ends and other changes from public transport
 	if (n1->edge && !n2->edge){
-		printf("MHD vs start\n");
+		//printf("MHD vs start\n");
 		return 0;
 	}
 	if (!n1->edge && n2->edge){
-		printf("MHD vs start\n");
+		//printf("MHD vs start\n");
 		return 0;
 	}
 	// Both ways changes from public transport and connection is different
 	if ((n1->edge && n2->edge) && (
 		n1->edge->ptedge->route != n2->edge->ptedge->route || 
 		n1->edge->ptedge->departure != n2->edge->ptedge->departure)){
-		printf("Different public transport\n");
+		//printf("Different public transport\n");
 		return 0;
 			
 	}
@@ -239,7 +256,7 @@ char equivWays(struct mmdijnode_t * way1, struct mmdijnode_t * way2){
 		frompt2++;
 	}
 
-	printf("From1: %d, to1: %d, from2: %d, to2: %d\n",frompt1,topt1,frompt2, topt2);
+	//printf("From1: %d, to1: %d, from2: %d, to2: %d\n",frompt1,topt1,frompt2, topt2);
 
 	n1 = way1;
 	n2 = way2;
@@ -255,12 +272,12 @@ char equivWays(struct mmdijnode_t * way1, struct mmdijnode_t * way2){
 	free(buf1);
 	free(buf2);
 
-	printf("Distance: %f\n",dist);
+	//printf("Distance: %f\n",dist);
 	if (dist < 100){
-		printf("Equivalent\n");
+	//	printf("Equivalent\n");
 		return 1;	
 	}
-	printf("Different\n");
+	//printf("Different\n");
 	
 	return 0;
 

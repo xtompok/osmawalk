@@ -319,6 +319,8 @@ int node(OSM_Node *n) {
 	attr.stop = classify(n->tags,conf.stop_pos);
 	if (attr.stop){
 		attr.ref = get_val(n->tags,"ref");
+	}else{
+		attr.ref = "";
 	}
 //	if (objtype==-1)
 //		return;

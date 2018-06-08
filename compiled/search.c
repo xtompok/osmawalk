@@ -39,6 +39,7 @@ void printVertices(Graph__Graph * graph){
 	}
 }
 
+
 // Print usage
 void usage(void){
 	printf("Usage: ./search fromlat fromlon tolat tolon\n");		
@@ -46,7 +47,7 @@ void usage(void){
 
 int main (int argc, char ** argv){
 	printf("Argc: %d\n",argc);
-	if (argc<5 && argc !=1 ){
+	if (argc<5 && argc >2 ){
 		usage();
 		return 1;
 	}
@@ -71,6 +72,8 @@ int main (int argc, char ** argv){
 		flon = atof(argv[2]);
 		tlat = atof(argv[3]);
 		tlon = atof(argv[4]);
+		struct pbf_data_t result;
+		result = findPath(data,flat,flon,tlat,tlon,0);
 	}else if (argc==6){
 		data = prepareData(configFileName,dataFileName,timetableFileName); 
 		flat = atof(argv[1]);
@@ -78,6 +81,31 @@ int main (int argc, char ** argv){
 		tlat = atof(argv[3]);
 		tlon = atof(argv[4]);
 		atime = atoll(argv[5]); 
+	}else if (argc==2){
+		data = prepareData(configFileName,dataFileName,timetableFileName); 
+		FILE * infile;
+		infile = fopen(argv[1],"r");
+		while (1) {
+			if (fscanf(infile,"%lf",&flat) != 1){
+				break;	
+			}
+			if (fscanf(infile,"%lf",&flon) != 1){
+				break;	
+			}
+			if (fscanf(infile,"%lld",&atime) != 1){
+				break;	
+			}
+			struct search_result_t result;
+			printf("Searching from %f %f\n",flat,flon);
+			result = findPathToMetro(data,flat,flon,atime);
+			for (int i=0;i<result.n_routes;i++){
+				free(result.routes[i].points);	
+			}
+			free(result.routes);
+
+		}
+		freeData(data);
+		return 0;
 	}else{
 		data = prepareData(configFileName,dataFileName,timetableFileName); 
 		for (double flon=14; flon < 15; flon += 0.5){
@@ -97,13 +125,17 @@ int main (int argc, char ** argv){
 	printf("Graph has %d vertices and %d edges\n",data->graph->n_vertices,data->graph->n_edges);
 	printMapBBox(*data);
 
-	struct pbf_data_t result;
-	result = findPath(data,flat,flon,tlat,tlon,atime);
+	struct search_result_t result;
+	result = findPathToMetro(data,flat,flon,atime);
 
-	freePackedPBF(result);
+	//freePackedPBF(result);
 	freeData(data);
 
-	//printResults(result);
+	if (result.n_routes == 0){
+		printf("Route not found\n");
+		return 0;
+	} 
+
 	//writeGpxFile(result,"track.gpx");
 
 	return 0;

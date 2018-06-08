@@ -10,6 +10,13 @@
 
 
 struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mmqueue_t * queue,int fromIdx, int toIdx){
+	if (toIdx == -1){
+		printf("Metro station not found\n");
+		struct search_result_t result;
+		result.n_routes = 0;
+		return result;
+			
+	}
 	int n_routes;
 	n_routes = GARY_SIZE(queue->vertlut[toIdx]);
 	printf("Found %d routes\n",n_routes);	
@@ -19,13 +26,13 @@ struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mm
 	int residx;
 	residx = 0;
 	for (int i=0;i<n_routes;i++){
-		printf("Processing route %d\n",i);
+		//printf("Processing route %d\n",i);
 		node = queue->vertlut[toIdx][i];
 		char equivalent;
 		equivalent = 0;
 		for (int j=0;j<residx;j++){
 			if (equivWays(queue->vertlut[toIdx][j],queue->vertlut[toIdx][i])){
-				printf("Equivalent with %d, skipping\n",j);
+		//		printf("Equivalent with %d, skipping\n",j);
 				equivalent = 1;
 				break;	
 			}
@@ -36,7 +43,7 @@ struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mm
 		routes[residx].time = node->arrival;
 		routes[residx].penalty = node->penalty;
 		routes[residx].dist = 0;
-		printf("Route %d: time: %f, penalty: %f\n",residx,routes[residx].time,routes[residx].penalty); 
+		//printf("Route %d: time: %f, penalty: %f\n",residx,routes[residx].time,routes[residx].penalty); 
 		struct point_t * points;
 		GARY_INIT(points,0);
 		int memdepart;
@@ -80,7 +87,7 @@ struct search_result_t processFoundMMRoutes(struct search_data_t data, struct mm
 
 		routes[residx].n_points = GARY_SIZE(points);
 		routes[residx].points = calloc(sizeof(struct point_t),routes[residx].n_points);
-		printf("Points: %d\n",routes[residx].n_points);
+		//printf("Points: %d\n",routes[residx].n_points);
 		for (int j=0;j<routes[residx].n_points;j++){
 			routes[residx].points[j]=points[routes[residx].n_points-1-j];
 		}
@@ -128,6 +135,26 @@ void printMMRoutes(struct search_data_t * data,struct search_result_t * res){
 		}
 	}
 	
+}
+
+void printMetroDetails(struct search_route_t * result){
+	time_t arrival;
+	arrival = result->points[0].arrival;
+	//printf("%f %f %d\n",result->points[0].lon,result->points[0].lat,arrival);
+	printf("Lenght: %1f m, Time: %1f \n",result->dist/1000, (result->time - arrival));
+	for (int i=0;i<result->n_points;i++){
+		struct point_t p;
+		p = result->points[i];
+		if (p.stop != NULL){
+			printf("Stop: id: %d, name: %s, arr: %d, dep: %d\n",
+			p.stop->id,
+			p.stop->name,
+			p.arrival - arrival,
+			p.departure - (arrival%(24*3600)));
+			break;	
+		}
+	}
+
 }
 void freeUnpackedPBF(Result__Result * result){
 	for (int ridx=0;ridx<result->n_routes;ridx++){

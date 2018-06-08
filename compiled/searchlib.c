@@ -149,7 +149,7 @@ int findNearestVertex(Graph__Graph * graph, double lon, double lat){
 		}
 	}
 	printf("Min dist: %f\n",sqrt(minDist));
-	printf("Point %d\n",minIdx);
+//	printf("Point %d\n",minIdx);
 //	printf("%f\n",graph->vertices[minIdx]->lon);
 //	printf("%f\n",graph->vertices[minIdx]->lat);
 	return minIdx;
@@ -170,7 +170,7 @@ struct dijnode_t *  prepareDijkstra(Graph__Graph * graph){
 }
 
 
-struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,time_t starttime){
+struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int * toIdx,time_t starttime){
 	Graph__Graph * graph;
 	graph = data.graph;
 
@@ -181,6 +181,10 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 	date = starttime - (starttime%DAY_SECS);
 	curtt = gen_tt_for_date(data.timetable,date,NULL);
 	nexttt = gen_tt_for_date(data.timetable,date+DAY_SECS,curtt);
+
+	//for (int i=0;i<curtt->nroutes;i++){
+	//	printf("%s;%d\n",curtt->routes[i].name,curtt->routes[i].ntrips);
+	//}
 
 	uint64_t curdate = date;
 	
@@ -194,6 +198,8 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 
 	int best_time;
 	best_time = -1;
+
+	*toIdx = -1;
 
 	while(queue->n_heap > 0){
 		if (getQueueMin(queue) == NULL){
@@ -370,21 +376,43 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,t
 
 
 		queue->vert->completed = true;
-		if (best_time == -1 && queue->vert->osmvert->idx == toIdx){
-			printf("Found path");
-			best_time = queue->vert->arrival-starttime;
+		if (best_time == -1 && queue->vert->stop != NULL){
+			struct stop * stop;
+			if (queue->vert->arrival - date > DAY_SECS){
+				stop = nexttt->stops + queue->vert->stop->id;
+				printf("Searching in next day\n");
+			} else {
+				stop = curtt->stops+queue->vert->stop->id;
+			}
+			//printf("Found stop %s\n",stop->name);
+			for (int i=0; i<stop->nroutes;i++){
+				char * route_name;
+				route_name = stop->routes[i]->name;
+				if ((route_name[0] == 'A' || route_name[0] == 'B' || route_name[0] == 'C')&&
+					route_name[1] == 0){
+					printf("Found metro %s\n",route_name);	
+					best_time = queue->vert->arrival-starttime;
+					break;
+				}
+			
+			}
 		}
 
 		// Break if connection is too long
-		if ((best_time != -1) && 
-			((queue->vert->arrival-starttime) > 1.5*best_time)){
-			printf("Path too long, exitting.");
-			
+		if (best_time != -1){
+			for (int i=0;i<graph->n_vertices;i++){
+				if (graph->vertices[i] == queue->vert->osmvert){
+		//			printf("Found toIdx: %d\n",i);
+					*toIdx = i;	
+				}
+			}
+		//	printf("Exitting\n");	
 			break;
 		}
 	}
 
 	free_tt(curtt);
+	free_tt(nexttt);
 	return queue;
 
 
@@ -508,7 +536,7 @@ struct pbf_data_t findPath(struct search_data_t * data,double fromLat, double fr
 	int toIdx;
 	toIdx = findNearestVertex(data->graph,toLon,toLat);
 
-/*	printf("Searching from %lld(%f,%f,%d) to %lld(%f,%f,%d)\n",data->graph->vertices[fromIdx]->osmid,
+	printf("Searching from %lld(%f,%f,%d) to %lld(%f,%f,%d)\n",data->graph->vertices[fromIdx]->osmid,
 			data->graph->vertices[fromIdx]->lat,
 			data->graph->vertices[fromIdx]->lon,
 			data->graph->vertices[fromIdx]->height,
@@ -517,7 +545,7 @@ struct pbf_data_t findPath(struct search_data_t * data,double fromLat, double fr
 			data->graph->vertices[toIdx]->lon,
 			data->graph->vertices[toIdx]->height
 			);
-*/
+
 
 	//findWay(*data, dijArray,fromIdx, toIdx);
 
@@ -525,6 +553,7 @@ struct pbf_data_t findPath(struct search_data_t * data,double fromLat, double fr
 	if (atime == 0){
 		atime = time(NULL)+tz_offset_second(time(NULL));
 	}
+	// FIXME removed for metro searching
 	queue = findMMWay(*data,fromIdx,toIdx,atime);
 	struct search_result_t result;
 	result = processFoundMMRoutes(*data,queue,fromIdx,toIdx);
@@ -558,5 +587,68 @@ struct pbf_data_t findPath(struct search_data_t * data,double fromLat, double fr
 	return result;	
 	*/
 }
+
+struct search_result_t findPathToMetro(struct search_data_t * data,double fromLat, double fromLon, uint64_t atime){
+	wgs2utm(*data,&fromLon,&fromLat);
+	int fromIdx;
+	fromIdx = findNearestVertex(data->graph,fromLon,fromLat);
+
+/*	printf("Searching from %lld(%f,%f,%d) to %lld(%f,%f,%d)\n",data->graph->vertices[fromIdx]->osmid,
+			data->graph->vertices[fromIdx]->lat,
+			data->graph->vertices[fromIdx]->lon,
+			data->graph->vertices[fromIdx]->height,
+			data->graph->vertices[toIdx]->osmid,
+			data->graph->vertices[toIdx]->lat,
+			data->graph->vertices[toIdx]->lon,
+			data->graph->vertices[toIdx]->height
+			);
+*/
+
+	//findWay(*data, dijArray,fromIdx, toIdx);
+
+	struct mmqueue_t * queue;
+	if (atime == 0){
+		atime = time(NULL)+tz_offset_second(time(NULL));
+	}
+	int toIdx;
+	queue = findMMWay(*data,fromIdx,&toIdx,atime);
+	struct search_result_t result;
+	result = processFoundMMRoutes(*data,queue,fromIdx,toIdx);
+	//writeGPXForResult(&result);
+	//printMMRoutes(data,&result);
+	if (result.n_routes == 0){
+		printf("Route not found\n");
+	} else {
+		printMetroDetails(&(result.routes[0]));
+	}
+
+	//struct pbf_data_t pbfRes;
+	//pbfRes = generatePBF(&result);	
+	
+	freeMMQueue(queue,data->graph->n_vertices);
+	return result;
+	/*
+	printf("Found\n");
+	struct search_route_t result;
+	int n_points;
+	result.points = resultsToArray(*data,dijArray,fromIdx,toIdx,&n_points);
+	result.n_points = n_points;
+	result.dist = 0;
+	result.time = 0;
+	if (result.n_points == 0){
+		return result;
+	}
+	int idx;
+	idx = fromIdx;
+	while(idx != toIdx){
+		result.dist+=data->graph->edges[dijArray[idx].fromEdgeIdx]->dist;
+		result.time+=calcTime(data->graph,data->conf,data->graph->edges[dijArray[idx].fromEdgeIdx]);
+		idx = dijArray[idx].fromIdx;
+	}
+	free(dijArray);
+	return result;	
+	*/
+}
+
 
 
