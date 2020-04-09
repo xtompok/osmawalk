@@ -72,8 +72,6 @@ int main (int argc, char ** argv){
 		flon = atof(argv[2]);
 		tlat = atof(argv[3]);
 		tlon = atof(argv[4]);
-		struct pbf_data_t result;
-		result = findPath(data,flat,flon,tlat,tlon,0);
 	}else if (argc==6){
 		data = prepareData(configFileName,dataFileName,timetableFileName); 
 		flat = atof(argv[1]);
@@ -125,16 +123,18 @@ int main (int argc, char ** argv){
 	printf("Graph has %d vertices and %d edges\n",data->graph->n_vertices,data->graph->n_edges);
 	printMapBBox(*data);
 
-	struct search_result_t result;
-	result = findPathToMetro(data,flat,flon,atime);
+	struct pbf_data_t result; 
+	result = findPath(data,flat,flon,tlat,tlon,0);
+	//struct search_result_t result;
+	//result = findPathToMetro(data,flat,flon,atime);
 
 	//freePackedPBF(result);
 	freeData(data);
 
-	if (result.n_routes == 0){
+	/*if (result.n_routes == 0){
 		printf("Route not found\n");
 		return 0;
-	} 
+	} */
 
 	//writeGpxFile(result,"track.gpx");
 

@@ -170,7 +170,7 @@ struct dijnode_t *  prepareDijkstra(Graph__Graph * graph){
 }
 
 
-struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int * toIdx,time_t starttime){
+struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int toIdx,time_t starttime){
 	Graph__Graph * graph;
 	graph = data.graph;
 
@@ -199,7 +199,6 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int * toIdx
 	int best_time;
 	best_time = -1;
 
-	*toIdx = -1;
 
 	while(queue->n_heap > 0){
 		if (getQueueMin(queue) == NULL){
@@ -375,6 +374,25 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int * toIdx
 		}
 
 
+
+		queue->vert->completed = true;
+		if (best_time == -1 && queue->vert->osmvert->idx == toIdx){
+			printf("Found path");
+			best_time = queue->vert->arrival-starttime;
+		//	break;
+		}
+
+		// Break if connection is too long
+		if ((best_time != -1) && 
+			((queue->vert->arrival-starttime) > 1.5*best_time)){
+			printf("Path too long, exitting.");
+			
+			break;
+		}
+
+
+/*
+
 		queue->vert->completed = true;
 		if (best_time == -1 && queue->vert->stop != NULL){
 			struct stop * stop;
@@ -408,11 +426,12 @@ struct mmqueue_t * findMMWay(struct search_data_t data, int fromIdx, int * toIdx
 			}
 		//	printf("Exitting\n");	
 			break;
-		}
+		}*/
 	}
 
 	free_tt(curtt);
 	free_tt(nexttt);
+	printf("Queue: %p\n",queue);
 	return queue;
 
 
@@ -555,6 +574,7 @@ struct pbf_data_t findPath(struct search_data_t * data,double fromLat, double fr
 	}
 	// FIXME removed for metro searching
 	queue = findMMWay(*data,fromIdx,toIdx,atime);
+	printf("Queue: %p\n",queue);
 	struct search_result_t result;
 	result = processFoundMMRoutes(*data,queue,fromIdx,toIdx);
 	writeGPXForResult(&result);
@@ -611,7 +631,7 @@ struct search_result_t findPathToMetro(struct search_data_t * data,double fromLa
 		atime = time(NULL)+tz_offset_second(time(NULL));
 	}
 	int toIdx;
-	queue = findMMWay(*data,fromIdx,&toIdx,atime);
+	//queue = findMMWay(*data,fromIdx,&toIdx,atime);
 	struct search_result_t result;
 	result = processFoundMMRoutes(*data,queue,fromIdx,toIdx);
 	//writeGPXForResult(&result);
