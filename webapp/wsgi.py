@@ -1,5 +1,5 @@
-from index import app
+from index import app as application
 
 if __name__ == '__main__':
-	app.debug = True
-	app.run()
+	application.debug = True
+	application.run()
